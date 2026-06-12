@@ -223,7 +223,8 @@ class RecordRenderingTests(unittest.TestCase):
         matches, rows = self.fixtures()
         html_out, cumulative = bs.render_record_calls(
             matches, rows, self.ledger_for([]))
-        self.assertIn("No graded calls yet", html_out)
+        self.assertEqual(html_out, "")            # standfirst carries the message
+        self.assertIn("No graded calls yet", cumulative)
 
     def test_overnight_grades_and_flags_missing_results(self):
         from datetime import date as _date
