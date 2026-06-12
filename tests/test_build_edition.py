@@ -326,5 +326,76 @@ class StakesContextTests(unittest.TestCase):
         self.assertIn("both hold top-two places as it stands", out)
 
 
+# ---- MD3 days route the Stakes slot through scenarios.py -------------------
+
+def _played(mid, a, b, sa, sb, date_et="2026-06-18"):
+    g, md = mid[0], (int(mid[1]) + 1) // 2
+    return f"{mid},{g},{md},{date_et},15:00,3:00 PM,{a},{b},Stad,City,USA,Fox,{sa},{sb},played,"
+
+
+def _sched_md3(mid, a, b):
+    g, md = mid[0], (int(mid[1]) + 1) // 2
+    return f"{mid},{g},{md},2026-06-24,21:00,9:00 PM,{a},{b},Stad,City,USA,Fox,,,scheduled,"
+
+
+# Group A through MD2; MD3 = {A5: Team Alpha vs Team Beta, A6: Team Gamma vs Team Delta}.
+GROUP_A_MD3_CSV = "\n".join([
+    FIX_HEADER,
+    _played("A1", "Team Alpha", "Team Gamma", 2, 0),
+    _played("A2", "Team Beta", "Team Delta", 1, 0),
+    _played("A3", "Team Alpha", "Team Delta", 1, 0),
+    _played("A4", "Team Beta", "Team Gamma", 1, 1),
+    _sched_md3("A5", "Team Alpha", "Team Beta"),
+    _sched_md3("A6", "Team Gamma", "Team Delta"),
+]) + "\n"
+
+
+class Md3IntegrationTests(unittest.TestCase):
+    def _build_md3_edition(self):
+        import tempfile as _tf
+        with _tf.NamedTemporaryFile("w", suffix=".csv", delete=False, encoding="utf-8") as f:
+            f.write(GROUP_A_MD3_CSV)
+            path = f.name
+        with tempfile.TemporaryDirectory() as d:
+            cards = write_cards(Path(d), md3=MD3)
+            try:
+                rows = be.read_rows(path)
+                matches = st.load_fixtures(path)
+                standings = st.compute_standings(matches)
+                return be.build_edition(date(2026, 6, 24), rows, standings, cards, matches=matches)
+            finally:
+                Path(path).unlink()
+
+    def test_md3_card_carries_scenario_stakes_not_the_factual_sentence(self):
+        edition, warnings = self._build_md3_edition()
+        self.assertEqual(warnings, [])
+        # scenario content is present...
+        self.assertIn("kick off simultaneously", edition)
+        self.assertIn("| Team | Top 2 | 3rd | Out | Margin |", edition)
+        self.assertIn("**Team Alpha:**", edition)
+        self.assertTrue(any(k in edition for k in ("Win:", "through (top 2)")))
+        # ...and the non-MD3 factual one-liner is NOT used on this day
+        self.assertNotIn("After 4 matches in Group A:", edition)
+        # The Call / Odds slot in the md3 card is still untouched
+        self.assertIn("**The Call / Odds & Best Bet:** *[Model pending.]*", edition)
+
+    def test_without_matches_md3_falls_back_to_factual(self):
+        # same fixtures, but build_edition called without `matches` -> factual stakes
+        import tempfile as _tf
+        with _tf.NamedTemporaryFile("w", suffix=".csv", delete=False, encoding="utf-8") as f:
+            f.write(GROUP_A_MD3_CSV)
+            path = f.name
+        with tempfile.TemporaryDirectory() as d:
+            cards = write_cards(Path(d), md3=MD3)
+            try:
+                rows = be.read_rows(path)
+                standings = st.compute_standings(st.load_fixtures(path))
+                edition, _ = be.build_edition(date(2026, 6, 24), rows, standings, cards)
+            finally:
+                Path(path).unlink()
+        self.assertNotIn("kick off simultaneously", edition)
+        self.assertIn("After 4 matches in Group A:", edition)   # factual fallback
+
+
 if __name__ == "__main__":
     unittest.main()

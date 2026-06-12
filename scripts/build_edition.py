@@ -44,6 +44,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import standings as st  # noqa: E402  (ranking/tiebreak logic lives here, not here)
+import scenarios as sc  # noqa: E402  (MD3 qualification scenarios live here)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TOURNAMENT_START = date(2026, 6, 11)          # June 11 = Day 1
@@ -299,11 +300,19 @@ def stakes_sentence(gt: "st.GroupTable", team_a: str, team_b: str) -> str:
     return " ".join(parts)
 
 
-def build_stakes_body(standings: "st.Standings", group: str, team_a: str, team_b: str) -> str:
+def build_stakes_body(standings: "st.Standings", group: str, team_a: str, team_b: str,
+                      scenario: "sc.ScenarioReport | None" = None) -> str:
+    """Stakes block = current group table + context. On MD3 days the context is
+    the qualification-scenario slice for these two teams; otherwise it is the
+    factual one-liner (positions/records/cutline)."""
     gt = standings.groups.get(group)
     if gt is None:
         return f"*[Standings for Group {group} unavailable.]*"
-    return render_group_table(gt) + "\n\n" + stakes_sentence(gt, team_a, team_b)
+    if scenario is not None:
+        context = sc.render_match_stakes(scenario, team_a, team_b)
+    else:
+        context = stakes_sentence(gt, team_a, team_b)
+    return render_group_table(gt) + "\n\n" + context
 
 
 # ---------------------------------------------------------------- edition assembly
@@ -367,9 +376,13 @@ def _verify_callouts(today: list[dict]) -> list[str]:
 
 
 def build_edition(target: date, rows: list[dict], standings: "st.Standings",
-                  cards_dir: str | Path) -> tuple[str, list[str]]:
+                  cards_dir: str | Path,
+                  matches: "list[st.Match] | None" = None) -> tuple[str, list[str]]:
     """Render the full edition markdown for ``target``. Returns
-    ``(markdown, warnings)``; warnings are data-integrity notes for stderr."""
+    ``(markdown, warnings)``; warnings are data-integrity notes for stderr.
+
+    ``matches`` (the parsed fixtures) enables MD3 qualification scenarios in the
+    Stakes slots; when omitted, MD3 cards fall back to the factual block."""
     warnings: list[str] = []
 
     unexpected = {r["match_id"] for r in rows if r.get("_late_cap")} - EXPECTED_LATE_CAPS
@@ -440,10 +453,28 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
                      'anything tagged "(verify before use)" must be confirmed or cut.')
         parts.append("")
 
+    # Precompute one MD3 scenario report per group that has an MD3 card today
+    # (both that group's cards reuse it). Needs the parsed fixtures.
+    scenarios_by_group: dict[str, "sc.ScenarioReport"] = {}
+    if matches is not None:
+        for g in sorted({r["group"] for r in today if int(r["match_id"][1]) >= 5}):
+            unplayed = sum(1 for m in matches if m.group == g and not m.is_played)
+            if unplayed != 2:
+                warnings.append(f"group {g}: {unplayed} games unplayed, not the clean "
+                                "2-game MD3 state — enter MD1/MD2 results first; using "
+                                "factual stakes for now")
+                continue
+            try:
+                scenarios_by_group[g] = sc.enumerate_scenarios(g, matches)
+            except (ValueError, KeyError) as e:
+                warnings.append(f"group {g}: MD3 scenario enumeration failed ({e}); "
+                                "falling back to factual stakes")
+
     card_chunks: list[str] = []
     for r in today:
         mid, team_a, team_b, group = r["match_id"], r["team_a"], r["team_b"], r["group"]
-        body = build_stakes_body(standings, group, team_a, team_b)
+        scenario = scenarios_by_group.get(group) if int(mid[1]) >= 5 else None
+        body = build_stakes_body(standings, group, team_a, team_b, scenario=scenario)
         card, src = extract_card(mid, team_a, team_b, cards_dir)
         if card is None:
             warnings.append(f"{mid}: no card found in cards/ — inserting placeholder")
@@ -500,7 +531,7 @@ def main(argv: list[str] | None = None) -> int:
     for w in standings.warnings:
         print(f"warning: {w}", file=sys.stderr)
 
-    edition, warnings = build_edition(target, rows, standings, args.cards_dir)
+    edition, warnings = build_edition(target, rows, standings, args.cards_dir, matches=matches)
     for w in warnings:
         print(f"warning: {w}", file=sys.stderr)
 

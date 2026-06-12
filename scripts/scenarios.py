@@ -285,6 +285,37 @@ def render_markdown(report: ScenarioReport) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def _team_scenario(report: ScenarioReport, name: str):
+    return next((ts for ts in report.teams if ts.team == name), None)
+
+
+def render_match_stakes(report: ScenarioReport, team_a: str, team_b: str) -> str:
+    """Compact Stakes block for a single MD3 card: the finish distribution and
+    Win/Draw/Loss prospects for just the two teams in this game. Used by
+    build_edition to fill an MD3 card's Stakes slot."""
+    ta, tb = _team_scenario(report, team_a), _team_scenario(report, team_b)
+    if ta is None or tb is None:
+        return f"*[No MD3 scenario available for {team_a} vs {team_b}.]*"
+    lines = [
+        f"_Final matchday: both Group {report.group} games kick off simultaneously — "
+        f"{report.n_combos} possible outcomes. Placings that come down to goal difference "
+        "are flagged margin-dependent._",
+        "",
+        "| Team | Top 2 | 3rd | Out | Margin |",
+        "|:---|---:|---:|---:|---:|",
+    ]
+    for ts in (ta, tb):
+        c = ts.counts
+        lines.append(f"| {ts.team} | {c['top2']} | {c['third']} | {c['out']} | {c['margin']} |")
+    lines.append("")
+    for ts in (ta, tb):
+        if ts.stakes:
+            lines.append(f"**{ts.team}:**")
+            lines += [f"- {s}" for s in ts.stakes]
+            lines.append("")
+    return "\n".join(lines).rstrip()
+
+
 def _third_place_section(full_md: str) -> str | None:
     marker = "## Third-place ranking"
     idx = full_md.find(marker)
