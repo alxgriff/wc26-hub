@@ -309,7 +309,9 @@ tbody th.team a:hover,.slate .teams a:hover{text-decoration:underline;text-decor
 .slate .teams a{text-decoration:none}
 
 /* ---------- odds & best bet ---------- */
-.edge-wrap{max-width:680px}
+.edge-wrap{max-width:680px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
+.edge-wrap::-webkit-scrollbar{height:8px}
+.edge-wrap::-webkit-scrollbar-thumb{background:var(--hairline)}
 .edge-wrap table{margin-bottom:4px}
 .edge-wrap td.lbl,.edge-wrap th.lbl{text-align:left}
 .edge-wrap tbody td.lbl{font-family:var(--serif);font-weight:700;font-size:.92rem}
@@ -361,12 +363,7 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
     <span class="kicker">The Call</span>
     <h2 id="call-h">What the model says</h2>
   </div>
-<div class="probs">
-  <p class="sr-only">Canada win 61 percent, draw 23 percent, Bosnia and Herzegovina win 16 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:61">61%</span><span class="pd" style="flex:23">23%</span><span class="pb" style="flex:16">16%</span></div>
-  <div class="scale" aria-hidden="true"><span>Canada 61%</span><span>draw 23%</span><span>Bosnia and Herzegovina 16%</span></div>
-  <p class="factline">most likely score <b>1–0</b> · expected goals <b>2.54</b> · over 2.5 <b>47%</b> · both score <b>39%</b><br>2-source consensus: rating model + Opta supercomputer (theanalyst.com) · home-field bonus: Canada</p>
-</div>
+<div class="placeholder-slot">Model pending — the ratings layer (Phase 2 in CLAUDE.md terms) has not produced a prediction for this match yet. This slot fills automatically once data/Ratings is complete; no numbers are invented in the meantime.</div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Pending aggregate model integration. Qualitative lean to log now: Canada's injury list directly weakens the two areas this specific matchup stresses — left flank and central defense — while Bosnia's game plan is unusually well-suited to neutralizing Marsch-ball. This profiles as tighter than ratings gaps will suggest; classic 1–0/draw territory.</p></blockquote></div>
 </section>
 

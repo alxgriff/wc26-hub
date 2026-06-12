@@ -1,0 +1,6 @@
+# Append-only logs: union-merge so concurrent appends (daily-build vs
+# closing-odds vs a human session) never produce a rebase conflict that
+# kills a publish run.
+data/odds_log.csv merge=union
+data/picks_log.csv merge=union
+data/predictions_log.csv merge=union

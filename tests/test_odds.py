@@ -170,13 +170,18 @@ class PickLedgerTests(unittest.TestCase):
         return {"market": "h2h", "selection": "home", "line": "", "odds": 2.5,
                 "implied_p": 0.40, "our_p": 0.45, "edge": edge}
 
-    def test_record_and_refresh_pre_kickoff(self):
+    def test_record_then_changed_price_needs_explicit_revise(self):
+        # A recorded pick is a published commitment: re-pricing it silently is
+        # forbidden; superseding requires the explicit revise flag.
         with tempfile.TemporaryDirectory() as d:
             path = Path(d) / "picks.csv"
             od.record_pick("D3", self._pick(), (2.55, "fanduel"), NOW, False, path)
-            od.record_pick("D3", self._pick(0.06), (2.60, "betmgm"), NOW, False, path)
+            with self.assertRaises(od.OddsError):
+                od.record_pick("D3", self._pick(0.06), (2.60, "betmgm"), NOW, False, path)
+            od.record_pick("D3", self._pick(0.06), (2.60, "betmgm"), NOW, False, path,
+                           allow_revise=True)
             picks = od.load_picks(path)
-            self.assertEqual(len(picks), 1)          # refreshed, not duplicated
+            self.assertEqual(len(picks), 1)          # superseded, not duplicated
             self.assertEqual(picks[0]["book"], "betmgm")
             self.assertEqual(picks[0]["status"], "open")
             self.assertEqual(picks[0]["stake"], "1")

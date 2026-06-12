@@ -1,0 +1,25 @@
+name: ci
+
+# Tests on every human push. The daily cron has its own hard test gate, but
+# without this, a broken push at 11 PM deploys instantly (Cloudflare watches
+# main) and isn't caught until the 7 AM run goes red — losing that morning's
+# publish. Bot pushes (GITHUB_TOKEN) don't trigger this, by GitHub's rules.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        run: python -m unittest discover -s tests
+      - name: Smoke build (site renders end to end)
+        # pinned in-tournament date: deterministic page regardless of when CI runs
+        run: python scripts/build_site.py --date 2026-06-20 --out-dir /tmp/site-smoke

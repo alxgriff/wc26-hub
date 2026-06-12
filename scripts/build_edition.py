@@ -631,7 +631,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: {e}", file=sys.stderr)
         return 1
 
-    standings = st.compute_standings(matches)
+    standings = st.compute_standings(matches, fair_play=st.load_discipline())
     for w in standings.warnings:
         print(f"warning: {w}", file=sys.stderr)
 
@@ -700,15 +700,9 @@ def main(argv: list[str] | None = None) -> int:
                 ev = od.evaluate_match(mid, odds_rows, ledger_rows, pred)
                 pick, flags = od.best_bet(ev)
                 bp = od._best_prices(odds_rows, mid)
-                if pick:
-                    price = bp.get((pick["market"], pick["selection"], str(pick["line"])),
-                                   (pick["odds"], "median"))
-                    try:
-                        msg = od.record_pick(mid, pick, price, now,
-                                             now >= lg.kickoff_dt(r))
-                        print(f"pick: {msg}", file=sys.stderr)
-                    except od.OddsError as e:
-                        print(f"pick: {mid} not recorded — {e}", file=sys.stderr)
+                # Rendering only: `odds.py evaluate --record` is the single
+                # canonical recorder (it owns the day-of and snapshot-freshness
+                # gates) — building an edition must never place a bet.
                 odds_bodies[mid] = od.render_odds_section(mid, ev, pick, flags, bp)
             units = od.units_summary(od.load_picks())
             if units:

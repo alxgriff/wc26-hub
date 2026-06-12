@@ -13,7 +13,11 @@ name: daily-build
 
 on:
   schedule:
-    - cron: "0 11 * * *"        # 07:00 ET (EDT) — after the midnight-ET games settle
+    # 07:00 ET (EDT), June 12-28 ONLY — June 28 is the final settlement run
+    # (grades the June 27 picks/predictions), after which the group-stage
+    # project is complete and the cron stops firing. Knockouts are a future
+    # project; re-derive these crons if DST assumptions ever change.
+    - cron: "0 11 12-28 6 *"
   workflow_dispatch:
     inputs:
       date:
@@ -27,9 +31,17 @@ on:
 permissions:
   contents: write
 
+# Shared with closing-odds.yml: both workflows push to main, so they must
+# never run concurrently (a mid-run push rejects the other's publish).
 concurrency:
-  group: daily-build
+  group: wc26-publish
   cancel-in-progress: false
+
+# Explicit bash => `-o pipefail`: without it, `python ... | tee` takes tee's
+# exit code and a failing step reads as success, blinding the health gate.
+defaults:
+  run:
+    shell: bash
 
 jobs:
   build:
@@ -46,9 +58,13 @@ jobs:
 
       - name: Editorial date (ET)
         id: ed
+        env:
+          DATE_IN: ${{ inputs.date }}   # env-routed: never template-expand into the script
         run: |
-          DATE="${{ inputs.date }}"
-          if [ -z "$DATE" ]; then DATE=$(TZ=America/New_York date +%F); fi
+          DATE="${DATE_IN:-$(TZ=America/New_York date +%F)}"
+          if ! [[ "$DATE" =~ ^2026-[01][0-9]-[0-3][0-9]$ ]]; then
+            echo "::error::bad date input '$DATE' (need YYYY-MM-DD)"; exit 1
+          fi
           echo "date=$DATE" >> "$GITHUB_OUTPUT"
           echo "Editorial date: $DATE" >> "$GITHUB_STEP_SUMMARY"
 
@@ -57,41 +73,40 @@ jobs:
         run: pip install anthropic
 
       - name: Enter overnight results (The Odds API)
+        id: results
         continue-on-error: true
-        run: |
-          python scripts/fetch_results.py | tee -a "$GITHUB_STEP_SUMMARY" \
-            || echo "::warning::results step failed — enter scores manually"
+        run: python scripts/fetch_results.py | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Settle yesterday's picks (units + CLV)
+        id: settle
         continue-on-error: true
         run: python scripts/odds.py settle | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Log today's slate predictions (the accountable numbers)
+        id: ledger
         continue-on-error: true
         run: python scripts/ledger.py log "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Snapshot today's odds
+        id: snapshot
         continue-on-error: true
-        run: |
-          python scripts/odds.py fetch | tee -a "$GITHUB_STEP_SUMMARY" \
-            || echo "::warning::odds snapshot failed — sections keep last snapshot"
+        run: python scripts/odds.py fetch | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Evaluate edges + record picks
+        id: evaluate
         continue-on-error: true
         run: python scripts/odds.py evaluate "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Stakes blurb (Sonnet, grounded in computed data)
+        id: blurb
         continue-on-error: true
-        run: |
-          python scripts/stakes_blurb.py "${{ steps.ed.outputs.date }}" \
-            || echo "::warning::blurb skipped — site renders without it"
+        run: python scripts/stakes_blurb.py "${{ steps.ed.outputs.date }}"
 
       - name: News digest (UNVERIFIED, gated)
+        id: news
         if: ${{ inputs.gather_news || vars.ENABLE_NEWS_DIGEST == 'true' }}
         continue-on-error: true
-        run: |
-          python scripts/fetch_news.py "${{ steps.ed.outputs.date }}" \
-            || echo "::warning::news digest skipped"
+        run: python scripts/fetch_news.py "${{ steps.ed.outputs.date }}"
 
       - name: Tests (hard gate — red suite publishes nothing)
         run: python -m unittest discover -s tests
@@ -100,10 +115,9 @@ jobs:
         run: python scripts/build_site.py --date "${{ steps.ed.outputs.date }}"
 
       - name: Build edition
+        id: edition
         continue-on-error: true
-        run: |
-          python scripts/build_edition.py "${{ steps.ed.outputs.date }}" \
-            || echo "::warning::edition build failed — site still publishes"
+        run: python scripts/build_edition.py "${{ steps.ed.outputs.date }}"
 
       - name: Commit & push (push = deploy)
         run: |
@@ -114,6 +128,28 @@ jobs:
             echo "No changes today." >> "$GITHUB_STEP_SUMMARY"
           else
             git commit -m "Daily build ${{ steps.ed.outputs.date }} [automated]"
+            git pull --rebase origin main
             git push
             echo "Published." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      # Runs AFTER publishing so a degraded-but-buildable morning still ships,
+      # then turns silent degradation into a red run (= notification email).
+      - name: Health gate — fail loudly if any data step failed
+        if: ${{ !cancelled() }}
+        run: |
+          failed=""
+          [ "${{ steps.results.outcome }}"  = "failure" ] && failed="$failed results"
+          [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"
+          [ "${{ steps.ledger.outcome }}"   = "failure" ] && failed="$failed ledger"
+          [ "${{ steps.snapshot.outcome }}" = "failure" ] && failed="$failed snapshot"
+          [ "${{ steps.evaluate.outcome }}" = "failure" ] && failed="$failed evaluate"
+          [ "${{ steps.blurb.outcome }}"    = "failure" ] && failed="$failed blurb"
+          [ "${{ steps.news.outcome }}"     = "failure" ] && failed="$failed news"
+          [ "${{ steps.edition.outcome }}"  = "failure" ] && failed="$failed edition"
+          if [ -n "$failed" ]; then
+            echo "::error::Degraded data steps:$failed"
+            echo "DEGRADED:$failed" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "All data steps healthy." >> "$GITHUB_STEP_SUMMARY"

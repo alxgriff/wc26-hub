@@ -8,15 +8,21 @@ name: closing-odds
 
 on:
   schedule:
-    - cron: "30 15 * * *"
-    - cron: "30 22 * * *"
+    # June 12-27 only — no closing lines needed after the last group game.
+    - cron: "30 15 12-27 6 *"
+    - cron: "30 22 12-27 6 *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
+# Same group as daily-build: serializes every workflow that pushes to main.
 concurrency:
-  group: closing-odds
+  group: wc26-publish
+
+defaults:
+  run:
+    shell: bash   # explicit bash => pipefail, so a failed fetch is a red run
 
 jobs:
   snapshot:

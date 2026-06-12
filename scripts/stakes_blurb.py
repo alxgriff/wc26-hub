@@ -64,7 +64,7 @@ def build_fact_pack(target: date, fixtures: Path) -> str:
     matches = st.load_fixtures(fixtures)
     rows = be.read_rows(fixtures)
     slate = be.select_matches(rows, target)
-    s = st.compute_standings(matches)
+    s = st.compute_standings(matches, fair_play=st.load_discipline())
     ledger_rows = lg.load_ledger()
     picks = [p for p in od.load_picks() if p.get("status") == "open"]
     day_n = (target - be.TOURNAMENT_START).days + 1

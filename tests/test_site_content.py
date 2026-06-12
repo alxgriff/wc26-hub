@@ -143,9 +143,12 @@ class FullSiteTests(unittest.TestCase):
                 resolved = (page.parent / target).resolve()
                 self.assertTrue(resolved.exists(), f"{page.name} -> {target} missing")
 
-    def test_match_page_placeholder_call_without_predictor(self):
+    def test_played_match_without_logged_call_says_so(self):
+        # A2 was played before any prediction was logged: the page must say
+        # "no logged call" rather than grading a retroactive recomputation.
         a2 = (self.out / "matches" / "A2.html").read_text(encoding="utf-8")
-        self.assertIn("Model pending", a2)
+        self.assertIn("No prediction was logged before kickoff", a2)
+        self.assertNotIn("Graded:", a2)
         self.assertIn("Pre-baked lean", a2)
         self.assertIn("South Korea", a2)
         self.assertIn("2–1", a2)  # played scoreline shown
@@ -163,22 +166,32 @@ class FullSiteTests(unittest.TestCase):
         self.assertIn('href="teams/mexico.html"', idx)
         self.assertIn('href="matches/B1.html"', idx)
 
-    def test_info_injection_renders_probbar_and_grading(self):
-        info = {"p_a": 0.5, "p_draw": 0.3, "p_b": 0.2,
-                "modal_score": (1, 0), "total": 2.4,
-                "over25": 0.45, "btts": 0.4,
-                "hfa": None, "consensus": True, "source": "Opta"}
+    def test_logged_call_is_graded_on_played_match(self):
+        logged = {"p_a": 0.5, "p_draw": 0.3, "p_b": 0.2,
+                  "predicted_score": "2-0", "logged_ts": "2026-06-11T09:00:00-04:00",
+                  "logged": True}
         import standings as st
         import build_edition as be
         s = st.compute_standings(st.load_fixtures(REPO / "data" / "fixtures.csv"))
         rows = be.read_rows(REPO / "data" / "fixtures.csv")
-        page = bs.render_match_page(rows[0], s, {}, REPO / "cards", info,
+        page = bs.render_match_page(rows[0], s, {}, REPO / "cards", logged,
                                     bs._site_css())  # A1, played 2-0
         self.assertIn("probbar", page)
-        self.assertIn("50%", page)
-        self.assertIn("2-source consensus", page)
-        self.assertIn("Graded:", page)         # played match gets the call graded
+        self.assertIn("Graded:", page)
+        self.assertIn("the logged call had it at", page)
         self.assertIn("Brier", page)
+        self.assertIn("published consensus — logged", page)
+        self.assertIn("predicted score", page)
+
+    def test_live_model_numbers_are_never_graded_retroactively(self):
+        live = {"p_a": 0.5, "p_draw": 0.3, "p_b": 0.2,
+                "modal_score": (1, 0), "total": 2.4,
+                "over25": 0.45, "btts": 0.4,
+                "hfa": None, "consensus": True, "source": "Opta"}
+        out = bs.render_call(live, "Mexico", "South Africa", None, result=(2, 0))
+        self.assertNotIn("Graded:", out)
+        self.assertIn("Ungraded:", out)
+        self.assertIn("no retroactive grading", out)
 
     def test_md2_page_of_unstarted_group_has_accurate_stakes(self):
         b3 = (self.out / "matches" / "B3.html").read_text(encoding="utf-8")

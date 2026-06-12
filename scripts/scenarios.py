@@ -186,7 +186,8 @@ def enumerate_scenarios(group: str, matches) -> ScenarioReport:
     if not group_matches:
         raise ValueError(f"no matches found for group {group!r}")
 
-    gt = st.compute_standings(group_matches).groups[group]
+    gt = st.compute_standings(group_matches,
+                              fair_play=st.load_discipline()).groups[group]
     rows = gt.rows
     teams = [r.team for r in rows]
     current = {r.team: r for r in rows}
@@ -349,7 +350,7 @@ def main(argv: list | None = None) -> int:
         print(f"error: {e}", file=sys.stderr)
         return 1
 
-    full = st.compute_standings(matches)
+    full = st.compute_standings(matches, fair_play=st.load_discipline())
     for w in full.warnings:
         print(f"warning: {w}", file=sys.stderr)
 

@@ -357,9 +357,15 @@ def best_bet(evaluation: dict, threshold: float = EDGE_THRESHOLD,
 # ---------------------------------------------------------------- picks ledger
 
 def record_pick(match_id: str, pick: dict, best_price: tuple, now: datetime,
-                kickoff_passed: bool, picks_path: Path = PICKS_LOG) -> str:
+                kickoff_passed: bool, picks_path: Path = PICKS_LOG,
+                allow_revise: bool = False) -> str:
     """Append/refresh the pick for (match_id, market). Best_price = (odds, book)
-    actually loggable; refuses post-kickoff and never touches settled rows."""
+    actually loggable; refuses post-kickoff and never touches settled rows.
+
+    A pick, once recorded, is a published commitment: re-recording the exact
+    same selection/line/odds is a no-op that preserves the ORIGINAL row and
+    timestamp; anything that would change it raises unless ``allow_revise``
+    is passed explicitly (CLI --revise). No silent re-pricing."""
     picks = load_picks(picks_path)
     existing = next((p for p in picks if p["match_id"] == match_id
                      and p["market"] == pick["market"]), None)
@@ -375,13 +381,27 @@ def record_pick(match_id: str, pick: dict, best_price: tuple, now: datetime,
            "timestamp": now.isoformat(timespec="seconds"),
            "status": "open", "units": "", "clv_pp": ""}
     if existing:
+        identical = (str(existing["selection"]) == str(row["selection"])
+                     and str(existing["line"]) == str(row["line"])
+                     and float(existing["odds"]) == float(row["odds"]))
+        if identical:
+            return (f"{match_id}: {pick['market']} pick unchanged — already "
+                    f"recorded at {existing['timestamp']}")
+        if not allow_revise:
+            raise OddsError(
+                f"{match_id} {pick['market']}: pick already recorded "
+                f"({existing['selection']} {existing['line'] or ''} @ "
+                f"{existing['odds']}, {existing['timestamp']}) and the new values "
+                f"differ ({row['selection']} {row['line'] or ''} @ {row['odds']}) "
+                "— pass --revise to supersede explicitly")
         existing.update(row)
     else:
         picks.append(row)
     _save(picks, picks_path, PICK_COLUMNS)
     return (f"{match_id}: {pick['market']} {pick['selection']}"
             f"{f' {pick['line']}' if pick['line'] else ''} @ {odds:.2f} ({book}), "
-            f"edge {pick['edge']:+.1%}")
+            f"edge {pick['edge']:+.1%}"
+            + (" [REVISED]" if existing and allow_revise else ""))
 
 
 def _market_keys(market: str, selection: str, line: str) -> list:
@@ -525,11 +545,29 @@ def _api_get(path: str, key: str, **params) -> tuple:
 
 
 def _match_event(event: dict, fixture_rows: list) -> dict | None:
-    """Map an API event to a fixtures row by canon team names (either order)."""
+    """Map an API event to a fixtures row by canon team names (either order),
+    bounded to ±1 day of the fixture's ET date so a knockout-stage rematch of
+    a group pairing can never be logged under the group match_id."""
     h = pr._canon(event.get("home_team", ""))
     a = pr._canon(event.get("away_team", ""))
+    ev_date = None
+    ct = (event.get("commence_time") or "").replace("Z", "+00:00")
+    if ct:
+        try:
+            # compare in ET, the fixtures' calendar — a UTC date is off by one
+            # for every evening kickoff and would widen the guard window
+            ev_date = datetime.fromisoformat(ct).astimezone(lg.ET).date()
+        except ValueError:
+            pass
     for r in fixture_rows:
         if {r["team_a"], r["team_b"]} == {h, a}:
+            if ev_date is not None:
+                try:
+                    f_date = date.fromisoformat((r.get("date_et") or "").strip())
+                except ValueError:
+                    f_date = None
+                if f_date and abs((ev_date - f_date).days) > 1:
+                    continue  # same pairing, different stage — not this fixture
             return r
     return None
 
@@ -628,8 +666,30 @@ def _best_prices(odds_rows: list, match_id: str) -> dict:
     return out
 
 
+MAX_SNAPSHOT_AGE_HOURS = 12   # picks are only recorded against fresh prices
+
+
+def _snapshot_age_hours(odds_rows: list, match_id: str, now: datetime,
+                        market: str | None = None) -> float | None:
+    """Hours since the newest snapshot row for this match (optionally for one
+    market, so a fresh totals row can't vouch for a stale h2h price); None if
+    no snapshot or the timestamps are unusable."""
+    stamps = [r["timestamp"] for r in odds_rows
+              if r["match_id"] == match_id and r["phase"] == "snapshot"
+              and (market is None or r["market"] == market)]
+    if not stamps:
+        return None
+    try:
+        latest = datetime.fromisoformat(max(stamps))
+        return (now - latest).total_seconds() / 3600
+    except (ValueError, TypeError):   # malformed or tz-naive stamp: treat as stale
+        return None
+
+
 def cmd_evaluate(target: date, fixtures: Path, threshold: float,
-                 record: bool = False) -> int:
+                 record: bool = False, revise: bool = False,
+                 record_any_date: bool = False,
+                 max_snapshot_age: float = MAX_SNAPSHOT_AGE_HOURS) -> int:
     rows = be.read_rows(fixtures)
     slate = be.select_matches(rows, target)
     if not slate:
@@ -637,6 +697,13 @@ def cmd_evaluate(target: date, fixtures: Path, threshold: float,
         return 0
     odds_rows = load_odds()
     ledger_rows = lg.load_ledger()
+    # Recording is a publishing act: day-of and fresh prices only, unless
+    # explicitly overridden. Evaluation/display is always allowed.
+    if record and target != lg.now_et().date() and not record_any_date:
+        print(f"--record refused: {target} is not today's editorial date "
+              f"({lg.now_et().date()}) — picks are recorded day-of against fresh "
+              "prices (pass --record-any-date to override deliberately)")
+        record = False
     try:
         model = pr.load_ratings(fixtures=fixtures)
     except ValueError as e:
@@ -656,12 +723,19 @@ def cmd_evaluate(target: date, fixtures: Path, threshold: float,
         print(render_odds_section(mid, ev, pick, flags, bp, threshold))
         if pick and record:
             passed = now >= lg.kickoff_dt(fr)
-            price = bp.get((pick["market"], pick["selection"], str(pick["line"])),
-                           (pick["odds"], "median"))
-            try:
-                print("→ " + record_pick(mid, pick, price, now, passed))
-            except OddsError as e:
-                print(f"→ NOT recorded: {e}")
+            age = _snapshot_age_hours(odds_rows, mid, now, market=pick["market"])
+            if age is None or age > max_snapshot_age:
+                print(f"→ NOT recorded: snapshot is "
+                      f"{'missing' if age is None else f'{age:.1f}h old'} "
+                      f"(max {max_snapshot_age:g}h) — refresh odds first")
+            else:
+                price = bp.get((pick["market"], pick["selection"], str(pick["line"])),
+                               (pick["odds"], "median"))
+                try:
+                    print("→ " + record_pick(mid, pick, price, now, passed,
+                                             allow_revise=revise))
+                except OddsError as e:
+                    print(f"→ NOT recorded: {e}")
         if pick and (day_best is None or pick["edge"] > day_best[1]["edge"]):
             day_best = (mid, pick)
     if day_best:
@@ -694,7 +768,16 @@ def main(argv: list | None = None) -> int:
     p_eval.add_argument("date")
     p_eval.add_argument("--threshold", type=float, default=EDGE_THRESHOLD)
     p_eval.add_argument("--record", action="store_true",
-                        help="record qualifying picks to picks_log.csv")
+                        help="record qualifying picks to picks_log.csv "
+                             "(day-of + fresh snapshot only)")
+    p_eval.add_argument("--revise", action="store_true",
+                        help="allow an existing open pick to be superseded")
+    p_eval.add_argument("--record-any-date", action="store_true",
+                        help="override the day-of recording gate (deliberate "
+                             "early positions only)")
+    p_eval.add_argument("--max-snapshot-age", type=float,
+                        default=MAX_SNAPSHOT_AGE_HOURS,
+                        help="oldest snapshot (hours) picks may be recorded against")
 
     sub.add_parser("settle", help="grade open picks + CLV")
     sub.add_parser("report", help="units/CLV summary")
@@ -799,7 +882,10 @@ def main(argv: list | None = None) -> int:
         except ValueError:
             print(f"error: bad date {args.date!r}", file=sys.stderr)
             return 2
-        return cmd_evaluate(target, args.fixtures, args.threshold, args.record)
+        return cmd_evaluate(target, args.fixtures, args.threshold, args.record,
+                            revise=args.revise,
+                            record_any_date=args.record_any_date,
+                            max_snapshot_age=args.max_snapshot_age)
 
     matches = st.load_fixtures(REPO_ROOT / "data" / "fixtures.csv")
     if args.command == "settle":

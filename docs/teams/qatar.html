@@ -309,7 +309,9 @@ tbody th.team a:hover,.slate .teams a:hover{text-decoration:underline;text-decor
 .slate .teams a{text-decoration:none}
 
 /* ---------- odds & best bet ---------- */
-.edge-wrap{max-width:680px}
+.edge-wrap{max-width:680px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
+.edge-wrap::-webkit-scrollbar{height:8px}
+.edge-wrap::-webkit-scrollbar-thumb{background:var(--hairline)}
 .edge-wrap table{margin-bottom:4px}
 .edge-wrap td.lbl,.edge-wrap th.lbl{text-align:left}
 .edge-wrap tbody td.lbl{font-family:var(--serif);font-weight:700;font-size:.92rem}

@@ -180,6 +180,35 @@ def _parse_score(value: str | None, mid: str, col: str) -> int | None:
     return score
 
 
+# ---------------------------------------------------------------- fair play
+
+DISCIPLINE = Path(__file__).resolve().parents[1] / "data" / "discipline.csv"
+# FIFA fair play deductions per card type (higher total = better ranking)
+FAIR_PLAY_POINTS = {"yellows": -1, "second_yellow_reds": -3,
+                    "direct_reds": -4, "yellow_plus_reds": -5}
+
+
+def load_discipline(path: str | Path = DISCIPLINE) -> dict[str, int]:
+    """data/discipline.csv -> {team: fair play points} (FIFA deductions,
+    negative; higher ranks first). The single source for every consumer
+    (site, editions, scenarios, blurb) so tied clusters rank identically
+    everywhere. Team-name validation happens in compute_standings, which
+    raises on canon mismatches per the join contract."""
+    path = Path(path)
+    if not path.exists():
+        return {}
+    totals: dict[str, int] = {}
+    with path.open(newline="", encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            team = (row.get("team") or "").strip()
+            if not team:
+                continue
+            pts = sum(FAIR_PLAY_POINTS[k] * int((row.get(k) or "0").strip() or 0)
+                      for k in FAIR_PLAY_POINTS)
+            totals[team] = totals.get(team, 0) + pts
+    return totals
+
+
 # ---------------------------------------------------------------- ranking
 
 def compute_standings(

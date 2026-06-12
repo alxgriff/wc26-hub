@@ -309,7 +309,9 @@ tbody th.team a:hover,.slate .teams a:hover{text-decoration:underline;text-decor
 .slate .teams a{text-decoration:none}
 
 /* ---------- odds & best bet ---------- */
-.edge-wrap{max-width:680px}
+.edge-wrap{max-width:680px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
+.edge-wrap::-webkit-scrollbar{height:8px}
+.edge-wrap::-webkit-scrollbar-thumb{background:var(--hairline)}
 .edge-wrap table{margin-bottom:4px}
 .edge-wrap td.lbl,.edge-wrap th.lbl{text-align:left}
 .edge-wrap tbody td.lbl{font-family:var(--serif);font-weight:700;font-size:.92rem}
@@ -361,12 +363,7 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
     <span class="kicker">The Call</span>
     <h2 id="call-h">What the model says</h2>
   </div>
-<div class="probs">
-  <p class="sr-only">Mexico win 78 percent, draw 17 percent, South Africa win 5 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:78">78%</span><span class="pd" style="flex:17">17%</span><span class="pb" style="flex:5"></span></div>
-  <div class="scale" aria-hidden="true"><span>Mexico 78%</span><span>draw 17%</span><span>South Africa 5%</span></div>
-  <p class="factline">most likely score <b>2–0</b> · expected goals <b>2.47</b> · over 2.5 <b>45%</b> · both score <b>28%</b><br>single source: rating model (Elo+Futi) · home-field bonus: Mexico<br><b>Graded:</b> final 2–0 (Mexico win) · the model had it at <b>78%</b> · Brier <b>0.026</b></p>
-</div>
+<div class="placeholder-slot">No prediction was logged before kickoff — nothing to grade. Calls are never graded retroactively.</div>
 </section>
 
 <section aria-labelledby="stakes-h">

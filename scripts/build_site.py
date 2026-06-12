@@ -46,11 +46,9 @@ import site_content as sc         # noqa: E402
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = REPO_ROOT / "templates"
 KB_GUIDE = REPO_ROOT / "kb" / "2026_fifa_world_cup_guide.md"
-DISCIPLINE = REPO_ROOT / "data" / "discipline.csv"
+DISCIPLINE = st.DISCIPLINE
 BLURBS_DIR = REPO_ROOT / "data" / "blurbs"
-# FIFA fair play deductions per card type (higher total = better ranking)
-FAIR_PLAY_POINTS = {"yellows": -1, "second_yellow_reds": -3,
-                    "direct_reds": -4, "yellow_plus_reds": -5}
+FAIR_PLAY_POINTS = st.FAIR_PLAY_POINTS
 REPO_URL = "https://github.com/alxgriff/wc26-hub"
 DAGGERS = ["†", "‡", "§", "¶"]
 GAMES_PER_TEAM = st.GAMES_PER_TEAM
@@ -90,22 +88,9 @@ def form_by_team(matches: "list[st.Match]") -> dict[str, list[str | None]]:
 
 
 def load_discipline(path: Path = DISCIPLINE) -> dict[str, int]:
-    """data/discipline.csv -> {team: fair play points} (FIFA deductions,
-    negative; higher ranks first). Team-name validation happens downstream in
-    compute_standings, which raises on canon mismatches per the join contract."""
-    import csv
-    if not Path(path).exists():
-        return {}
-    totals: dict[str, int] = {}
-    with Path(path).open(newline="", encoding="utf-8-sig") as f:
-        for row in csv.DictReader(f):
-            team = (row.get("team") or "").strip()
-            if not team:
-                continue
-            pts = sum(FAIR_PLAY_POINTS[k] * int((row.get(k) or "0").strip() or 0)
-                      for k in FAIR_PLAY_POINTS)
-            totals[team] = totals.get(team, 0) + pts
-    return totals
+    """Delegates to standings.load_discipline — the single fair-play source
+    shared with editions, scenarios, and the blurb."""
+    return st.load_discipline(path)
 
 
 def _note_daggers(rows: "list[st.TeamRow]", notes: list[str]
@@ -348,41 +333,68 @@ def load_predictor(fixtures: Path | None = None):
 def render_call(info: dict | None, team_a: str, team_b: str,
                 prebaked_lean: str | None,
                 result: tuple[int, int] | None = None) -> str:
-    """The Call block: model probabilities when the predictor is live, the
-    placeholder state otherwise. Played matches get the call graded against
-    the result (probability on the outcome + Brier, per CLAUDE.md). The
-    card's pre-baked lean rides along as a quote — editorial, not model."""
+    """The Call block. Scheduled matches show the live model read; played
+    matches show ONLY the pre-kickoff logged consensus (info["logged"]) graded
+    against the result — never a retroactive recomputation. A played match
+    with no logged call says so plainly instead of inventing a grade."""
     parts = []
     if info is None:
-        parts.append(
-            '<div class="placeholder-slot">Model pending — the ratings layer '
-            '(Phase 2 in CLAUDE.md terms) has not produced a prediction for this '
-            'match yet. This slot fills automatically once data/Ratings is '
-            'complete; no numbers are invented in the meantime.</div>')
+        if result is not None:
+            parts.append(
+                '<div class="placeholder-slot">No prediction was logged before '
+                'kickoff — nothing to grade. Calls are never graded '
+                'retroactively.</div>')
+        else:
+            parts.append(
+                '<div class="placeholder-slot">Model pending — the ratings layer '
+                '(Phase 2 in CLAUDE.md terms) has not produced a prediction for this '
+                'match yet. This slot fills automatically once data/Ratings is '
+                'complete; no numbers are invented in the meantime.</div>')
     else:
         pa, pd_, pb = info["p_a"], info["p_draw"], info["p_b"]
         wa, wd, wb = (max(round(x * 100), 1) for x in (pa, pd_, pb))
-        ms = info["modal_score"]
-        facts = [f'most likely score <b>{ms[0]}–{ms[1]}</b>',
-                 f'expected goals <b>{info["total"]:.2f}</b>']
-        if info.get("over25") is not None:
-            facts.append(f'over 2.5 <b>{round(info["over25"] * 100)}%</b>')
-        if info.get("btts") is not None:
-            facts.append(f'both score <b>{round(info["btts"] * 100)}%</b>')
-        srcline = ("2-source consensus: rating model + " + _esc(info["source"])
-                   if info.get("consensus") else "single source: rating model (Elo+Futi)")
-        hfa = f' · home-field bonus: {_esc(info["hfa"])}' if info.get("hfa") else ""
+        logged = bool(info.get("logged"))
+        facts = []
+        if logged:
+            if info.get("predicted_score"):
+                facts.append(f'predicted score <b>{_esc(info["predicted_score"])}</b>')
+            srcline = ("published consensus — logged "
+                       f"{_esc(_fmt_snapshot_ts(info.get('logged_ts', '')))}, pre-kickoff")
+            hfa = ""
+        else:
+            ms = info["modal_score"]
+            facts = [f'most likely score <b>{ms[0]}–{ms[1]}</b>',
+                     f'expected goals <b>{info["total"]:.2f}</b>']
+            if info.get("over25") is not None:
+                facts.append(f'over 2.5 <b>{round(info["over25"] * 100)}%</b>')
+            if info.get("btts") is not None:
+                facts.append(f'both score <b>{round(info["btts"] * 100)}%</b>')
+            srcline = ("2-source consensus: rating model + " + _esc(info["source"])
+                       if info.get("consensus") else "single source: rating model (Elo+Futi)")
+            hfa = f' · home-field bonus: {_esc(info["hfa"])}' if info.get("hfa") else ""
         graded = ""
-        if result is not None:
+        if result is not None and logged:
             sa, sb = result
-            outcome_v = ((1, 0, 0) if sa > sb else (0, 0, 1) if sa < sb else (0, 1, 0))
-            outcome_p = pa * outcome_v[0] + pd_ * outcome_v[1] + pb * outcome_v[2]
+            outcome_i = 0 if sa > sb else (2 if sa < sb else 1)
+            outcome_p = (pa, pd_, pb)[outcome_i]
             outcome_name = (f"{team_a} win" if sa > sb
                             else f"{team_b} win" if sa < sb else "draw")
-            brier = sum((p - o) ** 2 for p, o in zip((pa, pd_, pb), outcome_v)) / 3
+            # canonical Brier: ledger.brier (sum form, 0 best / 2 worst /
+            # 0.667 coin-flip) so the site and edition always publish the
+            # same number; inline fallback uses the identical formula
+            brier_fn = info.get("brier_fn") or (
+                lambda p, i: sum((p[j] - (1 if j == i else 0)) ** 2 for j in range(3)))
+            brier = brier_fn((pa, pd_, pb), outcome_i)
             graded = (f'<br><b>Graded:</b> final {sa}–{sb} ({_esc(outcome_name)}) · '
-                      f'the model had it at <b>{round(outcome_p * 100)}%</b> · '
-                      f'Brier <b>{brier:.3f}</b>')
+                      f'the logged call had it at <b>{round(outcome_p * 100)}%</b> · '
+                      f'Brier <b>{brier:.3f}</b> (0 best · 0.667 coin-flip · 2 worst)')
+        elif logged and info.get("awaiting"):
+            graded = ('<br><b>Awaiting result</b> — kickoff has passed; this '
+                      'logged call is frozen and will be graded when the score '
+                      'is entered.')
+        elif result is not None:
+            graded = ('<br><b>Ungraded:</b> these are current-model numbers, not a '
+                      'pre-kickoff logged call — no retroactive grading.')
         # in-bar labels are dropped under 6% (they would clip); the scale row
         # below always carries all three numbers
         la, ld, lb = (f"{w}%" if w >= 6 else "" for w in (wa, wd, wb))
@@ -940,16 +952,36 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     for team in sorted(set(profiles) - set(fixture_teams)):
         warnings.append(f"kb: profile {team!r} matches no fixtures team (canon mismatch?)")
 
+    ledger = _load_ledger(warnings)
     predictions = 0
+    scheduled = 0
     for row in rows:
-        info = _safe_predict(predictor, row, warnings)
-        predictions += info is not None
+        played = (row.get("status") or "").strip().lower() == "played"
+        kicked_off = False
+        if not played and ledger is not None:
+            try:
+                kicked_off = ledger["now"] >= ledger["kickoff_dt"](row)
+            except Exception:
+                kicked_off = False
+        if played or kicked_off:
+            # honesty rule: once kickoff passes, ONLY the verified pre-kickoff
+            # logged call may be shown — never a live recomputation
+            info = _logged_call(row["match_id"], ledger, row, warnings)
+            if info is not None and kicked_off and not played:
+                info["awaiting"] = True
+            if played and info is None:
+                warnings.append(f"{row['match_id']}: played with no usable logged "
+                                "call — rendered ungraded")
+        else:
+            scheduled += 1
+            info = _safe_predict(predictor, row, warnings)
+            predictions += info is not None
         odds_info = odds_call(row) if odds_call else None
         page = render_match_page(row, s, forms, cards_dir, info, css,
                                  template_dir, warnings, odds_info=odds_info)
         (out_dir / "matches" / f"{row['match_id']}.html").write_text(
             page, encoding="utf-8")
-    if predictor is not None and rows and predictions == 0:
+    if predictor is not None and scheduled and predictions == 0:
         warnings.append("predictor loaded but produced no usable prediction for "
                         "any match — every Call rendered as placeholder")
 
@@ -964,6 +996,66 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                 warnings.append(f"removed stale page {subdir}/{f.name}")
 
     return warnings
+
+
+def _load_ledger(warnings: list[str]) -> dict | None:
+    """The prediction-ledger API surface this renderer relies on, loaded
+    defensively: rows, the published-source constant, the canonical Brier
+    function, and kickoff math. A missing/changed ledger module degrades to
+    'no logged call', never a retroactive grade."""
+    try:
+        import ledger as lg
+        return {"rows": lg.load_ledger(),
+                "published": getattr(lg, "PUBLISHED_SOURCE", "consensus"),
+                "brier": lg.brier,
+                "kickoff_dt": lg.kickoff_dt,
+                "now": lg.now_et()}
+    except Exception as e:
+        warnings.append(f"prediction ledger unavailable ({e.__class__.__name__}: {e}) "
+                        "— played matches render as 'no logged call'")
+        return None
+
+
+def _logged_call(match_id: str, ledger: dict | None, fixture_row: dict,
+                 warnings: list[str]) -> dict | None:
+    """The published consensus for a match, as render_call info — but only if
+    it withstands integrity checks: probabilities valid per the contract, and
+    the log timestamp VERIFIABLY before kickoff. Anything unverifiable renders
+    as 'no logged call' rather than being stamped pre-kickoff."""
+    import math
+    from datetime import datetime as _dt
+    if ledger is None:
+        return None
+    row = None
+    for r in ledger["rows"]:   # last row wins, matching ledger.grade()
+        if r.get("match_id") == match_id and r.get("source") == ledger["published"]:
+            row = r
+    if row is None:
+        return None
+    try:
+        probs = (float(row["p_home"]), float(row["p_draw"]), float(row["p_away"]))
+    except (KeyError, ValueError):
+        warnings.append(f"{match_id}: malformed ledger row — rendered as no logged call")
+        return None
+    if (not all(math.isfinite(p) and 0 <= p <= 1 for p in probs)
+            or abs(sum(probs) - 1.0) > 0.001):
+        warnings.append(f"{match_id}: ledger probabilities fail the 1.0±0.001 "
+                        "contract — rendered as no logged call")
+        return None
+    try:
+        ts = _dt.fromisoformat((row.get("timestamp") or "").strip())
+        if ts >= ledger["kickoff_dt"](fixture_row):
+            warnings.append(f"{match_id}: ledger row logged at/after kickoff — "
+                            "refused (no post-hoc grading)")
+            return None
+    except (ValueError, TypeError, KeyError) as e:
+        warnings.append(f"{match_id}: cannot verify pre-kickoff timestamp "
+                        f"({e.__class__.__name__}) — rendered as no logged call")
+        return None
+    return {"p_a": probs[0], "p_draw": probs[1], "p_b": probs[2],
+            "predicted_score": (row.get("predicted_score") or "").strip(),
+            "logged_ts": row.get("timestamp", ""), "logged": True,
+            "brier_fn": ledger["brier"]}
 
 
 def _safe_predict(predictor, row: dict, warnings: list[str]) -> dict | None:
