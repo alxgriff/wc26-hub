@@ -47,6 +47,26 @@ before use in the predictor (`scripts/predict.py`).
   confirmation of the corrected Elo. Context/validation only until the user
   pulls a complete, current table (then candidate third consensus source).
 
+## Per-match Opta predictions (`Opta_Match_Predictions.csv`)
+
+The Analyst publishes the Opta supercomputer's W/D/L probabilities for every
+match in a server-rendered preview article, available **at least a day ahead**,
+at a predictable URL:
+
+    theanalyst.com/articles/{team-a}-vs-{team-b}-prediction-world-cup-2026-match-preview
+
+(team names lowercased/hyphenated, e.g. `united-states-vs-paraguay`,
+`canada-vs-bosnia-herzegovina`). **Daily ops:** each morning, fetch the
+preview for every match on today's editorial slate (including the 🌙 game) and
+append rows here — schema `match_id,p_home,p_draw,p_away,source,asof` with
+p_home = the fixtures row's team_a (CLAUDE.md's preferred match-level schema).
+`predict.py {match_id}` automatically blends these with the model (simple
+average per CLAUDE.md) and shows Consensus + both sources. Refresh day-of if
+team news breaks — Opta re-runs its sims. The interactive pages
+(/fixtures, /predictions, /stats) are client-side apps and NOT fetchable;
+the articles are the reliable path. Triangulation check (June 12): C1 Brazil
+57.7/23.5/18.8 (Opta) vs 55/26/19 (our model) vs 59/24/17 (de-vigged market).
+
 ## Name normalization (to the CLAUDE.md canon) — required before any join
 
 `Congo DR → DR Congo`, `Ivory Coast → Côte d'Ivoire`, `USA → United States`,

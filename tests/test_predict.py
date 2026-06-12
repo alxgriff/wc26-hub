@@ -106,6 +106,57 @@ class MatchModelTests(unittest.TestCase):
                                    msg=f"miscalibrated at gap {gap}")
 
 
+class OverlayTests(unittest.TestCase):
+    def _overlay_file(self, dirpath, rows):
+        p = Path(dirpath) / "Opta_Match_Predictions.csv"
+        with p.open("w", encoding="utf-8-sig", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["match_id", "p_home", "p_draw", "p_away", "source", "asof"])
+            w.writerows(rows)
+        return p
+
+    def test_percent_and_fraction_inputs_both_load(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = self._overlay_file(d, [
+                ["B1", 52.7, 25.3, 22.0, "opta", "2026-06-12"],     # percent
+                ["D1", 0.396, 0.266, 0.338, "opta", "2026-06-12"],  # fraction
+            ])
+            ov = pr.load_match_overlay(p)
+        for mid in ("B1", "D1"):
+            self.assertAlmostEqual(sum((ov[mid]["p_home"], ov[mid]["p_draw"],
+                                        ov[mid]["p_away"])), 1.0, places=3)
+        self.assertAlmostEqual(ov["B1"]["p_home"], 0.527, places=4)
+
+    def test_contract_violation_raises(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = self._overlay_file(d, [["B1", 60.0, 25.0, 22.0, "opta", "x"]])  # 107
+            with self.assertRaises(ValueError):
+                pr.load_match_overlay(p)
+
+    def test_missing_file_is_noop(self):
+        self.assertEqual(pr.load_match_overlay(Path("nope") / "missing.csv"), {})
+
+    def test_blend_is_equal_weight_average_and_sums_to_one(self):
+        m = model(mk("A", 1800), mk("B", 1800))
+        p = pr.predict_match(m, "A", "B")           # symmetric model
+        row = {"p_home": 0.60, "p_draw": 0.20, "p_away": 0.20, "source": "s", "asof": ""}
+        pa, pd, pb = pr.blend_wdl(p, row)
+        self.assertAlmostEqual(pa + pd + pb, 1.0, places=9)
+        self.assertAlmostEqual(pa, (p.p_a + 0.60) / 2, places=6)
+        self.assertGreater(pa, p.p_a)               # pulled toward the source
+        self.assertGreater(pa, pb)
+
+    def test_render_shows_consensus_and_both_sources(self):
+        m = model(mk("A", 1800), mk("B", 1800))
+        p = pr.predict_match(m, "A", "B")
+        row = {"p_home": 0.527, "p_draw": 0.253, "p_away": 0.22,
+               "source": "Opta supercomputer", "asof": "2026-06-12"}
+        out = pr.render_prediction(m, p, overlay_row=row)
+        self.assertIn("**Consensus:**", out)
+        self.assertIn("Opta supercomputer", out)
+        self.assertIn("our model", out)
+
+
 class RealDataTests(unittest.TestCase):
     """Integration against the committed verified ratings."""
     @classmethod

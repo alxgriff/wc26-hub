@@ -58,6 +58,7 @@ import csv
 import math
 import statistics as stats
 import sys
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -82,6 +83,10 @@ ELO_FILE = "Elo_Ratings_World_Cup_2026_VERIFIED.csv"   # NOT the corrupted origi
 FUTI_FILE = "World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv"
 OPTA_FILE = "Opta_Predictions_World_Cup_2026.csv"
 MARKET_FILE = "Market_Outrights_VERIFIED.csv"          # real de-vigged outright market
+OPTA_MATCH_FILE = "Opta_Match_Predictions.csv"         # per-match W/D/L overlay
+# CLAUDE.md preferred match-level schema: match_id,p_home,p_draw,p_away,source,asof
+# with p_home = the fixtures row's team_a. Aggregation rule per CLAUDE.md: simple
+# average of probabilities across sources (the model counts as one source).
 
 
 def _canon(name: str) -> str:
@@ -282,6 +287,45 @@ def predict_match(model: RatingModel, team_a: str, team_b: str,
                       total, top[0][0], over, btts, dnb_a, top)
 
 
+# ---------------------------------------------------------------- match-level overlay
+
+def load_match_overlay(path: str | Path = RATINGS_DIR / OPTA_MATCH_FILE) -> dict:
+    """Per-match W/D/L probabilities from an external source (CLAUDE.md preferred
+    schema). Accepts percentages or fractions; validates each row sums to 1 ±
+    0.001 after normalisation of units, per the data contract. Returns
+    {match_id: {"p_home","p_draw","p_away","source","asof"}} (fractions)."""
+    path = Path(path)
+    if not path.exists():
+        return {}
+    out = {}
+    with path.open(encoding="utf-8-sig", newline="") as f:
+        for row in csv.DictReader(f):
+            mid = (row.get("match_id") or "").strip()
+            ps = [float(row[k]) for k in ("p_home", "p_draw", "p_away")]
+            total = sum(ps)
+            if 97.0 <= total <= 103.0:          # given as percentages
+                ps = [p / 100 for p in ps]
+                total = sum(ps)
+            if abs(total - 1.0) > 0.001:
+                raise ValueError(
+                    f"{path.name}: {mid} probabilities sum to {total:.4f}, "
+                    "must be 1.0 ± 0.001 (CLAUDE.md contract)")
+            out[mid] = {"p_home": ps[0], "p_draw": ps[1], "p_away": ps[2],
+                        "source": (row.get("source") or "").strip(),
+                        "asof": (row.get("asof") or "").strip()}
+    return out
+
+
+def blend_wdl(pred: Prediction, overlay_row: Mapping) -> tuple:
+    """Consensus W/D/L: simple average of the model and the overlay source
+    (equal weights per CLAUDE.md), renormalised to sum exactly to 1."""
+    pa = (pred.p_a + overlay_row["p_home"]) / 2
+    pd = (pred.p_draw + overlay_row["p_draw"]) / 2
+    pb = (pred.p_b + overlay_row["p_away"]) / 2
+    z = pa + pd + pb
+    return pa / z, pd / z, pb / z
+
+
 # ---------------------------------------------------------------- rendering
 
 def _pct(x: float) -> str:
@@ -300,11 +344,17 @@ def _disagreement(model: RatingModel, t: TeamRating) -> str | None:
     return f"{t.team}: " + " vs ".join(bits)
 
 
-def render_prediction(model: RatingModel, p: Prediction) -> str:
+def render_prediction(model: RatingModel, p: Prediction,
+                      overlay_row: Mapping | None = None) -> str:
     a, b = model.teams[p.team_a], model.teams[p.team_b]
-    fav = p.team_a if p.p_a >= p.p_b else p.team_b
-    fav_p = max(p.p_a, p.p_b)
-    if p.p_draw >= max(p.p_a, p.p_b):
+    # headline probabilities: consensus when a second source is present
+    if overlay_row:
+        hp_a, hp_d, hp_b = blend_wdl(p, overlay_row)
+    else:
+        hp_a, hp_d, hp_b = p.p_a, p.p_draw, p.p_b
+    fav = p.team_a if hp_a >= hp_b else p.team_b
+    fav_p = max(hp_a, hp_b)
+    if hp_d >= max(hp_a, hp_b):
         lean = "too close to call — draw is the single most likely result"
     elif fav_p >= 0.65:
         lean = f"{fav} clear favourites"
@@ -315,9 +365,20 @@ def render_prediction(model: RatingModel, p: Prediction) -> str:
     hfa = f" (🏠 {p.hfa_team} home)" if p.hfa_team else ""
     mi, mj = p.modal_score
 
-    lines = [
-        f"**The Call — {p.team_a} vs {p.team_b}{hfa}**", "",
-        f"- **Model:** {p.team_a} {_pct(p.p_a)} · Draw {_pct(p.p_draw)} · {p.team_b} {_pct(p.p_b)}",
+    lines = [f"**The Call — {p.team_a} vs {p.team_b}{hfa}**", ""]
+    if overlay_row:
+        src = overlay_row["source"] or "external source"
+        lines += [
+            f"- **Consensus:** {p.team_a} {_pct(hp_a)} · Draw {_pct(hp_d)} · "
+            f"{p.team_b} {_pct(hp_b)} _(simple average of the two sources below)_",
+            f"  - our model: {_pct(p.p_a)} / {_pct(p.p_draw)} / {_pct(p.p_b)}",
+            f"  - {src}: {_pct(overlay_row['p_home'])} / {_pct(overlay_row['p_draw'])} / "
+            f"{_pct(overlay_row['p_away'])} (asof {overlay_row['asof']})",
+        ]
+    lines += [
+        f"- **Model:** {p.team_a} {_pct(p.p_a)} · Draw {_pct(p.p_draw)} · {p.team_b} {_pct(p.p_b)}"
+        if not overlay_row else
+        f"- **Score model:** expected goals below are from our model (the overlay is W/D/L only)",
         f"- **Expected goals:** {p.team_a} {p.lambda_a:.2f} – {p.lambda_b:.2f} {p.team_b} "
         f"(most likely {mi}–{mj})",
         f"- **Total:** {p.total:.2f} · Over 2.5 {_pct(p.over[2.5])} · BTTS {_pct(p.btts)} "
@@ -418,9 +479,12 @@ def main(argv: list | None = None) -> int:
               f"({len(model.teams)} teams, asof {model.asof})")
         return 0
 
+    overlay_row = None
     if len(args.teams) == 1:
+        mid = args.teams[0].strip().upper()
         try:
-            a, b, hfa = _fixture_lookup(args.teams[0], args.fixtures)
+            a, b, hfa = _fixture_lookup(mid, args.fixtures)
+            overlay_row = load_match_overlay(args.ratings_dir / OPTA_MATCH_FILE).get(mid)
         except ValueError as e:
             print(f"error: {e}", file=sys.stderr)
             return 1
@@ -436,7 +500,7 @@ def main(argv: list | None = None) -> int:
     except ValueError as e:
         print(f"error: {e}", file=sys.stderr)
         return 1
-    print(render_prediction(model, pred))
+    print(render_prediction(model, pred, overlay_row=overlay_row))
     return 0
 
 
