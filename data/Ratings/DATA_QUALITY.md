@@ -11,7 +11,8 @@ before use in the predictor (`scripts/predict.py`).
 | **Elo** | ⚠️ original corrupted — **use `Elo_Ratings_World_Cup_2026_VERIFIED.csv`** | match-strength backbone |
 | **Futi** (`...Futi_Detailed_Profiles_Final.csv`) | ✅ reliable | Attack/Defense goals model + tactical color |
 | **Opta** (`Opta_Predictions...`) | ✅ reputable, but tournament-level | context overlay only (advance %, win %) |
-| **Zeileis** (`Zeileis_Hybrid_Model...`) | ⚠️ squad-value column broken | not used in the model |
+| **Market** (`Market_Outrights_VERIFIED.csv`) | ✅ real market, de-vigged | public-sentiment context + divergence flags |
+| **Zeileis** (`Zeileis_Hybrid_Model...`) | ❌ both key columns broken | **not used at all** |
 
 ## What the audit found
 
@@ -29,6 +30,15 @@ before use in the predictor (`scripts/predict.py`).
   match strength.
 - **Zeileis squad value is broken** (Cape Verde €524m > Japan €117m; Norway
   €24m), which also corrupted its own tournament win-probability column. Dropped.
+- **Zeileis "Bookmaker_Consensus_Odds_Decimal" is not market data** (June 12
+  audit): every one of the 48 rows equals `1/(1.30 × Win_Probability)` — a
+  uniform multiplier (stdev 0.02), i.e. the model's own output dressed up as
+  odds. Checked against the real outright market (BetMGM, June 12): only 15/48
+  teams within 1.5×; errors up to 51× (Haiti listed 48.5 vs real 2501).
+- **`Market_Outrights_VERIFIED.csv`** is the replacement: real BetMGM outright
+  odds (via Yahoo Sports, asof 2026-06-12), with raw and de-vigged implied
+  probabilities (overround 1.242). This is the public-sentiment reference for
+  the `sources_diverge` flag in `data/team_strength.csv`.
 
 ## Name normalization (to the CLAUDE.md canon) — required before any join
 
