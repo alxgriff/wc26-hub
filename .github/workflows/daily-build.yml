@@ -1,0 +1,119 @@
+name: daily-build
+
+# The morning pipeline (7:00 AM ET during the tournament): enter overnight
+# results, settle yesterday's picks, log today's predictions, snapshot odds,
+# record picks, generate the stakes blurb, rebuild the site + edition, push.
+# The push IS the deploy (Cloudflare Pages watches main).
+#
+# Fail-soft design: data-gathering steps carry continue-on-error and surface
+# warnings in the job summary — a dead API never blocks the morning publish,
+# and nothing is ever invented (missing data renders as the placeholder
+# state, which the site and editions flag loudly). Tests and the site build
+# are HARD gates: a red test suite publishes nothing.
+
+on:
+  schedule:
+    - cron: "0 11 * * *"        # 07:00 ET (EDT) — after the midnight-ET games settle
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Editorial date YYYY-MM-DD (default: today ET)"
+        required: false
+      gather_news:
+        description: "Run the UNVERIFIED news digest"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Editorial date (ET)
+        id: ed
+        run: |
+          DATE="${{ inputs.date }}"
+          if [ -z "$DATE" ]; then DATE=$(TZ=America/New_York date +%F); fi
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          echo "Editorial date: $DATE" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install Anthropic SDK (blurb + news)
+        continue-on-error: true
+        run: pip install anthropic
+
+      - name: Enter overnight results (The Odds API)
+        continue-on-error: true
+        run: |
+          python scripts/fetch_results.py | tee -a "$GITHUB_STEP_SUMMARY" \
+            || echo "::warning::results step failed — enter scores manually"
+
+      - name: Settle yesterday's picks (units + CLV)
+        continue-on-error: true
+        run: python scripts/odds.py settle | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Log today's slate predictions (the accountable numbers)
+        continue-on-error: true
+        run: python scripts/ledger.py log "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Snapshot today's odds
+        continue-on-error: true
+        run: |
+          python scripts/odds.py fetch | tee -a "$GITHUB_STEP_SUMMARY" \
+            || echo "::warning::odds snapshot failed — sections keep last snapshot"
+
+      - name: Evaluate edges + record picks
+        continue-on-error: true
+        run: python scripts/odds.py evaluate "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Stakes blurb (Sonnet, grounded in computed data)
+        continue-on-error: true
+        run: |
+          python scripts/stakes_blurb.py "${{ steps.ed.outputs.date }}" \
+            || echo "::warning::blurb skipped — site renders without it"
+
+      - name: News digest (UNVERIFIED, gated)
+        if: ${{ inputs.gather_news || vars.ENABLE_NEWS_DIGEST == 'true' }}
+        continue-on-error: true
+        run: |
+          python scripts/fetch_news.py "${{ steps.ed.outputs.date }}" \
+            || echo "::warning::news digest skipped"
+
+      - name: Tests (hard gate — red suite publishes nothing)
+        run: python -m unittest discover -s tests
+
+      - name: Build site
+        run: python scripts/build_site.py --date "${{ steps.ed.outputs.date }}"
+
+      - name: Build edition
+        continue-on-error: true
+        run: |
+          python scripts/build_edition.py "${{ steps.ed.outputs.date }}" \
+            || echo "::warning::edition build failed — site still publishes"
+
+      - name: Commit & push (push = deploy)
+        run: |
+          git config user.name "wc26-daily-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes today." >> "$GITHUB_STEP_SUMMARY"
+          else
+            git commit -m "Daily build ${{ steps.ed.outputs.date }} [automated]"
+            git push
+            echo "Published." >> "$GITHUB_STEP_SUMMARY"
+          fi

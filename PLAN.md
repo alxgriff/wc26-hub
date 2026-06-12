@@ -102,7 +102,25 @@ Per the agreed design direction (see `~/.claude` project memory `display-directi
 
 ---
 
-## Daily ops checklist (every morning, June 12–27)
+## Daily automation (live June 12) — .github/workflows/
+
+`daily-build.yml` (07:00 ET + manual dispatch) runs the morning pipeline:
+results from The Odds API (`fetch_results.py`) → settle picks → log slate
+predictions → odds snapshot → evaluate + record picks → Sonnet stakes blurb
+(`stakes_blurb.py`, grounded in computed data only, renders on the index) →
+optional UNVERIFIED news digest (`fetch_news.py`, gated on the
+`ENABLE_NEWS_DIGEST` repo variable or a dispatch input; writes news/, never
+auto-publishes) → tests (hard gate) → site + edition build → push (= deploy).
+`closing-odds.yml` (11:30 AM + 6:30 PM ET) logs closing lines for CLV.
+Secrets required: `ODDS_API_KEY`, `ANTHROPIC_API_KEY`.
+
+Human jobs the automation deliberately leaves: verifying news before it
+touches cards/editions, filling `data/discipline.csv` (cards → fair-play
+tiebreaker; columns yellows/second_yellow_reds/direct_reds/yellow_plus_reds),
+the June 20 F4 kickoff re-verification, and reading the edition before
+trusting it. The checklist below remains the manual fallback.
+
+## Daily ops checklist (manual fallback)
 
 1. Get yesterday's results from the user (scores for every match on yesterday's *editorial* date — including the 🌙 game on late-cap nights). Enter into `data/fixtures.csv` (status → `played`, scores in). **Today: A2 South Korea–Czechia is outstanding.**
 2. `python scripts/standings.py` — sanity-check tables; stderr must be silent (warnings = data problem, fix before publishing).

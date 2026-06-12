@@ -46,6 +46,11 @@ import site_content as sc         # noqa: E402
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = REPO_ROOT / "templates"
 KB_GUIDE = REPO_ROOT / "kb" / "2026_fifa_world_cup_guide.md"
+DISCIPLINE = REPO_ROOT / "data" / "discipline.csv"
+BLURBS_DIR = REPO_ROOT / "data" / "blurbs"
+# FIFA fair play deductions per card type (higher total = better ranking)
+FAIR_PLAY_POINTS = {"yellows": -1, "second_yellow_reds": -3,
+                    "direct_reds": -4, "yellow_plus_reds": -5}
 REPO_URL = "https://github.com/alxgriff/wc26-hub"
 DAGGERS = ["†", "‡", "§", "¶"]
 GAMES_PER_TEAM = st.GAMES_PER_TEAM
@@ -82,6 +87,25 @@ def form_by_team(matches: "list[st.Match]") -> dict[str, list[str | None]]:
                     f"{m.match_id}: {team} already has a matchday-{m.matchday} result")
             forms[team][i] = letter
     return forms
+
+
+def load_discipline(path: Path = DISCIPLINE) -> dict[str, int]:
+    """data/discipline.csv -> {team: fair play points} (FIFA deductions,
+    negative; higher ranks first). Team-name validation happens downstream in
+    compute_standings, which raises on canon mismatches per the join contract."""
+    import csv
+    if not Path(path).exists():
+        return {}
+    totals: dict[str, int] = {}
+    with Path(path).open(newline="", encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            team = (row.get("team") or "").strip()
+            if not team:
+                continue
+            pts = sum(FAIR_PLAY_POINTS[k] * int((row.get(k) or "0").strip() or 0)
+                      for k in FAIR_PLAY_POINTS)
+            totals[team] = totals.get(team, 0) + pts
+    return totals
 
 
 def _note_daggers(rows: "list[st.TeamRow]", notes: list[str]
@@ -780,9 +804,11 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
                generated_at: str, template_path: Path = TEMPLATE_DIR / "page.html",
                editions_dir: Path = REPO_ROOT / "editions",
                css: str | None = None,
-               ledger_line: str | None = None) -> tuple[str, dict]:
+               ledger_line: str | None = None,
+               fair_play: dict[str, int] | None = None,
+               blurb_html: str = "") -> tuple[str, dict]:
     """Render the index page. Returns (html, data_dict)."""
-    s = st.compute_standings(matches)
+    s = st.compute_standings(matches, fair_play=fair_play)
     forms = form_by_team(matches)
     today = be.select_matches(rows, target)
     day_n = (target - be.TOURNAMENT_START).days + 1
@@ -820,6 +846,7 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
         data_json=data_json,
         ledger_html=(f'<p class="ledger-line">{_esc(ledger_line)}</p>'
                      if ledger_line else ""),
+        blurb_html=blurb_html,
     )
     return page, data
 
@@ -842,10 +869,20 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     for r in rows:  # load_fixtures validated the stripped values; use the same
         for k in ("match_id", "group", "team_a", "team_b"):
             r[k] = (r.get(k) or "").strip()
-    s = st.compute_standings(matches)
+    fair_play = load_discipline()
+    s = st.compute_standings(matches, fair_play=fair_play)
     warnings.extend(s.warnings)
     forms = form_by_team(matches)
     css = _site_css(template_dir)
+
+    blurb_html = ""
+    blurb_path = BLURBS_DIR / f"{target.isoformat()}.md"
+    if blurb_path.exists():
+        blurb_text = blurb_path.read_text(encoding="utf-8").strip()
+        if blurb_text:
+            blurb_html = ('<div class="blurb">' + sc.md_to_html(blurb_text)
+                          + '<p class="blurb-tag">— the morning line, generated '
+                          'from the day\'s data</p></div>')
 
     if predictor == "auto":
         predictor, why = load_predictor()
@@ -869,7 +906,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     index, data = build_page(matches, rows, target, generated_at,
                              template_path=template_dir / "page.html",
                              editions_dir=editions_dir, css=css,
-                             ledger_line=ledger_line)
+                             ledger_line=ledger_line, fair_play=fair_play,
+                             blurb_html=blurb_html)
     (out_dir / "index.html").write_text(index, encoding="utf-8")
     (out_dir / "data.json").write_text(
         json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
