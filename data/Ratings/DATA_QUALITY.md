@@ -39,6 +39,13 @@ before use in the predictor (`scripts/predict.py`).
   odds (via Yahoo Sports, asof 2026-06-12), with raw and de-vigged implied
   probabilities (overround 1.242). This is the public-sentiment reference for
   the `sources_diverge` flag in `data/team_strength.csv`.
+- **`Opta_Power_Ratings_PARTIAL.csv`** — Opta's match-level Power Ratings
+  (0–100) salvaged from The Analyst articles: 45/48 teams (per-row `asof`,
+  mostly 2025-12-05 draw-day vintage, some 2026-06-05). Missing: Ecuador,
+  Côte d'Ivoire, Bosnia and Herzegovina. Validates strongly: +0.97 rank
+  correlation with verified Elo, +0.96 with Futi — third independent
+  confirmation of the corrected Elo. Context/validation only until the user
+  pulls a complete, current table (then candidate third consensus source).
 
 ## Name normalization (to the CLAUDE.md canon) — required before any join
 
