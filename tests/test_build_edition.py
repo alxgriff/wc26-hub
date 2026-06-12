@@ -442,6 +442,38 @@ class CallInjectionTests(unittest.TestCase):
         self.assertFalse(ok)
 
 
+class OddsInjectionTests(unittest.TestCase):
+    ODDS_BODY = "| Market | ... |\n\n**No bet** — nothing clears 3%."
+
+    def test_inline_layout_fills_odds_keeps_hint(self):
+        with tempfile.TemporaryDirectory() as d:
+            cards = write_cards(Path(d), md1=MD1)
+            card, _ = be.extract_card("A1", "Team Alpha", "Team Beta", cards)
+        out, ok = be.inject_odds(card, self.ODDS_BODY)
+        self.assertTrue(ok)
+        self.assertIn("**No bet**", out)
+        self.assertIn("_Pre-baked note: Phase 3 — watch the draw._", out)
+
+    def test_md3_combined_slot_works_after_call_injection(self):
+        with tempfile.TemporaryDirectory() as d:
+            cards = write_cards(Path(d), md3=MD3)
+            card, _ = be.extract_card("A5", "Team Alpha", "Team Beta", cards)
+        card, _ = be.inject_call(card, "call body")          # splits the slot
+        out, ok = be.inject_odds(card, self.ODDS_BODY)
+        self.assertTrue(ok)
+        self.assertIn("**No bet**", out)
+        self.assertIn("call body", out)                       # both injected
+
+    def test_template_section_layout(self):
+        with tempfile.TemporaryDirectory() as d:
+            cards = write_cards(Path(d), template=TEMPLATE)
+            card, _ = be.extract_card("B1", "Canada", "Bosnia and Herzegovina", cards)
+        out, ok = be.inject_odds(card, self.ODDS_BODY)
+        self.assertTrue(ok)
+        self.assertIn("## Odds & Best Bet", out)
+        self.assertIn("**No bet**", out)
+
+
 class OvernightGradingTests(unittest.TestCase):
     def test_graded_match_shows_check_brier_and_cumulative(self):
         fixtures = "\n".join([

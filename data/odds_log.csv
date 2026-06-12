@@ -1,0 +1,7 @@
+﻿match_id,market,selection,line,odds,source,phase,timestamp
+C1,h2h,home,,1.610,median/betmgm-web,snapshot,2026-06-12T15:21:22-04:00
+C1,h2h,draw,,3.900,median/betmgm-web,snapshot,2026-06-12T15:21:22-04:00
+C1,h2h,away,,5.500,median/betmgm-web,snapshot,2026-06-12T15:21:22-04:00
+C1,h2h,home,,1.610,best:betmgm-web,snapshot,2026-06-12T15:21:22-04:00
+C1,h2h,draw,,3.900,best:betmgm-web,snapshot,2026-06-12T15:21:22-04:00
+C1,h2h,away,,5.500,best:betmgm-web,snapshot,2026-06-12T15:21:22-04:00

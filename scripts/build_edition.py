@@ -215,6 +215,33 @@ def inject_call(card: str, call_body: str) -> tuple[str, bool]:
     return card, False
 
 
+def inject_odds(card: str, odds_body: str) -> tuple[str, bool]:
+    """Replace a card's Odds & Best Bet placeholder with ``odds_body``,
+    preserving the pre-baked "markets to watch" hint as a trailing italic line.
+    Handles the inline ``**Odds & Best Bet:**`` line (md1/md2, and md3 after
+    inject_call splits its combined slot) and the ``## Odds & Best Bet``
+    section (template.md). Returns ``(card, replaced?)``."""
+    lines = card.split("\n")
+
+    def with_hint(placeholder_text: str) -> str:
+        m = _LEAN_RE.search(placeholder_text)
+        hint = m.group(1).strip() if m else ""
+        return odds_body + (f"\n\n_Pre-baked note: {hint}_" if hint else "")
+
+    for i, ln in enumerate(lines):
+        if ln.startswith("**Odds & Best Bet:**"):
+            block = ["**Odds & Best Bet:**", "", with_hint(ln)]
+            return "\n".join(lines[:i] + block + lines[i + 1:]), True
+    for i, ln in enumerate(lines):
+        if ln.strip() == "## Odds & Best Bet":
+            j = i + 1
+            while j < len(lines) and not lines[j].startswith("## "):
+                j += 1
+            block = [lines[i], "", with_hint("\n".join(lines[i + 1:j])), ""]
+            return "\n".join(lines[:i] + block + lines[j:]), True
+    return card, False
+
+
 def inject_stakes(card: str, stakes_body: str) -> tuple[str, bool]:
     """Replace a card's Stakes placeholder with ``stakes_body``, leaving The Call
     and Odds & Best Bet exactly as written. Returns ``(card, replaced?)``.
@@ -436,7 +463,8 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
                   matches: "list[st.Match] | None" = None,
                   calls: "dict[str, str] | None" = None,
                   graded: dict | None = None,
-                  cumulative: str | None = None) -> tuple[str, list[str]]:
+                  cumulative: str | None = None,
+                  odds_bodies: "dict[str, str] | None" = None) -> tuple[str, list[str]]:
     """Render the full edition markdown for ``target``. Returns
     ``(markdown, warnings)``; warnings are data-integrity notes for stderr.
 
@@ -448,6 +476,7 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
     in placeholder state (never invented)."""
     warnings: list[str] = []
     calls = calls or {}
+    odds_bodies = odds_bodies or {}
 
     unexpected = {r["match_id"] for r in rows if r.get("_late_cap")} - EXPECTED_LATE_CAPS
     if unexpected:
@@ -558,6 +587,11 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
                 if not call_ok:
                     warnings.append(f"{mid}: card has no The Call slot — prediction "
                                     f"not injected (source {src})")
+            if mid in odds_bodies:
+                chunk, odds_ok = inject_odds(chunk, odds_bodies[mid])
+                if not odds_ok:
+                    warnings.append(f"{mid}: card has no Odds & Best Bet slot — "
+                                    f"odds not injected (source {src})")
         card_chunks.append(chunk)
     parts.append("\n\n---\n\n".join(card_chunks) if card_chunks else "_No cards today._")
 
@@ -642,9 +676,51 @@ def main(argv: list[str] | None = None) -> int:
         print(f"warning: predictions unavailable ({e}) — The Call slots left "
               "in placeholder state", file=sys.stderr)
 
+    # Odds & best bets (Phase 5): consume logged snapshots only — no snapshot
+    # for a match means its slot stays in placeholder state (never invented).
+    odds_bodies: dict[str, str] = {}
+    try:
+        import ledger as lg
+        import odds as od
+        import predict as pr
+        odds_rows = od.load_odds()
+        if odds_rows:
+            for line in od.settle_picks(matches, odds_rows):
+                print(f"picks: {line}", file=sys.stderr)
+            ledger_rows = lg.load_ledger()
+            model = pr.load_ratings(fixtures=args.fixtures)
+            now = lg.now_et()
+            for r in select_matches(rows, target):
+                mid = r["match_id"]
+                if not any(o["match_id"] == mid for o in odds_rows):
+                    continue
+                host = pr.HOST_BY_COUNTRY.get((r.get("country") or "").strip())
+                hfa = host if host in (r["team_a"], r["team_b"]) else None
+                pred = pr.predict_match(model, r["team_a"], r["team_b"], hfa_team=hfa)
+                ev = od.evaluate_match(mid, odds_rows, ledger_rows, pred)
+                pick, flags = od.best_bet(ev)
+                bp = od._best_prices(odds_rows, mid)
+                if pick:
+                    price = bp.get((pick["market"], pick["selection"]),
+                                   (pick["odds"], "median"))
+                    try:
+                        msg = od.record_pick(mid, pick, price, now,
+                                             now >= lg.kickoff_dt(r))
+                        print(f"pick: {msg}", file=sys.stderr)
+                    except od.OddsError as e:
+                        print(f"pick: {mid} not recorded — {e}", file=sys.stderr)
+                odds_bodies[mid] = od.render_odds_section(mid, ev, pick, flags, bp)
+            units = od.units_summary(od.load_picks())
+            if units:
+                cumulative = (cumulative + "\n" + units) if cumulative else units
+    except Exception as e:
+        print(f"warning: odds evaluation unavailable ({e}) — Odds & Best Bet "
+              "slots left in placeholder state", file=sys.stderr)
+
     edition, warnings = build_edition(target, rows, standings, args.cards_dir,
                                       matches=matches, calls=calls,
-                                      graded=graded, cumulative=cumulative)
+                                      graded=graded, cumulative=cumulative,
+                                      odds_bodies=odds_bodies)
     for w in warnings:
         print(f"warning: {w}", file=sys.stderr)
 
