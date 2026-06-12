@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Record — WC26 Daily Hub</title>
+<meta name="description" content="The running accountability ledger: every logged call graded by Brier score, every paper pick with units and closing-line value.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,500&family=Spline+Sans+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+$site_css
+</style>
+</head>
+<body>
+<a class="skip" href="#calls">Skip to the graded calls</a>
+<div class="sheet">
+
+<header class="page-mast">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="index.html">The 26 Standings</a> · <span aria-current="page">The Record</span>
+  </nav>
+  <p class="eyebrow">WC26 Daily Hub · Accountability Ledger</p>
+  <h1>The Record</h1>
+  <div class="metaline">
+    <span>Every call logged before kickoff, graded after</span>
+    <span>Every pick on paper at flat 1u</span>
+  </div>
+</header>
+
+<main>
+
+<section id="calls" aria-labelledby="calls-h">
+  <div class="sec-head">
+    <span class="kicker">Brier</span>
+    <h2 id="calls-h">The Calls</h2>
+  </div>
+  <p class="standfirst">$cumulative_line</p>
+$calls_html
+</section>
+
+<section id="bets" aria-labelledby="bets-h">
+  <div class="sec-head">
+    <span class="kicker">Units &amp; CLV</span>
+    <h2 id="bets-h">The Bets</h2>
+  </div>
+  <p class="standfirst">$units_line</p>
+$bets_html
+</section>
+
+</main>
+
+<footer>
+  <p class="colophon">
+    Generated $generated_at · calls graded from data/predictions_log.csv (logged
+    pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
+    at fresh prices, revisions explicit, settled rows immutable) · Brier: 0 best ·
+    0.667 coin-flip · 2 worst · CLV = closing implied minus our implied at record ·
+    <a href="index.html">all standings</a> · <a href="$repo_url">source &amp; data</a>
+  </p>
+</footer>
+
+</div>
+</body>
+</html>

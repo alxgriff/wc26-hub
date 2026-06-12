@@ -166,6 +166,23 @@ class FullSiteTests(unittest.TestCase):
         self.assertIn('href="teams/mexico.html"', idx)
         self.assertIn('href="matches/B1.html"', idx)
 
+    def test_overnight_module_shows_yesterdays_results(self):
+        # target June 12 -> overnight = June 11 (A1 played 2-0, A2 played 2-1,
+        # neither logged pre-kickoff -> honest "no logged call")
+        idx = (self.out / "index.html").read_text(encoding="utf-8")
+        self.assertIn("Overnight — Thursday, June 11", idx)
+        self.assertIn("no logged call", idx)
+        self.assertIn('href="record.html"', idx)
+
+    def test_record_page_and_snapshot_archive(self):
+        rec = (self.out / "record.html").read_text(encoding="utf-8")
+        self.assertIn("The Record", rec)
+        self.assertIn("No graded calls yet", rec)   # nothing logged pre-A1/A2
+        # the D1 pick recorded by the morning run shows as an open bet
+        self.assertIn("Paraguay", rec)
+        self.assertIn("status-open", rec)
+        self.assertTrue((self.out / "data" / "2026-06-12.json").exists())
+
     def test_logged_call_is_graded_on_played_match(self):
         logged = {"p_a": 0.5, "p_draw": 0.3, "p_b": 0.2,
                   "predicted_score": "2-0", "logged_ts": "2026-06-11T09:00:00-04:00",

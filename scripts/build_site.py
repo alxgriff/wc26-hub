@@ -33,7 +33,7 @@ import html
 import json
 import re
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from string import Template
 from urllib.parse import quote
@@ -571,6 +571,193 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
     return "\n".join(parts)
 
 
+# ---------------------------------------------------------------- the record
+
+def _hit_chip(correct: bool) -> str:
+    if correct:
+        return ('<span class="hit hit-y" aria-hidden="true">✓</span>'
+                '<span class="sr-only">correct call</span>')
+    return ('<span class="hit hit-n" aria-hidden="true">✗</span>'
+            '<span class="sr-only">missed</span>')
+
+
+def render_record_calls(matches: "list[st.Match]", rows: list[dict],
+                        ledger: dict | None, root: str = "") -> tuple[str, str]:
+    """(calls_table_html, cumulative_line_text) for the record page."""
+    if ledger is None:
+        return "", "Prediction ledger unavailable."
+    grades = ledger["grade"](matches, ledger["rows"])
+    cumulative = ledger["cumulative"](matches, ledger["rows"]) \
+        or ("No graded calls yet — grades land when a logged match gets its "
+            "result entered.")
+    if not grades:
+        return "", cumulative
+    by_mid = {m.match_id: m for m in matches}
+    editorial = {r["match_id"]: r.get("_editorial") for r in rows}
+    ordered = sorted(grades, key=lambda mid: (editorial.get(mid) or date.min, mid))
+
+    body, day, day_acc = [], None, []
+
+    def flush_day():
+        if day is None or not day_acc:
+            return
+        n = len(day_acc)
+        hits = sum(1 for g in day_acc if g["correct"])
+        mean_b = sum(g["brier"] for g in day_acc) / n
+        body.append(
+            f'      <tr class="subtotal"><td colspan="4">{day:%B} {day.day} — '
+            f'{n} graded</td><td>{hits}/{n}</td><td>{mean_b:.3f}</td></tr>')
+
+    for mid in ordered:
+        g = grades[mid]
+        m = by_mid[mid]
+        ed = editorial.get(mid)
+        if ed != day:
+            flush_day()
+            day, day_acc = ed, []
+        day_acc.append(g)
+        p = g["p"]
+        pred = f' ({_esc(g["predicted_score"])})' if g["predicted_score"] else ""
+        body.append(
+            f'      <tr>\n'
+            f'        <td class="lbl"><a href="{root}matches/{_esc(mid)}.html">'
+            f'{_esc(m.team_a)} v {_esc(m.team_b)}</a></td>\n'
+            f'        <td>{p[0]:.0%}/{p[1]:.0%}/{p[2]:.0%}{pred}</td>\n'
+            f'        <td>{m.score_a}–{m.score_b}</td>\n'
+            f'        <td>{("home", "draw", "away")[g["outcome"]]}</td>\n'
+            f'        <td>{_hit_chip(g["correct"])}</td>\n'
+            f'        <td class="pts">{g["brier"]:.3f}</td>\n'
+            f'      </tr>')
+    flush_day()
+    table = (
+        '<div class="record-wrap">\n  <table>\n'
+        '    <caption class="sr-only">Every logged call graded: probabilities, '
+        'result, hit or miss, Brier score</caption>\n'
+        '    <thead><tr><th class="lbl" scope="col">Match</th>'
+        '<th scope="col">Logged H/D/A</th><th scope="col">Final</th>'
+        '<th scope="col">Outcome</th><th scope="col">Hit</th>'
+        '<th scope="col">Brier</th></tr></thead>\n'
+        '    <tbody>\n' + "\n".join(body) + "\n    </tbody>\n  </table>\n</div>")
+    return table, cumulative
+
+
+def render_record_bets(rows: list[dict], root: str = "") -> tuple[str, str]:
+    """(bets_table_html, units_line_text) for the record page."""
+    try:
+        import odds as od
+        picks = od.load_picks()
+        units = od.units_summary(picks)
+    except Exception:
+        return ('<p class="standfirst">Picks ledger unavailable.</p>',
+                "Picks ledger unavailable.")
+    if not picks:
+        return ('<p class="standfirst">No picks recorded yet.</p>',
+                "No picks recorded yet — the first qualifying edge gets logged "
+                "on the morning run.")
+    teams = {r["match_id"]: (r["team_a"], r["team_b"]) for r in rows}
+    editorial = {r["match_id"]: r.get("_editorial") for r in rows}
+    open_picks = [p for p in picks if p.get("status") == "open"]
+    units_line = units or "No picks settled yet."
+    if open_picks:
+        units_line += (f" {len(open_picks)} open pick"
+                       f"{'s' if len(open_picks) != 1 else ''}, "
+                       f"{len(open_picks)}u at risk.")
+    body = []
+    for p in sorted(picks, key=lambda p: (editorial.get(p["match_id"]) or date.min,
+                                          p["match_id"])):
+        mid = p["match_id"]
+        a, b = teams.get(mid, (mid, ""))
+        ed = editorial.get(mid)
+        when = f"{ed:%b} {ed.day}" if ed else ""
+        status = p.get("status") or "open"
+        units_cell = p.get("units") or ("—" if status == "open" else "")
+        clv_cell = f'{p["clv_pp"]}pp' if p.get("clv_pp") else "—"
+        body.append(
+            f'      <tr>\n'
+            f'        <td class="lbl">{_esc(when)}</td>\n'
+            f'        <td class="lbl"><a href="{root}matches/{_esc(mid)}.html">'
+            f'{_esc(a)} v {_esc(b)}</a></td>\n'
+            f'        <td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}</td>\n'
+            f'        <td>{_esc(p["odds"])}</td>\n'
+            f'        <td class="lbl">{_esc(p.get("book") or "")}</td>\n'
+            f'        <td>{_esc(p.get("edge_pp") or "")}pp</td>\n'
+            f'        <td class="lbl status-{_esc(status)}">{_esc(status)}</td>\n'
+            f'        <td class="pts">{_esc(units_cell)}</td>\n'
+            f'        <td>{_esc(clv_cell)}</td>\n'
+            f'      </tr>')
+    table = (
+        '<div class="record-wrap">\n  <table>\n'
+        '    <caption class="sr-only">Every recorded pick: selection, price, '
+        'edge at record, settlement, units, closing line value</caption>\n'
+        '    <thead><tr><th class="lbl" scope="col">Day</th>'
+        '<th class="lbl" scope="col">Match</th><th class="lbl" scope="col">Pick</th>'
+        '<th scope="col">Odds</th><th class="lbl" scope="col">Book</th>'
+        '<th scope="col">Edge</th><th class="lbl" scope="col">Status</th>'
+        '<th scope="col">Units</th><th scope="col">CLV</th></tr></thead>\n'
+        '    <tbody>\n' + "\n".join(body) + "\n    </tbody>\n  </table>\n</div>")
+    return table, units_line
+
+
+def render_record_page(matches: "list[st.Match]", rows: list[dict],
+                       ledger: dict | None, css: str, generated_at: str,
+                       template_dir: Path = TEMPLATE_DIR) -> str:
+    calls_html, cumulative = render_record_calls(matches, rows, ledger)
+    bets_html, units_line = render_record_bets(rows)
+    tpl = Template((template_dir / "record.html").read_text(encoding="utf-8"))
+    return tpl.safe_substitute(
+        site_css=css,
+        calls_html=calls_html,
+        cumulative_line=_esc(cumulative),
+        bets_html=bets_html,
+        units_line=_esc(units_line),
+        generated_at=_esc(generated_at),
+        repo_url=REPO_URL,
+    )
+
+
+def render_overnight(rows: list[dict], target: date,
+                     matches: "list[st.Match]", ledger: dict | None,
+                     root: str = "") -> str:
+    """Yesterday's results with their graded calls, for the index. Empty
+    string when yesterday had no matches."""
+    prior = be.select_matches(rows, target - timedelta(days=1))
+    if not prior:
+        return ""
+    grades = ledger["grade"](matches, ledger["rows"]) if ledger else {}
+    yesterday = target - timedelta(days=1)
+    items = []
+    for r in prior:
+        mid = r["match_id"]
+        href = f'{root}matches/{_esc(mid)}.html'
+        played = (r.get("status") or "").strip().lower() == "played"
+        if played:
+            line = (f'<a href="{href}">{_esc(r["team_a"])} '
+                    f'{_esc(str(r["score_a"]))}–{_esc(str(r["score_b"]))} '
+                    f'{_esc(r["team_b"])}</a>')
+            g = grades.get(mid)
+            if g:
+                grade_bit = (f' <span class="grade">{_hit_chip(g["correct"])} '
+                             f'logged {g["p"][g["outcome"]]:.0%} on the result · '
+                             f'Brier {g["brier"]:.3f}</span>')
+            else:
+                grade_bit = ' <span class="grade">no logged call</span>'
+        else:
+            line = (f'<a href="{href}">{_esc(r["team_a"])} v {_esc(r["team_b"])}'
+                    '</a>')
+            grade_bit = ' <span class="grade warn">⚠ result not yet entered</span>'
+        items.append(f'    <li><span class="mid">{_esc(mid)}</span>{line}{grade_bit}</li>')
+    return (
+        '<section aria-labelledby="overnight-h">\n'
+        '  <div class="sec-head">\n'
+        '    <span class="kicker">The Morning After</span>\n'
+        f'    <h2 id="overnight-h">Overnight — {yesterday:%A, %B} {yesterday.day}</h2>\n'
+        '  </div>\n'
+        '  <ul class="overnight">\n' + "\n".join(items) + '\n  </ul>\n'
+        f'  <p class="standfirst"><a href="{root}record.html">Full record — every '
+        'call and pick, graded →</a></p>\n'
+        '</section>')
+
+
 # ---------------------------------------------------------------- match pages
 
 _CALLOUT_SECTIONS = {"Key Duel", "Watch For", "Margin Notes",
@@ -825,7 +1012,8 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
                ledger_line: str | None = None,
                fair_play: dict[str, int] | None = None,
                blurb_html: str = "",
-               slate_picks: dict[str, str] | None = None) -> tuple[str, dict]:
+               slate_picks: dict[str, str] | None = None,
+               overnight_html: str = "") -> tuple[str, dict]:
     """Render the index page. Returns (html, data_dict)."""
     s = st.compute_standings(matches, fair_play=fair_play)
     forms = form_by_team(matches)
@@ -866,6 +1054,7 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
         ledger_html=(f'<p class="ledger-line">{_esc(ledger_line)}</p>'
                      if ledger_line else ""),
         blurb_html=blurb_html,
+        overnight_html=overnight_html,
     )
     return page, data
 
@@ -932,14 +1121,26 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                     f"{_sel_label(p['market'], p['selection'], p['line'], r['team_a'], r['team_b'])}"
                     f" {p['edge']:+.1%}")
 
+    ledger = _load_ledger(warnings)
     index, data = build_page(matches, rows, target, generated_at,
                              template_path=template_dir / "page.html",
                              editions_dir=editions_dir, css=css,
                              ledger_line=ledger_line, fair_play=fair_play,
-                             blurb_html=blurb_html, slate_picks=slate_picks)
+                             blurb_html=blurb_html, slate_picks=slate_picks,
+                             overnight_html=render_overnight(rows, target,
+                                                             matches, ledger))
     (out_dir / "index.html").write_text(index, encoding="utf-8")
     (out_dir / "data.json").write_text(
         json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+    # daily snapshot archive: the raw material for movement arrows and any
+    # future day-over-day analysis — cheap now, unrecoverable later
+    (out_dir / "data").mkdir(exist_ok=True)
+    (out_dir / "data" / f"{target.isoformat()}.json").write_text(
+        json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+
+    (out_dir / "record.html").write_text(
+        render_record_page(matches, rows, ledger, css, generated_at, template_dir),
+        encoding="utf-8")
 
     fixture_teams = sorted({m.team_a for m in matches} | {m.team_b for m in matches})
     for team in fixture_teams:
@@ -952,7 +1153,6 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     for team in sorted(set(profiles) - set(fixture_teams)):
         warnings.append(f"kb: profile {team!r} matches no fixtures team (canon mismatch?)")
 
-    ledger = _load_ledger(warnings)
     predictions = 0
     scheduled = 0
     for row in rows:
@@ -1009,6 +1209,8 @@ def _load_ledger(warnings: list[str]) -> dict | None:
                 "published": getattr(lg, "PUBLISHED_SOURCE", "consensus"),
                 "brier": lg.brier,
                 "kickoff_dt": lg.kickoff_dt,
+                "grade": lg.grade,
+                "cumulative": lg.cumulative_line,
                 "now": lg.now_et()}
     except Exception as e:
         warnings.append(f"prediction ledger unavailable ({e.__class__.__name__}: {e}) "

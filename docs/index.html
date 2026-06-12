@@ -334,6 +334,30 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
 
 .slate .pickline{display:block;font-family:var(--mono);font-size:.68rem;font-weight:700;color:var(--verm);margin-top:5px;letter-spacing:.03em}
 
+/* ---------- overnight + the record ---------- */
+.overnight{list-style:none;max-width:72ch}
+.overnight li{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;border-bottom:1px solid var(--hairline);padding:9px 2px;font-size:1rem}
+.overnight .mid{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.1em;color:var(--ink-soft);flex:0 0 2.2em}
+.overnight a{font-weight:700;text-decoration:none}
+.overnight a:hover{text-decoration:underline;text-decoration-color:var(--verm)}
+.overnight .grade{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
+.overnight .grade.warn{color:var(--amber)}
+.hit{display:inline-grid;place-items:center;width:15px;height:15px;font-size:.62rem;font-weight:700;vertical-align:-2px}
+.hit-y{background:var(--green-soft);color:var(--green);border:1px solid var(--green)}
+.hit-n{background:var(--verm-soft);color:var(--verm);border:1px solid var(--verm)}
+.record-wrap{border:1px solid var(--ink);background:var(--paper-2);box-shadow:4px 4px 0 var(--hairline);padding:6px 16px 12px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent;max-width:880px}
+.record-wrap::-webkit-scrollbar{height:8px}
+.record-wrap::-webkit-scrollbar-thumb{background:var(--hairline)}
+.record-wrap table{min-width:560px}
+.record-wrap td.lbl,.record-wrap th.lbl{text-align:left}
+.record-wrap tbody td.lbl a{text-decoration:none;font-family:var(--serif);font-weight:700;font-size:.92rem}
+.record-wrap tbody td.lbl a:hover{text-decoration:underline;text-decoration-color:var(--verm)}
+tr.subtotal td{font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);border-bottom:2px solid var(--ink);text-align:left}
+tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
+.status-won{color:var(--green);font-weight:700}
+.status-lost{color:var(--verm);font-weight:700}
+.status-open{color:var(--ink-soft)}
+
 </style>
 </head>
 <body>
@@ -366,10 +390,22 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
     <a href="#group-k">K</a>
     <a href="#group-l">L</a>
     <a class="wide" href="#thirds">3rd place</a>
+    <a class="wide" href="record.html">the record</a>
   </nav>
 </header>
 
 <main>
+<section aria-labelledby="overnight-h">
+  <div class="sec-head">
+    <span class="kicker">The Morning After</span>
+    <h2 id="overnight-h">Overnight — Thursday, June 11</h2>
+  </div>
+  <ul class="overnight">
+    <li><span class="mid">A1</span><a href="matches/A1.html">Mexico 2–0 South Africa</a> <span class="grade">no logged call</span></li>
+    <li><span class="mid">A2</span><a href="matches/A2.html">South Korea 2–1 Czechia</a> <span class="grade">no logged call</span></li>
+  </ul>
+  <p class="standfirst"><a href="record.html">Full record — every call and pick, graded →</a></p>
+</section>
 <section aria-labelledby="slate-h">
   <div class="sec-head">
     <span class="kicker">Today</span>
@@ -1042,7 +1078,7 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
   </div>
 
   <p class="colophon">
-    Generated 2026-06-12 17:07 · standings computed from data/fixtures.csv by scripts/standings.py ·
+    Generated 2026-06-12 17:15 · standings computed from data/fixtures.csv by scripts/standings.py ·
     tiebreakers: points, goal difference, goals scored, head-to-head, fair play, lots ·
     <a href="https://github.com/alxgriff/wc26-hub">source &amp; data</a> · machine-readable copy embedded below
   </p>
@@ -1914,7 +1950,7 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
   "notes": []
  },
  "warnings": [],
- "generated_at": "2026-06-12 17:07",
+ "generated_at": "2026-06-12 17:15",
  "slate_date": "2026-06-12"
 }
 </script>

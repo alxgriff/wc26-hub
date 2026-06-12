@@ -185,5 +185,72 @@ class GradedRenderingTests(unittest.TestCase):
         self.assertNotIn("Graded:", out)
 
 
+class RecordRenderingTests(unittest.TestCase):
+    @staticmethod
+    def fixtures():
+        import standings as st
+        from datetime import date as _date
+        matches = [st.Match("A1", "A", 1, "Mexico", "South Africa", 2, 0, "played"),
+                   st.Match("A2", "A", 1, "South Korea", "Czechia", 2, 1, "played")]
+        rows = [{"match_id": "A1", "team_a": "Mexico", "team_b": "South Africa",
+                 "_editorial": _date(2026, 6, 11)},
+                {"match_id": "A2", "team_a": "South Korea", "team_b": "Czechia",
+                 "_editorial": _date(2026, 6, 11)}]
+        return matches, rows
+
+    @staticmethod
+    def ledger_for(ledger_rows):
+        import ledger as lg
+        return {"rows": ledger_rows, "published": "consensus", "brier": lg.brier,
+                "kickoff_dt": lg.kickoff_dt, "grade": lg.grade,
+                "cumulative": lg.cumulative_line, "now": lg.now_et()}
+
+    def test_calls_table_with_day_subtotal_and_brier(self):
+        matches, rows = self.fixtures()
+        ledger_rows = [{"match_id": "A1", "source": "consensus", "p_home": "0.6",
+                        "p_draw": "0.25", "p_away": "0.15",
+                        "predicted_score": "2-0", "timestamp": "t"}]
+        html_out, cumulative = bs.render_record_calls(
+            matches, rows, self.ledger_for(ledger_rows))
+        self.assertIn("Mexico v South Africa", html_out)
+        self.assertIn("60%/25%/15%", html_out)
+        self.assertIn("subtotal", html_out)
+        self.assertIn("0.245", html_out)   # 0.4^2 + 0.25^2 + 0.15^2
+        self.assertIn("hit-y", html_out)   # 60% favorite landed
+        self.assertIn("cumulative Brier 0.245", cumulative)
+
+    def test_no_grades_renders_honest_empty_state(self):
+        matches, rows = self.fixtures()
+        html_out, cumulative = bs.render_record_calls(
+            matches, rows, self.ledger_for([]))
+        self.assertIn("No graded calls yet", html_out)
+
+    def test_overnight_grades_and_flags_missing_results(self):
+        from datetime import date as _date
+        matches, _ = self.fixtures()
+        rows = [{"match_id": "A1", "team_a": "Mexico", "team_b": "South Africa",
+                 "score_a": "2", "score_b": "0", "status": "played",
+                 "_editorial": _date(2026, 6, 11), "_late_cap": False,
+                 "kickoff_et_24h": "15:00", "date_et": "2026-06-11"},
+                {"match_id": "A2", "team_a": "South Korea", "team_b": "Czechia",
+                 "status": "scheduled", "_editorial": _date(2026, 6, 11),
+                 "_late_cap": False, "kickoff_et_24h": "22:00",
+                 "date_et": "2026-06-11"}]
+        ledger_rows = [{"match_id": "A1", "source": "consensus", "p_home": "0.6",
+                        "p_draw": "0.25", "p_away": "0.15",
+                        "predicted_score": "", "timestamp": "t"}]
+        out = bs.render_overnight(rows, _date(2026, 6, 12), matches,
+                                  self.ledger_for(ledger_rows))
+        self.assertIn("Overnight — Thursday, June 11", out)
+        self.assertIn("logged 60% on the result", out)
+        self.assertIn("Brier 0.245", out)
+        self.assertIn("result not yet entered", out)
+
+    def test_no_yesterday_matches_renders_nothing(self):
+        from datetime import date as _date
+        out = bs.render_overnight([], _date(2026, 7, 30), [], None)
+        self.assertEqual(out, "")
+
+
 if __name__ == "__main__":
     unittest.main()
