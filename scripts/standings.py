@@ -335,6 +335,41 @@ def _note(notes: list[str], text: str) -> None:
         notes.append(text)
 
 
+# ---------------------------------------------------------------- projection
+
+def to_dict(s: Standings) -> dict:
+    """JSON-safe projection of a Standings object (schema 1) for renderers
+    (build_site.py) and any future consumer. Pure: no I/O, no timestamps."""
+    def row(r: TeamRow, pos: int, extra: dict | None = None) -> dict:
+        d = {
+            "pos": pos, "team": r.team, "group": r.group,
+            "p": r.played, "w": r.won, "d": r.drawn, "l": r.lost,
+            "gf": r.gf, "ga": r.ga, "gd": r.gd, "pts": r.points,
+        }
+        if extra:
+            d.update(extra)
+        return d
+
+    return {
+        "schema": 1,
+        "played": s.played,
+        "total": s.total,
+        "groups": {
+            g: {
+                "rows": [row(r, i) for i, r in enumerate(t.rows, 1)],
+                "notes": list(t.notes),
+            }
+            for g, t in s.groups.items()
+        },
+        "third_place": {
+            "rows": [row(r, i, {"qualifying": i <= QUALIFYING_THIRDS})
+                     for i, r in enumerate(s.third_place, 1)],
+            "notes": list(s.third_place_notes),
+        },
+        "warnings": list(s.warnings),
+    }
+
+
 # ---------------------------------------------------------------- rendering
 
 def render_markdown(s: Standings) -> str:

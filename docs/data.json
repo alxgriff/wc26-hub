@@ -1,0 +1,867 @@
+{
+ "schema": 1,
+ "played": 2,
+ "total": 72,
+ "groups": {
+  "A": {
+   "rows": [
+    {
+     "pos": 1,
+     "team": "Mexico",
+     "group": "A",
+     "p": 1,
+     "w": 1,
+     "d": 0,
+     "l": 0,
+     "gf": 2,
+     "ga": 0,
+     "gd": 2,
+     "pts": 3
+    },
+    {
+     "pos": 2,
+     "team": "South Korea",
+     "group": "A",
+     "p": 1,
+     "w": 1,
+     "d": 0,
+     "l": 0,
+     "gf": 2,
+     "ga": 1,
+     "gd": 1,
+     "pts": 3
+    },
+    {
+     "pos": 3,
+     "team": "Czechia",
+     "group": "A",
+     "p": 1,
+     "w": 0,
+     "d": 0,
+     "l": 1,
+     "gf": 1,
+     "ga": 2,
+     "gd": -1,
+     "pts": 0
+    },
+    {
+     "pos": 4,
+     "team": "South Africa",
+     "group": "A",
+     "p": 1,
+     "w": 0,
+     "d": 0,
+     "l": 1,
+     "gf": 0,
+     "ga": 2,
+     "gd": -2,
+     "pts": 0
+    }
+   ],
+   "notes": []
+  },
+  "B": {
+   "rows": [
+    {
+     "pos": 1,
+     "team": "Bosnia and Herzegovina",
+     "group": "B",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 2,
+     "team": "Canada",
+     "group": "B",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 3,
+     "team": "Qatar",
+     "group": "B",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 4,
+     "team": "Switzerland",
+     "group": "B",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    }
+   ],
+   "notes": []
+  },
+  "C": {
+   "rows": [
+    {
+     "pos": 1,
+     "team": "Brazil",
+     "group": "C",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 2,
+     "team": "Haiti",
+     "group": "C",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 3,
+     "team": "Morocco",
+     "group": "C",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 4,
+     "team": "Scotland",
+     "group": "C",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    }
+   ],
+   "notes": []
+  },
+  "D": {
+   "rows": [
+    {
+     "pos": 1,
+     "team": "Australia",
+     "group": "D",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 2,
+     "team": "Paraguay",
+     "group": "D",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 3,
+     "team": "Türkiye",
+     "group": "D",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 4,
+     "team": "United States",
+     "group": "D",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    }
+   ],
+   "notes": []
+  },
+  "E": {
+   "rows": [
+    {
+     "pos": 1,
+     "team": "Curaçao",
+     "group": "E",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 2,
+     "team": "Côte d'Ivoire",
+     "group": "E",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 3,
+     "team": "Ecuador",
+     "group": "E",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 4,
+     "team": "Germany",
+     "group": "E",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    }
+   ],
+   "notes": []
+  },
+  "F": {
+   "rows": [
+    {
+     "pos": 1,
+     "team": "Japan",
+     "group": "F",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 2,
+     "team": "Netherlands",
+     "group": "F",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 3,
+     "team": "Sweden",
+     "group": "F",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 4,
+     "team": "Tunisia",
+     "group": "F",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    }
+   ],
+   "notes": []
+  },
+  "G": {
+   "rows": [
+    {
+     "pos": 1,
+     "team": "Belgium",
+     "group": "G",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 2,
+     "team": "Egypt",
+     "group": "G",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 3,
+     "team": "Iran",
+     "group": "G",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 4,
+     "team": "New Zealand",
+     "group": "G",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    }
+   ],
+   "notes": []
+  },
+  "H": {
+   "rows": [
+    {
+     "pos": 1,
+     "team": "Cape Verde",
+     "group": "H",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 2,
+     "team": "Saudi Arabia",
+     "group": "H",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 3,
+     "team": "Spain",
+     "group": "H",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 4,
+     "team": "Uruguay",
+     "group": "H",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    }
+   ],
+   "notes": []
+  },
+  "I": {
+   "rows": [
+    {
+     "pos": 1,
+     "team": "France",
+     "group": "I",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 2,
+     "team": "Iraq",
+     "group": "I",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 3,
+     "team": "Norway",
+     "group": "I",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 4,
+     "team": "Senegal",
+     "group": "I",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    }
+   ],
+   "notes": []
+  },
+  "J": {
+   "rows": [
+    {
+     "pos": 1,
+     "team": "Algeria",
+     "group": "J",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 2,
+     "team": "Argentina",
+     "group": "J",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 3,
+     "team": "Austria",
+     "group": "J",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 4,
+     "team": "Jordan",
+     "group": "J",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    }
+   ],
+   "notes": []
+  },
+  "K": {
+   "rows": [
+    {
+     "pos": 1,
+     "team": "Colombia",
+     "group": "K",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 2,
+     "team": "DR Congo",
+     "group": "K",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 3,
+     "team": "Portugal",
+     "group": "K",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 4,
+     "team": "Uzbekistan",
+     "group": "K",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    }
+   ],
+   "notes": []
+  },
+  "L": {
+   "rows": [
+    {
+     "pos": 1,
+     "team": "Croatia",
+     "group": "L",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 2,
+     "team": "England",
+     "group": "L",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 3,
+     "team": "Ghana",
+     "group": "L",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    },
+    {
+     "pos": 4,
+     "team": "Panama",
+     "group": "L",
+     "p": 0,
+     "w": 0,
+     "d": 0,
+     "l": 0,
+     "gf": 0,
+     "ga": 0,
+     "gd": 0,
+     "pts": 0
+    }
+   ],
+   "notes": []
+  }
+ },
+ "third_place": {
+  "rows": [
+   {
+    "pos": 1,
+    "team": "Austria",
+    "group": "J",
+    "p": 0,
+    "w": 0,
+    "d": 0,
+    "l": 0,
+    "gf": 0,
+    "ga": 0,
+    "gd": 0,
+    "pts": 0,
+    "qualifying": true
+   },
+   {
+    "pos": 2,
+    "team": "Ecuador",
+    "group": "E",
+    "p": 0,
+    "w": 0,
+    "d": 0,
+    "l": 0,
+    "gf": 0,
+    "ga": 0,
+    "gd": 0,
+    "pts": 0,
+    "qualifying": true
+   },
+   {
+    "pos": 3,
+    "team": "Ghana",
+    "group": "L",
+    "p": 0,
+    "w": 0,
+    "d": 0,
+    "l": 0,
+    "gf": 0,
+    "ga": 0,
+    "gd": 0,
+    "pts": 0,
+    "qualifying": true
+   },
+   {
+    "pos": 4,
+    "team": "Iran",
+    "group": "G",
+    "p": 0,
+    "w": 0,
+    "d": 0,
+    "l": 0,
+    "gf": 0,
+    "ga": 0,
+    "gd": 0,
+    "pts": 0,
+    "qualifying": true
+   },
+   {
+    "pos": 5,
+    "team": "Morocco",
+    "group": "C",
+    "p": 0,
+    "w": 0,
+    "d": 0,
+    "l": 0,
+    "gf": 0,
+    "ga": 0,
+    "gd": 0,
+    "pts": 0,
+    "qualifying": true
+   },
+   {
+    "pos": 6,
+    "team": "Norway",
+    "group": "I",
+    "p": 0,
+    "w": 0,
+    "d": 0,
+    "l": 0,
+    "gf": 0,
+    "ga": 0,
+    "gd": 0,
+    "pts": 0,
+    "qualifying": true
+   },
+   {
+    "pos": 7,
+    "team": "Portugal",
+    "group": "K",
+    "p": 0,
+    "w": 0,
+    "d": 0,
+    "l": 0,
+    "gf": 0,
+    "ga": 0,
+    "gd": 0,
+    "pts": 0,
+    "qualifying": true
+   },
+   {
+    "pos": 8,
+    "team": "Qatar",
+    "group": "B",
+    "p": 0,
+    "w": 0,
+    "d": 0,
+    "l": 0,
+    "gf": 0,
+    "ga": 0,
+    "gd": 0,
+    "pts": 0,
+    "qualifying": true
+   },
+   {
+    "pos": 9,
+    "team": "Spain",
+    "group": "H",
+    "p": 0,
+    "w": 0,
+    "d": 0,
+    "l": 0,
+    "gf": 0,
+    "ga": 0,
+    "gd": 0,
+    "pts": 0,
+    "qualifying": false
+   },
+   {
+    "pos": 10,
+    "team": "Sweden",
+    "group": "F",
+    "p": 0,
+    "w": 0,
+    "d": 0,
+    "l": 0,
+    "gf": 0,
+    "ga": 0,
+    "gd": 0,
+    "pts": 0,
+    "qualifying": false
+   },
+   {
+    "pos": 11,
+    "team": "Türkiye",
+    "group": "D",
+    "p": 0,
+    "w": 0,
+    "d": 0,
+    "l": 0,
+    "gf": 0,
+    "ga": 0,
+    "gd": 0,
+    "pts": 0,
+    "qualifying": false
+   },
+   {
+    "pos": 12,
+    "team": "Czechia",
+    "group": "A",
+    "p": 1,
+    "w": 0,
+    "d": 0,
+    "l": 1,
+    "gf": 1,
+    "ga": 2,
+    "gd": -1,
+    "pts": 0,
+    "qualifying": false
+   }
+  ],
+  "notes": []
+ },
+ "warnings": [],
+ "generated_at": "2026-06-12 14:44",
+ "slate_date": "2026-06-12"
+}
