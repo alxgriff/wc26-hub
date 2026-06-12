@@ -84,7 +84,7 @@ Tests: Poisson path probabilities sum to 1; Brier of a certain correct call = 0,
 
 ## Phase 5 — Odds & Best Bet (when the user goes live; CLAUDE.md "Phase 3")
 
-`data/odds_log.csv` (`match_id,market,selection,odds,source,timestamp`). De-vig 1X2 multiplicatively: `implied_i = (1/odds_i) / Σ(1/odds_j)`. Edge = model_p − implied; best bet = largest positive edge **iff** ≥ 3 percentage points (user-tunable), else print "No bet" (a normal outcome). Log closing odds for every pick; CLV = closing implied − snapshot implied. Recaps report units (flat 1u) + CLV next to Brier. **If no odds snapshot was provided, the section stays in placeholder state — never fetch-and-guess, never invent.**
+`data/odds_log.csv` (`match_id,market,selection,odds,source,timestamp`). De-vig 1X2 multiplicatively: `implied_i = (1/odds_i) / Σ(1/odds_j)`. Edge = model_p − implied; display threshold 3 percentage points. Recorded picks (evolved June 12): up to **3 per match**, the best selection per distinct market, each ≥ 5pp edge and ≤ 15pp sanity ceiling; same-match picks are correlated and the UI says so. Below the bar print "No bet" (a normal outcome). Log closing odds for every pick; CLV = closing implied − snapshot implied. Recaps report units (flat 1u) + CLV next to Brier. **If no odds snapshot was provided, the section stays in placeholder state — never fetch-and-guess, never invent.**
 
 ## Phase 6 — static HTML site ✅ (shipped June 12; extended same day)
 

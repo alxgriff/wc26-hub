@@ -370,6 +370,51 @@ class TotalsLadderTests(unittest.TestCase):
         self.assertEqual(picks[0]["units"], "+0.00")
         self.assertTrue(any("push" in l for l in lines))
 
+    def test_best_bets_top3_distinct_markets_at_record_bar(self):
+        ev = {"h2h": [("away", "", 3.85, 0.25, 0.36, 0.11),
+                      ("home", "", 2.10, 0.45, 0.38, -0.07)],
+              "totals": [("over", "2.0", 1.79, 0.53, 0.62, 0.09),
+                         ("over", "2.5", 2.37, 0.40, 0.49, 0.09),   # same market
+                         ("under", "2.5", 1.62, 0.60, 0.51, -0.09)],
+              "spreads": [("away", "0.5", 1.77, 0.55, 0.64, 0.098)],
+              "btts": [("yes", "", 1.90, 0.52, 0.56, 0.04)],        # below 5% bar
+              "missing": []}
+        picks, flags = od.best_bets(ev)
+        self.assertEqual(len(picks), 3)
+        self.assertEqual([p["market"] for p in picks], ["h2h", "spreads", "totals"])
+        self.assertEqual(len({p["market"] for p in picks}), 3)  # one per market
+        self.assertTrue(all(p["edge"] >= 0.05 for p in picks))
+        self.assertEqual(flags, [])
+
+    def test_best_bets_empty_below_record_bar_and_best_bet_compat(self):
+        ev = {"h2h": [("away", "", 3.85, 0.25, 0.29, 0.04)],
+              "totals": [], "spreads": [], "btts": [], "missing": []}
+        picks, _ = od.best_bets(ev)
+        self.assertEqual(picks, [])
+        pick, _ = od.best_bet(ev)            # display threshold still 3%
+        self.assertIsNotNone(pick)
+        self.assertEqual(pick["edge"], 0.04)
+
+    def test_multi_pick_callout_with_correlation_note(self):
+        info = {"evaluation": {"h2h": [("away", "", 3.85, 0.25, 0.36, 0.11)],
+                               "totals": [], "spreads": [], "btts": [],
+                               "missing": []},
+                "picks": [{"market": "h2h", "selection": "away", "line": "",
+                           "odds": 3.85, "implied_p": 0.25, "our_p": 0.36,
+                           "edge": 0.11},
+                          {"market": "spreads", "selection": "away", "line": "0.5",
+                           "odds": 1.77, "implied_p": 0.55, "our_p": 0.64,
+                           "edge": 0.098}],
+                "flags": [], "best_prices": {}, "recorded": [],
+                "threshold": 0.03, "record_threshold": 0.05,
+                "snapshot_ts": "2026-06-13T07:00:00-04:00"}
+        out = bs.render_market(info, "United States", "Paraguay", None)
+        self.assertIn("Best bets — top 2", out)
+        self.assertIn("1. <strong>Paraguay</strong>", out)
+        self.assertIn("2. <strong>Paraguay +0.5</strong>", out)
+        self.assertIn("correlated", out)
+        self.assertEqual(out.count("pick-row"), 1)   # h2h row highlighted
+
     def test_projection_line_renders_on_market_block(self):
         info = {"evaluation": {"h2h": [], "totals": [], "spreads": [], "btts": [],
                                "missing": []},

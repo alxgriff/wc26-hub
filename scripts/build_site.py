@@ -463,12 +463,15 @@ def load_odds_engine():
             ev = od.evaluate_match(mid, odds_rows, ledger_rows, pred)
             if not any(ev.get(m) for m in ("h2h", "totals", "spreads", "btts")):
                 return None
-            pick, flags = od.best_bet(ev)
+            match_picks, flags = od.best_bets(ev)
             return {
-                "evaluation": ev, "pick": pick, "flags": flags,
+                "evaluation": ev, "picks": match_picks,
+                "pick": match_picks[0] if match_picks else None,  # back-compat
+                "flags": flags,
                 "best_prices": od._best_prices(odds_rows, mid),
                 "recorded": [p for p in picks if p["match_id"] == mid],
                 "threshold": od.EDGE_THRESHOLD,
+                "record_threshold": getattr(od, "RECORD_THRESHOLD", 0.05),
                 "snapshot_ts": max(r["timestamp"] for r in match_rows),
                 "projection": {"total": pred.total,
                                "over": {f"{k:g}": v for k, v in pred.over.items()}},
@@ -517,8 +520,11 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
         return render_odds(prebaked, played=played)
 
     ev = odds_info["evaluation"]
-    pick = odds_info["pick"]
+    picks = odds_info.get("picks")
+    if picks is None:                       # legacy single-pick callers
+        picks = [odds_info["pick"]] if odds_info.get("pick") else []
     threshold = odds_info["threshold"]
+    record_threshold = odds_info.get("record_threshold", 0.05)
     parts = []
 
     proj = odds_info.get("projection")
@@ -532,8 +538,8 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
     rows_html = []
     for market in ("h2h", "totals", "spreads", "btts"):
         for sel, line, odds_v, implied, our_p, edge in ev.get(market, []):
-            is_pick = (pick is not None and pick["market"] == market
-                       and pick["selection"] == sel and str(pick["line"]) == str(line))
+            is_pick = any(pk["market"] == market and pk["selection"] == sel
+                          and str(pk["line"]) == str(line) for pk in picks)
             cls = ' class="pick-row"' if is_pick else ""
             edge_cls = "edge-pos" if edge >= threshold else ("edge-neg" if edge < 0 else "")
             rows_html.append(
@@ -552,18 +558,27 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
             '<th scope="col">Edge</th></tr></thead>\n    <tbody>\n'
             + "\n".join(rows_html) + "\n    </tbody>\n  </table>\n</div>")
 
-    if pick:
-        bp = odds_info["best_prices"].get(
-            (pick["market"], pick["selection"], str(pick["line"])))
-        price = f' — best price {bp[0]:.2f} ({_esc(bp[1])})' if bp else ""
-        parts.append(
-            '<div class="bet-callout"><span class="tag">Best bet</span>'
-            f'<p><strong>{_esc(_sel_label(pick["market"], pick["selection"], pick["line"], team_a, team_b))}'
-            f'</strong> ({_MARKET_LABELS[pick["market"]]}) @ {pick["odds"]:.2f}, '
-            f'edge <strong>{pick["edge"]:+.1%}</strong>{price}. Flat 1u, paper record.</p></div>')
+    if picks:
+        pick_lines = []
+        for i, pk in enumerate(picks, 1):
+            bp = odds_info["best_prices"].get(
+                (pk["market"], pk["selection"], str(pk["line"])))
+            price = f' — best price {bp[0]:.2f} ({_esc(bp[1])})' if bp else ""
+            num = f'{i}. ' if len(picks) > 1 else ""
+            pick_lines.append(
+                f'<p>{num}<strong>{_esc(_sel_label(pk["market"], pk["selection"], pk["line"], team_a, team_b))}'
+                f'</strong> ({_MARKET_LABELS[pk["market"]]}) @ {pk["odds"]:.2f}, '
+                f'edge <strong>{pk["edge"]:+.1%}</strong>{price}. Flat 1u, paper record.</p>')
+        corr = ('<p class="odds-note">same-match picks are correlated — they tend '
+                'to win and lose together; the units record swings accordingly.</p>'
+                if len(picks) > 1 else "")
+        tag = "Best bet" if len(picks) == 1 else f"Best bets — top {len(picks)}, ≥{record_threshold:.0%} edge"
+        parts.append(f'<div class="bet-callout"><span class="tag">{_esc(tag)}</span>'
+                     + "".join(pick_lines) + corr + '</div>')
     elif rows_html:
         parts.append(f'<p class="no-bet"><b>NO BET</b> — no edge clears the '
-                     f'{threshold:.0%} threshold (a normal, expected result).</p>')
+                     f'{record_threshold:.0%} recording bar (a normal, expected '
+                     'result).</p>')
 
     for rec in odds_info.get("recorded", []):
         status = rec.get("status", "open")
@@ -1279,11 +1294,12 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     if odds_call:
         for r in be.select_matches(rows, target):
             o = odds_call(r)
-            if o and o["pick"]:
-                p = o["pick"]
+            if o and o.get("picks"):
+                p = o["picks"][0]
+                more = f" (+{len(o['picks']) - 1} more)" if len(o["picks"]) > 1 else ""
                 slate_picks[r["match_id"]] = (
                     f"{_sel_label(p['market'], p['selection'], p['line'], r['team_a'], r['team_b'])}"
-                    f" {p['edge']:+.1%}")
+                    f" {p['edge']:+.1%}{more}")
 
     ledger = _load_ledger(warnings)
     index, data = build_page(matches, rows, target, generated_at,

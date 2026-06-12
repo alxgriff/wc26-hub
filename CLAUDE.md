@@ -72,9 +72,12 @@ specifies weights. Probabilities must sum to 1.0 ± 0.001 per match.
   (decimal), book/consensus source, timestamp.
 - De-vig the 1X2: implied_i = (1/odds_i) / Σ(1/odds_j) (multiplicative
   method; power or Shin method optional upgrade later).
-- Edge_i = model_p_i − implied_i. Best bet = largest positive edge **if** it
-  clears the threshold (default 3 percentage points, user-tunable).
-  Otherwise output "No bet" — a legitimate, expected result.
+- Edge_i = model_p_i − implied_i. Display threshold 3 percentage points;
+  **recorded picks**: up to 3 per match, the best selection per distinct
+  market, each clearing a 5-point recording bar (user-set June 12) and the
+  15-point sanity ceiling. Same-match picks are correlated — disclose it
+  wherever they're shown. Otherwise output "No bet" — a legitimate,
+  expected result.
 - Track closing line value: log closing odds for every pick; CLV = closing
   implied minus snapshot implied on our selection. Report units (flat 1u
   stakes unless told otherwise) and CLV alongside Brier in recaps.

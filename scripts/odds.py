@@ -373,11 +373,21 @@ def evaluate_match(match_id: str, odds_rows: list, ledger_rows: list,
     return out
 
 
-def best_bet(evaluation: dict, threshold: float = EDGE_THRESHOLD,
-             sanity: float = SANITY_EDGE) -> tuple:
-    """(pick | None, flags). Pick = dict for the largest positive edge ≥
-    threshold and ≤ sanity; edges above sanity become flags instead."""
-    candidates, flags = [], []
+RECORD_THRESHOLD = 0.05    # picks must clear a higher bar than table display
+MAX_PICKS_PER_MATCH = 3    # top edges across DISTINCT markets
+
+
+def best_bets(evaluation: dict, threshold: float = RECORD_THRESHOLD,
+              sanity: float = SANITY_EDGE,
+              limit: int = MAX_PICKS_PER_MATCH) -> tuple:
+    """(picks, flags): the best selection per market with edge ≥ threshold
+    and ≤ sanity, ranked by edge, capped at ``limit``. One pick per market by
+    construction — ladder lines within a market are mutually exclusive
+    alternatives, and same-match picks are correlated enough already (they
+    tend to win and lose together; the units record swings accordingly).
+    Edges above the sanity ceiling become flags, never picks."""
+    flags = []
+    per_market: dict = {}
     for market in ("h2h", "totals", "spreads", "btts"):
         for sel, line, odds, implied, our_p, edge in evaluation.get(market, []):
             if edge > sanity:
@@ -385,12 +395,23 @@ def best_bet(evaluation: dict, threshold: float = EDGE_THRESHOLD,
                              f"{edge:+.1%} implausibly large — verify odds freshness "
                              "and team news before trusting")
             elif edge >= threshold:
-                candidates.append({"market": market, "selection": sel, "line": line,
-                                   "odds": odds, "implied_p": implied,
-                                   "our_p": our_p, "edge": edge})
-    if not candidates:
-        return None, flags
-    return max(candidates, key=lambda c: c["edge"]), flags
+                cand = {"market": market, "selection": sel, "line": line,
+                        "odds": odds, "implied_p": implied,
+                        "our_p": our_p, "edge": edge}
+                cur = per_market.get(market)
+                if cur is None or cand["edge"] > cur["edge"]:
+                    per_market[market] = cand
+    picks = sorted(per_market.values(), key=lambda c: -c["edge"])[:limit]
+    return picks, flags
+
+
+def best_bet(evaluation: dict, threshold: float = EDGE_THRESHOLD,
+             sanity: float = SANITY_EDGE) -> tuple:
+    """(pick | None, flags): the single largest qualifying edge at the
+    display threshold. Kept for compatibility; recording uses best_bets."""
+    picks, flags = best_bets(evaluation, threshold=threshold, sanity=sanity,
+                             limit=1)
+    return (picks[0] if picks else None), flags
 
 
 # ---------------------------------------------------------------- picks ledger
@@ -529,10 +550,12 @@ def units_summary(picks: list) -> str | None:
 
 # ---------------------------------------------------------------- rendering
 
-def render_odds_section(match_id: str, evaluation: dict, pick: dict | None,
+def render_odds_section(match_id: str, evaluation: dict, pick,
                         flags: list, best_prices: dict,
                         threshold: float = EDGE_THRESHOLD) -> str:
-    """Markdown body for a card's Odds & Best Bet slot."""
+    """Markdown body for a card's Odds & Best Bet slot. ``pick`` accepts a
+    single pick dict (legacy) or the ranked list from best_bets."""
+    picks = pick if isinstance(pick, list) else ([pick] if pick else [])
     lines = []
     labelled = ([("1X2", r) for r in evaluation["h2h"]]
                 + [(f"O/U {r[1]}", r) for r in evaluation["totals"]]
@@ -550,16 +573,21 @@ def render_odds_section(match_id: str, evaluation: dict, pick: dict | None,
             lines.append("_Totals/AH/BTTS are model-priced from the score matrix "
                          "(the Opta overlay covers W/D/L only)._")
         lines.append("")
-    if pick:
-        bp = best_prices.get((pick["market"], pick["selection"], str(pick["line"])))
-        price = f" — best price {bp[0]:.2f} ({bp[1]})" if bp else ""
-        ln = f" {pick['line']}" if pick["line"] else ""
-        lines.append(f"**Best bet: {pick['selection']}{ln} ({pick['market']}) "
-                     f"@ {pick['odds']:.2f}, edge {pick['edge']:+.1%}**{price}. "
-                     "Flat 1u (paper).")
+    if picks:
+        for i, pk in enumerate(picks, 1):
+            bp = best_prices.get((pk["market"], pk["selection"], str(pk["line"])))
+            price = f" — best price {bp[0]:.2f} ({bp[1]})" if bp else ""
+            ln = f" {pk['line']}" if pk["line"] else ""
+            label = "Best bet" if len(picks) == 1 else f"Pick {i}"
+            lines.append(f"**{label}: {pk['selection']}{ln} ({pk['market']}) "
+                         f"@ {pk['odds']:.2f}, edge {pk['edge']:+.1%}**{price}. "
+                         "Flat 1u (paper).")
+        if len(picks) > 1:
+            lines.append("_Same-match picks are correlated — they tend to win "
+                         "and lose together._")
     elif rows:
-        lines.append(f"**No bet** — no edge clears the {threshold:.0%} threshold "
-                     "(a normal, expected result).")
+        lines.append(f"**No bet** — no edge clears the {RECORD_THRESHOLD:.0%} "
+                     "recording bar (a normal, expected result).")
     for fl in flags:
         lines.append(f"> ⚠️ {fl}")
     for ms in evaluation["missing"]:
@@ -761,15 +789,15 @@ def cmd_evaluate(target: date, fixtures: Path, threshold: float,
         hfa = host if host in (fr["team_a"], fr["team_b"]) else None
         pred = pr.predict_match(model, fr["team_a"], fr["team_b"], hfa_team=hfa)
         ev = evaluate_match(mid, odds_rows, ledger_rows, pred)
-        pick, flags = best_bet(ev, threshold)
+        picks, flags = best_bets(ev)
         bp = _best_prices(odds_rows, mid)
         print(f"\n### {mid} {fr['team_a']} vs {fr['team_b']}\n")
-        print(render_odds_section(mid, ev, pick, flags, bp, threshold))
-        if pick and record:
+        print(render_odds_section(mid, ev, picks, flags, bp, threshold))
+        for pick in picks if record else []:
             passed = now >= lg.kickoff_dt(fr)
             age = _snapshot_age_hours(odds_rows, mid, now, market=pick["market"])
             if age is None or age > max_snapshot_age:
-                print(f"→ NOT recorded: snapshot is "
+                print(f"→ NOT recorded ({pick['market']}): snapshot is "
                       f"{'missing' if age is None else f'{age:.1f}h old'} "
                       f"(max {max_snapshot_age:g}h) — refresh odds first")
             else:
@@ -780,8 +808,8 @@ def cmd_evaluate(target: date, fixtures: Path, threshold: float,
                                              allow_revise=revise))
                 except OddsError as e:
                     print(f"→ NOT recorded: {e}")
-        if pick and (day_best is None or pick["edge"] > day_best[1]["edge"]):
-            day_best = (mid, pick)
+        if picks and (day_best is None or picks[0]["edge"] > day_best[1]["edge"]):
+            day_best = (mid, picks[0])
     if day_best:
         mid, pk = day_best
         print(f"\n**Day's best bet: {mid} {pk['selection']} "

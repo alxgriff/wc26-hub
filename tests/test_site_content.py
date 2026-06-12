@@ -271,7 +271,7 @@ class OddsWiringTests(unittest.TestCase):
     def test_no_bet_is_a_normal_result(self):
         out = bs.render_market(self.synthetic_info(pick=False), "A", "B", None)
         self.assertIn("NO BET", out)
-        self.assertIn("3%", out)
+        self.assertIn("5% recording bar", out)
         self.assertNotIn("bet-callout", out)
 
     def test_sanity_flags_render_as_warnings(self):

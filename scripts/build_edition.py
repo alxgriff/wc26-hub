@@ -698,12 +698,12 @@ def main(argv: list[str] | None = None) -> int:
                 hfa = host if host in (r["team_a"], r["team_b"]) else None
                 pred = pr.predict_match(model, r["team_a"], r["team_b"], hfa_team=hfa)
                 ev = od.evaluate_match(mid, odds_rows, ledger_rows, pred)
-                pick, flags = od.best_bet(ev)
+                picks, flags = od.best_bets(ev)
                 bp = od._best_prices(odds_rows, mid)
                 # Rendering only: `odds.py evaluate --record` is the single
                 # canonical recorder (it owns the day-of and snapshot-freshness
                 # gates) — building an edition must never place a bet.
-                odds_bodies[mid] = od.render_odds_section(mid, ev, pick, flags, bp)
+                odds_bodies[mid] = od.render_odds_section(mid, ev, picks, flags, bp)
             units = od.units_summary(od.load_picks())
             if units:
                 cumulative = (cumulative + "\n" + units) if cumulative else units
