@@ -470,6 +470,8 @@ def load_odds_engine():
                 "recorded": [p for p in picks if p["match_id"] == mid],
                 "threshold": od.EDGE_THRESHOLD,
                 "snapshot_ts": max(r["timestamp"] for r in match_rows),
+                "projection": {"total": pred.total,
+                               "over": {f"{k:g}": v for k, v in pred.over.items()}},
             }
         except Exception:
             return None
@@ -518,6 +520,14 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
     pick = odds_info["pick"]
     threshold = odds_info["threshold"]
     parts = []
+
+    proj = odds_info.get("projection")
+    if proj:
+        ladder = " · ".join(f"over {line} <b>{p:.0%}</b>"
+                            for line, p in sorted(proj["over"].items(),
+                                                  key=lambda kv: float(kv[0])))
+        parts.append(f'<p class="odds-note">model projection: '
+                     f'<b>{proj["total"]:.2f}</b> total goals · {ladder}</p>')
 
     rows_html = []
     for market in ("h2h", "totals", "spreads", "btts"):

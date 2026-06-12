@@ -99,17 +99,28 @@ def devig(odds: list) -> list:
     return [r / z for r in raw]
 
 
-def prob_over(lambda_a: float, lambda_b: float, line: float, n: int = 12) -> float:
-    """P(total goals > line) from independent Poisson margins (the same
-    assumptions as predict.py's score matrix)."""
-    if abs(line - round(line)) < 1e-9:
-        raise OddsError(f"integer totals line {line} can push — only .5 lines supported")
+def totals_probs(lambda_a: float, lambda_b: float, line: float,
+                 n: int = 12) -> tuple:
+    """(P(over), P(push), P(under)) for any totals line from the independent-
+    Poisson score matrix. P(push) is nonzero only on integer lines, where the
+    total can land exactly on the line and the stake is refunded."""
     pa = [math.exp(-lambda_a) * lambda_a ** i / math.factorial(i) for i in range(n + 1)]
     pb = [math.exp(-lambda_b) * lambda_b ** j / math.factorial(j) for j in range(n + 1)]
     z = sum(pa) * sum(pb)
     under = sum(pa[i] * pb[j] for i in range(n + 1) for j in range(n + 1)
-                if i + j < line)
-    return 1.0 - under / z
+                if i + j < line) / z
+    push = sum(pa[i] * pb[j] for i in range(n + 1) for j in range(n + 1)
+               if abs(i + j - line) < 1e-9) / z
+    return (1.0 - under - push, push, under)
+
+
+def prob_over(lambda_a: float, lambda_b: float, line: float, n: int = 12) -> float:
+    """P(total goals > line) for half lines (kept for callers that cannot
+    handle a push; integer lines must go through totals_probs)."""
+    if abs(line - round(line)) < 1e-9:
+        raise OddsError(f"integer totals line {line} can push — use totals_probs")
+    over, _push, _under = totals_probs(lambda_a, lambda_b, line, n)
+    return over
 
 
 def margin_dist(lambda_a: float, lambda_b: float, n: int = 12) -> dict:
@@ -229,11 +240,29 @@ def latest_market(odds_rows: list, match_id: str, market: str,
     return out
 
 
+def all_paired_lines(market_data: dict, sel_a: str, sel_b: str,
+                     negate_b: bool = False) -> list:
+    """Every line quoted on BOTH sides of a two-way market, as
+    [(line_a, odds_a, odds_b), ...] sorted by the line value. For spreads the
+    b-side line is the negation of the a-side line (``negate_b``)."""
+    out = []
+    for (sel, line), (odds_a, n_a) in market_data.items():
+        if sel != sel_a:
+            continue
+        b_line = line
+        if negate_b and line:
+            b_line = f"{-float(line):g}"
+        match_b = market_data.get((sel_b, b_line))
+        if match_b:
+            out.append((line, odds_a, match_b[0], n_a + match_b[1]))
+    out.sort(key=lambda c: float(c[0]) if c[0] else 0.0)
+    return [(line, oa, ob) for line, oa, ob, _n in out]
+
+
 def paired_lines(market_data: dict, sel_a: str, sel_b: str,
                  negate_b: bool = False) -> tuple | None:
     """The best-supported line quoted on BOTH sides of a two-way market.
-    Returns (line_a, odds_a, odds_b) — for spreads the away line is the
-    negation of the home line (``negate_b``). None if no complete pair."""
+    Returns (line_a, odds_a, odds_b). None if no complete pair."""
     candidates = []
     for (sel, line), (odds_a, n_a) in market_data.items():
         if sel != sel_a:
@@ -286,18 +315,28 @@ def evaluate_match(match_id: str, odds_rows: list, ledger_rows: list,
         out["missing"].append("no 1X2 snapshot")
 
     totals = latest_market(odds_rows, match_id, "totals")
-    pair = paired_lines(totals, "over", "under") if totals else None
-    if pair and pred is not None:
-        line, o_over, o_under = pair
-        try:
-            p_over = prob_over(pred.lambda_a, pred.lambda_b, float(line))
-        except OddsError as e:
-            out["missing"].append(str(e))
-        else:
+    pairs = all_paired_lines(totals, "over", "under") if totals else []
+    if pairs and pred is not None:
+        for line, o_over, o_under in pairs:
+            try:
+                p_over, p_push, p_under = totals_probs(
+                    pred.lambda_a, pred.lambda_b, float(line))
+            except (ValueError, OddsError) as e:
+                out["missing"].append(f"O/U {line}: {e}")
+                continue
+            action = p_over + p_under
+            if action <= 0:
+                continue
+            # books refund pushes, so quoted odds (and their de-vig) are
+            # conditional on action — our probabilities must match that basis
             implied = devig([o_over, o_under])
-            for i, (sel, p) in enumerate((("over", p_over), ("under", 1 - p_over))):
-                out["totals"].append((sel, line, [o_over, o_under][i],
-                                      implied[i], p, p - implied[i]))
+            for sel, o, imp, p in (("over", o_over, implied[0], p_over / action),
+                                   ("under", o_under, implied[1], p_under / action)):
+                out["totals"].append((sel, line, o, imp, p, p - imp))
+            if p_push > 0.005:
+                out["missing"].append(
+                    f"O/U {line} can push (P {p_push:.0%}) — probabilities and "
+                    "edge are per unit at risk; a push refunds the stake")
     elif totals:
         out["missing"].append("totals quoted but no line has both over and under")
     else:
@@ -436,9 +475,14 @@ def settle_picks(matches: list, odds_rows: list,
             p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
         elif p["market"] == "totals":
             total = m.score_a + m.score_b
-            won = (total > float(p["line"])) == (p["selection"] == "over")
-            p["status"] = "won" if won else "lost"
-            p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
+            line = float(p["line"])
+            if abs(total - line) < 1e-9:        # integer line landed exactly
+                p["status"] = "push"
+                p["units"] = "+0.00"
+            else:
+                won = (total > line) == (p["selection"] == "over")
+                p["status"] = "won" if won else "lost"
+                p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
         elif p["market"] == "spreads":
             margin = m.score_a - m.score_b
             margin_sel = margin if p["selection"] == "home" else -margin

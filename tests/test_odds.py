@@ -115,8 +115,8 @@ class EvaluateTests(unittest.TestCase):
 
     def test_mixed_lines_pair_only_matching_sides(self):
         # books quote different main totals lines; over@2.5 must never be
-        # de-vigged against under@3.0 — paired_lines picks the best-supported
-        # complete pair
+        # de-vigged against under@3.0. Every COMPLETE pair is evaluated as a
+        # ladder; integer lines carry a push note.
         rows = [odds_row("D3", "totals", "over", 1.95, line="2.5",
                          source="median/7books"),
                 odds_row("D3", "totals", "under", 1.87, line="2.5",
@@ -126,8 +126,13 @@ class EvaluateTests(unittest.TestCase):
                 odds_row("D3", "totals", "under", 1.62, line="3.0",
                          source="median/2books")]
         ev = od.evaluate_match("D3", rows, [], fake_pred())
-        self.assertEqual(len(ev["totals"]), 2)
-        self.assertEqual(ev["totals"][0][1], "2.5")      # majority line chosen
+        self.assertEqual(len(ev["totals"]), 4)           # both lines, both sides
+        self.assertEqual(sorted({r[1] for r in ev["totals"]}), ["2.5", "3.0"])
+        # de-vig stays within a line: each line's implied probabilities sum to 1
+        for line in ("2.5", "3.0"):
+            implied = [r[3] for r in ev["totals"] if r[1] == line]
+            self.assertAlmostEqual(sum(implied), 1.0, places=9)
+        self.assertTrue(any("can push" in m for m in ev["missing"]))
         # orphan line on one side only -> not evaluated
         rows_orphan = [odds_row("D3", "totals", "over", 1.95, line="2.5"),
                        odds_row("D3", "totals", "under", 1.62, line="3.0")]

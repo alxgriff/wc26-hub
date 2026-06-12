@@ -492,7 +492,22 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
     <span class="kicker">The Market</span>
     <h2 id="odds-h">Odds &amp; best bet</h2>
   </div>
-<div class="placeholder-slot">No odds snapshot logged yet — this section activates with the odds workflow (CLAUDE.md Phase 3: odds_log.csv, de-vig, edge vs threshold). Odds are never invented.</div>
+<p class="odds-note">model projection: <b>2.56</b> total goals · over 1.5 <b>73%</b> · over 2.5 <b>47%</b> · over 3.5 <b>26%</b></p>
+<div class="edge-wrap">
+  <table>
+    <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
+    <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.0</td><td>1.99</td><td>48%</td><td>33%</td><td class="edge-neg">-15.3%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.0</td><td>1.83</td><td>52%</td><td>67%</td><td class="edge-pos">+15.3%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td>2.38</td><td>40%</td><td>26%</td><td class="edge-neg">-14.0%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td>1.56</td><td>60%</td><td>74%</td><td class="edge-pos">+14.0%</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Under 3.5</strong> (Total goals) @ 1.56, edge <strong>+14.0%</strong> — best price 1.56 (betrivers). Flat 1u, paper record.</p></div>
+<p class="verify-flag">totals under 3.0: edge +15.3% implausibly large — verify odds freshness and team news before trusting</p>
+<p class="odds-note">market snapshot Jun 12, 4:25 PM ET · median odds across books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only · no logged consensus prediction — 1X2 edge not computed · O/U 3.0 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake · spreads quoted but no line has both sides.</p>
 </section>
 
 <section aria-labelledby="teams-h">

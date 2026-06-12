@@ -312,5 +312,77 @@ class FateTests(unittest.TestCase):
         self.assertIn("— eliminated", card)
 
 
+class TotalsLadderTests(unittest.TestCase):
+    def test_totals_probs_integer_line_has_push_and_sums_to_one(self):
+        over, push, under = od.totals_probs(1.3, 1.2, 2.0)
+        self.assertGreater(push, 0.1)            # P(total == 2) is substantial
+        self.assertAlmostEqual(over + push + under, 1.0, places=9)
+
+    def test_totals_probs_half_line_no_push_matches_prob_over(self):
+        over, push, under = od.totals_probs(1.3, 1.2, 2.5)
+        self.assertEqual(push, 0.0)
+        self.assertAlmostEqual(over, od.prob_over(1.3, 1.2, 2.5), places=12)
+
+    @staticmethod
+    def _odds_rows(*lines):
+        rows = []
+        for line, o_over, o_under in lines:
+            for sel, o in (("over", o_over), ("under", o_under)):
+                rows.append({"match_id": "X1", "market": "totals", "selection": sel,
+                             "line": line, "odds": f"{o:.3f}",
+                             "source": "median/5books", "phase": "snapshot",
+                             "timestamp": "2026-06-13T07:00:00-04:00"})
+        return rows
+
+    def test_integer_line_now_evaluated_with_push_note(self):
+        from types import SimpleNamespace
+        pred = SimpleNamespace(lambda_a=1.3, lambda_b=1.2)
+        ev = od.evaluate_match("X1", self._odds_rows(("2.0", 1.90, 1.90)), [], pred)
+        self.assertEqual(len(ev["totals"]), 2)
+        sels = {(s, l) for s, l, *_ in ev["totals"]}
+        self.assertEqual(sels, {("over", "2.0"), ("under", "2.0")})
+        over_row = next(r for r in ev["totals"] if r[0] == "over")
+        self.assertAlmostEqual(over_row[3] + ev["totals"][1][3], 1.0, places=9)
+        self.assertTrue(any("can push" in m for m in ev["missing"]))
+
+    def test_full_ladder_every_paired_line_evaluated(self):
+        from types import SimpleNamespace
+        pred = SimpleNamespace(lambda_a=1.3, lambda_b=1.2)
+        ev = od.evaluate_match("X1", self._odds_rows(
+            ("1.5", 1.45, 2.75), ("2.5", 2.05, 1.85), ("3.5", 3.60, 1.30)), [], pred)
+        lines = sorted({l for _s, l, *_ in ev["totals"]})
+        self.assertEqual(lines, ["1.5", "2.5", "3.5"])
+        self.assertEqual(len(ev["totals"]), 6)
+
+    def test_integer_line_push_settles_as_refund(self):
+        import standings as st
+        with tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False) as f:
+            path = Path(f.name)
+        path.unlink()
+        od.record_pick("X1", {"market": "totals", "selection": "over", "line": "2.0",
+                              "odds": 1.90, "implied_p": 0.5, "our_p": 0.56,
+                              "edge": 0.06}, (1.90, "book"), NOW, False, path)
+        match = st.Match("X1", "X", 1, "A", "B", 1, 1, "played")  # total = 2
+        lines = od.settle_picks([match], [], picks_path=path)
+        picks = od.load_picks(path)
+        path.unlink()
+        self.assertEqual(picks[0]["status"], "push")
+        self.assertEqual(picks[0]["units"], "+0.00")
+        self.assertTrue(any("push" in l for l in lines))
+
+    def test_projection_line_renders_on_market_block(self):
+        info = {"evaluation": {"h2h": [], "totals": [], "spreads": [], "btts": [],
+                               "missing": []},
+                "pick": None, "flags": [], "best_prices": {}, "recorded": [],
+                "threshold": 0.03, "snapshot_ts": "2026-06-13T07:00:00-04:00",
+                "projection": {"total": 2.41,
+                               "over": {"1.5": 0.78, "2.5": 0.45, "3.5": 0.21}}}
+        out = bs.render_market(info, "A", "B", None)
+        self.assertIn("model projection", out)
+        self.assertIn("<b>2.41</b> total goals", out)
+        self.assertIn("over 1.5 <b>78%</b>", out)
+        self.assertIn("over 3.5 <b>21%</b>", out)
+
+
 if __name__ == "__main__":
     unittest.main()
