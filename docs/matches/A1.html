@@ -380,6 +380,18 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .wire li{margin-bottom:.45em}
 .wire a{word-break:break-all}
 
+/* ---------- the read: margin-notes rail on wide screens ----------
+   Print idiom: body copy in a measured column, the key-duel box, selection
+   notes, and trivia railed down the right margin, read in parallel. Below
+   1020px the callout grid reflows itself (auto-fit): 2-up on tablets,
+   1-up on phones. */
+@media (min-width:1020px){
+  .read-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;column-gap:46px;align-items:start}
+  .read-grid>.sec-head{grid-column:1/-1}
+  .read-grid>.prose,.read-grid>.placeholder-slot,.read-grid>.verify-flag{grid-column:1}
+  .read-grid>.callout-grid{grid-column:2;grid-row:2/span 6;grid-template-columns:1fr;margin:0}
+}
+
 </style>
 </head>
 <body>
@@ -464,7 +476,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
   </div>
 </section>
 
-<section aria-labelledby="card-h">
+<section aria-labelledby="card-h" class="read-grid">
   <div class="sec-head">
     <span class="kicker">The Read</span>
     <h2 id="card-h">Tactical preview</h2>
