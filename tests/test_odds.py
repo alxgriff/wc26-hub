@@ -264,6 +264,120 @@ class ApiMappingTests(unittest.TestCase):
         self.assertTrue(any("UNMATCHED" in l for l in lines))
 
 
+class AsianHandicapTests(unittest.TestCase):
+    # toy margin distribution from home's perspective:
+    # P(-1)=0.2, P(0)=0.3, P(+1)=0.3, P(+2)=0.2
+    M = {-1: 0.2, 0: 0.3, 1: 0.3, 2: 0.2}
+
+    def test_quarter_line_components(self):
+        self.assertEqual(od._ah_components(-0.75), [-1.0, -0.5])
+        self.assertEqual(od._ah_components(0.25), [0.0, 0.5])
+        self.assertEqual(od._ah_components(-1.0), [-1.0])
+        self.assertEqual(od._ah_components(0.5), [0.5])
+
+    def test_half_line_prob(self):
+        # home -0.5: win iff margin >= 1 -> 0.5; lose otherwise -> 0.5
+        self.assertAlmostEqual(od.ah_prob(self.M, -0.5), 0.5, places=9)
+
+    def test_integer_line_excludes_pushes(self):
+        # home -1: win iff margin >= 2 (0.2), push at 1 (0.3), lose else (0.5)
+        w, l = od.ah_effective(self.M, -1.0)
+        self.assertAlmostEqual(w, 0.2, places=9)
+        self.assertAlmostEqual(l, 0.5, places=9)
+        self.assertAlmostEqual(od.ah_prob(self.M, -1.0), 0.2 / 0.7, places=9)
+
+    def test_quarter_line_averages_components(self):
+        # home -0.75 = half at -0.5 (W=.5,L=.5) + half at -1 (W=.2,L=.5)
+        w, l = od.ah_effective(self.M, -0.75)
+        self.assertAlmostEqual(w, 0.35, places=9)
+        self.assertAlmostEqual(l, 0.5, places=9)
+
+    def test_home_and_away_sides_are_complementary(self):
+        p_home = od.ah_prob(self.M, -0.5)
+        away = {-m: p for m, p in self.M.items()}
+        self.assertAlmostEqual(od.ah_prob(away, 0.5), 1 - p_home, places=9)
+
+    def test_margin_dist_sums_to_one_and_matches_wdl(self):
+        m = od.margin_dist(1.5, 1.0)
+        self.assertAlmostEqual(sum(m.values()), 1.0, places=6)
+        # P(margin > 0) must equal the predict matrix home-win probability
+        model = pr.RatingModel({t.team: t for t in [_mk("A", 1850), _mk("B", 1750)]},
+                               pr.Config(), "x")
+        p = pr.predict_match(model, "A", "B")
+        m2 = od.margin_dist(p.lambda_a, p.lambda_b)
+        self.assertAlmostEqual(sum(v for k, v in m2.items() if k > 0), p.p_a, places=4)
+
+
+class AhSettlementTests(unittest.TestCase):
+    def test_full_win_and_loss(self):
+        self.assertEqual(od.ah_settle_units(2, -1.5, 2.0), (1.0, "won"))
+        self.assertEqual(od.ah_settle_units(0, -0.5, 2.0), (-1.0, "lost"))
+
+    def test_integer_push_returns_stake(self):
+        units, status = od.ah_settle_units(1, -1.0, 2.0)
+        self.assertAlmostEqual(units, 0.0)
+        self.assertEqual(status, "push")
+
+    def test_quarter_half_win(self):
+        # home -0.25, drew 0-0 from selection perspective margin 0:
+        # half at 0 -> push, half at -0.5 -> loss => -0.5u half-lost
+        units, status = od.ah_settle_units(0, -0.25, 2.0)
+        self.assertAlmostEqual(units, -0.5)
+        self.assertEqual(status, "half-lost")
+        # margin +1 at -0.75 with odds 2.10: half at -0.5 wins (+0.55),
+        # half at -1.0 pushes (0) => +0.55 half-won
+        units, status = od.ah_settle_units(1, -0.75, 2.10)
+        self.assertAlmostEqual(units, 0.55, places=9)
+        self.assertEqual(status, "half-won")
+
+    def test_settle_spreads_pick_end_to_end(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "picks.csv"
+            pick = {"market": "spreads", "selection": "home", "line": -0.75,
+                    "odds": 2.10, "implied_p": 0.48, "our_p": 0.53, "edge": 0.05}
+            od.record_pick("D3", pick, (2.10, "book"), NOW, False, path)
+            m = st.Match("D3", "D", 2, "X", "Y", 2, 1, "played")   # margin +1
+            od.settle_picks([m], [], path)
+            p = od.load_picks(path)[0]
+            self.assertEqual(p["status"], "half-won")
+            self.assertEqual(p["units"], "+0.55")
+
+    def test_units_summary_counts_pushes(self):
+        picks = [{"status": "won", "units": "+1.50", "clv_pp": ""},
+                 {"status": "push", "units": "+0.00", "clv_pp": ""},
+                 {"status": "half-lost", "units": "-0.50", "clv_pp": ""}]
+        out = od.units_summary(picks)
+        self.assertIn("1W-1L-1P", out)
+        self.assertIn("+1.00u", out)
+
+
+class BttsAndSpreadsEvalTests(unittest.TestCase):
+    def test_spreads_evaluated_and_eligible_for_best_bet(self):
+        rows = [odds_row("D3", "spreads", "home", 2.10, line="-0.5"),
+                odds_row("D3", "spreads", "away", 1.80, line="0.5")]
+        ev = od.evaluate_match("D3", rows, [], fake_pred(2.0, 1.0))   # strong home
+        self.assertEqual(len(ev["spreads"]), 2)
+        sel, line, o, imp, our_p, edge = ev["spreads"][0]
+        self.assertEqual((sel, line), ("home", -0.5))
+        self.assertAlmostEqual(our_p, od.ah_prob(od.margin_dist(2.0, 1.0), -0.5), places=9)
+        pick, _ = od.best_bet(ev, threshold=0.001)
+        self.assertIsNotNone(pick)
+
+    def test_btts_evaluated_from_model(self):
+        rows = [odds_row("D3", "btts", "yes", 1.85), odds_row("D3", "btts", "no", 1.95)]
+        ev = od.evaluate_match("D3", rows, [], fake_pred())
+        self.assertEqual(ev["btts"][0][0], "yes")
+        self.assertAlmostEqual(ev["btts"][0][4], fake_pred().btts, places=9)
+
+    def test_absent_optional_markets_stay_silent(self):
+        ev = od.evaluate_match("D3", h2h_rows("D3", 2.5, 3.3, 3.1),
+                               [ledger_row("D3", 0.4, 0.3, 0.3)], fake_pred())
+        self.assertEqual(ev["spreads"], [])
+        self.assertEqual(ev["btts"], [])
+        self.assertFalse(any("spreads" in m or "btts" in m.lower()
+                             for m in ev["missing"]))
+
+
 class RenderTests(unittest.TestCase):
     def test_no_bet_render(self):
         ev = {"h2h": [("home", "", 2.5, 0.40, 0.41, 0.01)], "totals": [],

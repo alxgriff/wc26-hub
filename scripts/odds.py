@@ -111,6 +111,71 @@ def prob_over(lambda_a: float, lambda_b: float, line: float, n: int = 12) -> flo
     return 1.0 - under / z
 
 
+def margin_dist(lambda_a: float, lambda_b: float, n: int = 12) -> dict:
+    """{goal margin (a − b): probability} from the independent-Poisson matrix."""
+    pa = [math.exp(-lambda_a) * lambda_a ** i / math.factorial(i) for i in range(n + 1)]
+    pb = [math.exp(-lambda_b) * lambda_b ** j / math.factorial(j) for j in range(n + 1)]
+    z = sum(pa) * sum(pb)
+    out: dict = {}
+    for i in range(n + 1):
+        for j in range(n + 1):
+            out[i - j] = out.get(i - j, 0.0) + pa[i] * pb[j] / z
+    return out
+
+
+def _ah_components(handicap: float) -> list:
+    """A quarter line splits the stake across its two neighbours; other lines
+    are a single component."""
+    q = round(handicap * 4)
+    if q % 2 == 1:                      # ±0.25, ±0.75, ±1.25, ...
+        return [(q - 1) / 4, (q + 1) / 4]
+    return [handicap]
+
+
+def ah_effective(margins: dict, handicap: float) -> tuple:
+    """(W_eff, L_eff) for an Asian-handicap side whose perspective-margin
+    distribution is ``margins`` and line is ``handicap`` (e.g. home −0.75 with
+    margins from home's perspective). Pushes are excluded from both; quarter
+    lines weight each half-stake component 50/50. Fair odds = (W+L)/W, so the
+    de-vig-comparable probability is W_eff / (W_eff + L_eff)."""
+    comps = _ah_components(handicap)
+    w = l = 0.0
+    for h in comps:
+        w += sum(p for m, p in margins.items() if m + h > 1e-9)
+        l += sum(p for m, p in margins.items() if m + h < -1e-9)
+    return w / len(comps), l / len(comps)
+
+
+def ah_prob(margins: dict, handicap: float) -> float:
+    """Push-adjusted win probability comparable to a de-vigged two-way price."""
+    w, l = ah_effective(margins, handicap)
+    if w + l <= 0:
+        raise OddsError(f"degenerate handicap {handicap}")
+    return w / (w + l)
+
+
+def ah_settle_units(margin_sel: int, handicap: float, odds: float) -> tuple:
+    """(units, status) for a settled AH pick: ``margin_sel`` is the final goal
+    margin from the selection's perspective, stake 1u split across quarter-line
+    components (half-win +/− (odds−1)/2, push component 0)."""
+    comps = _ah_components(handicap)
+    units = 0.0
+    results = []
+    for h in comps:
+        adj = margin_sel + h
+        if adj > 1e-9:
+            units += (odds - 1) / len(comps)
+            results.append("w")
+        elif adj < -1e-9:
+            units -= 1.0 / len(comps)
+            results.append("l")
+        else:
+            results.append("p")
+    status = {"w": "won", "l": "lost", "p": "push"}[results[0]] if len(set(results)) == 1 \
+        else ("half-won" if "w" in results else "half-lost")
+    return units, status
+
+
 # ---------------------------------------------------------------- log I/O
 
 def _load(path: Path, columns: list) -> list:
@@ -172,7 +237,7 @@ def evaluate_match(match_id: str, odds_rows: list, ledger_rows: list,
     """Edge table for one match. Returns
     {"h2h": [(selection, line, median_odds, implied, our_p, edge)], "totals": [...],
      "missing": [...notes...]}."""
-    out = {"h2h": [], "totals": [], "missing": []}
+    out = {"h2h": [], "totals": [], "spreads": [], "btts": [], "missing": []}
 
     h2h = latest_market(odds_rows, match_id, "h2h")
     probs = consensus_probs(match_id, ledger_rows)
@@ -206,6 +271,34 @@ def evaluate_match(match_id: str, odds_rows: list, ledger_rows: list,
         out["missing"].append("incomplete totals snapshot (need over + under)")
     else:
         out["missing"].append("no totals snapshot")
+
+    # Asian handicap and BTTS are optional markets: evaluated when present,
+    # silent when absent. Both are model-priced (the overlay is W/D/L-only).
+    spreads = latest_market(odds_rows, match_id, "spreads")
+    if spreads and "home" in spreads and "away" in spreads and pred is not None:
+        h_line = float(spreads["home"][0])
+        odds2 = [spreads["home"][1], spreads["away"][1]]
+        try:
+            margins = margin_dist(pred.lambda_a, pred.lambda_b)
+            p_home = ah_prob(margins, h_line)
+            implied = devig(odds2)
+            for sel, line, o, imp, p in (
+                    ("home", h_line, odds2[0], implied[0], p_home),
+                    ("away", -h_line, odds2[1], implied[1], 1 - p_home)):
+                out["spreads"].append((sel, line, o, imp, p, p - imp))
+        except OddsError as e:
+            out["missing"].append(f"spreads: {e}")
+    elif spreads:
+        out["missing"].append("incomplete spreads snapshot (need home + away)")
+
+    btts = latest_market(odds_rows, match_id, "btts")
+    if btts and "yes" in btts and "no" in btts and pred is not None:
+        odds2 = [btts["yes"][1], btts["no"][1]]
+        implied = devig(odds2)
+        for i, (sel, p) in enumerate((("yes", pred.btts), ("no", 1 - pred.btts))):
+            out["btts"].append((sel, "", odds2[i], implied[i], p, p - implied[i]))
+    elif btts:
+        out["missing"].append("incomplete BTTS snapshot (need yes + no)")
     return out
 
 
@@ -214,8 +307,8 @@ def best_bet(evaluation: dict, threshold: float = EDGE_THRESHOLD,
     """(pick | None, flags). Pick = dict for the largest positive edge ≥
     threshold and ≤ sanity; edges above sanity become flags instead."""
     candidates, flags = [], []
-    for market in ("h2h", "totals"):
-        for sel, line, odds, implied, our_p, edge in evaluation[market]:
+    for market in ("h2h", "totals", "spreads", "btts"):
+        for sel, line, odds, implied, our_p, edge in evaluation.get(market, []):
             if edge > sanity:
                 flags.append(f"{market} {sel}{f' {line}' if line else ''}: edge "
                              f"{edge:+.1%} implausibly large — verify odds freshness "
@@ -273,14 +366,29 @@ def settle_picks(matches: list, odds_rows: list,
         if p["market"] == "h2h":
             outcome = ("home", "draw", "away")[lg.outcome_index(m.score_a, m.score_b)]
             won = p["selection"] == outcome
-        else:
+            p["status"] = "won" if won else "lost"
+            p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
+        elif p["market"] == "totals":
             total = m.score_a + m.score_b
             won = (total > float(p["line"])) == (p["selection"] == "over")
-        p["status"] = "won" if won else "lost"
-        p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
+            p["status"] = "won" if won else "lost"
+            p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
+        elif p["market"] == "spreads":
+            margin = m.score_a - m.score_b
+            margin_sel = margin if p["selection"] == "home" else -margin
+            units, status = ah_settle_units(margin_sel, float(p["line"]),
+                                            float(p["odds"]))
+            p["status"] = status
+            p["units"] = f"{units:+.2f}"
+        else:  # btts
+            both = m.score_a >= 1 and m.score_b >= 1
+            won = both == (p["selection"] == "yes")
+            p["status"] = "won" if won else "lost"
+            p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
 
         closing = latest_market(odds_rows, p["match_id"], p["market"], phase="closing")
-        sels = H2H_SELECTIONS if p["market"] == "h2h" else ("over", "under")
+        sels = {"h2h": H2H_SELECTIONS, "totals": ("over", "under"),
+                "spreads": ("home", "away"), "btts": ("yes", "no")}[p["market"]]
         if closing and all(s in closing for s in sels):
             implied = devig([closing[s][1] for s in sels])
             clv = implied[sels.index(p["selection"])] - float(p["implied_p"])
@@ -293,13 +401,16 @@ def settle_picks(matches: list, odds_rows: list,
 
 
 def units_summary(picks: list) -> str | None:
-    settled = [p for p in picks if p["status"] in ("won", "lost")]
+    settled = [p for p in picks if p["status"] not in ("", "open")]
     if not settled:
         return None
     units = sum(float(p["units"]) for p in settled)
-    wins = sum(1 for p in settled if p["status"] == "won")
+    wins = sum(1 for p in settled if p["status"] in ("won", "half-won"))
+    losses = sum(1 for p in settled if p["status"] in ("lost", "half-lost"))
+    pushes = len(settled) - wins - losses
+    rec = f"{wins}W-{losses}L" + (f"-{pushes}P" if pushes else "")
     clvs = [float(p["clv_pp"]) for p in settled if p["clv_pp"]]
-    out = (f"Picks: {len(settled)} settled ({wins}W-{len(settled) - wins}L), "
+    out = (f"Picks: {len(settled)} settled ({rec}), "
            f"{units:+.2f}u at flat 1u stakes")
     if clvs:
         out += f"; avg CLV {statistics.mean(clvs):+.1f}pp over {len(clvs)} closing line(s)"
@@ -313,14 +424,21 @@ def render_odds_section(match_id: str, evaluation: dict, pick: dict | None,
                         threshold: float = EDGE_THRESHOLD) -> str:
     """Markdown body for a card's Odds & Best Bet slot."""
     lines = []
-    rows = evaluation["h2h"] + evaluation["totals"]
+    labelled = ([("1X2", r) for r in evaluation["h2h"]]
+                + [(f"O/U {r[1]}", r) for r in evaluation["totals"]]
+                + [(f"AH {r[1]:+g}", r) for r in evaluation.get("spreads", [])]
+                + [("BTTS", r) for r in evaluation.get("btts", [])])
+    rows = [r for _, r in labelled]
     if rows:
         lines += ["| Market | Sel | Odds (median) | Implied | Ours | Edge |",
                   "|:--|:--|--:|--:|--:|--:|"]
-        for sel, line, odds, implied, our_p, edge in rows:
-            mk = "1X2" if (sel in H2H_SELECTIONS) else f"O/U {line}"
+        for mk, (sel, line, odds, implied, our_p, edge) in labelled:
             lines.append(f"| {mk} | {sel} | {odds:.2f} | {implied:.0%} | "
                          f"{our_p:.0%} | {edge:+.1%} |")
+        if evaluation.get("spreads") or evaluation.get("btts") or evaluation["totals"]:
+            lines.append("")
+            lines.append("_Totals/AH/BTTS are model-priced from the score matrix "
+                         "(the Opta overlay covers W/D/L only)._")
         lines.append("")
     if pick:
         bp = best_prices.get((pick["market"], pick["selection"]))
@@ -408,6 +526,17 @@ def snapshot_from_api(events: list, fixture_rows: list, phase: str,
                         if sel in ("over", "under"):
                             prices.setdefault(("totals", sel, str(oc.get("point", "")))
                                               , []).append((float(oc["price"]), bk["key"]))
+                elif mkt["key"] == "spreads":
+                    for oc in mkt.get("outcomes", []):
+                        nm = pr._canon(oc["name"])
+                        if nm == fr["team_a"]:
+                            sel = "home"
+                        elif nm == fr["team_b"]:
+                            sel = "away"
+                        else:
+                            continue
+                        prices.setdefault(("spreads", sel, str(oc.get("point", "")))
+                                          , []).append((float(oc["price"]), bk["key"]))
         n_books = len(ev.get("bookmakers", []))
         for (market, sel, line), plist in prices.items():
             med = statistics.median(p for p, _ in plist)
@@ -500,9 +629,10 @@ def main(argv: list | None = None) -> int:
 
     p_enter = sub.add_parser("enter", help="manually enter odds")
     p_enter.add_argument("match_id")
-    p_enter.add_argument("market", choices=["h2h", "totals"])
+    p_enter.add_argument("market", choices=["h2h", "totals", "spreads", "btts"])
     p_enter.add_argument("values", nargs="+",
-                         help="h2h: H,D,A — totals: LINE OVER,UNDER")
+                         help="h2h: H,D,A — totals: LINE OVER,UNDER — "
+                              "spreads: HOME_LINE HOME,AWAY — btts: YES,NO")
     p_enter.add_argument("--source", default="manual")
     p_enter.add_argument("--phase", choices=["snapshot", "closing"], default="snapshot")
 
@@ -532,7 +662,7 @@ def main(argv: list | None = None) -> int:
             return 1
         try:
             events, remaining = _api_get(f"/sports/{args.sport}/odds", key,
-                                         regions="us", markets="h2h,totals",
+                                         regions="us", markets="h2h,spreads,totals",
                                          oddsFormat="decimal", dateFormat="iso")
         except urllib.error.HTTPError as e:
             if e.code == 404:
@@ -564,7 +694,7 @@ def main(argv: list | None = None) -> int:
                         "line": "", "odds": f"{o:.3f}", "source": args.source,
                         "phase": args.phase, "timestamp": now}
                        for s, o in zip(H2H_SELECTIONS, odds3)]
-            else:
+            elif args.market == "totals":
                 if len(args.values) != 2:
                     raise OddsError("totals needs: LINE OVER,UNDER")
                 line = float(args.values[0])
@@ -576,6 +706,27 @@ def main(argv: list | None = None) -> int:
                         "line": str(line), "odds": f"{o:.3f}", "source": args.source,
                         "phase": args.phase, "timestamp": now}
                        for s, o in zip(("over", "under"), ou)]
+            elif args.market == "spreads":
+                if len(args.values) != 2:
+                    raise OddsError("spreads needs: HOME_LINE HOME,AWAY")
+                h_line = float(args.values[0])
+                ha = [float(x) for x in args.values[1].split(",")]
+                if len(ha) != 2:
+                    raise OddsError("spreads needs two odds: home,away")
+                devig(ha)
+                new = [{"match_id": args.match_id, "market": "spreads", "selection": s,
+                        "line": str(l), "odds": f"{o:.3f}", "source": args.source,
+                        "phase": args.phase, "timestamp": now}
+                       for s, l, o in (("home", h_line, ha[0]), ("away", -h_line, ha[1]))]
+            else:  # btts
+                yn = [float(x) for x in args.values[0].split(",")]
+                if len(yn) != 2:
+                    raise OddsError("btts needs two odds: yes,no")
+                devig(yn)
+                new = [{"match_id": args.match_id, "market": "btts", "selection": s,
+                        "line": "", "odds": f"{o:.3f}", "source": args.source,
+                        "phase": args.phase, "timestamp": now}
+                       for s, o in zip(("yes", "no"), yn)]
         except (OddsError, ValueError) as e:
             print(f"error: {e}", file=sys.stderr)
             return 1
