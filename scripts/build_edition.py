@@ -17,8 +17,12 @@ which differs from ``date_et`` for the three 🌙 late-cap games that kick off a
 
 What this builder fills in is the **Stakes** slot of each card (current group
 table + one factual sentence). It deliberately leaves **The Call** and **Odds &
-Best Bet** untouched until their phases (predict.py / odds) are live, and never
-synthesises card prose: a missing card becomes a clearly-marked placeholder.
+Best Bet** untouched until Phase 5 (odds), and never synthesises card prose: a
+missing card becomes a clearly-marked placeholder. Since Phase 4 went live, the
+**The Call** slot is filled with the consensus prediction (predict.py + the
+ledger; pre-baked qualitative leans preserved) and **Overnight** carries
+prediction grading (✓/✗ + Brier + the running ledger line); missing prediction
+inputs leave those in placeholder state — never invented.
 
 Importable API (for tests and future scripts):
 
@@ -171,6 +175,45 @@ def extract_card(mid: str, team_a: str, team_b: str, cards_dir: str | Path
 
 
 # ---------------------------------------------------------------- stakes injection
+
+_LEAN_RE = re.compile(r"\*\[(.+?)\]\*", re.DOTALL)
+
+
+def inject_call(card: str, call_body: str) -> tuple[str, bool]:
+    """Replace a card's The Call placeholder with ``call_body``, preserving the
+    pre-baked qualitative lean (the *[...]* text) as a trailing italic line and
+    leaving Odds & Best Bet in placeholder state (Phase 5).
+
+    Handles all three card layouts: ``**The Call:**`` line (md1/md2), the
+    combined ``**The Call / Odds & Best Bet:**`` line (md3), and the
+    ``## The Call`` section (template.md). Returns ``(card, replaced?)``."""
+    lines = card.split("\n")
+
+    def with_lean(text_after_marker: str) -> str:
+        m = _LEAN_RE.search(text_after_marker)
+        lean = m.group(1).strip() if m else ""
+        return call_body + (f"\n\n_Pre-baked lean: {lean}_" if lean else "")
+
+    for i, ln in enumerate(lines):
+        if ln.startswith("**The Call / Odds & Best Bet:**"):
+            block = ["**The Call:**", "", with_lean(ln),
+                     "**Odds & Best Bet:** *[Phase 5 — market snapshot pending.]*"]
+            return "\n".join(lines[:i] + block + lines[i + 1:]), True
+        if ln.startswith("**The Call:**"):
+            block = ["**The Call:**", "", with_lean(ln)]
+            return "\n".join(lines[:i] + block + lines[i + 1:]), True
+
+    for i, ln in enumerate(lines):
+        if ln.strip() == "## The Call":
+            j = i + 1
+            while j < len(lines) and not lines[j].startswith("## "):
+                j += 1
+            body_text = "\n".join(lines[i + 1:j])
+            block = [lines[i], "", with_lean(body_text), ""]
+            return "\n".join(lines[:i] + block + lines[j:]), True
+
+    return card, False
+
 
 def inject_stakes(card: str, stakes_body: str) -> tuple[str, bool]:
     """Replace a card's Stakes placeholder with ``stakes_body``, leaving The Call
@@ -334,7 +377,12 @@ def _slate_line(r: dict) -> str:
             f"{r['match_id']} · {r['team_a']} vs {r['team_b']} · {tv} · {venue}")
 
 
-def _overnight_section(rows: list[dict], yesterday: date) -> list[str]:
+def _overnight_section(rows: list[dict], yesterday: date,
+                       graded: dict | None = None,
+                       cumulative: str | None = None) -> list[str]:
+    """Yesterday's results, with per-match prediction grades (✓/✗ + Brier) when
+    the ledger has a published call for a match."""
+    graded = graded or {}
     prior = select_matches(rows, yesterday)
     out = ["## Overnight", ""]
     if not prior:
@@ -353,12 +401,20 @@ def _overnight_section(rows: list[dict], yesterday: date) -> list[str]:
             if note:
                 line += f" — {note}"
             out.append(line)
+            g = graded.get(r["match_id"])
+            if g:
+                call = "/".join(f"{x:.0%}" for x in g["p"])
+                score = f", predicted {g['predicted_score']}" if g.get("predicted_score") else ""
+                out.append(f"  - Our call: {call} (H/D/A{score}) → "
+                           f"{'✓ correct' if g['correct'] else '✗ wrong'} · "
+                           f"Brier {g['brier']:.3f}")
         else:
             out.append(f"- ⚠️ **{r['match_id']}**{moon} {r['team_a']} vs "
                        f"{r['team_b']} — **result not yet entered**")
     out.append("")
-    out.append("_Prediction grading and the Brier ledger activate in Phase 4 "
-               "(predict.py)._")
+    out.append(cumulative if cumulative else
+               "_No graded predictions yet — the Brier ledger starts once a "
+               "logged call's match is played._")
     out.append("")
     return out
 
@@ -377,13 +433,21 @@ def _verify_callouts(today: list[dict]) -> list[str]:
 
 def build_edition(target: date, rows: list[dict], standings: "st.Standings",
                   cards_dir: str | Path,
-                  matches: "list[st.Match] | None" = None) -> tuple[str, list[str]]:
+                  matches: "list[st.Match] | None" = None,
+                  calls: "dict[str, str] | None" = None,
+                  graded: dict | None = None,
+                  cumulative: str | None = None) -> tuple[str, list[str]]:
     """Render the full edition markdown for ``target``. Returns
     ``(markdown, warnings)``; warnings are data-integrity notes for stderr.
 
     ``matches`` (the parsed fixtures) enables MD3 qualification scenarios in the
-    Stakes slots; when omitted, MD3 cards fall back to the factual block."""
+    Stakes slots; when omitted, MD3 cards fall back to the factual block.
+    ``calls`` ({match_id: The-Call body}) fills the cards' The Call slots;
+    ``graded``/``cumulative`` (from ledger.grade / ledger.cumulative_line) add
+    prediction grading to Overnight. All optional: when absent, those slots stay
+    in placeholder state (never invented)."""
     warnings: list[str] = []
+    calls = calls or {}
 
     unexpected = {r["match_id"] for r in rows if r.get("_late_cap")} - EXPECTED_LATE_CAPS
     if unexpected:
@@ -414,7 +478,8 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
         parts.append("")
 
     # Overnight
-    parts.extend(_overnight_section(rows, target - timedelta(days=1)))
+    parts.extend(_overnight_section(rows, target - timedelta(days=1),
+                                    graded=graded, cumulative=cumulative))
 
     # Today's slate
     parts.append("## Today's slate")
@@ -488,6 +553,11 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
             if not replaced:
                 warnings.append(f"{mid}: card has no Stakes slot — left unchanged "
                                 f"(source {src})")
+            if mid in calls:
+                chunk, call_ok = inject_call(chunk, calls[mid])
+                if not call_ok:
+                    warnings.append(f"{mid}: card has no The Call slot — prediction "
+                                    f"not injected (source {src})")
         card_chunks.append(chunk)
     parts.append("\n\n---\n\n".join(card_chunks) if card_chunks else "_No cards today._")
 
@@ -531,7 +601,50 @@ def main(argv: list[str] | None = None) -> int:
     for w in standings.warnings:
         print(f"warning: {w}", file=sys.stderr)
 
-    edition, warnings = build_edition(target, rows, standings, args.cards_dir, matches=matches)
+    # Predictions + grading (Phase 4). Local imports: ledger imports this module,
+    # so the dependency must stay one-way at import time. Any failure leaves the
+    # affected slots in placeholder state — never invented.
+    calls: dict[str, str] = {}
+    graded = None
+    cumulative = None
+    try:
+        import ledger as lg
+        import predict as pr
+        for line in lg.log_slate(target, args.fixtures):
+            print(f"ledger: {line}", file=sys.stderr)
+        ledger_rows = lg.load_ledger()
+        graded = lg.grade(matches, ledger_rows)
+        cumulative = lg.cumulative_line(matches, ledger_rows)
+        model = pr.load_ratings(fixtures=args.fixtures)
+        overlay = pr.load_match_overlay()
+        for r in select_matches(rows, target):
+            mid = r["match_id"]
+            host = pr.HOST_BY_COUNTRY.get((r.get("country") or "").strip())
+            hfa = host if host in (r["team_a"], r["team_b"]) else None
+            pred = pr.predict_match(model, r["team_a"], r["team_b"], hfa_team=hfa)
+            ov = overlay.get(mid)
+            if ov:
+                pa, pd_, pb = pr.blend_wdl(pred, ov)
+                srcs = (f"consensus of our model "
+                        f"({pred.p_a:.0%}/{pred.p_draw:.0%}/{pred.p_b:.0%}) and "
+                        f"{ov['source'] or 'Opta'} "
+                        f"({ov['p_home']:.0%}/{ov['p_draw']:.0%}/{ov['p_away']:.0%})")
+            else:
+                pa, pd_, pb = pred.p_a, pred.p_draw, pred.p_b
+                srcs = "our model (no second source for this match yet)"
+            mi, mj = pred.modal_score
+            calls[mid] = (
+                f"**{r['team_a']} {pa:.0%} · Draw {pd_:.0%} · {r['team_b']} {pb:.0%}** — "
+                f"{srcs}. Predicted score **{mi}–{mj}** "
+                f"(xG {pred.lambda_a:.2f}–{pred.lambda_b:.2f}); "
+                f"Over 2.5 {pred.over[2.5]:.0%}, BTTS {pred.btts:.0%}.")
+    except Exception as e:  # missing ratings, canon mismatch, ledger guard, ...
+        print(f"warning: predictions unavailable ({e}) — The Call slots left "
+              "in placeholder state", file=sys.stderr)
+
+    edition, warnings = build_edition(target, rows, standings, args.cards_dir,
+                                      matches=matches, calls=calls,
+                                      graded=graded, cumulative=cumulative)
     for w in warnings:
         print(f"warning: {w}", file=sys.stderr)
 

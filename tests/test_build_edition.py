@@ -397,5 +397,78 @@ class Md3IntegrationTests(unittest.TestCase):
         self.assertIn("After 4 matches in Group A:", edition)   # factual fallback
 
 
+# ---- Phase 4: The Call injection + Overnight grading ------------------------
+
+CALL_BODY = "**Alpha 61% · Draw 23% · Beta 16%** — consensus. Predicted score **1–0**."
+
+
+class CallInjectionTests(unittest.TestCase):
+    def test_inline_layout_fills_call_keeps_lean_and_odds(self):
+        with tempfile.TemporaryDirectory() as d:
+            cards = write_cards(Path(d), md1=MD1)
+            card, _ = be.extract_card("A1", "Team Alpha", "Team Beta", cards)
+        out, ok = be.inject_call(card, CALL_BODY)
+        self.assertTrue(ok)
+        self.assertIn(CALL_BODY, out)
+        self.assertIn("_Pre-baked lean: Model pending — lean Alpha._", out)
+        # Odds slot byte-identical, Stakes untouched
+        self.assertIn("**Odds & Best Bet:** *[Phase 3 — watch the draw.]*", out)
+        self.assertIn("**Stakes:** *[Edition day placeholder.]*", out)
+
+    def test_md3_combined_slot_splits_call_from_odds(self):
+        with tempfile.TemporaryDirectory() as d:
+            cards = write_cards(Path(d), md3=MD3)
+            card, _ = be.extract_card("A5", "Team Alpha", "Team Beta", cards)
+        out, ok = be.inject_call(card, CALL_BODY)
+        self.assertTrue(ok)
+        self.assertIn(CALL_BODY, out)
+        self.assertIn("_Pre-baked lean: Model pending._", out)
+        self.assertIn("**Odds & Best Bet:** *[Phase 5 — market snapshot pending.]*", out)
+        self.assertNotIn("**The Call / Odds & Best Bet:**", out)
+
+    def test_template_section_layout(self):
+        with tempfile.TemporaryDirectory() as d:
+            cards = write_cards(Path(d), template=TEMPLATE)
+            card, _ = be.extract_card("B1", "Canada", "Bosnia and Herzegovina", cards)
+        out, ok = be.inject_call(card, CALL_BODY)
+        self.assertTrue(ok)
+        self.assertIn("## The Call", out)
+        self.assertIn(CALL_BODY, out)
+        self.assertIn("_Pre-baked lean: Pending aggregate model._", out)
+        self.assertIn("*[Phase 3 — market snapshot.]*", out)   # odds untouched
+
+    def test_no_call_slot_reports_not_replaced(self):
+        out, ok = be.inject_call("## Card\n\nNothing here.", CALL_BODY)
+        self.assertFalse(ok)
+
+
+class OvernightGradingTests(unittest.TestCase):
+    def test_graded_match_shows_check_brier_and_cumulative(self):
+        fixtures = "\n".join([
+            FIX_HEADER,
+            "A1,A,1,2026-06-11,15:00,3:00 PM,X,Y,S,C,USA,Fox,2,0,played,",
+        ]) + "\n"
+        import tempfile as _tf
+        with _tf.NamedTemporaryFile("w", suffix=".csv", delete=False, encoding="utf-8") as f:
+            f.write(fixtures)
+            path = f.name
+        try:
+            rows = be.read_rows(path)
+        finally:
+            Path(path).unlink()
+        graded = {"A1": {"p": (0.7, 0.2, 0.1), "outcome": 0, "brier": 0.14,
+                         "correct": True, "predicted_score": "2-0"}}
+        out = "\n".join(be._overnight_section(rows, date(2026, 6, 11), graded=graded,
+                                              cumulative="Ledger to date: 1 graded..."))
+        self.assertIn("✓ correct", out)
+        self.assertIn("Brier 0.140", out)
+        self.assertIn("predicted 2-0", out)
+        self.assertIn("Ledger to date: 1 graded...", out)
+
+    def test_no_grading_keeps_placeholder_line(self):
+        out = "\n".join(be._overnight_section([], date(2026, 6, 11)))
+        self.assertIn("No matches on the previous editorial date", out)
+
+
 if __name__ == "__main__":
     unittest.main()
