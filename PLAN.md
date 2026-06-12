@@ -86,7 +86,17 @@ Tests: Poisson path probabilities sum to 1; Brier of a certain correct call = 0,
 
 `data/odds_log.csv` (`match_id,market,selection,odds,source,timestamp`). De-vig 1X2 multiplicatively: `implied_i = (1/odds_i) / Σ(1/odds_j)`. Edge = model_p − implied; best bet = largest positive edge **iff** ≥ 3 percentage points (user-tunable), else print "No bet" (a normal outcome). Log closing odds for every pick; CLV = closing implied − snapshot implied. Recaps report units (flat 1u) + CLV next to Brier. **If no odds snapshot was provided, the section stays in placeholder state — never fetch-and-guess, never invent.**
 
-## Phase 6 — static HTML site (optional polish; any time after Phase 1)
+## Phase 6 — static HTML site ✅ (shipped June 12; extended same day)
+
+Live: `python scripts/build_site.py` renders docs/ — index (standings hub),
+48 team cards (`docs/teams/{slug}.html`, parsed from kb/ by site_content.py),
+72 matchup previews (`docs/matches/{id}.html`: card prose + live Stakes + The
+Call via a defensive predict.py adapter + Odds placeholder per contract).
+Played matches grade the model call (probability on outcome + Brier). All
+templates in templates/ share site.css (inlined per page, zero JS). Daily ops
+step: rebuild + commit docs/ after entering results. Original spec follows:
+
+## Phase 6 (original spec) — static HTML site (optional polish; any time after Phase 1)
 
 Per the agreed design direction (see `~/.claude` project memory `display-direction` / the June 12 design panel): `scripts/build_site.py` renders a single self-contained `docs/index.html` from the same `Standings` object — stdlib `string.Template`, no Node, no build step. 12 group cards in a CSS grid; third-place race with the top-8 cutline as a structural rule; green/neutral/grey status (wired via optional statuses arg, populated by scenarios.py later); tiebreak notes as footnote daggers, lots-⚠️ promoted. Add `to_dict(standings)` to standings.py (unit-tested) and embed the JSON in the page. Host: GitHub Pages from `/docs` or just open the file. Do NOT build: frameworks, bundlers, auto-refresh, flag emoji (broken on Windows).
 

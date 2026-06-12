@@ -87,7 +87,7 @@ a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--verm);outline-o
 .dateline::before{content:"";position:absolute;left:0;right:0;top:2px;border-top:1px solid var(--ink)}
 .progress{margin:14px auto 0;max-width:430px}
 .progress .bar{height:4px;background:var(--hairline);position:relative}
-.progress .bar i{position:absolute;inset:0;right:auto;width:2.8%;background:var(--verm);min-width:2px}
+.progress .bar i{position:absolute;inset:0;right:auto;background:var(--verm);min-width:2px}
 .progress .lbl{font-family:var(--mono);font-size:.68rem;color:var(--ink-soft);margin-top:5px;letter-spacing:.06em}
 
 /* ---------- group letter nav ---------- */
@@ -235,6 +235,79 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
   th,td{padding:7px 3px}
   .card{padding:11px 10px 9px}
 }
+
+/* ---------- subpages: team cards & matchup previews ---------- */
+.crumbs{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:18px}
+.crumbs a{text-decoration:none}
+.crumbs a:hover{text-decoration:underline}
+.page-mast{border-bottom:3px solid var(--ink);padding-bottom:14px;margin-bottom:8px;position:relative}
+.page-mast::after{content:"";position:absolute;left:0;right:0;bottom:3px;border-bottom:1px solid var(--ink)}
+.page-mast .eyebrow{margin-bottom:2px}
+.page-mast h1{font-size:clamp(1.9rem,6vw,3.3rem);font-weight:900;letter-spacing:-.015em;line-height:1.05;text-wrap:balance;font-variation-settings:"opsz" 144}
+.page-mast h1 a{text-decoration:none}
+.page-mast h1 a:hover{text-decoration:underline;text-decoration-thickness:3px;text-decoration-color:var(--verm)}
+.page-mast h1 .vs{font-size:.45em;font-weight:500;font-style:italic;color:var(--ink-soft);margin:0 .35em}
+.metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
+.metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
+.scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
+
+.strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
+.strap b{color:var(--ink);font-weight:700}
+
+.prose{max-width:72ch;font-size:.98rem;line-height:1.62}
+.prose p{margin:0 0 1em}
+.prose ul{margin:0 0 1em 1.2em}
+.prose li{margin-bottom:.45em}
+.prose blockquote{border-left:3px solid var(--amber);padding:2px 0 2px 14px;color:var(--ink-soft);font-style:italic;margin:0 0 1em}
+.prose strong{font-weight:700}
+
+.callout{border:1px solid var(--ink);background:var(--paper-2);box-shadow:3px 3px 0 var(--hairline);padding:12px 15px;margin:0 0 14px}
+.callout .tag{display:block;font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--verm);margin-bottom:5px}
+.callout p{margin:0;font-size:.92rem;line-height:1.55}
+.callout-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:14px;margin:18px 0}
+.callout-grid .callout{margin:0}
+
+.squad{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:2px 28px;margin:10px 0 6px}
+.squad div{padding:7px 0;border-bottom:1px solid var(--hairline)}
+.squad dt{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:2px}
+.squad dd{margin:0;font-size:.88rem;line-height:1.5}
+
+.fixture-list{list-style:none;margin:8px 0}
+.fixture-list li{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;border-bottom:1px solid var(--hairline);padding:9px 2px;font-family:var(--mono);font-size:.82rem}
+.fixture-list .md{color:var(--ink-soft);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;flex:0 0 3.2em}
+.fixture-list .fx{font-family:var(--serif);font-weight:700;font-size:.95rem}
+.fixture-list .fx a{text-decoration:none}
+.fixture-list .fx a:hover{text-decoration:underline}
+.fixture-list .res{font-weight:700}
+.fixture-list .when{color:var(--ink-soft);margin-left:auto;font-size:.7rem;letter-spacing:.05em;text-transform:uppercase}
+
+.probs{border:1px solid var(--ink);background:var(--paper-2);box-shadow:4px 4px 0 var(--hairline);padding:14px 16px;margin:6px 0 16px;max-width:680px}
+.probbar{display:flex;height:30px;border:1px solid var(--ink);font-family:var(--mono);font-size:.7rem;font-weight:700;margin:10px 0 4px}
+.probbar span{display:grid;place-items:center;overflow:hidden;white-space:nowrap;min-width:0;padding:0 3px}
+.probbar .pa{background:var(--green-soft);color:var(--ink);border-right:1px solid var(--ink)}
+.probbar .pd{color:var(--ink);border-right:1px solid var(--ink)}
+.probbar .pb{background:var(--verm-soft);color:var(--ink)}
+.probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
+.probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
+.probs .factline b{color:var(--ink)}
+.placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
+
+.mini-table{max-width:560px}
+.team-pair{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}
+.team-pair a{flex:1 1 240px;border:1px solid var(--ink);background:var(--paper-2);box-shadow:3px 3px 0 var(--hairline);padding:11px 14px;text-decoration:none;font-weight:700;font-size:1.02rem}
+@media (hover:hover){
+  .team-pair a{transition:transform .18s ease,box-shadow .18s ease}
+  .team-pair a:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--hairline)}
+}
+.team-pair a .sub{display:block;font-family:var(--mono);font-weight:500;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-top:3px}
+.verify-flag{border-left:3px solid var(--amber);background:var(--amber-soft);padding:9px 13px;font-family:var(--mono);font-size:.72rem;color:var(--ink);margin:0 0 14px;max-width:72ch}
+
+.callout ul{margin:2px 0 0 1.1em;font-size:.92rem;line-height:1.55}
+.callout li{margin-bottom:.35em}
+tbody th.team a{text-decoration:none}
+tbody th.team a:hover,.slate .teams a:hover{text-decoration:underline;text-decoration-color:var(--verm)}
+.slate .teams a{text-decoration:none}
+
 </style>
 </head>
 <body>
@@ -250,7 +323,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     <span>One edition per ET date</span>
   </div>
   <div class="progress">
-    <div class="bar" role="img" aria-label="2 of 72 group-stage matches played"><i></i></div>
+    <div class="bar" role="img" aria-label="2 of 72 group-stage matches played"><i style="width:2.8%"></i></div>
     <p class="lbl">2 of 72 group-stage matches played</p>
   </div>
   <nav class="gnav" aria-label="Jump to group">
@@ -278,8 +351,8 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
   </div>
   <div class="slate-scroll" tabindex="0" role="region" aria-label="Today's matches, scrollable">
     <ul class="slate">
-    <li><span class="t">3:00 PM ET</span><span class="teams">Canada v Bosnia and Herzegovina</span><span class="meta">B1 · Fox · BMO Field, Toronto</span></li>
-    <li><span class="t">9:00 PM ET</span><span class="teams">United States v Paraguay</span><span class="meta">D1 · Fox · SoFi Stadium, Inglewood</span></li>
+    <li><span class="t">3:00 PM ET</span><span class="teams"><a href="matches/B1.html">Canada v Bosnia and Herzegovina</a></span><span class="meta">B1 · Fox · BMO Field, Toronto · preview →</span></li>
+    <li><span class="t">9:00 PM ET</span><span class="teams"><a href="matches/D1.html">United States v Paraguay</a></span><span class="meta">D1 · Fox · SoFi Stadium, Inglewood · preview →</span></li>
     </ul>
   </div>
 </section>
@@ -299,7 +372,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Mexico">Mexico</th>
+        <th class="team" scope="row" title="Mexico"><a href="teams/mexico.html">Mexico</a></th>
         <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, not yet played, not yet played</span></td>
         <td>2</td>
         <td>+2</td>
@@ -307,7 +380,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="South Korea">South Korea</th>
+        <th class="team" scope="row" title="South Korea"><a href="teams/south-korea.html">South Korea</a></th>
         <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, not yet played, not yet played</span></td>
         <td>2</td>
         <td>+1</td>
@@ -315,7 +388,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Czechia">Czechia</th>
+        <th class="team" scope="row" title="Czechia"><a href="teams/czechia.html">Czechia</a></th>
         <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">lost, not yet played, not yet played</span></td>
         <td>1</td>
         <td>-1</td>
@@ -323,7 +396,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="South Africa">South Africa</th>
+        <th class="team" scope="row" title="South Africa"><a href="teams/south-africa.html">South Africa</a></th>
         <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">lost, not yet played, not yet played</span></td>
         <td>0</td>
         <td>-2</td>
@@ -340,7 +413,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Bosnia and Herzegovina">Bosnia and Herzegovina</th>
+        <th class="team" scope="row" title="Bosnia and Herzegovina"><a href="teams/bosnia-and-herzegovina.html">Bosnia and Herzegovina</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -348,7 +421,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="Canada">Canada</th>
+        <th class="team" scope="row" title="Canada"><a href="teams/canada.html">Canada</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -356,7 +429,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Qatar">Qatar</th>
+        <th class="team" scope="row" title="Qatar"><a href="teams/qatar.html">Qatar</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -364,7 +437,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Switzerland">Switzerland</th>
+        <th class="team" scope="row" title="Switzerland"><a href="teams/switzerland.html">Switzerland</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -381,7 +454,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Brazil">Brazil</th>
+        <th class="team" scope="row" title="Brazil"><a href="teams/brazil.html">Brazil</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -389,7 +462,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="Haiti">Haiti</th>
+        <th class="team" scope="row" title="Haiti"><a href="teams/haiti.html">Haiti</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -397,7 +470,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Morocco">Morocco</th>
+        <th class="team" scope="row" title="Morocco"><a href="teams/morocco.html">Morocco</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -405,7 +478,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Scotland">Scotland</th>
+        <th class="team" scope="row" title="Scotland"><a href="teams/scotland.html">Scotland</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -422,7 +495,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Australia">Australia</th>
+        <th class="team" scope="row" title="Australia"><a href="teams/australia.html">Australia</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -430,7 +503,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="Paraguay">Paraguay</th>
+        <th class="team" scope="row" title="Paraguay"><a href="teams/paraguay.html">Paraguay</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -438,7 +511,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Türkiye">Türkiye</th>
+        <th class="team" scope="row" title="Türkiye"><a href="teams/turkiye.html">Türkiye</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -446,7 +519,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="United States">United States</th>
+        <th class="team" scope="row" title="United States"><a href="teams/united-states.html">United States</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -463,7 +536,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Curaçao">Curaçao</th>
+        <th class="team" scope="row" title="Curaçao"><a href="teams/curacao.html">Curaçao</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -471,7 +544,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="Côte d&#x27;Ivoire">Côte d&#x27;Ivoire</th>
+        <th class="team" scope="row" title="Côte d&#x27;Ivoire"><a href="teams/cote-divoire.html">Côte d&#x27;Ivoire</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -479,7 +552,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Ecuador">Ecuador</th>
+        <th class="team" scope="row" title="Ecuador"><a href="teams/ecuador.html">Ecuador</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -487,7 +560,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Germany">Germany</th>
+        <th class="team" scope="row" title="Germany"><a href="teams/germany.html">Germany</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -504,7 +577,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Japan">Japan</th>
+        <th class="team" scope="row" title="Japan"><a href="teams/japan.html">Japan</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -512,7 +585,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="Netherlands">Netherlands</th>
+        <th class="team" scope="row" title="Netherlands"><a href="teams/netherlands.html">Netherlands</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -520,7 +593,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Sweden">Sweden</th>
+        <th class="team" scope="row" title="Sweden"><a href="teams/sweden.html">Sweden</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -528,7 +601,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Tunisia">Tunisia</th>
+        <th class="team" scope="row" title="Tunisia"><a href="teams/tunisia.html">Tunisia</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -545,7 +618,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Belgium">Belgium</th>
+        <th class="team" scope="row" title="Belgium"><a href="teams/belgium.html">Belgium</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -553,7 +626,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="Egypt">Egypt</th>
+        <th class="team" scope="row" title="Egypt"><a href="teams/egypt.html">Egypt</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -561,7 +634,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Iran">Iran</th>
+        <th class="team" scope="row" title="Iran"><a href="teams/iran.html">Iran</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -569,7 +642,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="New Zealand">New Zealand</th>
+        <th class="team" scope="row" title="New Zealand"><a href="teams/new-zealand.html">New Zealand</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -586,7 +659,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Cape Verde">Cape Verde</th>
+        <th class="team" scope="row" title="Cape Verde"><a href="teams/cape-verde.html">Cape Verde</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -594,7 +667,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="Saudi Arabia">Saudi Arabia</th>
+        <th class="team" scope="row" title="Saudi Arabia"><a href="teams/saudi-arabia.html">Saudi Arabia</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -602,7 +675,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Spain">Spain</th>
+        <th class="team" scope="row" title="Spain"><a href="teams/spain.html">Spain</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -610,7 +683,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Uruguay">Uruguay</th>
+        <th class="team" scope="row" title="Uruguay"><a href="teams/uruguay.html">Uruguay</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -627,7 +700,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="France">France</th>
+        <th class="team" scope="row" title="France"><a href="teams/france.html">France</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -635,7 +708,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="Iraq">Iraq</th>
+        <th class="team" scope="row" title="Iraq"><a href="teams/iraq.html">Iraq</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -643,7 +716,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Norway">Norway</th>
+        <th class="team" scope="row" title="Norway"><a href="teams/norway.html">Norway</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -651,7 +724,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Senegal">Senegal</th>
+        <th class="team" scope="row" title="Senegal"><a href="teams/senegal.html">Senegal</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -668,7 +741,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Algeria">Algeria</th>
+        <th class="team" scope="row" title="Algeria"><a href="teams/algeria.html">Algeria</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -676,7 +749,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="Argentina">Argentina</th>
+        <th class="team" scope="row" title="Argentina"><a href="teams/argentina.html">Argentina</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -684,7 +757,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Austria">Austria</th>
+        <th class="team" scope="row" title="Austria"><a href="teams/austria.html">Austria</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -692,7 +765,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Jordan">Jordan</th>
+        <th class="team" scope="row" title="Jordan"><a href="teams/jordan.html">Jordan</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -709,7 +782,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Colombia">Colombia</th>
+        <th class="team" scope="row" title="Colombia"><a href="teams/colombia.html">Colombia</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -717,7 +790,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="DR Congo">DR Congo</th>
+        <th class="team" scope="row" title="DR Congo"><a href="teams/dr-congo.html">DR Congo</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -725,7 +798,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Portugal">Portugal</th>
+        <th class="team" scope="row" title="Portugal"><a href="teams/portugal.html">Portugal</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -733,7 +806,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Uzbekistan">Uzbekistan</th>
+        <th class="team" scope="row" title="Uzbekistan"><a href="teams/uzbekistan.html">Uzbekistan</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -750,7 +823,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Croatia">Croatia</th>
+        <th class="team" scope="row" title="Croatia"><a href="teams/croatia.html">Croatia</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -758,7 +831,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="England">England</th>
+        <th class="team" scope="row" title="England"><a href="teams/england.html">England</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -766,7 +839,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Ghana">Ghana</th>
+        <th class="team" scope="row" title="Ghana"><a href="teams/ghana.html">Ghana</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -774,7 +847,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Panama">Panama</th>
+        <th class="team" scope="row" title="Panama"><a href="teams/panama.html">Panama</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -799,7 +872,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     <tbody>
       <tr class="q">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Austria">Austria</th>
+        <th class="team" scope="row" title="Austria"><a href="teams/austria.html">Austria</a></th>
         <td class="grp">J</td>
         <td>0-0-0</td>
         <td>0</td>
@@ -809,7 +882,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="q">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="Ecuador">Ecuador</th>
+        <th class="team" scope="row" title="Ecuador"><a href="teams/ecuador.html">Ecuador</a></th>
         <td class="grp">E</td>
         <td>0-0-0</td>
         <td>0</td>
@@ -819,7 +892,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="q">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Ghana">Ghana</th>
+        <th class="team" scope="row" title="Ghana"><a href="teams/ghana.html">Ghana</a></th>
         <td class="grp">L</td>
         <td>0-0-0</td>
         <td>0</td>
@@ -829,7 +902,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="q">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Iran">Iran</th>
+        <th class="team" scope="row" title="Iran"><a href="teams/iran.html">Iran</a></th>
         <td class="grp">G</td>
         <td>0-0-0</td>
         <td>0</td>
@@ -839,7 +912,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="q">
         <td class="pos">5</td>
-        <th class="team" scope="row" title="Morocco">Morocco</th>
+        <th class="team" scope="row" title="Morocco"><a href="teams/morocco.html">Morocco</a></th>
         <td class="grp">C</td>
         <td>0-0-0</td>
         <td>0</td>
@@ -849,7 +922,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="q">
         <td class="pos">6</td>
-        <th class="team" scope="row" title="Norway">Norway</th>
+        <th class="team" scope="row" title="Norway"><a href="teams/norway.html">Norway</a></th>
         <td class="grp">I</td>
         <td>0-0-0</td>
         <td>0</td>
@@ -859,7 +932,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="q">
         <td class="pos">7</td>
-        <th class="team" scope="row" title="Portugal">Portugal</th>
+        <th class="team" scope="row" title="Portugal"><a href="teams/portugal.html">Portugal</a></th>
         <td class="grp">K</td>
         <td>0-0-0</td>
         <td>0</td>
@@ -869,7 +942,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="q">
         <td class="pos">8</td>
-        <th class="team" scope="row" title="Qatar">Qatar</th>
+        <th class="team" scope="row" title="Qatar"><a href="teams/qatar.html">Qatar</a></th>
         <td class="grp">B</td>
         <td>0-0-0</td>
         <td>0</td>
@@ -880,7 +953,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       <tr class="cut"><td colspan="8"><span class="scissors" aria-hidden="true">✂</span>&nbsp; the cutline — top 8 advance</td></tr>
       <tr class="below">
         <td class="pos">9</td>
-        <th class="team" scope="row" title="Spain">Spain</th>
+        <th class="team" scope="row" title="Spain"><a href="teams/spain.html">Spain</a></th>
         <td class="grp">H</td>
         <td>0-0-0</td>
         <td>0</td>
@@ -890,7 +963,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="below">
         <td class="pos">10</td>
-        <th class="team" scope="row" title="Sweden">Sweden</th>
+        <th class="team" scope="row" title="Sweden"><a href="teams/sweden.html">Sweden</a></th>
         <td class="grp">F</td>
         <td>0-0-0</td>
         <td>0</td>
@@ -900,7 +973,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="below">
         <td class="pos">11</td>
-        <th class="team" scope="row" title="Türkiye">Türkiye</th>
+        <th class="team" scope="row" title="Türkiye"><a href="teams/turkiye.html">Türkiye</a></th>
         <td class="grp">D</td>
         <td>0-0-0</td>
         <td>0</td>
@@ -910,7 +983,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
       </tr>
       <tr class="below">
         <td class="pos">12</td>
-        <th class="team" scope="row" title="Czechia">Czechia</th>
+        <th class="team" scope="row" title="Czechia"><a href="teams/czechia.html">Czechia</a></th>
         <td class="grp">A</td>
         <td>0-0-1</td>
         <td>1</td>
@@ -940,7 +1013,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
     </ul>
   </div>
   <p class="colophon">
-    Generated 2026-06-12 14:44 · standings computed from data/fixtures.csv by scripts/standings.py ·
+    Generated 2026-06-12 15:22 · standings computed from data/fixtures.csv by scripts/standings.py ·
     tiebreakers: points, goal difference, goals scored, head-to-head, fair play, lots ·
     <a href="https://github.com/alxgriff/wc26-hub">source &amp; data</a> · machine-readable copy embedded below
   </p>
@@ -1812,7 +1885,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
   "notes": []
  },
  "warnings": [],
- "generated_at": "2026-06-12 14:44",
+ "generated_at": "2026-06-12 15:22",
  "slate_date": "2026-06-12"
 }
 </script>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>South Africa — WC26 Daily Hub</title>
+<meta name="description" content="South Africa at the 2026 World Cup: squad, tactical profile, fixtures and current Group A standing.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,500&family=Spline+Sans+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5f1e6;
+  --paper-2:#efe9da;
+  --ink:#1b1812;
+  --ink-soft:#615a4b;
+  --hairline:rgba(27,24,18,.16);
+  --green:#1c6b35;
+  --green-soft:rgba(28,107,53,.10);
+  --verm:#a83018;
+  --verm-soft:rgba(168,48,24,.08);
+  --amber:#8a5a00;
+  --amber-soft:rgba(138,90,0,.14);
+  --serif:"Fraunces",Georgia,"Times New Roman",serif;
+  --mono:"Spline Sans Mono","Cascadia Code",Consolas,"Courier New",monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#16140e;
+    --paper-2:#1d1a12;
+    --ink:#ece5d2;
+    --ink-soft:#a59c86;
+    --hairline:rgba(236,229,210,.18);
+    --green:#62b97e;
+    --green-soft:rgba(98,185,126,.12);
+    --verm:#e8765a;
+    --verm-soft:rgba(232,118,90,.10);
+    --amber:#d9a948;
+    --amber-soft:rgba(217,169,72,.12);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+html,body{overflow-x:clip}
+body{
+  background:var(--paper);
+  background-image:radial-gradient(var(--hairline) .5px,transparent .5px);
+  background-size:4px 4px;
+  color:var(--ink);
+  font-family:var(--serif);
+  font-weight:500;
+  line-height:1.45;
+  padding:clamp(14px,3.5vw,40px) clamp(14px,4vw,48px) 56px;
+}
+.sheet{max-width:1140px;margin:0 auto}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+a{color:inherit}
+main{display:block}
+a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--verm);outline-offset:2px}
+.slate-scroll,.thirds-wrap{scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
+.slate-scroll::-webkit-scrollbar,.thirds-wrap::-webkit-scrollbar{height:8px}
+.slate-scroll::-webkit-scrollbar-thumb{background:var(--hairline)}
+.thirds-wrap::-webkit-scrollbar-thumb{background:var(--hairline)}
+.skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:var(--paper);padding:8px 14px;font-family:var(--mono);font-size:.8rem;z-index:9}
+.skip:focus{left:8px;top:8px}
+
+/* ---------- masthead ---------- */
+.masthead{text-align:center;animation:settle .6s cubic-bezier(.2,.7,.3,1) both}
+.eyebrow{
+  font-family:var(--mono);font-size:.68rem;font-weight:500;letter-spacing:.32em;
+  text-transform:uppercase;color:var(--ink-soft);
+}
+.masthead h1{
+  font-size:clamp(2.3rem,8.5vw,4.8rem);
+  font-weight:900;letter-spacing:-.015em;line-height:1.02;
+  margin:.12em 0 .18em;
+  font-variation-settings:"opsz" 144;
+  text-wrap:balance;
+}
+.masthead h1 .num{color:var(--verm)}
+.dateline{
+  display:flex;justify-content:center;flex-wrap:wrap;column-gap:1.4em;row-gap:2px;
+  border-top:3px solid var(--ink);border-bottom:1px solid var(--ink);
+  padding:7px 4px;position:relative;
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+}
+.dateline::before{content:"";position:absolute;left:0;right:0;top:2px;border-top:1px solid var(--ink)}
+.progress{margin:14px auto 0;max-width:430px}
+.progress .bar{height:4px;background:var(--hairline);position:relative}
+.progress .bar i{position:absolute;inset:0;right:auto;background:var(--verm);min-width:2px}
+.progress .lbl{font-family:var(--mono);font-size:.68rem;color:var(--ink-soft);margin-top:5px;letter-spacing:.06em}
+
+/* ---------- group letter nav ---------- */
+.gnav{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin:22px 0 4px}
+.gnav a{
+  font-family:var(--mono);font-size:.78rem;font-weight:700;text-decoration:none;
+  width:32px;height:32px;display:grid;place-items:center;
+  border:1px solid var(--ink);
+}
+.gnav a:hover{background:var(--ink);color:var(--paper)}
+.gnav a.wide{width:auto;padding:0 12px;letter-spacing:.1em}
+
+/* ---------- section headers ---------- */
+section{margin-top:46px}
+.sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:18px}
+.sec-head h2{font-size:clamp(1.45rem,3.4vw,1.9rem);font-weight:900;letter-spacing:-.01em}
+.sec-head .kicker{font-family:var(--mono);font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:var(--verm);font-weight:700;white-space:nowrap}
+.standfirst{font-style:italic;color:var(--ink-soft);font-size:.95rem;margin:-8px 0 18px}
+
+/* ---------- today's slate ---------- */
+.slate-scroll{overflow-x:auto;padding-bottom:8px;scroll-snap-type:x proximity}
+.slate{list-style:none;display:flex;gap:10px}
+.slate li{
+  scroll-snap-align:start;flex:0 0 auto;min-width:218px;
+  border:1px solid var(--ink);background:var(--paper-2);
+  padding:10px 13px 11px;box-shadow:3px 3px 0 var(--hairline);
+}
+.slate .t{font-family:var(--mono);font-weight:700;font-size:.8rem}
+.slate .t .moon{color:var(--amber)}
+.slate .teams{display:block;font-weight:700;font-size:1.02rem;line-height:1.25;margin:3px 0 4px}
+.slate .meta{font-family:var(--mono);font-size:.68rem;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase}
+.slate li.empty{font-style:italic;color:var(--ink-soft);border-style:dashed;box-shadow:none}
+
+/* ---------- group cards ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(310px,100%),1fr));gap:20px}
+.card{
+  border:1px solid var(--ink);background:var(--paper-2);
+  box-shadow:4px 4px 0 var(--hairline);
+  padding:13px 14px 11px;
+  animation:rise .55s cubic-bezier(.2,.7,.3,1) both;
+  animation-delay:calc(var(--i)*45ms);
+}
+@media (hover:hover){
+  .card{transition:transform .18s ease,box-shadow .18s ease}
+  .card:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--hairline)}
+}
+.card h3{
+  display:flex;align-items:center;gap:9px;
+  font-size:1rem;font-weight:900;letter-spacing:.02em;text-transform:uppercase;
+  border-bottom:2px solid var(--ink);padding-bottom:7px;margin-bottom:2px;
+}
+.card h3 .stamp{
+  font-family:var(--mono);font-weight:700;font-size:.95rem;
+  width:26px;height:26px;display:grid;place-items:center;flex:0 0 auto;
+  background:var(--ink);color:var(--paper);
+}
+.card h3 .played-tag{margin-left:auto;font-family:var(--mono);font-weight:500;font-size:.62rem;letter-spacing:.12em;color:var(--ink-soft)}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.84rem;font-variant-numeric:tabular-nums}
+.card table{table-layout:fixed}
+th,td{text-align:right;padding:7px 4px;border-bottom:1px solid var(--hairline);white-space:nowrap}
+th.num{width:2.4rem}
+thead th{
+  font-size:.66rem;font-weight:500;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-soft);padding-top:9px;padding-bottom:4px;
+}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+td.pos,th.pos{width:1.8em;color:var(--ink-soft);text-align:left;padding-left:7px}
+th.team{text-align:left}
+tbody th.team{
+  font-family:var(--serif);font-weight:700;font-size:.92rem;
+  max-width:1px;width:99%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+tbody th.team .dag{color:var(--verm);font-family:var(--mono);font-size:.75em;font-weight:500}
+td.pts{font-weight:700;font-size:.95rem}
+.card tbody tr:nth-child(2) th,.card tbody tr:nth-child(2) td{border-bottom:2px solid var(--ink)}
+.card tbody tr.zone-top{background:var(--green-soft)}
+.card tbody tr.zone-top td.pos{box-shadow:inset 3px 0 0 var(--green)}
+.card tbody tr.zone-third td.pos{box-shadow:inset 3px 0 0 var(--amber)}
+.card tbody tr.zone-third{background:var(--amber-soft)}
+/* fate-* hooks are wired by scenarios.py output (Phase 3+). When emitting them,
+   build_site must also add sr-only text — the ::after ✓ is visual-only.
+   zone-out (4th place) is intentionally unstyled: neutral is the default. */
+tr.fate-through th.team::after{content:" ✓";color:var(--green);font-family:var(--mono)}
+tr.fate-out{color:var(--ink-soft)}
+tr.fate-out th.team{text-decoration:line-through;text-decoration-thickness:1px;text-decoration-color:var(--ink-soft)}
+
+/* form pips */
+td.form,th.form{white-space:nowrap;text-align:center}
+th.form{width:62px}
+.pip{
+  display:inline-grid;place-items:center;width:16px;height:16px;
+  font-size:.58rem;font-weight:700;margin:0 1px;vertical-align:middle;
+  border:1px solid var(--hairline);color:var(--ink-soft);
+}
+.pip-w{background:var(--green);border-color:var(--green);color:var(--paper)}
+.pip-d{border-color:var(--ink-soft);color:var(--ink)}
+.pip-l{background:var(--verm-soft);border-color:var(--verm);color:var(--verm)}
+@media (prefers-color-scheme:dark){.pip-w{color:#10130c}}
+
+/* notes */
+.notes{list-style:none;margin-top:9px;font-family:var(--mono);font-size:.68rem;line-height:1.5;color:var(--ink-soft)}
+.notes li{padding-left:1.2em;text-indent:-1.2em;margin-top:3px}
+.notes .dag{color:var(--verm)}
+.notes li.warn{color:var(--amber)}
+
+/* ---------- third-place race ---------- */
+.thirds-wrap{border:1px solid var(--ink);background:var(--paper-2);box-shadow:4px 4px 0 var(--hairline);padding:6px 16px 12px;overflow-x:auto;max-width:768px;margin-inline:auto}
+.thirds-wrap table{min-width:560px}
+.thirds-wrap tbody tr.q{background:var(--green-soft)}
+.thirds-wrap tbody tr.q td.pos{box-shadow:inset 3px 0 0 var(--green)}
+.thirds-wrap tbody tr.below{color:var(--ink-soft)}
+.thirds-wrap tbody tr.below th.team{font-weight:500}
+td.grp{font-weight:700}
+td.in{color:var(--green);font-weight:700;text-align:center}
+tr.cut td{
+  border-bottom:0;border-top:2px dashed var(--verm);
+  padding:5px 0 6px;text-align:center;
+  font-size:.64rem;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--verm);
+}
+tr.cut .scissors{font-size:.9rem;letter-spacing:0;vertical-align:-1px}
+
+/* ---------- footer ---------- */
+footer{margin-top:52px;border-top:3px solid var(--ink);padding-top:8px;position:relative}
+footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1px solid var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 26px;font-family:var(--mono);font-size:.68rem;color:var(--ink-soft);margin-top:10px}
+.legend .pip{vertical-align:-3px}
+.legend .swatch{display:inline-block;width:12px;height:12px;vertical-align:-1px;border:1px solid var(--hairline)}
+.legend .swatch.g{background:var(--green-soft);border-left:3px solid var(--green)}
+.legend .swatch.a{background:var(--amber-soft);border-left:3px solid var(--amber)}
+.archive{margin-top:16px;font-family:var(--mono);font-size:.72rem}
+.archive h2{font-family:var(--serif);font-size:.95rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.archive ul{list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:6px}
+.colophon{margin-top:18px;font-family:var(--mono);font-size:.64rem;color:var(--ink-soft);letter-spacing:.04em;line-height:1.7;max-width:72ch}
+.moon{color:var(--amber);font-family:var(--serif)}
+
+@keyframes rise{from{opacity:0;transform:translateY(12px)}}
+@keyframes settle{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+@media (max-width:480px){
+  .slate-scroll{overflow-x:visible}
+  .slate{flex-direction:column}
+  .slate li{min-width:0}
+  th,td{padding:7px 3px}
+  .card{padding:11px 10px 9px}
+}
+
+/* ---------- subpages: team cards & matchup previews ---------- */
+.crumbs{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:18px}
+.crumbs a{text-decoration:none}
+.crumbs a:hover{text-decoration:underline}
+.page-mast{border-bottom:3px solid var(--ink);padding-bottom:14px;margin-bottom:8px;position:relative}
+.page-mast::after{content:"";position:absolute;left:0;right:0;bottom:3px;border-bottom:1px solid var(--ink)}
+.page-mast .eyebrow{margin-bottom:2px}
+.page-mast h1{font-size:clamp(1.9rem,6vw,3.3rem);font-weight:900;letter-spacing:-.015em;line-height:1.05;text-wrap:balance;font-variation-settings:"opsz" 144}
+.page-mast h1 a{text-decoration:none}
+.page-mast h1 a:hover{text-decoration:underline;text-decoration-thickness:3px;text-decoration-color:var(--verm)}
+.page-mast h1 .vs{font-size:.45em;font-weight:500;font-style:italic;color:var(--ink-soft);margin:0 .35em}
+.metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
+.metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
+.scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
+
+.strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
+.strap b{color:var(--ink);font-weight:700}
+
+.prose{max-width:72ch;font-size:.98rem;line-height:1.62}
+.prose p{margin:0 0 1em}
+.prose ul{margin:0 0 1em 1.2em}
+.prose li{margin-bottom:.45em}
+.prose blockquote{border-left:3px solid var(--amber);padding:2px 0 2px 14px;color:var(--ink-soft);font-style:italic;margin:0 0 1em}
+.prose strong{font-weight:700}
+
+.callout{border:1px solid var(--ink);background:var(--paper-2);box-shadow:3px 3px 0 var(--hairline);padding:12px 15px;margin:0 0 14px}
+.callout .tag{display:block;font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--verm);margin-bottom:5px}
+.callout p{margin:0;font-size:.92rem;line-height:1.55}
+.callout-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:14px;margin:18px 0}
+.callout-grid .callout{margin:0}
+
+.squad{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:2px 28px;margin:10px 0 6px}
+.squad div{padding:7px 0;border-bottom:1px solid var(--hairline)}
+.squad dt{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:2px}
+.squad dd{margin:0;font-size:.88rem;line-height:1.5}
+
+.fixture-list{list-style:none;margin:8px 0}
+.fixture-list li{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;border-bottom:1px solid var(--hairline);padding:9px 2px;font-family:var(--mono);font-size:.82rem}
+.fixture-list .md{color:var(--ink-soft);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;flex:0 0 3.2em}
+.fixture-list .fx{font-family:var(--serif);font-weight:700;font-size:.95rem}
+.fixture-list .fx a{text-decoration:none}
+.fixture-list .fx a:hover{text-decoration:underline}
+.fixture-list .res{font-weight:700}
+.fixture-list .when{color:var(--ink-soft);margin-left:auto;font-size:.7rem;letter-spacing:.05em;text-transform:uppercase}
+
+.probs{border:1px solid var(--ink);background:var(--paper-2);box-shadow:4px 4px 0 var(--hairline);padding:14px 16px;margin:6px 0 16px;max-width:680px}
+.probbar{display:flex;height:30px;border:1px solid var(--ink);font-family:var(--mono);font-size:.7rem;font-weight:700;margin:10px 0 4px}
+.probbar span{display:grid;place-items:center;overflow:hidden;white-space:nowrap;min-width:0;padding:0 3px}
+.probbar .pa{background:var(--green-soft);color:var(--ink);border-right:1px solid var(--ink)}
+.probbar .pd{color:var(--ink);border-right:1px solid var(--ink)}
+.probbar .pb{background:var(--verm-soft);color:var(--ink)}
+.probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
+.probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
+.probs .factline b{color:var(--ink)}
+.placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
+
+.mini-table{max-width:560px}
+.team-pair{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}
+.team-pair a{flex:1 1 240px;border:1px solid var(--ink);background:var(--paper-2);box-shadow:3px 3px 0 var(--hairline);padding:11px 14px;text-decoration:none;font-weight:700;font-size:1.02rem}
+@media (hover:hover){
+  .team-pair a{transition:transform .18s ease,box-shadow .18s ease}
+  .team-pair a:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--hairline)}
+}
+.team-pair a .sub{display:block;font-family:var(--mono);font-weight:500;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-top:3px}
+.verify-flag{border-left:3px solid var(--amber);background:var(--amber-soft);padding:9px 13px;font-family:var(--mono);font-size:.72rem;color:var(--ink);margin:0 0 14px;max-width:72ch}
+
+.callout ul{margin:2px 0 0 1.1em;font-size:.92rem;line-height:1.55}
+.callout li{margin-bottom:.35em}
+tbody th.team a{text-decoration:none}
+tbody th.team a:hover,.slate .teams a:hover{text-decoration:underline;text-decoration-color:var(--verm)}
+.slate .teams a{text-decoration:none}
+
+</style>
+</head>
+<body>
+<a class="skip" href="#profile">Skip to the profile</a>
+<div class="sheet">
+
+<header class="page-mast">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="../index.html">The 26 Standings</a> · <a href="../index.html#group-a">Group A</a> · <span aria-current="page">South Africa</span>
+  </nav>
+  <p class="eyebrow">WC26 Daily Hub · Team Card</p>
+  <h1>South Africa</h1>
+  <div class="metaline">
+    <span class="stamp">Group A</span>
+    <span>4th · 0 pts · GD -2</span>
+    <span>Form <span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">lost, not yet played, not yet played</span></span>
+  </div>
+  <div class="strap">
+    <span><b>Manager:</b> Hugo Broos</span>
+    <span><b>Captain:</b> Ronwen Williams</span>
+    <span><b>Projected XI shape:</b> 4-2-3-1</span>
+    <span><b>World Cup history:</b> 4 appearances (1998, 2002, 2010, 2026) | Recent finish: Group Stage (2010) | Best finish: Group Stage (3x)</span>
+    <span><b>Most appearances:</b> Teboho Aaron Mokoena (107)</span>
+    <span><b>Record goalscorer:</b> Benni McCarthy (31)</span>
+  </div>
+</header>
+
+<main id="profile">
+
+<section aria-labelledby="fixtures-h">
+  <div class="sec-head">
+    <span class="kicker">The Slate</span>
+    <h2 id="fixtures-h">Group-stage fixtures</h2>
+  </div>
+  <ul class="fixture-list">
+    <li><span class="md">MD1</span><span class="fx"><a href="../matches/A1.html">at Mexico</a></span><span class="res">0–2 L</span><span class="when">FT</span></li>
+    <li><span class="md">MD2</span><span class="fx"><a href="../matches/A3.html">at Czechia</a></span><span class="when">2026-06-18 · 12:00 PM ET</span></li>
+    <li><span class="md">MD3</span><span class="fx"><a href="../matches/A6.html">vs South Korea</a></span><span class="when">2026-06-24 · 9:00 PM ET</span></li>
+  </ul>
+</section>
+
+<section aria-labelledby="tactics-h">
+  <div class="sec-head">
+    <span class="kicker">The System</span>
+    <h2 id="tactics-h">Tactical profile</h2>
+  </div>
+  <div class="prose">
+<p>Keen observers of South Africa during this most recent period of international success under Hugo Broos will note a resemblance to the playstyle of Mamelodi Sundowns, South Africa's historically dominant club side and the current CAF Champions League title holders. This is by design, and while Sundowns' representation in the squad is roughly equal to that of rival Premiership side Orlando Pirates, it's Sundowns' players that lend Bafana Bafana their identity on the pitch, particularly the metronomic Teboho Mokoena in midfield, captain &amp; goalkeeper Ronwen Williams and fullback duo of Aubrey Modiba and Khuliso Mudau.</p>
+<p>Like Sundowns, Broos' South Africa prefer to play with the ball, building up from the backline with short, high-tempo passes. Their outfield players are spatially adventurous and willing to cover great distances to force overloads in the wide areas and half-spaces. Build-up in the attacking area will often incorporate two of the midfielders and a fullback, coalescing in a 6-man wide forward line with multiple routes through which to supply the runs of forward Lyle Foster. Out of possession, South Africa press aggressively man-to-man to win the ball back high up the pitch. This approach invites the usual structural concerns, but the presence of Mokoena and vertical mobility of the fullbacks help mitigate that risk.</p>
+  </div>
+  <div class="callout-grid">
+  <div class="callout"><span class="tag">Key player</span><p>It's no exaggeration to say that Teboho Mokoena plays a key role in virtually every phase of South Africa's game. He is simultaneously the team's best playmaker and midfield ball-winner, the positional anchor that enables his teammates to enact their pressing structure, and a leadership figure off the pitch. He also does all of that for Mamelodi Sundowns.</p></div>
+  <div class="callout"><span class="tag">Rising star</span><p>21-year old Relebohile Mofokeng led the South African Premiership in goal involvements with 10G + 8A this season and played a massive part in Orlando Pirates' first title-winning campaign since 2012. The versatile playmaker has yet to carve out a consistent starting role for Bafana Bafana, but the opportunity is there to claim at this tournament.</p></div>
+  <div class="callout"><span class="tag">Fun fact</span><p>Each one of South Africa's last three squads (2002, 2010 &amp; 2026) has featured a different player named Teboho Mokoena making his World Cup debut.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="squad-h">
+  <div class="sec-head">
+    <span class="kicker">The Names</span>
+    <h2 id="squad-h">Squad by position</h2>
+  </div>
+  <dl class="squad">
+    <div><dt>Goalkeepers</dt><dd>Ronwen Williams, Ricardo Goss, Sipho Chaine</dd></div>
+    <div><dt>Central defenders</dt><dd>Mbekezeli Mbokazi, Ime Okon, Khulumani Ndamane, Nkosinathi Sibisi, Olwethu Makhanya</dd></div>
+    <div><dt>Wide defenders</dt><dd>Khuliso Mudau, Thabang Matuludi, Aubrey Modiba, Samukele Kabini, Bradley Cross</dd></div>
+    <div><dt>Defensive midfield</dt><dd>Teboho Mokoena</dd></div>
+    <div><dt>Central midfield</dt><dd>Sphephelo Sithole, Jayden Adams, Thalente Mbatha</dd></div>
+    <div><dt>Attacking midfield</dt><dd>Themba Zwane</dd></div>
+    <div><dt>Wide forwards</dt><dd>Oswin Appollis, Tshepang Moremi, Relebohile Mofokeng, Thapelo Maseko, Kamogelo Sebelebele</dd></div>
+    <div><dt>Central forwards</dt><dd>Lyle Foster, Evidence Makgopa, Iqraam Rayners</dd></div>
+  </dl>
+</section>
+
+</main>
+
+<footer>
+  <p class="colophon">
+    Profile from the project knowledge base (pre-baked June 11, 2026 — squad and
+    selection notes verified day-of in the daily editions) · standing computed from
+    data/fixtures.csv · <a href="../index.html">all standings</a> ·
+    <a href="https://github.com/alxgriff/wc26-hub">source &amp; data</a>
+  </p>
+</footer>
+
+</div>
+</body>
+</html>
