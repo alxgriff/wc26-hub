@@ -52,6 +52,7 @@ import csv
 import json
 import math
 import os
+import re
 import statistics
 import sys
 import urllib.error
@@ -208,16 +209,45 @@ def append_odds(rows: list, path: Path = ODDS_LOG) -> None:
 
 def latest_market(odds_rows: list, match_id: str, market: str,
                   phase: str = "snapshot", source_prefix: str = "median") -> dict:
-    """The most recent {selection: (line, odds)} for a match/market/phase from
-    rows whose source starts with ``source_prefix``."""
+    """The most recent {(selection, line): (odds, n_books)} for a
+    match/market/phase from rows whose source starts with ``source_prefix``.
+    Line-aware because different books quote different main lines — pairing an
+    Over at one line with an Under at another would be an invalid de-vig."""
     rows = [r for r in odds_rows
             if r["match_id"] == match_id and r["market"] == market
             and r["phase"] == phase and r["source"].startswith(source_prefix)]
     if not rows:
         return {}
     last_ts = max(r["timestamp"] for r in rows)
-    return {r["selection"]: (r["line"], float(r["odds"]))
-            for r in rows if r["timestamp"] == last_ts}
+    out = {}
+    for r in rows:
+        if r["timestamp"] != last_ts:
+            continue
+        m = re.search(r"/(\d+)books", r["source"])
+        out[(r["selection"], r["line"])] = (float(r["odds"]),
+                                            int(m.group(1)) if m else 1)
+    return out
+
+
+def paired_lines(market_data: dict, sel_a: str, sel_b: str,
+                 negate_b: bool = False) -> tuple | None:
+    """The best-supported line quoted on BOTH sides of a two-way market.
+    Returns (line_a, odds_a, odds_b) — for spreads the away line is the
+    negation of the home line (``negate_b``). None if no complete pair."""
+    candidates = []
+    for (sel, line), (odds_a, n_a) in market_data.items():
+        if sel != sel_a:
+            continue
+        b_line = line
+        if negate_b and line:
+            b_line = f"{-float(line):g}"
+        match_b = market_data.get((sel_b, b_line))
+        if match_b:
+            candidates.append((n_a + match_b[1], line, odds_a, match_b[0]))
+    if not candidates:
+        return None
+    _, line, odds_a, odds_b = max(candidates, key=lambda c: c[0])
+    return line, odds_a, odds_b
 
 
 # ---------------------------------------------------------------- evaluation
@@ -241,11 +271,11 @@ def evaluate_match(match_id: str, odds_rows: list, ledger_rows: list,
 
     h2h = latest_market(odds_rows, match_id, "h2h")
     probs = consensus_probs(match_id, ledger_rows)
-    if h2h and all(s in h2h for s in H2H_SELECTIONS):
+    if h2h and all((s, "") in h2h for s in H2H_SELECTIONS):
         if probs is None:
             out["missing"].append("no logged consensus prediction — 1X2 edge not computed")
         else:
-            odds3 = [h2h[s][1] for s in H2H_SELECTIONS]
+            odds3 = [h2h[(s, "")][0] for s in H2H_SELECTIONS]
             implied = devig(odds3)
             for i, sel in enumerate(H2H_SELECTIONS):
                 out["h2h"].append((sel, "", odds3[i], implied[i], probs[i],
@@ -256,44 +286,46 @@ def evaluate_match(match_id: str, odds_rows: list, ledger_rows: list,
         out["missing"].append("no 1X2 snapshot")
 
     totals = latest_market(odds_rows, match_id, "totals")
-    if totals and "over" in totals and "under" in totals and pred is not None:
-        line = float(totals["over"][0])
+    pair = paired_lines(totals, "over", "under") if totals else None
+    if pair and pred is not None:
+        line, o_over, o_under = pair
         try:
-            p_over = prob_over(pred.lambda_a, pred.lambda_b, line)
+            p_over = prob_over(pred.lambda_a, pred.lambda_b, float(line))
         except OddsError as e:
             out["missing"].append(str(e))
         else:
-            odds2 = [totals["over"][1], totals["under"][1]]
-            implied = devig(odds2)
+            implied = devig([o_over, o_under])
             for i, (sel, p) in enumerate((("over", p_over), ("under", 1 - p_over))):
-                out["totals"].append((sel, line, odds2[i], implied[i], p, p - implied[i]))
+                out["totals"].append((sel, line, [o_over, o_under][i],
+                                      implied[i], p, p - implied[i]))
     elif totals:
-        out["missing"].append("incomplete totals snapshot (need over + under)")
+        out["missing"].append("totals quoted but no line has both over and under")
     else:
         out["missing"].append("no totals snapshot")
 
     # Asian handicap and BTTS are optional markets: evaluated when present,
     # silent when absent. Both are model-priced (the overlay is W/D/L-only).
     spreads = latest_market(odds_rows, match_id, "spreads")
-    if spreads and "home" in spreads and "away" in spreads and pred is not None:
-        h_line = float(spreads["home"][0])
-        odds2 = [spreads["home"][1], spreads["away"][1]]
+    pair = paired_lines(spreads, "home", "away", negate_b=True) if spreads else None
+    if pair and pred is not None:
+        h_line, o_home, o_away = pair
         try:
             margins = margin_dist(pred.lambda_a, pred.lambda_b)
-            p_home = ah_prob(margins, h_line)
-            implied = devig(odds2)
+            p_home = ah_prob(margins, float(h_line))
+            implied = devig([o_home, o_away])
+            a_line = f"{-float(h_line):g}"
             for sel, line, o, imp, p in (
-                    ("home", h_line, odds2[0], implied[0], p_home),
-                    ("away", -h_line, odds2[1], implied[1], 1 - p_home)):
+                    ("home", h_line, o_home, implied[0], p_home),
+                    ("away", a_line, o_away, implied[1], 1 - p_home)):
                 out["spreads"].append((sel, line, o, imp, p, p - imp))
         except OddsError as e:
             out["missing"].append(f"spreads: {e}")
     elif spreads:
-        out["missing"].append("incomplete spreads snapshot (need home + away)")
+        out["missing"].append("spreads quoted but no line has both sides")
 
     btts = latest_market(odds_rows, match_id, "btts")
-    if btts and "yes" in btts and "no" in btts and pred is not None:
-        odds2 = [btts["yes"][1], btts["no"][1]]
+    if btts and ("yes", "") in btts and ("no", "") in btts and pred is not None:
+        odds2 = [btts[("yes", "")][0], btts[("no", "")][0]]
         implied = devig(odds2)
         for i, (sel, p) in enumerate((("yes", pred.btts), ("no", 1 - pred.btts))):
             out["btts"].append((sel, "", odds2[i], implied[i], p, p - implied[i]))
@@ -352,6 +384,20 @@ def record_pick(match_id: str, pick: dict, best_price: tuple, now: datetime,
             f"edge {pick['edge']:+.1%}")
 
 
+def _market_keys(market: str, selection: str, line: str) -> list:
+    """Ordered (selection, line) keys spanning the full market a pick belongs
+    to, with spreads lines negated for the opposite side."""
+    if market == "h2h":
+        return [(s, "") for s in H2H_SELECTIONS]
+    if market == "btts":
+        return [("yes", ""), ("no", "")]
+    if market == "totals":
+        return [("over", line), ("under", line)]
+    other = f"{-float(line):g}" if line else ""
+    return ([("home", line), ("away", other)] if selection == "home"
+            else [("home", other), ("away", line)])
+
+
 def settle_picks(matches: list, odds_rows: list,
                  picks_path: Path = PICKS_LOG) -> list:
     """Grade open picks whose match is played: units (odds−1 won, −1 lost) and
@@ -387,11 +433,11 @@ def settle_picks(matches: list, odds_rows: list,
             p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
 
         closing = latest_market(odds_rows, p["match_id"], p["market"], phase="closing")
-        sels = {"h2h": H2H_SELECTIONS, "totals": ("over", "under"),
-                "spreads": ("home", "away"), "btts": ("yes", "no")}[p["market"]]
-        if closing and all(s in closing for s in sels):
-            implied = devig([closing[s][1] for s in sels])
-            clv = implied[sels.index(p["selection"])] - float(p["implied_p"])
+        keys = _market_keys(p["market"], p["selection"], p["line"])
+        if closing and all(k in closing for k in keys):
+            implied = devig([closing[k][0] for k in keys])
+            idx = [k[0] for k in keys].index(p["selection"])
+            clv = implied[idx] - float(p["implied_p"])
             p["clv_pp"] = f"{clv * 100:+.1f}"
         lines.append(f"{p['match_id']} {p['market']} {p['selection']}: "
                      f"{p['status']} {p['units']}u"
@@ -426,7 +472,7 @@ def render_odds_section(match_id: str, evaluation: dict, pick: dict | None,
     lines = []
     labelled = ([("1X2", r) for r in evaluation["h2h"]]
                 + [(f"O/U {r[1]}", r) for r in evaluation["totals"]]
-                + [(f"AH {r[1]:+g}", r) for r in evaluation.get("spreads", [])]
+                + [(f"AH {float(r[1]):+g}", r) for r in evaluation.get("spreads", [])]
                 + [("BTTS", r) for r in evaluation.get("btts", [])])
     rows = [r for _, r in labelled]
     if rows:
@@ -441,7 +487,7 @@ def render_odds_section(match_id: str, evaluation: dict, pick: dict | None,
                          "(the Opta overlay covers W/D/L only)._")
         lines.append("")
     if pick:
-        bp = best_prices.get((pick["market"], pick["selection"]))
+        bp = best_prices.get((pick["market"], pick["selection"], str(pick["line"])))
         price = f" — best price {bp[0]:.2f} ({bp[1]})" if bp else ""
         ln = f" {pick['line']}" if pick["line"] else ""
         lines.append(f"**Best bet: {pick['selection']}{ln} ({pick['market']}) "
@@ -495,6 +541,15 @@ def snapshot_from_api(events: list, fixture_rows: list, phase: str,
     rows, lines = [], []
     stamp = now.isoformat(timespec="seconds")
     for ev in events:
+        ct = (ev.get("commence_time") or "").replace("Z", "+00:00")
+        if ct:
+            try:
+                if datetime.fromisoformat(ct) <= now:
+                    lines.append(f"{ev.get('home_team')} vs {ev.get('away_team')}: "
+                                 "already kicked off — in-play odds not logged")
+                    continue
+            except ValueError:
+                pass
         fr = _match_event(ev, fixture_rows)
         if fr is None:
             lines.append(f"UNMATCHED event: {ev.get('home_team')!r} vs "
@@ -557,10 +612,9 @@ def snapshot_from_api(events: list, fixture_rows: list, phase: str,
 # ---------------------------------------------------------------- CLI
 
 def _best_prices(odds_rows: list, match_id: str) -> dict:
-    """{(market, selection): (odds, book)} from the latest best:* rows."""
+    """{(market, selection, line): (odds, book)} from the latest best:* rows."""
     out = {}
-    for market in ("h2h", "totals"):
-        m = latest_market(odds_rows, match_id, market, source_prefix="best:")
+    for market in ("h2h", "totals", "spreads", "btts"):
         rows = [r for r in odds_rows if r["match_id"] == match_id
                 and r["market"] == market and r["phase"] == "snapshot"
                 and r["source"].startswith("best:")]
@@ -569,8 +623,8 @@ def _best_prices(odds_rows: list, match_id: str) -> dict:
         last_ts = max(r["timestamp"] for r in rows)
         for r in rows:
             if r["timestamp"] == last_ts:
-                out[(market, r["selection"])] = (float(r["odds"]),
-                                                 r["source"].split(":", 1)[1])
+                out[(market, r["selection"], r["line"])] = (
+                    float(r["odds"]), r["source"].split(":", 1)[1])
     return out
 
 
@@ -602,7 +656,7 @@ def cmd_evaluate(target: date, fixtures: Path, threshold: float,
         print(render_odds_section(mid, ev, pick, flags, bp, threshold))
         if pick and record:
             passed = now >= lg.kickoff_dt(fr)
-            price = bp.get((pick["market"], pick["selection"]),
+            price = bp.get((pick["market"], pick["selection"], str(pick["line"])),
                            (pick["odds"], "median"))
             try:
                 print("→ " + record_pick(mid, pick, price, now, passed))

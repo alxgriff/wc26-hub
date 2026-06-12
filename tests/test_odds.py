@@ -111,7 +111,29 @@ class EvaluateTests(unittest.TestCase):
         old = h2h_rows("D3", 2.0, 3.0, 4.0, ts="2026-06-13T08:00:00-04:00")
         new = h2h_rows("D3", 2.5, 3.3, 3.1, ts="2026-06-13T10:00:00-04:00")
         mk = od.latest_market(old + new, "D3", "h2h")
-        self.assertAlmostEqual(mk["home"][1], 2.5)
+        self.assertAlmostEqual(mk[("home", "")][0], 2.5)
+
+    def test_mixed_lines_pair_only_matching_sides(self):
+        # books quote different main totals lines; over@2.5 must never be
+        # de-vigged against under@3.0 — paired_lines picks the best-supported
+        # complete pair
+        rows = [odds_row("D3", "totals", "over", 1.95, line="2.5",
+                         source="median/7books"),
+                odds_row("D3", "totals", "under", 1.87, line="2.5",
+                         source="median/7books"),
+                odds_row("D3", "totals", "over", 2.30, line="3.0",
+                         source="median/2books"),
+                odds_row("D3", "totals", "under", 1.62, line="3.0",
+                         source="median/2books")]
+        ev = od.evaluate_match("D3", rows, [], fake_pred())
+        self.assertEqual(len(ev["totals"]), 2)
+        self.assertEqual(ev["totals"][0][1], "2.5")      # majority line chosen
+        # orphan line on one side only -> not evaluated
+        rows_orphan = [odds_row("D3", "totals", "over", 1.95, line="2.5"),
+                       odds_row("D3", "totals", "under", 1.62, line="3.0")]
+        ev2 = od.evaluate_match("D3", rows_orphan, [], fake_pred())
+        self.assertEqual(ev2["totals"], [])
+        self.assertTrue(any("no line has both" in m for m in ev2["missing"]))
 
 
 class BestBetTests(unittest.TestCase):
@@ -263,6 +285,13 @@ class ApiMappingTests(unittest.TestCase):
         self.assertEqual(rows, [])
         self.assertTrue(any("UNMATCHED" in l for l in lines))
 
+    def test_in_play_event_not_logged(self):
+        ev = self._event()
+        ev["commence_time"] = "2026-06-13T13:00:00Z"   # 9:00 ET < NOW (10:00 ET)
+        rows, lines = od.snapshot_from_api([ev], self.FIXTURE_ROWS, "snapshot", NOW)
+        self.assertEqual(rows, [])
+        self.assertTrue(any("kicked off" in l for l in lines))
+
 
 class AsianHandicapTests(unittest.TestCase):
     # toy margin distribution from home's perspective:
@@ -358,7 +387,7 @@ class BttsAndSpreadsEvalTests(unittest.TestCase):
         ev = od.evaluate_match("D3", rows, [], fake_pred(2.0, 1.0))   # strong home
         self.assertEqual(len(ev["spreads"]), 2)
         sel, line, o, imp, our_p, edge = ev["spreads"][0]
-        self.assertEqual((sel, line), ("home", -0.5))
+        self.assertEqual((sel, line), ("home", "-0.5"))
         self.assertAlmostEqual(our_p, od.ah_prob(od.margin_dist(2.0, 1.0), -0.5), places=9)
         pick, _ = od.best_bet(ev, threshold=0.001)
         self.assertIsNotNone(pick)
@@ -391,7 +420,7 @@ class RenderTests(unittest.TestCase):
         pick = {"market": "h2h", "selection": "home", "line": "", "odds": 2.5,
                 "implied_p": 0.40, "our_p": 0.45, "edge": 0.05}
         out = od.render_odds_section("D3", ev, pick, [],
-                                     {("h2h", "home"): (2.55, "fanduel")})
+                                     {("h2h", "home", ""): (2.55, "fanduel")})
         self.assertIn("Best bet: home", out)
         self.assertIn("best price 2.55 (fanduel)", out)
         self.assertIn("Flat 1u (paper)", out)

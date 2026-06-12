@@ -133,6 +133,14 @@ class OverlayTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 pr.load_match_overlay(p)
 
+    def test_rounded_published_percentages_renormalise(self):
+        # articles round to 0.1%: 20.5+24.1+55.3 = 99.9 must load, normalised
+        with tempfile.TemporaryDirectory() as d:
+            p = self._overlay_file(d, [["D2", 20.5, 24.1, 55.3, "opta", "x"]])
+            ov = pr.load_match_overlay(p)
+        total = ov["D2"]["p_home"] + ov["D2"]["p_draw"] + ov["D2"]["p_away"]
+        self.assertAlmostEqual(total, 1.0, places=9)
+
     def test_missing_file_is_noop(self):
         self.assertEqual(pr.load_match_overlay(Path("nope") / "missing.csv"), {})
 

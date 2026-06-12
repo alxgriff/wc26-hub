@@ -701,7 +701,7 @@ def main(argv: list[str] | None = None) -> int:
                 pick, flags = od.best_bet(ev)
                 bp = od._best_prices(odds_rows, mid)
                 if pick:
-                    price = bp.get((pick["market"], pick["selection"]),
+                    price = bp.get((pick["market"], pick["selection"], str(pick["line"])),
                                    (pick["odds"], "median"))
                     try:
                         msg = od.record_pick(mid, pick, price, now,
