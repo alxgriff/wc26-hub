@@ -356,3 +356,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .scenario-team{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--verm);margin:10px 0 3px}
 .scenario-stakes{list-style:none;font-size:.92rem;line-height:1.55}
 .scenario-stakes li{padding-left:1.1em;text-indent:-1.1em;margin-bottom:4px}
+
+.overnight-more{font-style:italic;color:var(--ink-soft);font-size:.95rem;margin:14px 0 0}
+.overnight-more a{text-decoration:none}
+.overnight-more a:hover{text-decoration:underline;text-decoration-color:var(--verm)}

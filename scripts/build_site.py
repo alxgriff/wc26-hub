@@ -838,7 +838,7 @@ def render_overnight(rows: list[dict], target: date,
         f'    <h2 id="overnight-h">Overnight — {yesterday:%A, %B} {yesterday.day}</h2>\n'
         '  </div>\n'
         '  <ul class="overnight">\n' + "\n".join(items) + '\n  </ul>\n'
-        f'  <p class="standfirst"><a href="{root}record.html">Full record — every '
+        f'  <p class="overnight-more"><a href="{root}record.html">Full record — every '
         'call and pick, graded →</a></p>\n'
         '</section>')
 
