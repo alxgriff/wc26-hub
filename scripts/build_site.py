@@ -256,9 +256,11 @@ def render_thirds(s: "st.Standings", forms: dict[str, list[str | None]],
     )
 
 
-def render_slate(today: list[dict], root: str = "") -> str:
+def render_slate(today: list[dict], root: str = "",
+                 picks: dict[str, str] | None = None) -> str:
     if not today:
         return '    <li class="empty">No matches on this editorial date.</li>'
+    picks = picks or {}
     chips = []
     for r in today:
         mid = r["match_id"]
@@ -276,10 +278,14 @@ def render_slate(today: list[dict], root: str = "") -> str:
         else:
             label = f'{_esc(r["team_a"])} v {_esc(r["team_b"])}'
             time_bit = _esc((r.get("kickoff_et") or "").strip()) + " ET"
+        pick_html = ""
+        if mid in picks:
+            pick_html = f'<span class="pickline">▸ best bet: {_esc(picks[mid])}</span>'
         chips.append(
             f'    <li><span class="t">{time_bit}{moon}</span>'
             f'<span class="teams"><a href="{href}">{label}</a></span>'
-            f'<span class="meta">{_esc(mid)} · {_esc(tv)} · {_esc(venue)} · preview →</span></li>')
+            f'<span class="meta">{_esc(mid)} · {_esc(tv)} · {_esc(venue)} · preview →</span>'
+            f'{pick_html}</li>')
     return "\n".join(chips)
 
 
@@ -806,7 +812,8 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
                css: str | None = None,
                ledger_line: str | None = None,
                fair_play: dict[str, int] | None = None,
-               blurb_html: str = "") -> tuple[str, dict]:
+               blurb_html: str = "",
+               slate_picks: dict[str, str] | None = None) -> tuple[str, dict]:
     """Render the index page. Returns (html, data_dict)."""
     s = st.compute_standings(matches, fair_play=fair_play)
     forms = form_by_team(matches)
@@ -837,7 +844,7 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
         progress_pct=f"{(100 * s.played / s.total) if s.total else 0:.1f}",
         group_nav_html=_group_nav(s.groups),
         slate_title=slate_title,
-        slate_html=render_slate(today),
+        slate_html=render_slate(today, picks=slate_picks),
         groups_html=groups_html,
         thirds_html=render_thirds(s, forms),
         archive_html=_archive(editions_dir),
@@ -903,11 +910,21 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     (out_dir / "teams").mkdir(exist_ok=True)
     (out_dir / "matches").mkdir(exist_ok=True)
 
+    slate_picks: dict[str, str] = {}
+    if odds_call:
+        for r in be.select_matches(rows, target):
+            o = odds_call(r)
+            if o and o["pick"]:
+                p = o["pick"]
+                slate_picks[r["match_id"]] = (
+                    f"{_sel_label(p['market'], p['selection'], p['line'], r['team_a'], r['team_b'])}"
+                    f" {p['edge']:+.1%}")
+
     index, data = build_page(matches, rows, target, generated_at,
                              template_path=template_dir / "page.html",
                              editions_dir=editions_dir, css=css,
                              ledger_line=ledger_line, fair_play=fair_play,
-                             blurb_html=blurb_html)
+                             blurb_html=blurb_html, slate_picks=slate_picks)
     (out_dir / "index.html").write_text(index, encoding="utf-8")
     (out_dir / "data.json").write_text(
         json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")

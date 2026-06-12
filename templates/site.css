@@ -318,3 +318,5 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
 .blurb{max-width:72ch;margin:-4px 0 20px;font-size:1.04rem;line-height:1.6}
 .blurb p{margin:0 0 .7em}
 .blurb .blurb-tag{font-family:var(--mono);font-size:.64rem;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase;margin:0}
+
+.slate .pickline{display:block;font-family:var(--mono);font-size:.68rem;font-weight:700;color:var(--verm);margin-top:5px;letter-spacing:.03em}

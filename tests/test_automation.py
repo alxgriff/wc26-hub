@@ -110,6 +110,18 @@ class BlurbFactPackTests(unittest.TestCase):
         self.assertIn("No matches", pack)
 
 
+class SlatePickTests(unittest.TestCase):
+    def test_pickline_renders_on_slate_chip(self):
+        today = [{"match_id": "D1", "team_a": "United States", "team_b": "Paraguay",
+                  "kickoff_et": "9:00 PM", "tv_us": "Fox", "stadium": "SoFi Stadium",
+                  "city": "Inglewood", "status": "scheduled", "_late_cap": False}]
+        out = bs.render_slate(today, picks={"D1": "Paraguay +11.2%"})
+        self.assertIn("pickline", out)
+        self.assertIn("best bet: Paraguay +11.2%", out)
+        # and absent when no pick
+        self.assertNotIn("pickline", bs.render_slate(today))
+
+
 class NewsPromptTests(unittest.TestCase):
     def test_prompt_lists_slate_only(self):
         prompt = fn.build_prompt(date(2026, 6, 13), REPO / "data" / "fixtures.csv")
