@@ -122,6 +122,46 @@ class SlatePickTests(unittest.TestCase):
         self.assertNotIn("pickline", bs.render_slate(today))
 
 
+class WireTests(unittest.TestCase):
+    DIGEST = """<!-- AUTO-GATHERED banner -->
+
+> ⚠️ **Auto-gathered news digest — UNVERIFIED.**
+
+### B2: Qatar vs Switzerland
+
+- Akram Afif trained fully on Friday (source: https://example.com/afif)
+
+### C1: Brazil vs Morocco
+
+No verifiable updates found.
+"""
+
+    def test_load_wire_maps_sections_latest_wins(self):
+        with tempfile.TemporaryDirectory() as td:
+            nd = Path(td)
+            (nd / "2026-06-12.md").write_text(self.DIGEST, encoding="utf-8")
+            (nd / "2026-06-13.md").write_text(
+                "### C1: Brazil vs Morocco\n\n- Neymar back in training "
+                "(source: https://example.com/ney)\n", encoding="utf-8")
+            wire = bs.load_wire(nd)
+        self.assertEqual(wire["B2"][0], "2026-06-12")
+        self.assertIn("Afif", wire["B2"][1])
+        self.assertEqual(wire["C1"][0], "2026-06-13")   # later digest wins
+        self.assertIn("Neymar", wire["C1"][1])
+        self.assertNotIn("UNVERIFIED", wire["B2"][1])   # banner not in sections
+
+    def test_render_wire_frames_as_reporting_with_clickable_sources(self):
+        out = bs.render_wire(("2026-06-12",
+                              "- Afif trained fully (source: https://example.com/afif)"))
+        self.assertIn("The Wire", out)
+        self.assertIn("not verified by the hub", out)
+        self.assertIn('<a href="https://example.com/afif"', out)
+
+    def test_no_digest_renders_nothing(self):
+        self.assertEqual(bs.render_wire(None), "")
+        self.assertEqual(bs.load_wire(Path("does/not/exist")), {})
+
+
 class NewsPromptTests(unittest.TestCase):
     def test_prompt_lists_slate_only(self):
         prompt = fn.build_prompt(date(2026, 6, 13), REPO / "data" / "fixtures.csv")

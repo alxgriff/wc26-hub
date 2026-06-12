@@ -114,11 +114,14 @@ auto-publishes) → tests (hard gate) → site + edition build → push (= deplo
 `closing-odds.yml` (11:30 AM + 6:30 PM ET) logs closing lines for CLV.
 Secrets required: `ODDS_API_KEY`, `ANTHROPIC_API_KEY`.
 
-Human jobs the automation deliberately leaves: verifying news before it
-touches cards/editions, filling `data/discipline.csv` (cards → fair-play
-tiebreaker; columns yellows/second_yellow_reds/direct_reds/yellow_plus_reds),
-the June 20 F4 kickoff re-verification, and reading the edition before
-trusting it. The checklist below remains the manual fallback.
+The news digest (enabled June 12 via the ENABLE_NEWS_DIGEST variable) is
+relayed automatically on match pages as "The Wire" — attributed reporting
+in a distinct box, never house voice. Human jobs the automation deliberately
+leaves: turning verified claims into card edits or `data/discipline.csv`
+rows (cards → fair-play tiebreaker; columns yellows/second_yellow_reds/
+direct_reds/yellow_plus_reds — these change computed standings, so they
+stay human), the June 20 F4 kickoff re-verification, and reading the
+edition before trusting it. The checklist below remains the manual fallback.
 
 ## Daily ops checklist (manual fallback)
 

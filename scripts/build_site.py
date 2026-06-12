@@ -584,6 +584,62 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
     return "\n".join(parts)
 
 
+# ---------------------------------------------------------------- the wire
+
+NEWS_DIR = REPO_ROOT / "news"
+_WIRE_SECTION_RE = re.compile(r"^### ([A-L][1-6]):", re.MULTILINE)
+_URL_RE = re.compile(r"https?://[^\s<)\]]+")
+
+
+def load_wire(news_dir: Path = NEWS_DIR) -> dict[str, tuple[str, str]]:
+    """{match_id: (digest_date, section_markdown)} from news/*.md — the latest
+    digest mentioning a match wins. The repo-facing UNVERIFIED banner is
+    stripped; the site applies its own wire-copy framing."""
+    out: dict[str, tuple[str, str]] = {}
+    if not news_dir.exists():
+        return out
+    for f in sorted(news_dir.glob("*.md")):   # ascending date: later files win
+        text = f.read_text(encoding="utf-8")
+        marks = list(_WIRE_SECTION_RE.finditer(text))
+        for i, m in enumerate(marks):
+            end = marks[i + 1].start() if i + 1 < len(marks) else len(text)
+            body = text[m.start():end]
+            # drop the "### A1: Team vs Team" heading line itself
+            body = body.split("\n", 1)[1] if "\n" in body else ""
+            out[m.group(1)] = (f.stem, body.strip())
+    return out
+
+
+def _linkify(escaped: str) -> str:
+    """Make source URLs clickable in already-escaped text."""
+    return _URL_RE.sub(
+        lambda m: f'<a href="{m.group(0)}" rel="nofollow">{m.group(0)}</a>',
+        escaped)
+
+
+def render_wire(entry: tuple[str, str] | None) -> str:
+    """The Wire: auto-gathered, source-attributed news — relayed as reporting,
+    never asserted in the hub's voice. Whole section omitted when no digest
+    mentions the match."""
+    if not entry:
+        return ""
+    digest_date, body = entry
+    body_html = _linkify(sc.md_to_html(body))
+    return (
+        '<section aria-labelledby="wire-h">\n'
+        '  <div class="sec-head">\n'
+        '    <span class="kicker">The Wire</span>\n'
+        '    <h2 id="wire-h">What\'s being reported</h2>\n'
+        '  </div>\n'
+        f'  <div class="wire">\n'
+        f'    <p class="wire-tag">Auto-gathered {_esc(digest_date)} · every claim '
+        'carries its source · relayed as reporting, not verified by the hub — '
+        'click through before it bears weight.</p>\n'
+        f'{body_html}\n'
+        '  </div>\n'
+        '</section>')
+
+
 # ---------------------------------------------------------------- fates
 
 FATE_SR = {"through": " — qualified for the Round of 32",
@@ -928,7 +984,8 @@ def render_match_page(row: dict, s: "st.Standings",
                       template_dir: Path = TEMPLATE_DIR,
                       warnings: list[str] | None = None,
                       odds_info: dict | None = None,
-                      scenario_html: str = "") -> str:
+                      scenario_html: str = "",
+                      wire_html: str = "") -> str:
     mid, g = row["match_id"].strip(), row["group"].strip()
     team_a, team_b = row["team_a"].strip(), row["team_b"].strip()
     played = (row.get("status") or "").strip().lower() == "played"
@@ -994,6 +1051,7 @@ def render_match_page(row: dict, s: "st.Standings",
         scenario_html=scenario_html,
         mini_table_html=mini,
         card_html=render_card_sections(sections),
+        wire_html=wire_html,
         odds_html=render_market(odds_info, team_a, team_b, odds_note, played=played),
         repo_url=REPO_URL,
     )
@@ -1176,6 +1234,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     warnings.extend(s.warnings)
     forms = form_by_team(matches)
     fates, md3_reports = compute_fates(matches, warnings)
+    wire = load_wire()
     css = _site_css(template_dir)
 
     blurb_html = ""
@@ -1279,7 +1338,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                 md3_reports[row["group"]], row["team_a"], row["team_b"])
         page = render_match_page(row, s, forms, cards_dir, info, css,
                                  template_dir, warnings, odds_info=odds_info,
-                                 scenario_html=scenario_html)
+                                 scenario_html=scenario_html,
+                                 wire_html=render_wire(wire.get(row["match_id"])))
         (out_dir / "matches" / f"{row['match_id']}.html").write_text(
             page, encoding="utf-8")
     if predictor is not None and scheduled and predictions == 0:

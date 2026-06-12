@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """AUTO-GATHERED news digest for today's teams via Claude + web search.
 
-This is the GATHERING half of the news workflow only. Output goes to
-news/YYYY-MM-DD.md stamped UNVERIFIED; nothing here auto-publishes into
-cards, editions, or the site. Per the CLAUDE.md verification rules, injury
-and selection claims must be verified (or cut) by a human/edition pass
-before they become load-bearing. Every claim must carry a source URL; the
-model is instructed to report "nothing found" rather than pad.
+Output goes to news/YYYY-MM-DD.md stamped UNVERIFIED. build_site relays it
+on match pages as "The Wire" — attributed reporting in a visually distinct
+box, never the hub's own voice. Per the CLAUDE.md verification rules, a
+claim only becomes load-bearing (card edits, discipline.csv rows that feed
+the tiebreaker math) after human verification at its source. Every claim
+must carry a source URL; the model is instructed to report "nothing found"
+rather than pad.
 
 CLI:
     python scripts/fetch_news.py [DATE] [--out-dir news]
