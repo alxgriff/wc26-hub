@@ -16,7 +16,8 @@
      "gf": 2,
      "ga": 0,
      "gd": 2,
-     "pts": 3
+     "pts": 3,
+     "fate": null
     },
     {
      "pos": 2,
@@ -29,7 +30,8 @@
      "gf": 2,
      "ga": 1,
      "gd": 1,
-     "pts": 3
+     "pts": 3,
+     "fate": null
     },
     {
      "pos": 3,
@@ -42,7 +44,8 @@
      "gf": 1,
      "ga": 2,
      "gd": -1,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 4,
@@ -55,7 +58,8 @@
      "gf": 0,
      "ga": 2,
      "gd": -2,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     }
    ],
    "notes": []
@@ -73,7 +77,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 2,
@@ -86,7 +91,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 3,
@@ -99,7 +105,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 4,
@@ -112,7 +119,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     }
    ],
    "notes": []
@@ -130,7 +138,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 2,
@@ -143,7 +152,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 3,
@@ -156,7 +166,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 4,
@@ -169,7 +180,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     }
    ],
    "notes": []
@@ -187,7 +199,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 2,
@@ -200,7 +213,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 3,
@@ -213,7 +227,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 4,
@@ -226,7 +241,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     }
    ],
    "notes": []
@@ -244,7 +260,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 2,
@@ -257,7 +274,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 3,
@@ -270,7 +288,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 4,
@@ -283,7 +302,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     }
    ],
    "notes": []
@@ -301,7 +321,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 2,
@@ -314,7 +335,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 3,
@@ -327,7 +349,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 4,
@@ -340,7 +363,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     }
    ],
    "notes": []
@@ -358,7 +382,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 2,
@@ -371,7 +396,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 3,
@@ -384,7 +410,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 4,
@@ -397,7 +424,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     }
    ],
    "notes": []
@@ -415,7 +443,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 2,
@@ -428,7 +457,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 3,
@@ -441,7 +471,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 4,
@@ -454,7 +485,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     }
    ],
    "notes": []
@@ -472,7 +504,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 2,
@@ -485,7 +518,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 3,
@@ -498,7 +532,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 4,
@@ -511,7 +546,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     }
    ],
    "notes": []
@@ -529,7 +565,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 2,
@@ -542,7 +579,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 3,
@@ -555,7 +593,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 4,
@@ -568,7 +607,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     }
    ],
    "notes": []
@@ -586,7 +626,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 2,
@@ -599,7 +640,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 3,
@@ -612,7 +654,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 4,
@@ -625,7 +668,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     }
    ],
    "notes": []
@@ -643,7 +687,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 2,
@@ -656,7 +701,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 3,
@@ -669,7 +715,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     },
     {
      "pos": 4,
@@ -682,7 +729,8 @@
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0
+     "pts": 0,
+     "fate": null
     }
    ],
    "notes": []
@@ -702,7 +750,8 @@
     "ga": 0,
     "gd": 0,
     "pts": 0,
-    "qualifying": true
+    "qualifying": true,
+    "fate": null
    },
    {
     "pos": 2,
@@ -716,7 +765,8 @@
     "ga": 0,
     "gd": 0,
     "pts": 0,
-    "qualifying": true
+    "qualifying": true,
+    "fate": null
    },
    {
     "pos": 3,
@@ -730,7 +780,8 @@
     "ga": 0,
     "gd": 0,
     "pts": 0,
-    "qualifying": true
+    "qualifying": true,
+    "fate": null
    },
    {
     "pos": 4,
@@ -744,7 +795,8 @@
     "ga": 0,
     "gd": 0,
     "pts": 0,
-    "qualifying": true
+    "qualifying": true,
+    "fate": null
    },
    {
     "pos": 5,
@@ -758,7 +810,8 @@
     "ga": 0,
     "gd": 0,
     "pts": 0,
-    "qualifying": true
+    "qualifying": true,
+    "fate": null
    },
    {
     "pos": 6,
@@ -772,7 +825,8 @@
     "ga": 0,
     "gd": 0,
     "pts": 0,
-    "qualifying": true
+    "qualifying": true,
+    "fate": null
    },
    {
     "pos": 7,
@@ -786,7 +840,8 @@
     "ga": 0,
     "gd": 0,
     "pts": 0,
-    "qualifying": true
+    "qualifying": true,
+    "fate": null
    },
    {
     "pos": 8,
@@ -800,7 +855,8 @@
     "ga": 0,
     "gd": 0,
     "pts": 0,
-    "qualifying": true
+    "qualifying": true,
+    "fate": null
    },
    {
     "pos": 9,
@@ -814,7 +870,8 @@
     "ga": 0,
     "gd": 0,
     "pts": 0,
-    "qualifying": false
+    "qualifying": false,
+    "fate": null
    },
    {
     "pos": 10,
@@ -828,7 +885,8 @@
     "ga": 0,
     "gd": 0,
     "pts": 0,
-    "qualifying": false
+    "qualifying": false,
+    "fate": null
    },
    {
     "pos": 11,
@@ -842,7 +900,8 @@
     "ga": 0,
     "gd": 0,
     "pts": 0,
-    "qualifying": false
+    "qualifying": false,
+    "fate": null
    },
    {
     "pos": 12,
@@ -856,12 +915,13 @@
     "ga": 2,
     "gd": -1,
     "pts": 0,
-    "qualifying": false
+    "qualifying": false,
+    "fate": null
    }
   ],
   "notes": []
  },
  "warnings": [],
- "generated_at": "2026-06-12 17:15",
+ "generated_at": "2026-06-12 17:21",
  "slate_date": "2026-06-12"
 }

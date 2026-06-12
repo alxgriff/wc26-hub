@@ -42,6 +42,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import standings as st            # noqa: E402
 import build_edition as be        # noqa: E402
 import site_content as sc         # noqa: E402
+import scenarios as scen          # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = REPO_ROOT / "templates"
@@ -154,26 +155,34 @@ def _team_link(team: str, root: str) -> str:
     return f'{root}teams/{sc.slugify(team)}.html'
 
 
-def _team_cell(r: "st.TeamRow", syms: dict[str, str], root: str) -> str:
+def _team_cell(r: "st.TeamRow", syms: dict[str, str], root: str,
+               fate: str | None = None) -> str:
     dag = syms.get(r.team, "")
     dag_html = f'<span class="dag">{dag}</span>' if dag else ""
+    sr = (f'<span class="sr-only">{FATE_SR[fate]}</span>'
+          if fate in FATE_SR else "")
     return (f'<th class="team" scope="row" title="{_esc(r.team)}">'
-            f'<a href="{_team_link(r.team, root)}">{_esc(r.team)}</a>{dag_html}</th>')
+            f'<a href="{_team_link(r.team, root)}">{_esc(r.team)}</a>{sr}{dag_html}</th>')
 
 
 def render_group_card(gt: "st.GroupTable", forms: dict[str, list[str | None]],
-                      index: int, root: str = "") -> str:
+                      index: int, root: str = "",
+                      fates: dict[str, str] | None = None) -> str:
     g = gt.group
+    fates = fates or {}
     played = sum(r.played for r in gt.rows) // 2
     syms, sym_notes = _note_daggers(gt.rows, gt.notes)
     rows_html = []
     for pos, r in enumerate(gt.rows, 1):
         zone = "zone-top" if pos <= 2 else ("zone-third" if pos == 3 else "zone-out")
+        fate = fates.get(r.team)
+        if fate in FATE_SR:
+            zone += f" fate-{fate}"
         form = forms.get(r.team, [None] * GAMES_PER_TEAM)
         rows_html.append(
             f'      <tr class="{zone}">\n'
             f'        <td class="pos">{pos}</td>\n'
-            f'        {_team_cell(r, syms, root)}\n'
+            f'        {_team_cell(r, syms, root, fate)}\n'
             f'        <td class="form">{_pips_html(form)}</td>\n'
             f'        <td>{r.gf}</td>\n'
             f'        <td>{st._fmt_gd(r.gd)}</td>\n'
@@ -199,8 +208,9 @@ def render_group_card(gt: "st.GroupTable", forms: dict[str, list[str | None]],
 
 
 def render_thirds(s: "st.Standings", forms: dict[str, list[str | None]],
-                  root: str = "") -> str:
+                  root: str = "", fates: dict[str, str] | None = None) -> str:
     rows = s.third_place
+    fates = fates or {}
     if not rows:
         return '<p class="standfirst">No third-place table yet — no completed group rows.</p>'
     syms, sym_notes = _note_daggers(rows, s.third_place_notes)
@@ -208,12 +218,15 @@ def render_thirds(s: "st.Standings", forms: dict[str, list[str | None]],
     for pos, r in enumerate(rows, 1):
         qualifying = pos <= st.QUALIFYING_THIRDS
         cls = "q" if qualifying else "below"
+        fate = fates.get(r.team)
+        if fate in FATE_SR:
+            cls += f" fate-{fate}"
         in_cell = ('<td class="in">✓<span class="sr-only"> qualifying as it stands</span></td>'
                    if qualifying else '<td class="in"><span class="sr-only">out as it stands</span></td>')
         body.append(
             f'      <tr class="{cls}">\n'
             f'        <td class="pos">{pos}</td>\n'
-            f'        {_team_cell(r, syms, root)}\n'
+            f'        {_team_cell(r, syms, root, fate)}\n'
             f'        <td class="grp">{_esc(r.group)}</td>\n'
             f'        <td>{r.won}-{r.drawn}-{r.lost}</td>\n'
             f'        <td>{r.gf}</td>\n'
@@ -571,6 +584,78 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
     return "\n".join(parts)
 
 
+# ---------------------------------------------------------------- fates
+
+FATE_SR = {"through": " — qualified for the Round of 32",
+           "out": " — eliminated"}
+
+
+def compute_fates(matches: "list[st.Match]", warnings: list[str]
+                  ) -> tuple[dict[str, str], dict[str, "scen.ScenarioReport"]]:
+    """Conservative within-group fates from the scenario enumerator:
+    'through' only when a team finishes top-2 in EVERY outcome combination
+    (margin-independent), 'out' only when it finishes 4th in every combination
+    — a 3rd place is never marked, since the best-thirds cutline is cross-group
+    math this deliberately does not guess. Also returns the per-group scenario
+    report for groups in the canonical 2-games-left MD3 state."""
+    fates: dict[str, str] = {}
+    md3_reports: dict[str, "scen.ScenarioReport"] = {}
+    for group in sorted({m.group for m in matches}):
+        try:
+            report = scen.enumerate_scenarios(group, matches)
+        except Exception as e:
+            warnings.append(f"group {group}: scenario enumeration failed "
+                            f"({e.__class__.__name__}: {e}) — no fate marks")
+            continue
+        for ts in report.teams:
+            if ts.counts["top2"] == report.n_combos:
+                fates[ts.team] = "through"
+            elif ts.counts["out"] == report.n_combos:
+                fates[ts.team] = "out"
+        if len(report.unplayed) == 2:
+            md3_reports[group] = report
+    return fates, md3_reports
+
+
+def render_scenario_block(report: "scen.ScenarioReport",
+                          team_a: str, team_b: str) -> str:
+    """The MD3 scenario block for one match page: finish distribution across
+    all outcome combinations plus the Win/Draw/Loss prospects for both teams.
+    Numbers come exclusively from scenarios.py — this only formats."""
+    ta = next((t for t in report.teams if t.team == team_a), None)
+    tb = next((t for t in report.teams if t.team == team_b), None)
+    if ta is None or tb is None:
+        return ""
+    rows = []
+    for ts in (ta, tb):
+        c = ts.counts
+        rows.append(f'      <tr><td class="lbl">{_esc(ts.team)}</td>'
+                    f'<td>{c["top2"]}</td><td>{c["third"]}</td>'
+                    f'<td>{c["out"]}</td><td>{c["margin"]}</td></tr>')
+    parts = [
+        '<div class="scenario">',
+        f'  <p class="scenario-intro">Final matchday — both Group {_esc(report.group)} '
+        f'games kick off simultaneously: {report.n_combos} possible outcomes. '
+        'Anything that comes down to goal difference is flagged margin-dependent, '
+        'never guessed.</p>',
+        '  <table>',
+        '    <caption class="sr-only">Finish distribution across all outcome '
+        'combinations</caption>',
+        '    <thead><tr><th class="lbl" scope="col">Team</th>'
+        '<th scope="col">Top 2</th><th scope="col">3rd</th>'
+        '<th scope="col">Out</th><th scope="col">Margin</th></tr></thead>',
+        '    <tbody>\n' + "\n".join(rows) + '\n    </tbody>',
+        '  </table>',
+    ]
+    for ts in (ta, tb):
+        if ts.stakes:
+            items = "".join(f"<li>{sc._inline(s)}</li>" for s in ts.stakes)
+            parts.append(f'  <p class="scenario-team">{_esc(ts.team)}</p>'
+                         f'  <ul class="scenario-stakes">{items}</ul>')
+    parts.append('</div>')
+    return "\n".join(parts)
+
+
 # ---------------------------------------------------------------- the record
 
 def _hit_chip(correct: bool) -> str:
@@ -842,7 +927,8 @@ def render_match_page(row: dict, s: "st.Standings",
                       cards_dir: Path, info: dict | None, css: str,
                       template_dir: Path = TEMPLATE_DIR,
                       warnings: list[str] | None = None,
-                      odds_info: dict | None = None) -> str:
+                      odds_info: dict | None = None,
+                      scenario_html: str = "") -> str:
     mid, g = row["match_id"].strip(), row["group"].strip()
     team_a, team_b = row["team_a"].strip(), row["team_b"].strip()
     played = (row.get("status") or "").strip().lower() == "played"
@@ -905,6 +991,7 @@ def render_match_page(row: dict, s: "st.Standings",
         tv=_esc((row.get("tv_us") or "").strip() or "TV TBD"),
         call_html=render_call(info, team_a, team_b, lean, result=result),
         stakes_sentence=_esc(stakes),
+        scenario_html=scenario_html,
         mini_table_html=mini,
         card_html=render_card_sections(sections),
         odds_html=render_market(odds_info, team_a, team_b, odds_note, played=played),
@@ -1013,10 +1100,12 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
                fair_play: dict[str, int] | None = None,
                blurb_html: str = "",
                slate_picks: dict[str, str] | None = None,
-               overnight_html: str = "") -> tuple[str, dict]:
+               overnight_html: str = "",
+               fates: dict[str, str] | None = None) -> tuple[str, dict]:
     """Render the index page. Returns (html, data_dict)."""
     s = st.compute_standings(matches, fair_play=fair_play)
     forms = form_by_team(matches)
+    fates = fates or {}
     today = be.select_matches(rows, target)
     day_n = (target - be.TOURNAMENT_START).days + 1
 
@@ -1025,10 +1114,15 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
                    + (f"{n} match" + ("" if n == 1 else "es") if n else "rest day"))
 
     groups_html = "\n".join(
-        render_group_card(s.groups[g], forms, i)
+        render_group_card(s.groups[g], forms, i, fates=fates)
         for i, g in enumerate(sorted(s.groups)))
 
     data = st.to_dict(s)
+    for gd in data["groups"].values():
+        for row in gd["rows"]:
+            row["fate"] = fates.get(row["team"])
+    for row in data["third_place"]["rows"]:
+        row["fate"] = fates.get(row["team"])
     data["generated_at"] = generated_at
     data["slate_date"] = target.isoformat()
     # < is valid JSON inside strings and defuses every HTML parser-escape
@@ -1046,7 +1140,7 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
         slate_title=slate_title,
         slate_html=render_slate(today, picks=slate_picks),
         groups_html=groups_html,
-        thirds_html=render_thirds(s, forms),
+        thirds_html=render_thirds(s, forms, fates=fates),
         archive_html=_archive(editions_dir),
         generated_at=_esc(generated_at),
         repo_url=REPO_URL,
@@ -1081,6 +1175,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     s = st.compute_standings(matches, fair_play=fair_play)
     warnings.extend(s.warnings)
     forms = form_by_team(matches)
+    fates, md3_reports = compute_fates(matches, warnings)
     css = _site_css(template_dir)
 
     blurb_html = ""
@@ -1128,7 +1223,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                              ledger_line=ledger_line, fair_play=fair_play,
                              blurb_html=blurb_html, slate_picks=slate_picks,
                              overnight_html=render_overnight(rows, target,
-                                                             matches, ledger))
+                                                             matches, ledger),
+                             fates=fates)
     (out_dir / "index.html").write_text(index, encoding="utf-8")
     (out_dir / "data.json").write_text(
         json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -1177,8 +1273,13 @@ def build_site(out_dir: Path, target: date, generated_at: str,
             info = _safe_predict(predictor, row, warnings)
             predictions += info is not None
         odds_info = odds_call(row) if odds_call else None
+        scenario_html = ""
+        if int(row["match_id"][1]) >= 5 and row["group"] in md3_reports:
+            scenario_html = render_scenario_block(
+                md3_reports[row["group"]], row["team_a"], row["team_b"])
         page = render_match_page(row, s, forms, cards_dir, info, css,
-                                 template_dir, warnings, odds_info=odds_info)
+                                 template_dir, warnings, odds_info=odds_info,
+                                 scenario_html=scenario_html)
         (out_dir / "matches" / f"{row['match_id']}.html").write_text(
             page, encoding="utf-8")
     if predictor is not None and scheduled and predictions == 0:

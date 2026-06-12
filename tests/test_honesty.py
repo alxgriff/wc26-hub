@@ -253,5 +253,64 @@ class RecordRenderingTests(unittest.TestCase):
         self.assertEqual(out, "")
 
 
+class FateTests(unittest.TestCase):
+    @staticmethod
+    def mk(mid, a, b, sa=None, sb=None):
+        import standings as st
+        played = sa is not None
+        return st.Match(mid, mid[0], (int(mid[1]) + 1) // 2, a, b, sa, sb,
+                        "played" if played else "scheduled")
+
+    def test_completed_group_fates_exact(self):
+        # 1st/2nd through, 4th out, 3rd unmarked (cutline is cross-group math)
+        m = [self.mk("A1", "T1", "T2", 1, 0), self.mk("A2", "T3", "T4", 2, 0),
+             self.mk("A3", "T1", "T3", 1, 0), self.mk("A4", "T2", "T4", 3, 0),
+             self.mk("A5", "T1", "T4", 1, 0), self.mk("A6", "T2", "T3", 1, 0)]
+        warnings = []
+        fates, md3 = bs.compute_fates(m, warnings)
+        self.assertEqual(fates.get("T1"), "through")   # 9 pts
+        self.assertEqual(fates.get("T2"), "through")   # 6 pts, GD +3 vs T3 +1
+        self.assertNotIn("T3", fates)                  # 3rd: thirds race, never marked
+        self.assertEqual(fates.get("T4"), "out")       # 0 pts, 4th
+        self.assertEqual(md3, {})                      # 0 unplayed != MD3 state
+        self.assertEqual(warnings, [])
+
+    def test_mid_group_clinch_on_points_alone(self):
+        # After MD2: T1 has 6 (massive GD), worst case stays top on points
+        m = [self.mk("B1", "T1", "T2", 5, 0), self.mk("B2", "T3", "T4", 0, 0),
+             self.mk("B3", "T1", "T3", 5, 0), self.mk("B4", "T2", "T4", 1, 1),
+             self.mk("B5", "T1", "T4"), self.mk("B6", "T2", "T3")]
+        fates, md3 = bs.compute_fates(m, [])
+        self.assertEqual(fates.get("T1"), "through")
+        self.assertNotIn("T2", fates)                  # alive, not decided
+        self.assertNotIn("T4", fates)                  # can still reach 3rd+
+        self.assertIn("B", md3)                        # 2 unplayed -> MD3 state
+
+    def test_scenario_block_renders_both_teams(self):
+        m = [self.mk("B1", "T1", "T2", 5, 0), self.mk("B2", "T3", "T4", 0, 0),
+             self.mk("B3", "T1", "T3", 5, 0), self.mk("B4", "T2", "T4", 1, 1),
+             self.mk("B5", "T1", "T4"), self.mk("B6", "T2", "T3")]
+        _, md3 = bs.compute_fates(m, [])
+        out = bs.render_scenario_block(md3["B"], "T1", "T4")
+        self.assertIn("9 possible outcomes", out)
+        self.assertIn("margin-dependent", out)
+        self.assertIn("Win:", out)
+        self.assertIn(">T1<", out)
+        self.assertIn(">T4<", out)
+
+    def test_fate_classes_and_sr_text_on_group_card(self):
+        import standings as st
+        m = [self.mk("A1", "T1", "T2", 1, 0), self.mk("A2", "T3", "T4", 2, 0),
+             self.mk("A3", "T1", "T3", 1, 0), self.mk("A4", "T2", "T4", 3, 0),
+             self.mk("A5", "T1", "T4", 1, 0), self.mk("A6", "T2", "T3", 1, 0)]
+        fates, _ = bs.compute_fates(m, [])
+        s = st.compute_standings(m)
+        card = bs.render_group_card(s.groups["A"], {}, 0, fates=fates)
+        self.assertIn("fate-through", card)
+        self.assertIn("fate-out", card)
+        self.assertIn("qualified for the Round of 32", card)   # sr-only text
+        self.assertIn("— eliminated", card)
+
+
 if __name__ == "__main__":
     unittest.main()
