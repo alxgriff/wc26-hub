@@ -16,9 +16,9 @@ Read CLAUDE.md first — its data contracts override everything here.
 | `scripts/standings.py` | ✅ Done, reviewed, 20 tests green. Importable API: `load_fixtures(path)`, `compute_standings(matches, fair_play=None)`, `render_markdown(standings)`. Run: `python scripts/standings.py`. |
 | `tests/test_standings.py` | ✅ 20 tests. Run: `python -m unittest discover -s tests` |
 | `cards/md1.md`, `md2.md`, `md3.md` | ✅ Moved into place. |
-| `cards/template.md` | ❌ **MISSING — blocks today's edition.** `wc26_match_card_template_and_samples.md` (on claude.ai) holds the 9-section template AND the full B1 (Canada–Bosnia) and D1 (USA–Paraguay) cards. June 12's two matches are exactly B1 and D1. **User must drop this file in.** |
+| `cards/template.md` | ✅ In place (June 12): 9-section template + full B1 and D1 cards. NOTE its card-header format differs — see Phase 1 step 2. |
 | `kb/2026_fifa_world_cup_guide.md`, `calendar.md` | ✅ In place. |
-| A2 result (South Korea–Czechia, June 11 10 PM ET) | ❌ Not in CSV yet — needed for today's edition recap. **Get from user; never invent.** |
+| A2 result (South Korea–Czechia, June 11 10 PM ET) | ✅ Entered June 12: 2–2, status played. CSV now shows 2 of 72 played. |
 | git | Initialized June 12 with an initial commit. Commit after each edition (the accountability trail). |
 
 ## Standing guardrails (every phase, every session)
@@ -43,7 +43,8 @@ Read CLAUDE.md first — its data contracts override everything here.
 2. **Pull each match's card** from `cards/`:
    - md1/md2 cards: slice from `^## {match_id}:` to the next `^## ` (or EOF), dropping a trailing `---` separator. Matchday from the match_id digit: 1–2 → md1.md, 3–4 → md2.md, 5–6 → md3.md.
    - md3 cards use `^### {match_id}:` headers nested under `## June N` sections — slice `###`-to-next-`###`-or-`##`.
-   - B1/D1 live in `cards/template.md` (once supplied) — search it the same way; if a card is missing anywhere, insert a clearly marked placeholder block and warn on stderr. Do not synthesize card prose.
+   - B1/D1 live in `cards/template.md` in a THIRD format: H1 headers with team names but no match_id (`# 🇨🇦 Canada vs Bosnia and Herzegovina 🇧🇦`), sections at `##` level, cards separated by doubled `---` lines. Extraction rule for this file only: find the `^# ` line containing BOTH team_a and team_b (exact canon strings from the fixtures row); slice until the next `^# ` line or `^## Pre-bake status`, stripping trailing `---` lines. The card's section headers are `##` (not bold-inline like md1/md2), so the Stakes slot here is a `## Stakes` section whose body is a `*[...]*` placeholder paragraph — replace the placeholder body, keep the header.
+   - If a card is missing anywhere, insert a clearly marked placeholder block and warn on stderr. Do not synthesize card prose.
 3. **Inject standings into each card's Stakes slot.** Cards carry `**Stakes:** *[...]*` placeholders. Replace with a starting block: the match's group table (from `render_markdown` output, or a compact 4-row slice) + one factual sentence of context (e.g. "Mexico lead Group A on 3 pts; both these teams are on 0"). Keep it factual — no scenario claims until Phase 3 (scenarios.py) exists.
 4. **Leave `**The Call:**` and `**Odds & Best Bet:**` slots exactly as-is** until their phases are live.
 5. **Edition skeleton**, in this order (fan reading order):
@@ -53,7 +54,7 @@ Read CLAUDE.md first — its data contracts override everything here.
    - **Standings snapshot**: full `render_markdown(standings)` output inside `<details><summary>All tables</summary>...</details>`. From June 18 (MD2), also surface the third-place table outside the fold (calendar says the tracker debuts ~June 18, centerpiece June 22–27).
    - **Match cards** (with Stakes filled).
    - Header note for MD2/MD3 cards: injury/selection notes are pre-baked — **verify day-of before publishing** (the card files say this themselves; anything "(verify before use)" must be web-verified or cut).
-6. **Tests** (`tests/test_build_edition.py`): synthetic card text + tmp fixtures CSV (use `tempfile`); cover (a) card extraction for both `##` and `###` formats, (b) the 🌙 mapping — assert D2/J2/F4 land on June 13/16/20 editions and date-only queries for June 14 do NOT include D2, (c) Stakes replacement leaves The Call/Odds untouched, (d) missing card → placeholder + warning, not a crash.
+6. **Tests** (`tests/test_build_edition.py`): synthetic card text + tmp fixtures CSV (use `tempfile`); cover (a) card extraction for all three formats (`## A1:` md1/md2, `### A5:` md3, H1-by-team-names template.md), (b) the 🌙 mapping — assert D2/J2/F4 land on June 13/16/20 editions and date-only queries for June 14 do NOT include D2, (c) Stakes replacement leaves The Call/Odds untouched, (d) missing card → placeholder + warning, not a crash.
 
 **Acceptance:** tests green; `python scripts/build_edition.py 2026-06-12` produces a readable edition with B1+D1 (or placeholders if template.md still missing); no invented content.
 
