@@ -374,6 +374,161 @@ def render_call(info: dict | None, team_a: str, team_b: str,
     return "\n".join(parts)
 
 
+# ---------------------------------------------------------------- the market
+
+def load_odds_engine():
+    """Defensive adapter around odds.py + ledger.py (Phase 5, owned by another
+    stream). Returns (callable, ledger_line, None) or (None, None, reason).
+    The callable maps a fixtures row -> dict for render_market(); returns None
+    for matches with no snapshot (placeholder state, per contract)."""
+    try:
+        import odds as od
+        import ledger as lg
+        import predict as pr
+        odds_rows = od.load_odds()
+        if not odds_rows:
+            return None, None, "odds_log.csv is empty — no snapshots yet"
+        ledger_rows = lg.load_ledger()
+        picks = od.load_picks()
+        model = pr.load_ratings()
+    except Exception as e:                      # broad on purpose: never break the build
+        return None, None, f"odds engine unavailable ({e.__class__.__name__}: {e})"
+
+    def call(row: dict) -> dict | None:
+        try:
+            mid = row["match_id"]
+            match_rows = [r for r in odds_rows
+                          if r["match_id"] == mid and r["phase"] == "snapshot"]
+            if not match_rows:
+                return None
+            a, b = row["team_a"].strip(), row["team_b"].strip()
+            host = pr.HOST_BY_COUNTRY.get((row.get("country") or "").strip())
+            hfa = host if host in (a, b) else None
+            pred = pr.predict_match(model, a, b, hfa_team=hfa)
+            ev = od.evaluate_match(mid, odds_rows, ledger_rows, pred)
+            if not any(ev.get(m) for m in ("h2h", "totals", "spreads", "btts")):
+                return None
+            pick, flags = od.best_bet(ev)
+            return {
+                "evaluation": ev, "pick": pick, "flags": flags,
+                "best_prices": od._best_prices(odds_rows, mid),
+                "recorded": [p for p in picks if p["match_id"] == mid],
+                "threshold": od.EDGE_THRESHOLD,
+                "snapshot_ts": max(r["timestamp"] for r in match_rows),
+            }
+        except Exception:
+            return None
+
+    return call, od.units_summary(picks), None
+
+
+_MARKET_LABELS = {"h2h": "1X2", "totals": "Total goals", "spreads": "Asian handicap",
+                  "btts": "Both teams to score"}
+
+
+def _sel_label(market: str, sel: str, line: str, team_a: str, team_b: str) -> str:
+    if market == "h2h":
+        return {"home": team_a, "draw": "Draw", "away": team_b}.get(sel, sel)
+    if market == "totals":
+        return f"{sel.capitalize()} {line}"
+    if market == "spreads":
+        team = team_a if sel == "home" else team_b
+        try:
+            return f"{team} {float(line):+g}"
+        except (TypeError, ValueError):
+            return f"{team} {line}"
+    if market == "btts":
+        return f"Both score — {sel}"
+    return sel
+
+
+def _fmt_snapshot_ts(ts: str) -> str:
+    try:
+        from datetime import datetime as _dt
+        d = _dt.fromisoformat(ts)
+        return f"{d:%b} {d.day}, {d:%I:%M %p} ET".replace(" 0", " ")
+    except ValueError:
+        return ts
+
+
+def render_market(odds_info: dict | None, team_a: str, team_b: str,
+                  prebaked: str | None, played: bool = False) -> str:
+    """Odds & Best Bet block: the de-vigged edge table + the pick when the
+    odds engine has a snapshot; the contract placeholder otherwise. Numbers
+    come exclusively from odds.py — this function only formats."""
+    if odds_info is None:
+        return render_odds(prebaked, played=played)
+
+    ev = odds_info["evaluation"]
+    pick = odds_info["pick"]
+    threshold = odds_info["threshold"]
+    parts = []
+
+    rows_html = []
+    for market in ("h2h", "totals", "spreads", "btts"):
+        for sel, line, odds_v, implied, our_p, edge in ev.get(market, []):
+            is_pick = (pick is not None and pick["market"] == market
+                       and pick["selection"] == sel and str(pick["line"]) == str(line))
+            cls = ' class="pick-row"' if is_pick else ""
+            edge_cls = "edge-pos" if edge >= threshold else ("edge-neg" if edge < 0 else "")
+            rows_html.append(
+                f'      <tr{cls}><td class="lbl">{_esc(_MARKET_LABELS[market])}</td>'
+                f'<td class="lbl">{_esc(_sel_label(market, sel, line, team_a, team_b))}</td>'
+                f'<td>{odds_v:.2f}</td><td>{implied:.0%}</td><td>{our_p:.0%}</td>'
+                f'<td class="{edge_cls}">{edge:+.1%}</td></tr>')
+    if rows_html:
+        parts.append(
+            '<div class="edge-wrap">\n  <table>\n'
+            '    <caption class="sr-only">Market odds versus the model: implied '
+            'probability, our probability, and the edge per selection</caption>\n'
+            '    <thead><tr><th class="lbl" scope="col">Market</th>'
+            '<th class="lbl" scope="col">Selection</th><th scope="col">Odds</th>'
+            '<th scope="col">Implied</th><th scope="col">Ours</th>'
+            '<th scope="col">Edge</th></tr></thead>\n    <tbody>\n'
+            + "\n".join(rows_html) + "\n    </tbody>\n  </table>\n</div>")
+
+    if pick:
+        bp = odds_info["best_prices"].get(
+            (pick["market"], pick["selection"], str(pick["line"])))
+        price = f' — best price {bp[0]:.2f} ({_esc(bp[1])})' if bp else ""
+        parts.append(
+            '<div class="bet-callout"><span class="tag">Best bet</span>'
+            f'<p><strong>{_esc(_sel_label(pick["market"], pick["selection"], pick["line"], team_a, team_b))}'
+            f'</strong> ({_MARKET_LABELS[pick["market"]]}) @ {pick["odds"]:.2f}, '
+            f'edge <strong>{pick["edge"]:+.1%}</strong>{price}. Flat 1u, paper record.</p></div>')
+    elif rows_html:
+        parts.append(f'<p class="no-bet"><b>NO BET</b> — no edge clears the '
+                     f'{threshold:.0%} threshold (a normal, expected result).</p>')
+
+    for rec in odds_info.get("recorded", []):
+        status = rec.get("status", "open")
+        line_bits = [f'Logged pick: {_esc(_sel_label(rec["market"], rec["selection"], rec["line"], team_a, team_b))} '
+                     f'@ {_esc(rec["odds"])} ({_esc(rec["book"])}), edge {_esc(rec["edge_pp"])}pp']
+        if status != "open":
+            line_bits.append(f'settled <b>{_esc(status)}</b> for {_esc(rec["units"])}u')
+            if rec.get("clv_pp"):
+                line_bits.append(f'CLV {_esc(rec["clv_pp"])}pp')
+        else:
+            line_bits.append("open")
+        parts.append(f'<p class="odds-note">{" · ".join(line_bits)}.</p>')
+
+    for fl in odds_info.get("flags", []):
+        parts.append(f'<p class="verify-flag">{_esc(fl)}</p>')
+
+    notes = [f'market snapshot {_esc(_fmt_snapshot_ts(odds_info["snapshot_ts"]))} · '
+             'median odds across books, de-vigged multiplicatively']
+    if ev.get("totals") or ev.get("spreads") or ev.get("btts"):
+        notes.append("totals / handicap / BTTS are model-priced from the score "
+                     "matrix — the Opta overlay covers W/D/L only")
+    notes.extend(ev.get("missing", []))
+    parts.append('<p class="odds-note">' + " · ".join(_esc(n) for n in notes) + ".</p>")
+
+    if prebaked:
+        parts.append('<div class="prose"><blockquote><p><strong>Markets to watch '
+                     f'(pre-baked):</strong> {sc._inline(prebaked)}</p></blockquote></div>')
+    return "\n".join(parts)
+
+
 # ---------------------------------------------------------------- match pages
 
 _CALLOUT_SECTIONS = {"Key Duel", "Watch For", "Margin Notes",
@@ -457,7 +612,8 @@ def render_match_page(row: dict, s: "st.Standings",
                       forms: dict[str, list[str | None]],
                       cards_dir: Path, info: dict | None, css: str,
                       template_dir: Path = TEMPLATE_DIR,
-                      warnings: list[str] | None = None) -> str:
+                      warnings: list[str] | None = None,
+                      odds_info: dict | None = None) -> str:
     mid, g = row["match_id"].strip(), row["group"].strip()
     team_a, team_b = row["team_a"].strip(), row["team_b"].strip()
     played = (row.get("status") or "").strip().lower() == "played"
@@ -522,7 +678,7 @@ def render_match_page(row: dict, s: "st.Standings",
         stakes_sentence=_esc(stakes),
         mini_table_html=mini,
         card_html=render_card_sections(sections),
-        odds_html=render_odds(odds_note, played=played),
+        odds_html=render_market(odds_info, team_a, team_b, odds_note, played=played),
         repo_url=REPO_URL,
     )
 
@@ -623,7 +779,8 @@ def render_team_page(profile: "sc.TeamProfile", s: "st.Standings",
 def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
                generated_at: str, template_path: Path = TEMPLATE_DIR / "page.html",
                editions_dir: Path = REPO_ROOT / "editions",
-               css: str | None = None) -> tuple[str, dict]:
+               css: str | None = None,
+               ledger_line: str | None = None) -> tuple[str, dict]:
     """Render the index page. Returns (html, data_dict)."""
     s = st.compute_standings(matches)
     forms = form_by_team(matches)
@@ -661,6 +818,8 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
         generated_at=_esc(generated_at),
         repo_url=REPO_URL,
         data_json=data_json,
+        ledger_html=(f'<p class="ledger-line">{_esc(ledger_line)}</p>'
+                     if ledger_line else ""),
     )
     return page, data
 
@@ -671,10 +830,11 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                kb_path: Path = KB_GUIDE,
                template_dir: Path = TEMPLATE_DIR,
                editions_dir: Path = REPO_ROOT / "editions",
-               predictor="auto") -> list[str]:
+               predictor="auto", odds_engine="auto") -> list[str]:
     """Render the whole site (index + team cards + match previews + data.json)
-    into out_dir. Returns warnings. ``predictor`` is "auto" (load predict.py
-    defensively), None (placeholder state), or a callable (tests)."""
+    into out_dir. Returns warnings. ``predictor`` and ``odds_engine`` are
+    "auto" (load the real modules defensively), None (placeholder state), or
+    a callable (tests)."""
     warnings: list[str] = []
 
     matches = st.load_fixtures(fixtures)
@@ -692,6 +852,13 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         if why:
             warnings.append(f"The Call renders as placeholder: {why}")
 
+    if odds_engine == "auto":
+        odds_call, ledger_line, odds_why = load_odds_engine()
+        if odds_why:
+            warnings.append(f"Odds sections render as placeholder: {odds_why}")
+    else:
+        odds_call, ledger_line = odds_engine, None
+
     profiles, kb_warnings = sc.parse_kb(kb_path)
     warnings.extend(f"kb: {w}" for w in kb_warnings)
 
@@ -701,7 +868,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
 
     index, data = build_page(matches, rows, target, generated_at,
                              template_path=template_dir / "page.html",
-                             editions_dir=editions_dir, css=css)
+                             editions_dir=editions_dir, css=css,
+                             ledger_line=ledger_line)
     (out_dir / "index.html").write_text(index, encoding="utf-8")
     (out_dir / "data.json").write_text(
         json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -721,8 +889,9 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     for row in rows:
         info = _safe_predict(predictor, row, warnings)
         predictions += info is not None
+        odds_info = odds_call(row) if odds_call else None
         page = render_match_page(row, s, forms, cards_dir, info, css,
-                                 template_dir, warnings)
+                                 template_dir, warnings, odds_info=odds_info)
         (out_dir / "matches" / f"{row['match_id']}.html").write_text(
             page, encoding="utf-8")
     if predictor is not None and rows and predictions == 0:

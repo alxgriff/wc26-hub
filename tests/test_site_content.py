@@ -119,7 +119,7 @@ class FullSiteTests(unittest.TestCase):
         cls.tmp = tempfile.TemporaryDirectory()
         cls.out = Path(cls.tmp.name)
         cls.warnings = bs.build_site(cls.out, date(2026, 6, 12), "2026-06-12 09:00",
-                                     predictor=None)
+                                     predictor=None, odds_engine=None)
 
     @classmethod
     def tearDownClass(cls):
@@ -203,9 +203,85 @@ class FullSiteTests(unittest.TestCase):
     def test_stale_pages_removed_on_rebuild(self):
         stale = self.out / "teams" / "old-team-name.html"
         stale.write_text("stale", encoding="utf-8")
-        warnings = bs.build_site(self.out, date(2026, 6, 12), "t", predictor=None)
+        warnings = bs.build_site(self.out, date(2026, 6, 12), "t", predictor=None,
+                                 odds_engine=None)
         self.assertFalse(stale.exists())
         self.assertTrue(any("stale" in w for w in warnings))
+
+
+class OddsWiringTests(unittest.TestCase):
+    @staticmethod
+    def synthetic_info(pick=True):
+        ev = {"h2h": [("home", "", 1.61, 0.595, 0.62, 0.025),
+                      ("draw", "", 3.90, 0.246, 0.22, -0.026),
+                      ("away", "", 5.50, 0.159, 0.16, 0.001)],
+              "totals": [("under", "2.5", 2.05, 0.49, 0.555, 0.065),
+                         ("over", "2.5", 1.85, 0.51, 0.445, -0.065)],
+              "spreads": [], "btts": [],
+              "missing": ["one informational note"]}
+        pick_d = {"market": "totals", "selection": "under", "line": "2.5",
+                  "odds": 2.05, "implied_p": 0.49, "our_p": 0.555, "edge": 0.065}
+        return {"evaluation": ev, "pick": pick_d if pick else None, "flags": [],
+                "best_prices": {("totals", "under", "2.5"): (2.10, "fanduel")},
+                "recorded": [], "threshold": 0.03,
+                "snapshot_ts": "2026-06-12T15:21:22-04:00"}
+
+    def test_edge_table_maps_selections_to_team_names(self):
+        out = bs.render_market(self.synthetic_info(), "Brazil", "Morocco", None)
+        self.assertIn(">Brazil<", out)          # home -> team name
+        self.assertIn(">Morocco<", out)         # away -> team name
+        self.assertIn("Under 2.5", out)
+        self.assertIn("pick-row", out)
+        self.assertIn("Best bet", out)
+        self.assertIn("best price 2.10 (fanduel)", out)
+        self.assertIn("+6.5%", out)
+        self.assertIn("market snapshot", out)
+        self.assertIn("one informational note", out)
+
+    def test_no_bet_is_a_normal_result(self):
+        out = bs.render_market(self.synthetic_info(pick=False), "A", "B", None)
+        self.assertIn("NO BET", out)
+        self.assertIn("3%", out)
+        self.assertNotIn("bet-callout", out)
+
+    def test_sanity_flags_render_as_warnings(self):
+        info = self.synthetic_info(pick=False)
+        info["flags"] = ["h2h away: edge +20.0% implausibly large"]
+        out = bs.render_market(info, "A", "B", None)
+        self.assertIn("verify-flag", out)
+        self.assertIn("implausibly large", out)
+
+    def test_placeholder_without_snapshot(self):
+        out = bs.render_market(None, "A", "B", "the draw and the under")
+        self.assertIn("placeholder-slot", out)
+        self.assertIn("the draw and the under", out)
+
+    def test_recorded_pick_line(self):
+        info = self.synthetic_info()
+        info["recorded"] = [{"market": "totals", "selection": "under", "line": "2.5",
+                             "odds": "2.05", "book": "fanduel", "edge_pp": "6.5",
+                             "status": "won", "units": "+1.05", "clv_pp": "1.2"}]
+        out = bs.render_market(info, "A", "B", None)
+        self.assertIn("Logged pick", out)
+        self.assertIn("won", out)
+        self.assertIn("+1.05", out)
+        self.assertIn("CLV 1.2pp", out)
+
+    def test_engine_integration_on_real_data(self):
+        call, _ledger, why = bs.load_odds_engine()
+        self.assertIsNone(why, f"odds engine failed to load: {why}")
+        import standings as st
+        import build_edition as be
+        rows = be.read_rows(REPO / "data" / "fixtures.csv")
+        s = st.compute_standings(st.load_fixtures(REPO / "data" / "fixtures.csv"))
+        d1 = next(r for r in rows if r["match_id"] == "D1")
+        info = call(d1)
+        self.assertIsNotNone(info, "D1 has snapshots + consensus; expected evaluation")
+        self.assertTrue(info["evaluation"]["h2h"], "D1 1X2 edges should compute")
+        page = bs.render_match_page(d1, s, {}, REPO / "cards", None,
+                                    bs._site_css(), odds_info=info)
+        self.assertIn("edge-wrap", page)
+        self.assertIn("United States", page)
 
 
 if __name__ == "__main__":

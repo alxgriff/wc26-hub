@@ -308,6 +308,23 @@ tbody th.team a{text-decoration:none}
 tbody th.team a:hover,.slate .teams a:hover{text-decoration:underline;text-decoration-color:var(--verm)}
 .slate .teams a{text-decoration:none}
 
+/* ---------- odds & best bet ---------- */
+.edge-wrap{max-width:680px}
+.edge-wrap table{margin-bottom:4px}
+.edge-wrap td.lbl,.edge-wrap th.lbl{text-align:left}
+.edge-wrap tbody td.lbl{font-family:var(--serif);font-weight:700;font-size:.92rem}
+td.edge-pos{color:var(--green);font-weight:700}
+td.edge-neg{color:var(--ink-soft)}
+tr.pick-row{background:var(--verm-soft)}
+tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
+.bet-callout{border:2px solid var(--verm);background:var(--paper-2);box-shadow:4px 4px 0 var(--hairline);padding:12px 15px;margin:12px 0;max-width:680px}
+.bet-callout .tag{display:block;font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--verm);margin-bottom:5px}
+.bet-callout p{margin:0;font-size:.95rem;line-height:1.5}
+.no-bet{font-family:var(--mono);font-size:.78rem;margin:10px 0;max-width:680px}
+.no-bet b{letter-spacing:.06em}
+.odds-note{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.7;max-width:680px}
+.ledger-line{font-family:var(--mono);font-size:.74rem;font-weight:700;margin-top:14px}
+
 </style>
 </head>
 <body>
@@ -338,10 +355,10 @@ tbody th.team a:hover,.slate .teams a:hover{text-decoration:underline;text-decor
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Haiti win 9 percent, draw 17 percent, Scotland win 74 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:9">9%</span><span class="pd" style="flex:17">17%</span><span class="pb" style="flex:74">74%</span></div>
-  <div class="scale" aria-hidden="true"><span>Haiti 9%</span><span>draw 17%</span><span>Scotland 74%</span></div>
-  <p class="factline">most likely score <b>0–2</b> · expected goals <b>2.96</b> · over 2.5 <b>57%</b> · both score <b>44%</b><br>single source: rating model (Elo+Futi)</p>
+  <p class="sr-only">Haiti win 14 percent, draw 19 percent, Scotland win 67 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:14">14%</span><span class="pd" style="flex:19">19%</span><span class="pb" style="flex:67">67%</span></div>
+  <div class="scale" aria-hidden="true"><span>Haiti 14%</span><span>draw 19%</span><span>Scotland 67%</span></div>
+  <p class="factline">most likely score <b>0–2</b> · expected goals <b>2.96</b> · over 2.5 <b>57%</b> · both score <b>44%</b><br>2-source consensus: rating model + Opta supercomputer (theanalyst.com)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> high-variance; Haiti's press vs Scotland's thin midfield makes this far livelier than the ratings gap.</p></blockquote></div>
 </section>
@@ -420,7 +437,21 @@ tbody th.team a:hover,.slate .teams a:hover{text-decoration:underline;text-decor
     <span class="kicker">The Market</span>
     <h2 id="odds-h">Odds &amp; best bet</h2>
   </div>
-<div class="placeholder-slot">No odds snapshot logged yet — this section activates with the odds workflow (CLAUDE.md Phase 3: odds_log.csv, de-vig, edge vs threshold). Odds are never invented.</div>
+<div class="edge-wrap">
+  <table>
+    <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
+    <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl">1X2</td><td class="lbl">Haiti</td><td>5.80</td><td>16%</td><td>14%</td><td class="edge-neg">-2.3%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td>4.20</td><td>23%</td><td>19%</td><td class="edge-neg">-3.5%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Scotland</td><td>1.57</td><td>61%</td><td>67%</td><td class="edge-pos">+5.9%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td>1.88</td><td>51%</td><td>57%</td><td class="edge-pos">+6.1%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td>1.93</td><td>49%</td><td>43%</td><td class="edge-neg">-6.1%</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2.5</strong> (Total goals) @ 1.88, edge <strong>+6.1%</strong> — best price 1.93 (bovada). Flat 1u, paper record.</p></div>
+<p class="odds-note">market snapshot Jun 12, 3:52 PM ET · median odds across books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only · spreads quoted but no line has both sides.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> both teams to score; over 2.5.</p></blockquote></div>
 </section>
 
