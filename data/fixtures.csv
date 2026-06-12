@@ -1,6 +1,6 @@
-match_id,group,matchday,date_et,kickoff_et_24h,kickoff_et,team_a,team_b,stadium,city,country,tv_us,score_a,score_b,status,notes
+﻿match_id,group,matchday,date_et,kickoff_et_24h,kickoff_et,team_a,team_b,stadium,city,country,tv_us,score_a,score_b,status,notes
 A1,A,1,2026-06-11,15:00,3:00 PM,Mexico,South Africa,Estadio Azteca,Mexico City,Mexico,,2,0,played,"Tournament opener; Julián Quiñones scored the World Cup's first goal"
-A2,A,1,2026-06-11,22:00,10:00 PM,South Korea,Czechia,Estadio Akron,Guadalajara,Mexico,FS1,2,2,played,
+A2,A,1,2026-06-11,22:00,10:00 PM,South Korea,Czechia,Estadio Akron,Guadalajara,Mexico,FS1,2,1,played,
 A3,A,2,2026-06-18,12:00,12:00 PM,Czechia,South Africa,Mercedes-Benz Stadium,Atlanta,USA,Fox,,,scheduled,
 A4,A,2,2026-06-18,21:00,9:00 PM,Mexico,South Korea,Estadio Akron,Guadalajara,Mexico,Fox,,,scheduled,
 A5,A,3,2026-06-24,21:00,9:00 PM,Czechia,Mexico,Estadio Azteca,Mexico City,Mexico,Fox,,,scheduled,"Simultaneous with A6 (matchday 3 rule)"
