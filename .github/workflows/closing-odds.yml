@@ -8,9 +8,17 @@ name: closing-odds
 
 on:
   schedule:
-    # June 12-27 only — no closing lines needed after the last group game.
+    # June only — no closing lines needed after the last group game (Jun 27).
+    # Four ET capture points bracket the kickoff spread (12 PM - 12 AM ET):
+    #   15:30 UTC = 11:30 AM ET  (before the noon kickoffs)
+    #   22:30 UTC =  6:30 PM ET  (before the evening slate)
+    #   00:30 UTC =  8:30 PM ET prev. ET day (before the 9-11 PM games)
+    #   03:30 UTC = 11:30 PM ET prev. ET day (before the midnight late-caps)
+    # In-play events are skipped by the fetcher, so late runs never pollute.
     - cron: "30 15 12-27 6 *"
     - cron: "30 22 12-27 6 *"
+    - cron: "30 0 13-28 6 *"
+    - cron: "30 3 13-28 6 *"
   workflow_dispatch:
 
 permissions:
