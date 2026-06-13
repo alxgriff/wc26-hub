@@ -219,6 +219,13 @@ def _read(path: Path) -> dict:
         return {_canon(r["Team"]): r for r in csv.DictReader(f)}
 
 
+def _clamp_pct(x) -> float:
+    """A percentage in [0, 100], rounded to 2dp — guards the DISPLAY against raw-float
+    artifacts in supplied Opta columns (e.g. Haiti/Curaçao Advance% carry long-decimal
+    noise) and against out-of-range corruption. Display-only; never a model input."""
+    return round(min(100.0, max(0.0, float(x))), 2)
+
+
 def _zscores(values: dict) -> dict:
     mean, sd = stats.mean(values.values()), stats.pstdev(values.values())
     sd = sd or 1.0
@@ -304,8 +311,8 @@ def load_ratings(ratings_dir: str | Path = RATINGS_DIR,
             team=t, elo=E[t], futi=FR[t], attack=FA[t], defense=FD[t],
             strength=strength[t], z_att=zA[t], z_def=zD[t],
             elo_rank=rE[t], futi_rank=rF[t], consensus_rank=rS[t],
-            opta_advance=float(opta[t]["Advance_From_Group_%"]) if (opta and t in opta) else None,
-            opta_wincup=float(opta[t]["Win_Tournament_%"]) if (opta and t in opta) else None,
+            opta_advance=_clamp_pct(opta[t]["Advance_From_Group_%"]) if (opta and t in opta) else None,
+            opta_wincup=_clamp_pct(opta[t]["Win_Tournament_%"]) if (opta and t in opta) else None,
             opta_rank=rO.get(t),
             market_odds=float(market[t]["Decimal_Odds"]) if t in market else None,
             market_implied=float(market[t]["Implied_Devig_%"]) if t in market else None,

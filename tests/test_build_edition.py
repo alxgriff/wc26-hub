@@ -15,6 +15,26 @@ import build_edition as be
 import standings as st
 
 
+class TemplateCanonDriftTests(unittest.TestCase):
+    """A B1/D1 template.md H1 naming only ONE canon team => likely canon drift,
+    which should be reported distinctly from a genuinely absent card."""
+
+    def test_one_team_h1_is_flagged_partial(self):
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "template.md").write_text(
+                "# 🇨🇦 Canada vs Bosnia and Herzegovina 🇧🇦\nbody\n", encoding="utf-8")
+            # both canon names present -> not a partial
+            self.assertIsNone(be._template_partial(d, "Canada", "Bosnia and Herzegovina"))
+            # a drifted away-name ('&' vs 'and') -> only Canada matches -> flagged
+            hit = be._template_partial(d, "Canada", "Bosnia & Herzegovina")
+            self.assertIsNotNone(hit)
+            self.assertIn("Canada", hit)
+
+    def test_absent_template_returns_none(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertIsNone(be._template_partial(d, "Canada", "Bosnia and Herzegovina"))
+
+
 # ---- synthetic card files (one card per format) ----------------------------
 
 MD1 = """# Match Cards — Matchday 1

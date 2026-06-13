@@ -74,3 +74,9 @@ the articles are the reliable path. Triangulation check (June 12): C1 Brazil
 `Czech Republic → Czechia`, `Bosnia-Herzegovina → Bosnia and Herzegovina`,
 `Cape Verde Islands → Cape Verde`. (Futi uses a different naming convention than
 Elo/Opta/Zeileis.) On any name that does not resolve to the canon: stop and report.
+
+## Opta column hygiene (2026-06-13)
+The supplied Opta `Advance_From_Group_%` carries raw-float artifacts for the weakest
+sides (Haiti 1.020739..., Curaçao 2.587135...). Display-only (never a model input)
+and already masked by output format specifiers; `predict._clamp_pct` now rounds to 2dp
+and clamps to [0,100] on ingest as a belt-and-suspenders guard.

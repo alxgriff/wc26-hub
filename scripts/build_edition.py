@@ -151,6 +151,19 @@ def _extract_by_teams(text: str, team_a: str, team_b: str) -> str | None:
     return None
 
 
+def _template_partial(cards_dir: "str | Path", team_a: str, team_b: str) -> str | None:
+    """An H1 in template.md naming exactly ONE of the two teams — a likely canon
+    drift (the B1/D1 card exists but a name doesn't match the fixtures canon), as
+    opposed to a genuinely missing card. Returns the offending H1 line, or None."""
+    path = Path(cards_dir) / "template.md"
+    if not path.exists():
+        return None
+    for ln in path.read_text(encoding="utf-8").splitlines():
+        if ln.startswith("# ") and ((team_a in ln) ^ (team_b in ln)):
+            return ln.strip()
+    return None
+
+
 def extract_card(mid: str, team_a: str, team_b: str, cards_dir: str | Path
                  ) -> tuple[str | None, str | None]:
     """Locate a match's pre-baked card. Returns ``(card_text, source_filename)``
@@ -590,7 +603,11 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
         body = build_stakes_body(standings, group, team_a, team_b, scenario=scenario)
         card, src = extract_card(mid, team_a, team_b, cards_dir)
         if card is None:
-            warnings.append(f"{mid}: no card found in cards/ — inserting placeholder")
+            drift = _template_partial(cards_dir, team_a, team_b) if int(mid[1]) in (1, 2) else None
+            warnings.append(
+                f"{mid}: no card found in cards/ — inserting placeholder"
+                + (f"; template.md has a one-team H1 ({drift!r}) — likely a canon-spelling "
+                   "drift, NOT a missing card" if drift else ""))
             chunk = (f"## {mid}: {team_a} vs {team_b}\n\n"
                      f"> ⚠️ **Card not found** in cards/. Placeholder — no card "
                      f"prose synthesised.\n\n**Stakes:**\n\n{body}\n\n"
@@ -611,6 +628,10 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
                 if not odds_ok:
                     warnings.append(f"{mid}: card has no Odds & Best Bet slot — "
                                     f"odds not injected (source {src})")
+            if "verify before use" in card.lower():   # per-card precision over the blanket banner
+                chunk = (f"> ⚠️ **Verify before publishing — {mid} {team_a} vs {team_b}:** "
+                         'this card carries a "(verify before use)" tag; confirm against '
+                         "current news or cut it.\n\n" + chunk)
         card_chunks.append(chunk)
     parts.append("\n\n---\n\n".join(card_chunks) if card_chunks else "_No cards today._")
 

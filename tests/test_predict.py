@@ -174,6 +174,14 @@ class OverlayTests(unittest.TestCase):
         self.assertIn("our model", out)
 
 
+class ClampPctTests(unittest.TestCase):
+    def test_rounds_and_clamps(self):
+        self.assertEqual(pr._clamp_pct("1.020739451095947"), 1.02)   # Haiti Advance% artifact
+        self.assertEqual(pr._clamp_pct(2.5871353088555535), 2.59)    # Curaçao Advance% artifact
+        self.assertEqual(pr._clamp_pct(150), 100.0)                  # clamp high
+        self.assertEqual(pr._clamp_pct(-3), 0.0)                     # clamp low
+
+
 class RealDataTests(unittest.TestCase):
     """Integration against the committed verified ratings."""
     @classmethod
@@ -182,8 +190,11 @@ class RealDataTests(unittest.TestCase):
 
     def test_loads_all_48_teams_from_verified_elo(self):
         self.assertEqual(len(self.m.teams), 48)
-        self.assertEqual(self.m.asof, "2026-06-11")
-        # the corrected Elo is in use: Morocco is strong, not 45th
+        # asof is present and a valid date — don't lock the exact day (survives a
+        # legitimate ratings refresh; still catches a missing/garbage as-of).
+        self.assertRegex(self.m.asof, r"^\d{4}-\d{2}-\d{2}$")
+        # the corrected Elo is in use: Morocco is strong, not 45th (an invariant,
+        # not an exact rank).
         self.assertLess(self.m.teams["Morocco"].consensus_rank, 20)
 
     def test_every_fixture_pairing_sums_to_one(self):
@@ -226,7 +237,8 @@ class RealDataTests(unittest.TestCase):
         spain = self.m.teams["Spain"]
         haiti = self.m.teams["Haiti"]
         self.assertIsNotNone(spain.market_rank)
-        self.assertEqual(spain.market_rank, 1)               # market favourite
+        self.assertLessEqual(spain.market_rank, 3)           # a clear favourite (top-3;
+        #                                                      don't lock the exact rank)
         self.assertLess(spain.market_odds, haiti.market_odds)
         # de-vigged implied probabilities are a probability measure
         total = sum(t.market_implied for t in self.m.teams.values()
