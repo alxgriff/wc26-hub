@@ -94,8 +94,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         events, remaining = od._api_get(f"/sports/{args.sport}/scores", key,
                                         daysFrom=args.days_from, dateFormat="iso")
-    except (urllib.error.URLError, urllib.error.HTTPError) as e:
-        print(f"error: scores API unreachable: {e}", file=sys.stderr)
+    except (urllib.error.HTTPError, od.OddsError) as e:
+        print(f"error: scores API: {e}", file=sys.stderr)
         return 1
 
     for line in apply_completed(events, args.fixtures, dry_run=args.dry_run):

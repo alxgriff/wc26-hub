@@ -8,6 +8,7 @@ import tempfile
 import unittest
 from datetime import datetime
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
@@ -198,6 +199,12 @@ class BestBetTests(unittest.TestCase):
         self.assertIsNone(pick)                      # not auto-picked
         self.assertTrue(any("implausibly large" in f for f in flags))
 
+    def test_edge_exactly_at_sanity_ceiling_is_flagged_not_recorded(self):
+        # the 15pp ceiling is inclusive: an edge AT it is the case the rule targets
+        pick, flags = od.best_bet(self._ev(0.15))
+        self.assertIsNone(pick)
+        self.assertTrue(any("implausibly large" in f for f in flags))
+
     def test_largest_edge_wins_across_markets(self):
         ev = {"h2h": [("home", "", 2.5, 0.40, 0.44, 0.04)],
               "totals": [("over", 2.5, 1.95, 0.50, 0.56, 0.06)], "missing": []}
@@ -348,7 +355,9 @@ class ApiMappingTests(unittest.TestCase):
     FIXTURE_ROWS = [{"match_id": "A4", "team_a": "Mexico", "team_b": "South Korea"}]
 
     def _event(self, home="Korea Republic", away="Mexico"):
-        return {"home_team": home, "away_team": away, "bookmakers": [
+        return {"home_team": home, "away_team": away,
+                "commence_time": "2026-06-13T20:00:00Z",   # future vs NOW (10:00 ET)
+                "bookmakers": [
             {"key": "fanduel", "markets": [
                 {"key": "h2h", "outcomes": [
                     {"name": home, "price": 3.1},
@@ -388,6 +397,34 @@ class ApiMappingTests(unittest.TestCase):
         rows, lines = od.snapshot_from_api([ev], self.FIXTURE_ROWS, "snapshot", NOW)
         self.assertEqual(rows, [])
         self.assertTrue(any("kicked off" in l for l in lines))
+
+    def test_event_without_commence_time_skipped_fail_closed(self):
+        ev = self._event()
+        ev.pop("commence_time")
+        rows, lines = od.snapshot_from_api([ev], self.FIXTURE_ROWS, "snapshot", NOW)
+        self.assertEqual(rows, [])                       # never logged on unknown time
+        self.assertTrue(any("fail-closed" in l for l in lines))
+
+
+class ApiErrorTests(unittest.TestCase):
+    def test_urlerror_becomes_keyless_oddserror(self):
+        import urllib.error
+        with mock.patch("odds.urllib.request.urlopen",
+                        side_effect=urllib.error.URLError("connection refused")):
+            with self.assertRaises(od.OddsError) as cm:
+                od._api_get("/sports/x/odds", "SECRETKEY")
+        self.assertNotIn("SECRETKEY", str(cm.exception))
+
+    def test_httperror_message_has_no_key_and_url_is_scrubbed(self):
+        import urllib.error, io
+        err = urllib.error.HTTPError(
+            url="https://api.the-odds-api.com/v4/sports/x/odds?apiKey=SECRETKEY",
+            code=401, msg="Unauthorized", hdrs=None, fp=io.BytesIO(b""))
+        with mock.patch("odds.urllib.request.urlopen", side_effect=err):
+            with self.assertRaises(urllib.error.HTTPError) as cm:
+                od._api_get("/sports/x/odds", "SECRETKEY")
+        self.assertNotIn("SECRETKEY", str(cm.exception))          # printed message is key-free
+        self.assertNotIn("SECRETKEY", cm.exception.url or "")     # url scrubbed defensively
 
 
 class AsianHandicapTests(unittest.TestCase):
@@ -521,6 +558,7 @@ class RenderTests(unittest.TestCase):
         self.assertIn("Best bet: home", out)
         self.assertIn("best price 2.55 (fanduel)", out)
         self.assertIn("Flat 1u (paper)", out)
+        self.assertIn("display threshold", out)   # 3pp marker is wired, not inert
 
 
 if __name__ == "__main__":

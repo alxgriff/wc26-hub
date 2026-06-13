@@ -423,7 +423,7 @@ def best_bets(evaluation: dict, threshold: float = RECORD_THRESHOLD,
     per_market: dict = {}
     for market in ("h2h", "totals", "spreads", "btts"):
         for sel, line, odds, implied, our_p, edge in evaluation.get(market, []):
-            if edge > sanity:
+            if edge >= sanity:   # inclusive: an edge AT the ceiling is the case the rule targets
                 flags.append(f"{market} {sel}{f' {line}' if line else ''}: edge "
                              f"{edge:+.1%} implausibly large — verify odds freshness "
                              "and team news before trusting")
@@ -631,9 +631,16 @@ def render_odds_section(match_id: str, evaluation: dict, pick,
     if rows:
         lines += ["| Market | Sel | Odds (median) | Implied | Ours | Edge |",
                   "|:--|:--|--:|--:|--:|--:|"]
+        actionable = 0
         for mk, (sel, line, odds, implied, our_p, edge) in labelled:
+            clears = edge >= threshold
+            actionable += int(clears)
             lines.append(f"| {mk} | {sel} | {odds:.2f} | {implied:.0%} | "
-                         f"{our_p:.0%} | {edge:+.1%} |")
+                         f"{our_p:.0%} | {edge:+.1%}{' ✓' if clears else ''} |")
+        if actionable:
+            lines.append("")
+            lines.append(f"_✓ clears the {threshold:.0%} display threshold; a pick "
+                         f"must clear the {RECORD_THRESHOLD:.0%} recording bar._")
         if evaluation.get("spreads") or evaluation.get("btts") or evaluation["totals"]:
             lines.append("")
             lines.append("_Totals/AH/BTTS are model-priced from the score matrix "
@@ -677,9 +684,23 @@ def _api_get(path: str, key: str, **params) -> tuple:
     qs = "&".join(f"{k}={v}" for k, v in params.items())
     url = f"{API_BASE}{path}?{qs}"
     req = urllib.request.Request(url, headers={"User-Agent": "wc26-hub/1.0"})
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        remaining = resp.headers.get("x-requests-remaining", "?")
-        return json.loads(resp.read().decode("utf-8")), remaining
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            remaining = resp.headers.get("x-requests-remaining", "?")
+            return json.loads(resp.read().decode("utf-8")), remaining
+    except urllib.error.HTTPError as e:
+        # the request URL carries the apiKey query param — scrub it so the key
+        # can never leak through e.url (callers print e.code/body, not the URL)
+        try:
+            if getattr(e, "url", None):
+                e.url = e.url.replace(key, "***")
+        except Exception:
+            pass
+        raise
+    except (urllib.error.URLError, TimeoutError) as e:
+        # DNS / refused / timeout: a clean, key-free OddsError so a best-effort
+        # snapshot degrades instead of crashing the step with a traceback
+        raise OddsError(f"odds API unreachable: {getattr(e, 'reason', e)}") from None
 
 
 def _match_event(event: dict, fixture_rows: list) -> dict | None:
@@ -718,14 +739,20 @@ def snapshot_from_api(events: list, fixture_rows: list, phase: str,
     stamp = now.isoformat(timespec="seconds")
     for ev in events:
         ct = (ev.get("commence_time") or "").replace("Z", "+00:00")
+        kickoff = None
         if ct:
             try:
-                if datetime.fromisoformat(ct) <= now:
-                    lines.append(f"{ev.get('home_team')} vs {ev.get('away_team')}: "
-                                 "already kicked off — in-play odds not logged")
-                    continue
+                kickoff = datetime.fromisoformat(ct)
             except ValueError:
-                pass
+                kickoff = None
+        # fail CLOSED: only log a snapshot for an event with a valid, FUTURE
+        # kickoff — a missing/unparseable/past commence_time is skipped and
+        # reported so in-play (or unknown-time) prices never pollute the log.
+        if kickoff is None or kickoff <= now:
+            why = ("already kicked off — in-play odds not logged" if kickoff
+                   else "no valid commence_time — skipped (fail-closed)")
+            lines.append(f"{ev.get('home_team')} vs {ev.get('away_team')}: {why}")
+            continue
         fr = _match_event(ev, fixture_rows)
         if fr is None:
             lines.append(f"UNMATCHED event: {ev.get('home_team')!r} vs "
@@ -947,6 +974,9 @@ def main(argv: list | None = None) -> int:
             else:
                 print(f"error: odds API HTTP {e.code}: {e.read().decode()[:200]}",
                       file=sys.stderr)
+            return 1
+        except OddsError as e:                 # URLError/timeout from _api_get
+            print(f"error: {e}", file=sys.stderr)
             return 1
         rows = be.read_rows(args.fixtures)
         odds_rows, lines = snapshot_from_api(events, rows, args.phase, lg.now_et())
