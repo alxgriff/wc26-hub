@@ -68,6 +68,18 @@ jobs:
           echo "date=$DATE" >> "$GITHUB_OUTPUT"
           echo "Editorial date: $DATE" >> "$GITHUB_STEP_SUMMARY"
 
+      # HARD GATE — runs on the PRISTINE checkout, before any step below mutates
+      # the working tree. It guards against CODE regressions deterministically
+      # (identical basis to ci.yml: committed code + committed data); a red suite
+      # publishes nothing. It must run pre-mutation: several site/honesty tests
+      # read the live data/ files and assert point-in-time world state, so
+      # running them AFTER fetch_results/settle/record turns normal overnight
+      # data evolution into a false red — which blocked the 2026-06-13 publish.
+      # Data-shape breakage on freshly fetched data still fails loudly at the
+      # (hard) "Build site" step further down.
+      - name: Tests (hard gate — red suite publishes nothing)
+        run: python -m unittest discover -s tests
+
       - name: Install Anthropic SDK (blurb + news)
         continue-on-error: true
         run: pip install anthropic
@@ -107,9 +119,6 @@ jobs:
         if: ${{ inputs.gather_news || vars.ENABLE_NEWS_DIGEST == 'true' }}
         continue-on-error: true
         run: python scripts/fetch_news.py "${{ steps.ed.outputs.date }}"
-
-      - name: Tests (hard gate — red suite publishes nothing)
-        run: python -m unittest discover -s tests
 
       - name: Build site
         run: python scripts/build_site.py --date "${{ steps.ed.outputs.date }}"
