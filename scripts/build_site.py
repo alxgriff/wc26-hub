@@ -345,7 +345,8 @@ def load_predictor(fixtures: Path | None = None):
 
 def render_call(info: dict | None, team_a: str, team_b: str,
                 prebaked_lean: str | None,
-                result: tuple[int, int] | None = None) -> str:
+                result: tuple[int, int] | None = None,
+                kicked_off: bool = False) -> str:
     """The Call block. Scheduled matches show the live model read; played
     matches show ONLY the pre-kickoff logged consensus (info["logged"]) graded
     against the result — never a retroactive recomputation. A played match
@@ -357,6 +358,11 @@ def render_call(info: dict | None, team_a: str, team_b: str,
                 '<div class="placeholder-slot">No prediction was logged before '
                 'kickoff — nothing to grade. Calls are never graded '
                 'retroactively.</div>')
+        elif kicked_off:
+            parts.append(
+                '<div class="placeholder-slot">No prediction was logged before this '
+                'match kicked off — and the honesty rule forbids making or grading a '
+                'call after kickoff, so no number is shown here.</div>')
         else:
             parts.append(
                 '<div class="placeholder-slot">Model pending — the ratings layer '
@@ -446,6 +452,10 @@ def load_odds_engine():
         ledger_rows = lg.load_ledger()
         picks = od.load_picks()
         model = pr.load_ratings()
+        # read here (not via getattr inside the swallowing closure) so a rename of
+        # RECORD_THRESHOLD fails loudly as a clear "engine unavailable" reason rather
+        # than silently desyncing the displayed bar to 0.05 in every pick callout
+        record_threshold = od.RECORD_THRESHOLD
     except Exception as e:                      # broad on purpose: never break the build
         return None, None, f"odds engine unavailable ({e.__class__.__name__}: {e})"
 
@@ -471,7 +481,7 @@ def load_odds_engine():
                 "best_prices": od._best_prices(odds_rows, mid),
                 "recorded": [p for p in picks if p["match_id"] == mid],
                 "threshold": od.EDGE_THRESHOLD,
-                "record_threshold": getattr(od, "RECORD_THRESHOLD", 0.05),
+                "record_threshold": record_threshold,
                 "snapshot_ts": max(r["timestamp"] for r in match_rows),
                 "projection": {"total": pred.total,
                                "over": {f"{k:g}": v for k, v in pred.over.items()}},
@@ -1018,7 +1028,8 @@ def render_match_page(row: dict, s: "st.Standings",
                       warnings: list[str] | None = None,
                       odds_info: dict | None = None,
                       scenario_html: str = "",
-                      wire_html: str = "") -> str:
+                      wire_html: str = "",
+                      kicked_off: bool = False) -> str:
     mid, g = row["match_id"].strip(), row["group"].strip()
     team_a, team_b = row["team_a"].strip(), row["team_b"].strip()
     played = (row.get("status") or "").strip().lower() == "played"
@@ -1079,7 +1090,8 @@ def render_match_page(row: dict, s: "st.Standings",
         when=when,
         venue=_esc(venue) or "Venue TBD",
         tv=_esc((row.get("tv_us") or "").strip() or "TV TBD"),
-        call_html=render_call(info, team_a, team_b, lean, result=result),
+        call_html=render_call(info, team_a, team_b, lean, result=result,
+                              kicked_off=kicked_off),
         stakes_sentence=_esc(stakes),
         scenario_html=scenario_html,
         mini_table_html=mini,
@@ -1386,7 +1398,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         page = render_match_page(row, s, forms, cards_dir, info, css,
                                  template_dir, warnings, odds_info=odds_info,
                                  scenario_html=scenario_html,
-                                 wire_html=render_wire(wire.get(row["match_id"])))
+                                 wire_html=render_wire(wire.get(row["match_id"])),
+                                 kicked_off=kicked_off)
         (out_dir / "matches" / f"{row['match_id']}.html").write_text(
             page, encoding="utf-8")
     if predictor is not None and scheduled and predictions == 0:

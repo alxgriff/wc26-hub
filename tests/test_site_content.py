@@ -225,8 +225,9 @@ class FullSiteTests(unittest.TestCase):
                   "logged": True}
         import standings as st
         import build_edition as be
-        s = st.compute_standings(st.load_fixtures(REPO / "data" / "fixtures.csv"))
-        rows = be.read_rows(REPO / "data" / "fixtures.csv")
+        fx = self.SNAP / "fixtures.csv"   # frozen snapshot, not the live tree
+        s = st.compute_standings(st.load_fixtures(fx))
+        rows = be.read_rows(fx)
         page = bs.render_match_page(rows[0], s, {}, REPO / "cards", logged,
                                     bs._site_css())  # A1, played 2-0
         self.assertIn("probbar", page)

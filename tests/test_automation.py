@@ -111,15 +111,20 @@ class DisciplineTests(unittest.TestCase):
 
 
 class BlurbFactPackTests(unittest.TestCase):
+    # build against the frozen June-12 snapshot (fixtures + ledger), not the live,
+    # evolving files, so the assertions test grounding logic, not tournament state.
+    SNAP = REPO / "tests" / "fixtures" / "site_snapshot"
+
     def test_fact_pack_grounds_the_slate(self):
-        pack = sb.build_fact_pack(date(2026, 6, 13), REPO / "data" / "fixtures.csv")
+        pack = sb.build_fact_pack(date(2026, 6, 13), self.SNAP / "fixtures.csv",
+                                  ledger_path=self.SNAP / "predictions_log.csv")
         self.assertIn("C1: Brazil vs Morocco", pack)
-        self.assertIn("Published consensus", pack)     # June 13 slate is logged
+        self.assertIn("Published consensus", pack)     # C1 is in the frozen ledger
         self.assertIn("1. ", pack)                     # group table lines
         self.assertNotIn("injur", pack.lower())        # no news channel here
 
     def test_rest_day_pack(self):
-        pack = sb.build_fact_pack(date(2026, 7, 30), REPO / "data" / "fixtures.csv")
+        pack = sb.build_fact_pack(date(2026, 7, 30), self.SNAP / "fixtures.csv")
         self.assertIn("No matches", pack)
 
 

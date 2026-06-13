@@ -116,7 +116,7 @@ class LoggedCallTests(unittest.TestCase):
     def ledger(rows):
         import ledger as lg
         return {"rows": rows, "published": "consensus", "brier": lg.brier,
-                "kickoff_dt": lg.kickoff_dt, "now": lg.now_et()}
+                "kickoff_dt": lg.kickoff_dt, "now": NOW}
 
     @staticmethod
     def row(ts="2026-06-12T15:04:05-04:00", **kw):
@@ -125,6 +125,13 @@ class LoggedCallTests(unittest.TestCase):
                 "timestamp": ts}
         base.update(kw)
         return base
+
+    def test_kicked_off_with_no_logged_call_does_not_say_model_pending(self):
+        # a game already underway must not imply a live number is still coming
+        out = bs.render_call(None, "X", "Y", None, result=None, kicked_off=True)
+        self.assertIn("kicked off", out)
+        self.assertNotIn("Model pending", out)
+        self.assertNotIn("fills automatically", out)
 
     def test_returns_verified_pre_kickoff_consensus(self):
         warnings = []
@@ -203,7 +210,7 @@ class RecordRenderingTests(unittest.TestCase):
         import ledger as lg
         return {"rows": ledger_rows, "published": "consensus", "brier": lg.brier,
                 "kickoff_dt": lg.kickoff_dt, "grade": lg.grade,
-                "cumulative": lg.cumulative_line, "now": lg.now_et()}
+                "cumulative": lg.cumulative_line, "now": NOW}
 
     def test_calls_table_with_day_subtotal_and_brier(self):
         matches, rows = self.fixtures()

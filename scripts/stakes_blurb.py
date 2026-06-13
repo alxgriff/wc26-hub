@@ -59,13 +59,15 @@ def _group_table_lines(s: "st.Standings", group: str) -> list[str]:
             for pos, r in enumerate(gt.rows, 1)]
 
 
-def build_fact_pack(target: date, fixtures: Path) -> str:
-    """Everything the model is allowed to know, as plain text."""
+def build_fact_pack(target: date, fixtures: Path, ledger_path: Path | None = None) -> str:
+    """Everything the model is allowed to know, as plain text. ``ledger_path`` is
+    injectable so tests can ground the pack on a frozen ledger instead of the
+    live, evolving predictions_log."""
     matches = st.load_fixtures(fixtures)
     rows = be.read_rows(fixtures)
     slate = be.select_matches(rows, target)
     s = st.compute_standings(matches, fair_play=st.load_discipline())
-    ledger_rows = lg.load_ledger()
+    ledger_rows = lg.load_ledger(ledger_path) if ledger_path else lg.load_ledger()
     picks = [p for p in od.load_picks() if p.get("status") == "open"]
     day_n = (target - be.TOURNAMENT_START).days + 1
 
