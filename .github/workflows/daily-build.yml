@@ -114,6 +114,13 @@ jobs:
         continue-on-error: true
         run: python scripts/odds.py evaluate "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
 
+      - name: Weather forecast (Open-Meteo, no key needed)
+        id: weather
+        continue-on-error: true
+        run: |
+          python scripts/weather.py --date "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
+          python scripts/weather.py --backfill | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Stakes blurb (Sonnet, grounded in computed data)
         id: blurb
         continue-on-error: true
@@ -172,6 +179,7 @@ jobs:
           [ "${{ steps.ledger.outcome }}"   = "failure" ] && failed="$failed ledger"
           [ "${{ steps.snapshot.outcome }}" = "failure" ] && failed="$failed snapshot"
           [ "${{ steps.evaluate.outcome }}" = "failure" ] && failed="$failed evaluate"
+          [ "${{ steps.weather.outcome }}"  = "failure" ] && failed="$failed weather"
           [ "${{ steps.blurb.outcome }}"    = "failure" ] && failed="$failed blurb"
           [ "${{ steps.news.outcome }}"     = "failure" ] && failed="$failed news"
           [ "${{ steps.edition.outcome }}"  = "failure" ] && failed="$failed edition"

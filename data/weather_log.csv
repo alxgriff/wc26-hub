@@ -1,0 +1,5 @@
+﻿match_id,source,temp_c,rh_pct,wind_ms,solar_wm2,wbgt_est,climate_controlled,as_of
+B2,forecast,21.5,62.0,4.5,650,22.36,false,2026-06-13 07:00 ET
+C1,forecast,25.8,65.0,4.5,650,27.03,false,2026-06-13 07:00 ET
+C2,forecast,28.2,68.0,4.5,650,30.12,false,2026-06-13 07:00 ET
+D2,forecast,35.0,55.0,4.5,650,21.00,true,2026-06-13 07:00 ET

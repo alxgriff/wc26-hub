@@ -95,6 +95,37 @@ specifies weights. Probabilities must sum to 1.0 ± 0.001 per match.
 - Never invent odds. If no snapshot was provided/fetched, the section stays
   in placeholder state.
 
+## Phase 7 — Sweat Factor data contracts
+
+### data/venues.csv — static, 16 rows, join key = `stadium` (exact string)
+Columns: `stadium, city, lat, lon, roof, air_conditioned`
+- `roof`: `open | retractable | canopy`
+- `air_conditioned`: `true` only for venues with closeable, bowl-cooling roofs
+  (AT&T Stadium, Mercedes-Benz Stadium, NRG Stadium). Canopy venues (Hard Rock,
+  SoFi) treat pitch as open. BC Place retractable but not AC.
+- Clamp rule: if `air_conditioned`, `wbgt_est` = `CONFIG["cc_wbgt"]` (21.0°C)
+  and the page shows "Indoors — heat not a factor."
+
+### data/team_climate.csv — static baselines, 48 rows, join key = canon team name
+Columns: `team, baseline_lat, baseline_lon, baseline_wbgt, source, asof`
+- `baseline_wbgt` computed once from Open-Meteo historical archive via
+  `weather.py --baselines` (June–July mean WBGT over years 2022–2024). Do not
+  recompute at build time. Initial values marked `source=estimate`; update to
+  `source=openmeteo-archive` after running `--baselines`.
+- v2 upgrade path: replace capital-city proxy with squad-weighted club-city blend.
+
+### data/weather_log.csv — append/upsert log (like odds_log.csv)
+Columns: `match_id, source, temp_c, rh_pct, wind_ms, solar_wm2, wbgt_est, climate_controlled, as_of`
+- `source`: `forecast | actual`. Both rows may exist per match.
+- Upsert key = `(match_id, source)`. Re-running a fetch updates the row, never double-logs.
+- Fetch runs before the build (weather.py --date) — **never at build time**. If no
+  row exists for a match, every section shows a clearly-marked placeholder.
+- Attribution required in footer: "Weather by Open-Meteo (CC BY 4.0)."
+- WBGT formula (BOM shade approx): `e = (rh/100)*6.105*exp(17.27*T/(237.7+T));
+  wbgt = 0.567*T + 0.393*e + 3.94`. Climate-controlled venues clamp to 21.0°C.
+- CONFIG (in `scripts/weather.py`) contains all tunable bounds; get sign-off
+  before changing for first publication.
+
 ## Style
 - Editions are markdown, prose-forward; match cards keep their 9-section
   format from cards/template.md. Don't editorialize injuries beyond sourced

@@ -380,6 +380,27 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .wire li{margin-bottom:.45em}
 .wire a{word-break:break-all}
 
+/* ---------- sweat factor / conditions meter ---------- */
+.conditions{margin:.2rem 0 .4rem}
+.cond-stamp{display:block;font-family:var(--mono);font-size:.67rem;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.55rem}
+.cond-stats{font-size:.9rem;margin-bottom:.35rem}
+.cond-track{height:8px;background:var(--hairline);border-radius:4px;margin:.2rem 0 .25rem;position:relative;overflow:hidden}
+.cond-fill{position:absolute;inset:0;right:auto;border-radius:4px;background:var(--verm)}
+.cond-sev{font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--verm);margin:.1rem 0 .8rem}
+.cond-teams{display:grid;gap:.5rem;margin-top:.2rem}
+.cond-team{display:grid;grid-template-columns:minmax(8rem,auto) 1fr auto;align-items:center;gap:.5rem;font-size:.85rem}
+.cond-tname{font-weight:700}
+.cond-dis-track{height:4px;background:var(--hairline);border-radius:2px;position:relative;overflow:hidden}
+.cond-dis-fill{position:absolute;inset:0;right:auto;border-radius:2px;background:var(--amber)}
+.cond-delta{color:var(--ink-soft);font-family:var(--mono);font-size:.7rem;white-space:nowrap;text-align:right}
+.cond-ac{font-family:var(--mono);font-size:.82rem;color:var(--ink-soft);margin:.2rem 0}
+/* severity colour overrides */
+.cond-sev-severe{color:var(--verm)}
+.cond-sev-high{color:var(--amber)}
+.cond-sev-moderate{color:var(--amber)}
+.cond-sev-mild{color:var(--ink-soft)}
+.cond-sev-indoors{color:var(--ink-soft)}
+
 /* ---------- match pages: article column + margin-notes rail ----------
    Print idiom: the whole article (call, stakes, read, wire, market) flows
    as one measured column while the key-duel / watch-for / selection /
@@ -514,6 +535,20 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
   </div>
 </section>
 
+<section aria-labelledby="weather-h">
+  <div class="sec-head">
+    <span class="kicker">The Conditions</span>
+    <h2 id="weather-h">Heat &amp; climate</h2>
+  </div>
+<div class="conditions">
+  <span class="cond-stamp">Forecast · as of 2026-06-13 07:00 ET</span>
+  <p class="cond-stats">~28°C · moderate humidity (68% RH) · WBGT 30.1</p>
+  <div class="cond-track" aria-label="Match heat index: Severe (87/100)"><div class="cond-fill" style="width:87%"></div></div>
+  <p class="cond-sev cond-sev-severe">Severe</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Haiti</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-0.4°C vs home</span></div><div class="cond-team"><span class="cond-tname">Scotland</span><div class="cond-dis-track" aria-label="Heat disadvantage 100/100"><div class="cond-dis-fill" style="width:100%"></div></div><span class="cond-delta">+12.1°C vs home</span></div></div>
+</div>
+</section>
+
 <section aria-labelledby="card-h" class="read-grid">
   <div class="sec-head">
     <span class="kicker">The Read</span>
@@ -594,7 +629,8 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
     Card prose pre-baked June 11, 2026 from the knowledge base — injury and selection
     notes are refreshed in the daily editions, not here · standings computed from
     data/fixtures.csv · <a href="../index.html">all standings</a> ·
-    <a href="https://github.com/alxgriff/wc26-hub">source &amp; data</a>
+    <a href="https://github.com/alxgriff/wc26-hub">source &amp; data</a> ·
+    Weather by <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0)
   </p>
 </footer>
 
