@@ -233,7 +233,10 @@ def log_slate(editorial_date: date, fixtures_path: Path,
             lines.append(f"{mid} {team_a} vs {team_b}: "
                          + (f"logged {logged} row(s)" if logged else "already logged (unchanged)"))
         except LedgerError as e:
-            lines.append(f"{mid}: SKIPPED — {e}")
+            # A slate match we failed to log BEFORE kickoff is a permanent hole
+            # in the accountability ledger (immutable: no backfill). Mark it
+            # MISSED so the CLI exits non-zero and the daily health gate goes red.
+            lines.append(f"{mid}: MISSED — prediction not logged before kickoff ({e})")
 
     save_ledger(ledger, ledger_path)
     return lines
@@ -262,8 +265,14 @@ def main(argv: list | None = None) -> int:
         except ValueError:
             print(f"error: bad date {args.date!r}", file=sys.stderr)
             return 2
-        for line in log_slate(target, args.fixtures, args.ledger):
+        lines = log_slate(target, args.fixtures, args.ledger)
+        for line in lines:
             print(line)
+        missed = [l for l in lines if "MISSED" in l]
+        if missed:
+            print(f"::error::{len(missed)} slate prediction(s) not logged before "
+                  "kickoff — run the morning pipeline earlier", file=sys.stderr)
+            return 1
         return 0
 
     matches = st.load_fixtures(args.fixtures)

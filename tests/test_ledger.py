@@ -23,6 +23,28 @@ def played(mid, a, b, sa, sb):
     return st.Match(mid, mid[0], (int(mid[1]) + 1) // 2, a, b, sa, sb, "played")
 
 
+class LogCliTests(unittest.TestCase):
+    """`ledger.py log` must exit non-zero when a slate prediction was MISSED
+    (not logged before kickoff) so the daily health gate goes red."""
+
+    def _run_with(self, lines):
+        orig = lg.log_slate
+        lg.log_slate = lambda *a, **k: lines
+        try:
+            return lg.main(["log", "2026-06-12"])
+        finally:
+            lg.log_slate = orig
+
+    def test_missed_prediction_exits_nonzero(self):
+        rc = self._run_with(["D1 X vs Y: MISSED — prediction not logged before kickoff (...)"])
+        self.assertEqual(rc, 1)
+
+    def test_all_logged_exits_zero(self):
+        rc = self._run_with(["D1 X vs Y: logged 2 row(s)",
+                             "D2 P vs Q: already logged (unchanged)"])
+        self.assertEqual(rc, 0)
+
+
 class BrierTests(unittest.TestCase):
     def test_certain_correct_call_scores_zero(self):
         self.assertAlmostEqual(lg.brier((1.0, 0.0, 0.0), 0), 0.0)

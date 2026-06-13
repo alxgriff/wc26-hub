@@ -25,8 +25,11 @@ permissions:
   contents: write
 
 # Same group as daily-build: serializes every workflow that pushes to main.
+# Explicit cancel-in-progress:false (matches daily-build) — queue, never cancel
+# an in-flight publish mid-push.
 concurrency:
   group: wc26-publish
+  cancel-in-progress: false
 
 defaults:
   run:

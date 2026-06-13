@@ -81,8 +81,18 @@ jobs:
         run: python -m unittest discover -s tests
 
       - name: Install Anthropic SDK (blurb + news)
+        id: sdk
         continue-on-error: true
         run: pip install anthropic
+
+      # Log today's slate FIRST — before any kickoff and before results land — so
+      # an accountable pre-kickoff call is never missed (a late run on 2026-06-12
+      # logged B1 four minutes after kickoff and lost it permanently; immutable,
+      # no backfill). A MISSED row now exits non-zero -> health gate -> red run.
+      - name: Log today's slate predictions (the accountable numbers)
+        id: ledger
+        continue-on-error: true
+        run: python scripts/ledger.py log "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Enter overnight results (The Odds API)
         id: results
@@ -93,11 +103,6 @@ jobs:
         id: settle
         continue-on-error: true
         run: python scripts/odds.py settle | tee -a "$GITHUB_STEP_SUMMARY"
-
-      - name: Log today's slate predictions (the accountable numbers)
-        id: ledger
-        continue-on-error: true
-        run: python scripts/ledger.py log "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Snapshot today's odds
         id: snapshot
@@ -128,11 +133,24 @@ jobs:
         continue-on-error: true
         run: python scripts/build_edition.py "${{ steps.ed.outputs.date }}"
 
+      # The hard test gate ran PRE-mutation; this guards the POST-mutation
+      # artifact that actually gets published. Hard step: a broken build blocks
+      # the push rather than deploying a corrupt page.
+      - name: Smoke-check built output
+        run: |
+          test -s docs/index.html \
+            || { echo "::error::docs/index.html missing/empty after build"; exit 1; }
+          test -s "docs/data/${{ steps.ed.outputs.date }}.json" \
+            || { echo "::error::snapshot json for ${{ steps.ed.outputs.date }} missing"; exit 1; }
+
       - name: Commit & push (push = deploy)
         run: |
           git config user.name "wc26-daily-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add -A
+          # explicit allowlist: only the artifacts the daily build owns, so a
+          # stray working-tree file can never ride along in an automated commit
+          git add data docs editions
+          [ -d news ] && git add news || true
           if git diff --cached --quiet; then
             echo "No changes today." >> "$GITHUB_STEP_SUMMARY"
           else
@@ -148,6 +166,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           failed=""
+          [ "${{ steps.sdk.outcome }}"      = "failure" ] && failed="$failed sdk"
           [ "${{ steps.results.outcome }}"  = "failure" ] && failed="$failed results"
           [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"
           [ "${{ steps.ledger.outcome }}"   = "failure" ] && failed="$failed ledger"
