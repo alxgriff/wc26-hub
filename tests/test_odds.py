@@ -82,6 +82,17 @@ def _mk(name, strength):
                          market_implied=None, market_rank=None)
 
 
+class FmtLineTests(unittest.TestCase):
+    def test_canonicalizes_line_forms(self):
+        self.assertEqual(od._fmt_line("3.0"), "3")
+        self.assertEqual(od._fmt_line(3.0), "3")
+        self.assertEqual(od._fmt_line("3"), "3")
+        self.assertEqual(od._fmt_line("-1.0"), "-1")
+        self.assertEqual(od._fmt_line("2.5"), "2.5")
+        self.assertEqual(od._fmt_line(""), "")
+        self.assertEqual(od._fmt_line(None), "")
+
+
 class EvaluateTests(unittest.TestCase):
     def test_h2h_edge_against_consensus(self):
         # market: 2.50/3.30/3.10 -> implied ~ .416/.315/.335 (devigged ~.40/.30/.30)
@@ -125,6 +136,17 @@ class EvaluateTests(unittest.TestCase):
         mk = od.latest_market(old + new, "D3", "h2h")
         self.assertAlmostEqual(mk[("home", "")][0], 2.5)
 
+    def test_integer_handicap_pairs_despite_decimal_format(self):
+        # home -1.0 / away +1.0 stored as "-1.0"/"1.0" were silently dropped:
+        # keys were "-1.0"/"1.0" but the negate-lookup used "-1"/"1".
+        rows = [odds_row("D3", "spreads", "home", 2.00, line="-1.0"),
+                odds_row("D3", "spreads", "away", 1.80, line="1.0")]
+        mk = od.latest_market(rows, "D3", "spreads")
+        self.assertIn(("home", "-1"), mk)      # canonicalized on read
+        pair = od.paired_lines(mk, "home", "away", negate_b=True)
+        self.assertIsNotNone(pair)             # was None before the fix
+        self.assertEqual(pair[0], "-1")
+
     def test_mixed_lines_pair_only_matching_sides(self):
         # books quote different main totals lines; over@2.5 must never be
         # de-vigged against under@3.0. Every COMPLETE pair is evaluated as a
@@ -139,9 +161,10 @@ class EvaluateTests(unittest.TestCase):
                          source="median/2books")]
         ev = od.evaluate_match("D3", rows, [], fake_pred())
         self.assertEqual(len(ev["totals"]), 4)           # both lines, both sides
-        self.assertEqual(sorted({r[1] for r in ev["totals"]}), ["2.5", "3.0"])
+        # lines are canonicalized on read: "3.0" -> "3"
+        self.assertEqual(sorted({r[1] for r in ev["totals"]}), ["2.5", "3"])
         # de-vig stays within a line: each line's implied probabilities sum to 1
-        for line in ("2.5", "3.0"):
+        for line in ("2.5", "3"):
             implied = [r[3] for r in ev["totals"] if r[1] == line]
             self.assertAlmostEqual(sum(implied), 1.0, places=9)
         self.assertTrue(any("can push" in m for m in ev["missing"]))
@@ -305,6 +328,20 @@ class SettleTests(unittest.TestCase):
             path = self._setup(d)
             od.settle_picks([self._match(2, 0)], [], path, fixtures_rows=[self._fix()])
             self.assertEqual(od.load_picks(path)[0]["clv_pp"], "")
+
+    def test_integer_totals_line_clv_pairs_despite_format(self):
+        # pick line "3.0", closing rows line "3": CLV was missed before the
+        # write/lookup were routed through _fmt_line.
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "p.csv"
+            pick = {"market": "totals", "selection": "over", "line": "3.0",
+                    "odds": 2.0, "implied_p": 0.50, "our_p": 0.55, "edge": 0.05}
+            od.record_pick("D3", pick, (2.0, "book"), NOW, False, path)
+            self.assertEqual(od.load_picks(path)[0]["line"], "3")   # stored canonical
+            closing = totals_rows("D3", 3, 1.90, 1.95, phase="closing")  # line "3"
+            od.settle_picks([self._match(2, 2)], closing, path,    # 4 goals: over wins
+                            fixtures_rows=[self._fix()])
+            self.assertNotEqual(od.load_picks(path)[0]["clv_pp"], "")
 
 
 class ApiMappingTests(unittest.TestCase):

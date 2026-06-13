@@ -340,7 +340,7 @@ class TotalsLadderTests(unittest.TestCase):
         ev = od.evaluate_match("X1", self._odds_rows(("2.0", 1.90, 1.90)), [], pred)
         self.assertEqual(len(ev["totals"]), 2)
         sels = {(s, l) for s, l, *_ in ev["totals"]}
-        self.assertEqual(sels, {("over", "2.0"), ("under", "2.0")})
+        self.assertEqual(sels, {("over", "2"), ("under", "2")})   # canonical line form
         over_row = next(r for r in ev["totals"] if r[0] == "over")
         self.assertAlmostEqual(over_row[3] + ev["totals"][1][3], 1.0, places=9)
         self.assertTrue(any("can push" in m for m in ev["missing"]))

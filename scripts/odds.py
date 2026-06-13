@@ -218,6 +218,19 @@ def append_odds(rows: list, path: Path = ODDS_LOG) -> None:
     _save(existing + rows, path, ODDS_COLUMNS)
 
 
+def _fmt_line(line) -> str:
+    """Canonical string form of a market line so writes and look-ups always
+    agree: '3.0'/'3'/3 -> '3', '-1.0' -> '-1', '2.5' -> '2.5', ''/None -> ''.
+    The single formatter for every line write and key — whole-number handicaps
+    and totals were silently dropped when written '3.0' but keyed '3'."""
+    if line is None or line == "":
+        return ""
+    try:
+        return f"{float(line):g}"
+    except (TypeError, ValueError):
+        return str(line)
+
+
 def latest_market(odds_rows: list, match_id: str, market: str,
                   phase: str = "snapshot", source_prefix: str = "median") -> dict:
     """The most recent {(selection, line): (odds, n_books)} for a
@@ -235,8 +248,8 @@ def latest_market(odds_rows: list, match_id: str, market: str,
         if r["timestamp"] != last_ts:
             continue
         m = re.search(r"/(\d+)books", r["source"])
-        out[(r["selection"], r["line"])] = (float(r["odds"]),
-                                            int(m.group(1)) if m else 1)
+        out[(r["selection"], _fmt_line(r["line"]))] = (float(r["odds"]),
+                                                       int(m.group(1)) if m else 1)
     return out
 
 
@@ -262,7 +275,7 @@ def all_paired_lines(market_data: dict, sel_a: str, sel_b: str,
             continue
         b_line = line
         if negate_b and line:
-            b_line = f"{-float(line):g}"
+            b_line = _fmt_line(-float(line))
         match_b = market_data.get((sel_b, b_line))
         if match_b:
             out.append((line, odds_a, match_b[0], n_a + match_b[1]))
@@ -280,7 +293,7 @@ def paired_lines(market_data: dict, sel_a: str, sel_b: str,
             continue
         b_line = line
         if negate_b and line:
-            b_line = f"{-float(line):g}"
+            b_line = _fmt_line(-float(line))
         match_b = market_data.get((sel_b, b_line))
         if match_b:
             candidates.append((n_a + match_b[1], line, odds_a, match_b[0]))
@@ -372,7 +385,7 @@ def evaluate_match(match_id: str, odds_rows: list, ledger_rows: list,
             margins = margin_dist(pred.lambda_a, pred.lambda_b)
             p_home = ah_prob(margins, float(h_line))
             implied = devig([o_home, o_away])
-            a_line = f"{-float(h_line):g}"
+            a_line = _fmt_line(-float(h_line))
             for sel, line, o, imp, p in (
                     ("home", h_line, o_home, implied[0], p_home),
                     ("away", a_line, o_away, implied[1], 1 - p_home)):
@@ -455,14 +468,14 @@ def record_pick(match_id: str, pick: dict, best_price: tuple, now: datetime,
         raise OddsError(f"{match_id}: kickoff has passed — no new or revised picks")
     odds, book = best_price
     row = {"match_id": match_id, "market": pick["market"], "selection": pick["selection"],
-           "line": pick["line"], "odds": f"{odds:.2f}", "book": book,
+           "line": _fmt_line(pick["line"]), "odds": f"{odds:.2f}", "book": book,
            "edge_pp": f"{pick['edge'] * 100:.1f}", "our_p": f"{pick['our_p']:.4f}",
            "implied_p": f"{pick['implied_p']:.4f}", "stake": "1",
            "timestamp": now.isoformat(timespec="seconds"),
            "status": "open", "units": "", "clv_pp": ""}
     if existing:
         identical = (str(existing["selection"]) == str(row["selection"])
-                     and str(existing["line"]) == str(row["line"])
+                     and _fmt_line(existing["line"]) == _fmt_line(row["line"])
                      and float(existing["odds"]) == float(row["odds"]))
         if identical:
             return (f"{match_id}: {pick['market']} pick unchanged — already "
@@ -491,9 +504,10 @@ def _market_keys(market: str, selection: str, line: str) -> list:
         return [(s, "") for s in H2H_SELECTIONS]
     if market == "btts":
         return [("yes", ""), ("no", "")]
+    line = _fmt_line(line)
     if market == "totals":
         return [("over", line), ("under", line)]
-    other = f"{-float(line):g}" if line else ""
+    other = _fmt_line(-float(line)) if line else ""
     return ([("home", line), ("away", other)] if selection == "home"
             else [("home", other), ("away", line)])
 
@@ -741,7 +755,7 @@ def snapshot_from_api(events: list, fixture_rows: list, phase: str,
                     for oc in mkt.get("outcomes", []):
                         sel = oc["name"].strip().lower()
                         if sel in ("over", "under"):
-                            prices.setdefault(("totals", sel, str(oc.get("point", "")))
+                            prices.setdefault(("totals", sel, _fmt_line(oc.get("point", "")))
                                               , []).append((float(oc["price"]), bk["key"]))
                 elif mkt["key"] == "spreads":
                     for oc in mkt.get("outcomes", []):
@@ -752,7 +766,7 @@ def snapshot_from_api(events: list, fixture_rows: list, phase: str,
                             sel = "away"
                         else:
                             continue
-                        prices.setdefault(("spreads", sel, str(oc.get("point", "")))
+                        prices.setdefault(("spreads", sel, _fmt_line(oc.get("point", "")))
                                           , []).append((float(oc["price"]), bk["key"]))
         n_books = len(ev.get("bookmakers", []))
         for (market, sel, line), plist in prices.items():
@@ -964,7 +978,7 @@ def main(argv: list | None = None) -> int:
                     raise OddsError("totals needs two odds: over,under")
                 devig(ou)
                 new = [{"match_id": args.match_id, "market": "totals", "selection": s,
-                        "line": str(line), "odds": f"{o:.3f}", "source": args.source,
+                        "line": _fmt_line(line), "odds": f"{o:.3f}", "source": args.source,
                         "phase": args.phase, "timestamp": now}
                        for s, o in zip(("over", "under"), ou)]
             elif args.market == "spreads":
@@ -976,7 +990,7 @@ def main(argv: list | None = None) -> int:
                     raise OddsError("spreads needs two odds: home,away")
                 devig(ha)
                 new = [{"match_id": args.match_id, "market": "spreads", "selection": s,
-                        "line": str(l), "odds": f"{o:.3f}", "source": args.source,
+                        "line": _fmt_line(l), "odds": f"{o:.3f}", "source": args.source,
                         "phase": args.phase, "timestamp": now}
                        for s, l, o in (("home", h_line, ha[0]), ("away", -h_line, ha[1]))]
             else:  # btts
