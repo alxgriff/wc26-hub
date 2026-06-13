@@ -310,6 +310,19 @@ past ~20 years of WC + continental knockouts. Treat this as its own data depende
 
 ### 2.4 Host-specific home-field advantage (HFA) that scales with host strength
 
+> **RESULT (2026-06-13): measured; flat 60 validated, host TABLE added, per-match
+> SCALING not adopted.** `scripts/fit_hfa.py` on 7,216 non-neutral competitive
+> matches (2010+): the full-crowd home edge is ~+0.455 goals ≈ **~67 Elo pts**, so
+> the current `hfa = 60` is a corroborated split-crowd discount. Per-match
+> host-strength scaling is the right *direction* (c = +0.032, Kalwij-consistent) but
+> **negligible** (out-of-sample home-GD RMSE improves ~0.001 ≈ noise) and moot for
+> WC2026 (US/Mexico/Canada are mid-strength → scaled ≈ flat). Built the structure
+> (`Config.hfa_by_host`, default None ⇒ flat, regression-guarded; loadable from
+> `data/calibration.json`) so per-host values can be FIT against results as the
+> tournament runs — but shipped nothing active. The "apply more to defense"
+> refinement below is NOT adopted (independent review: likely backwards — HA leans
+> offensive). See `data/History/DATA_QUALITY.md`.
+
 **Why (well-evidenced).** Current HFA is a single hand-set constant
 (`hfa = 60` Elo-pts) applied to any host at home. The literature says HFA is
 *not* one-size-fits-all:

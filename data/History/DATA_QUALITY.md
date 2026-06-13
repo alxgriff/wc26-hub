@@ -35,3 +35,22 @@ in place and ready; the club-football prior simply does not transfer to internat
 football here, and the validation gate (correctly) rejected it. Re-run `fit_rho.py`
 if a better corpus / lambda model (e.g. a full Maher fit) or the knockout regime
 (more cautious, may differ) warrants revisiting.
+
+## Result of the HFA measurement (2026-06-13)
+`scripts/fit_hfa.py` measured international home advantage on 7,216 non-neutral
+competitive matches (2010+):
+
+- **Home edge at even strength ≈ +0.455 goals ≈ ~67 Elo pts** (full crowd). The
+  current `Config.hfa = 60` is therefore **corroborated** — a sensible split-crowd
+  discount of the ~67 full-crowd edge, not an arbitrary number.
+- **Per-match host-strength scaling: c = +0.032** — the spec's (Kalwij) direction
+  (stronger host → larger edge), but **negligible**: out-of-sample home-GD RMSE
+  improves by only 0.001 (≈ noise). And it's moot for WC2026 — the three hosts
+  (US/Mexico/Canada) are mid-strength, so a scaled HFA ≈ the flat value for them.
+
+**Decision: keep the flat `hfa = 60` (validated); do NOT add per-match strength
+scaling.** Built the host-aware structure instead: `Config.hfa_by_host` (optional
+`{host: elo_pts}`, default None ⇒ flat for every host, regression-guarded). Prefer
+FITTING per-host values against actual results as the tournament runs (or setting
+crowd-context values deliberately) over guessing — `data/calibration.json` can carry
+`hfa` / `hfa_by_host` to activate. Not written, so the model is unchanged.

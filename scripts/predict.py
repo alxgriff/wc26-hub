@@ -120,9 +120,16 @@ class Config:
     mu0: float = 2.6        # baseline total goals at even strength / even att-def
     theta: float = 190.0    # FIT to the Elo expectancy curve (see module docstring)
     alpha: float = 0.20     # Futi att/def (z) -> log expected-total goals
-    hfa: float = 60.0       # host home-field advantage, in Elo-equivalent points
-                            # (eloratings.net convention is +100; we discount for
-                            # split crowds at neutral-ish NFL venues — revisit vs Brier)
+    hfa: float = 60.0       # flat host home-field advantage, in Elo-equivalent points.
+                            # eloratings.net convention is +100; 60 is a deliberate
+                            # split-crowd discount and is corroborated: the measured
+                            # full-crowd international home edge is ~67 Elo / +0.46 goals
+                            # (scripts/fit_hfa.py), so 60 is a sensible discount.
+    hfa_by_host: "dict | None" = None   # optional per-host override {host: elo_pts}.
+                            # None => the flat `hfa` for every host (today's behaviour).
+                            # Per-match strength-scaling is real-direction but negligible
+                            # (fit_hfa), so prefer FITTING per-host values against actual
+                            # results as the tournament runs over guessing crowd discounts.
     max_goals: int = 8      # score-matrix truncation (captures >99.99%)
     w_elo: float = 1.0      # consensus weights (equal by default)
     w_futi: float = 1.0
@@ -231,9 +238,13 @@ def load_ratings(ratings_dir: str | Path = RATINGS_DIR,
     rating (stop-and-report on any canon mismatch, per the data contract)."""
     if config is None:
         config = Config()
-        cal = _load_calibration()          # activate a fitted rho if one was persisted
+        cal = _load_calibration()          # activate fitted knobs if any were persisted
         if cal and cal.get("rho") is not None:
             config.rho = float(cal["rho"])
+        if cal and cal.get("hfa") is not None:
+            config.hfa = float(cal["hfa"])
+        if cal and cal.get("hfa_by_host"):
+            config.hfa_by_host = {k: float(v) for k, v in cal["hfa_by_host"].items()}
     ratings_dir = Path(ratings_dir)
     elo = _read(ratings_dir / ELO_FILE)
     futi = _read(ratings_dir / FUTI_FILE)
@@ -362,8 +373,9 @@ def predict_match(model: RatingModel, team_a: str, team_b: str,
         if t not in model.teams:
             raise ValueError(f"unknown team {t!r} (not in the rating model)")
     a, b = model.teams[team_a], model.teams[team_b]
-    bonus_a = cfg.hfa if hfa_team == team_a else 0.0
-    bonus_b = cfg.hfa if hfa_team == team_b else 0.0
+    host_hfa = (cfg.hfa_by_host or {}).get(hfa_team, cfg.hfa)   # per-host value or flat
+    bonus_a = host_hfa if hfa_team == team_a else 0.0
+    bonus_b = host_hfa if hfa_team == team_b else 0.0
 
     sup = (a.strength + bonus_a - b.strength - bonus_b) / cfg.theta
     texture = ((a.z_att - b.z_def) + (b.z_att - a.z_def)) / 2
