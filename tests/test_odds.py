@@ -264,6 +264,27 @@ class ProbsValidTests(unittest.TestCase):
         self.assertFalse(lg.probs_valid((0.5, 0.5)))               # wrong arity
 
 
+class PicksDedupeTests(unittest.TestCase):
+    """load_picks heals a union-merge that duplicated a pick row on a rebase race."""
+
+    def _row(self, status, units="", market="h2h", line=""):
+        return {"match_id": "D1", "market": market, "selection": "away",
+                "line": line, "status": status, "units": units}
+
+    def test_open_plus_settled_collapses_to_settled(self):
+        out = od._dedupe_picks([self._row("open"), self._row("lost", "-1.00")])
+        self.assertEqual(len(out), 1)
+        self.assertEqual(out[0]["status"], "lost")     # settled wins; no double-count
+
+    def test_distinct_markets_both_kept(self):
+        out = od._dedupe_picks([self._row("open"), self._row("open", market="totals")])
+        self.assertEqual(len(out), 2)
+
+    def test_contradictory_settled_rows_raise(self):
+        with self.assertRaises(od.OddsError):
+            od._dedupe_picks([self._row("won", "+3.00"), self._row("lost", "-1.00")])
+
+
 class SettleTests(unittest.TestCase):
     def _setup(self, d, selection="home", market="h2h", line=""):
         path = Path(d) / "picks.csv"

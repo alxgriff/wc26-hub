@@ -63,13 +63,17 @@ specifies weights. Probabilities must sum to 1.0 ± 0.001 per match.
 
 ## Prediction accountability
 - Every published prediction gets logged: match_id, p_home/p_draw/p_away,
-  predicted score, timestamp. Brier score = mean squared error of the W/D/L
-  probability vector vs the 1/0/0 outcome vector; report cumulative + per-day.
+  predicted score, timestamp. Brier score = sum of squared errors of the W/D/L
+  probability vector vs the 1/0/0 outcome vector (multiclass Brier, range 0–2;
+  0.667 = coin-flip baseline); report cumulative + per-day.
 
 ## Phase 3 — Odds & Best Bet methodology
-- At publish time, snapshot the market: 3-way moneyline, draw no bet, total
-  goals O/U. Log to data/odds_log.csv: match_id, market, selection, odds
-  (decimal), book/consensus source, timestamp.
+- At publish time, snapshot the market: 3-way moneyline (1X2) and total goals
+  O/U, plus Asian handicap (spreads) and both-teams-to-score where quoted. Log
+  to data/odds_log.csv: match_id, market, selection, line, odds (decimal),
+  source, phase, timestamp. The 1X2 edge is vs the published consensus;
+  totals/handicap/BTTS are model-priced from the score matrix (the overlay
+  covers W/D/L only). Draw-no-bet is computed but not yet snapshotted/recorded.
 - De-vig the 1X2: implied_i = (1/odds_i) / Σ(1/odds_j) (multiplicative
   method; power or Shin method optional upgrade later).
 - Edge_i = model_p_i − implied_i. Display threshold 3 percentage points;

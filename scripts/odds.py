@@ -209,8 +209,30 @@ def load_odds(path: Path = ODDS_LOG) -> list:
     return _load(path, ODDS_COLUMNS)
 
 
+def _dedupe_picks(rows: list) -> list:
+    """Heal a union-merge that duplicated a pick row on a rebase race (the picks
+    log is merge=union per .gitattributes). For one (match_id, market, selection,
+    line): prefer the SETTLED copy over an open one so units aren't double-counted;
+    two settled copies that DISAGREE are a real corruption — stop and report."""
+    settled = lambda r: (r.get("status") or "") not in ("", "open")
+    by_key: dict = {}
+    order: list = []
+    for r in rows:
+        k = (r["match_id"], r["market"], r["selection"], _fmt_line(r.get("line", "")))
+        if k not in by_key:
+            by_key[k] = r
+            order.append(k)
+        elif settled(by_key[k]) and settled(r):
+            if (by_key[k].get("status"), by_key[k].get("units")) != (r.get("status"), r.get("units")):
+                raise OddsError(f"picks log has contradictory settled rows for {k} "
+                                "— resolve the duplicate by hand")
+        elif settled(r):
+            by_key[k] = r       # prefer the settled copy over the open one
+    return [by_key[k] for k in order]
+
+
 def load_picks(path: Path = PICKS_LOG) -> list:
-    return _load(path, PICK_COLUMNS)
+    return _dedupe_picks(_load(path, PICK_COLUMNS))
 
 
 def append_odds(rows: list, path: Path = ODDS_LOG) -> None:
