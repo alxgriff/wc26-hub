@@ -259,6 +259,19 @@ past ~20 years of WC + continental knockouts. Treat this as its own data depende
 
 ### 2.2 `fit_rho.py` — estimate ρ on the broad competitive set
 
+> **RESULT (2026-06-13): built, fit, and NOT activated — the data rejected it.**
+> `scripts/fit_rho.py` fit ρ on 10,748 competitive internationals (2010+, friendlies
+> and unplayed rows dropped) by Dixon-Coles partial-LL and validated out-of-sample
+> (2023+ holdout). Fitted **ρ ≈ −0.015** — an order of magnitude below the
+> club-football −0.13…−0.18 — and out-of-sample W/D/L log-loss & Brier did **not**
+> improve. Diagnostic: independent Poisson already predicts draws at ~22.9% vs an
+> empirical ~22.0% (it slightly *over*-predicts), so the negative-ρ correction moves
+> calibration the wrong way. Per "validate, don't assume," **no `calibration.json` is
+> written and `Config.rho` stays 0.0** — the Tier-1 mechanism is in place but off.
+> The club-football DC prior does not transfer to international football here. Re-run
+> if a fuller λ model (Maher MLE) or the knockout regime warrants it. See
+> `data/History/DATA_QUALITY.md`.
+
 - **Fit broad, not major-tournament-only.** ρ only "sees" the 0-0/0-1/1-0/1-1 corner,
   so it is robust to era and essentially unaffected by blowouts — a broad competitive
   sample gives a tighter, lower-variance estimate. (Restricting to major tournaments

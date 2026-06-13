@@ -69,6 +69,21 @@ import standings as st  # noqa: E402  (canon validation reuses the fixtures load
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RATINGS_DIR = REPO_ROOT / "data" / "Ratings"
 FIXTURES = REPO_ROOT / "data" / "fixtures.csv"
+CALIBRATION = REPO_ROOT / "data" / "calibration.json"   # fitted Config knobs (rho), if any
+
+
+def _load_calibration(path: "Path | None" = None) -> "dict | None":
+    """Fitted Config values written by fit_rho.py, or None if not present. ABSENT is
+    the normal, behaviour-preserving state: the model runs at its inert defaults
+    (rho=0.0). Looked up at call time so it can be redirected in tests."""
+    path = path or CALIBRATION
+    if not path.exists():
+        return None
+    try:
+        import json
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (ValueError, OSError):
+        return None
 
 # rating-file team names -> CLAUDE.md canon (Futi uses a different convention)
 ALIAS = {
@@ -214,7 +229,11 @@ def load_ratings(ratings_dir: str | Path = RATINGS_DIR,
     """Build the consensus rating model from the verified Elo + Futi files, with
     Opta/Zeileis as context. Validates that every fixtures team resolves to a
     rating (stop-and-report on any canon mismatch, per the data contract)."""
-    config = config or Config()
+    if config is None:
+        config = Config()
+        cal = _load_calibration()          # activate a fitted rho if one was persisted
+        if cal and cal.get("rho") is not None:
+            config.rho = float(cal["rho"])
     ratings_dir = Path(ratings_dir)
     elo = _read(ratings_dir / ELO_FILE)
     futi = _read(ratings_dir / FUTI_FILE)

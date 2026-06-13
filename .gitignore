@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 data/.odds_api_key
+# Large historical corpus for rho fitting — re-fetch via the curl in
+# data/History/DATA_QUALITY.md (public CC0); keep the repo lean.
+data/History/*.csv
