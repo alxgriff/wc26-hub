@@ -186,6 +186,14 @@ class RealDataTests(unittest.TestCase):
         # the corrected Elo is in use: Morocco is strong, not 45th
         self.assertLess(self.m.teams["Morocco"].consensus_rank, 20)
 
+    def test_every_fixture_pairing_sums_to_one(self):
+        # corruption guard: every one of the 72 fixtures' W/D/L must sum to 1±0.001
+        import standings as st
+        for fx in st.load_fixtures(pr.FIXTURES):
+            p = pr.predict_match(self.m, fx.team_a, fx.team_b)
+            self.assertAlmostEqual(p.p_a + p.p_draw + p.p_b, 1.0, places=6,
+                                   msg=f"{fx.match_id}: {fx.team_a} v {fx.team_b}")
+
     def test_consensus_orders_strong_over_weak(self):
         s = self.m.teams
         self.assertGreater(s["Spain"].strength, s["Qatar"].strength)

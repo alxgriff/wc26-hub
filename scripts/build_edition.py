@@ -186,7 +186,10 @@ def extract_card(mid: str, team_a: str, team_b: str, cards_dir: str | Path
 
 # ---------------------------------------------------------------- stakes injection
 
-_LEAN_RE = re.compile(r"\*\[(.+?)\]\*", re.DOTALL)
+# single-line only: real *[...]* lean/hint markers never span lines, and DOTALL
+# could let the non-greedy capture run across the wrong emphasis run in the
+# multi-line "## The Call" section path
+_LEAN_RE = re.compile(r"\*\[(.+?)\]\*")
 
 
 def inject_call(card: str, call_body: str) -> tuple[str, bool]:
