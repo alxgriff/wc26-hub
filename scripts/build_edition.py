@@ -685,7 +685,7 @@ def main(argv: list[str] | None = None) -> int:
         import predict as pr
         odds_rows = od.load_odds()
         if odds_rows:
-            for line in od.settle_picks(matches, odds_rows):
+            for line in od.settle_picks(matches, odds_rows, fixtures_rows=rows):
                 print(f"picks: {line}", file=sys.stderr)
             ledger_rows = lg.load_ledger()
             model = pr.load_ratings(fixtures=args.fixtures)

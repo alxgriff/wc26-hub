@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import math
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -71,6 +72,20 @@ def outcome_index(score_a: int, score_b: int) -> int:
 def brier(p: tuple, outcome: int) -> float:
     """Multiclass Brier: sum of squared errors vs the 1/0/0 outcome vector."""
     return sum((p[i] - (1.0 if i == outcome else 0.0)) ** 2 for i in range(3))
+
+
+def probs_valid(probs) -> bool:
+    """True iff a W/D/L triple is finite, each in [0, 1], and sums to 1.0±0.001 —
+    the CLAUDE.md probability contract. The single gate shared by the site's
+    rendered call and the consensus that drives recorded bets, so the two cannot
+    drift. Accepts strings or numbers; any parse failure is invalid."""
+    try:
+        p = [float(x) for x in probs]
+    except (TypeError, ValueError):
+        return False
+    return (len(p) == 3
+            and all(math.isfinite(x) and 0.0 <= x <= 1.0 for x in p)
+            and abs(sum(p) - 1.0) <= 0.001)
 
 
 # ---------------------------------------------------------------- ledger I/O

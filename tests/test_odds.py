@@ -107,6 +107,18 @@ class EvaluateTests(unittest.TestCase):
         self.assertEqual(ev["h2h"], [])
         self.assertTrue(any("no logged consensus" in m for m in ev["missing"]))
 
+    def test_invalid_consensus_suppresses_h2h_edge(self):
+        # a corrupt consensus row (probs sum 1.10) must NOT drive an edge or an
+        # (immutable) recorded bet; it is suppressed with a distinct, loud note.
+        bad = {"match_id": "D3", "source": "consensus", "p_home": "0.50",
+               "p_draw": "0.30", "p_away": "0.30", "predicted_score": "1-0",
+               "timestamp": TS}
+        self.assertIsNone(od.consensus_probs("D3", [bad]))
+        ev = od.evaluate_match("D3", h2h_rows("D3", 2.5, 3.3, 3.1), [bad], fake_pred())
+        self.assertEqual(ev["h2h"], [])
+        self.assertTrue(any("fails the 1.0±0.001" in m for m in ev["missing"]))
+        self.assertFalse(any("no logged consensus" in m for m in ev["missing"]))
+
     def test_latest_snapshot_wins(self):
         old = h2h_rows("D3", 2.0, 3.0, 4.0, ts="2026-06-13T08:00:00-04:00")
         new = h2h_rows("D3", 2.5, 3.3, 3.1, ts="2026-06-13T10:00:00-04:00")
@@ -208,6 +220,20 @@ class PickLedgerTests(unittest.TestCase):
                 od.record_pick("D3", self._pick(0.08), (2.6, "y"), NOW, False, path)
 
 
+class ProbsValidTests(unittest.TestCase):
+    """The shared 1.0±0.001 probability gate (ledger.probs_valid) used by both
+    the bet-driving consensus and the site's rendered call."""
+
+    def test_contract_boundaries(self):
+        self.assertTrue(lg.probs_valid(("0.5", "0.3", "0.2")))     # strings, sum 1.0
+        self.assertTrue(lg.probs_valid((0.4, 0.2995, 0.3005)))     # within ±0.001
+        self.assertFalse(lg.probs_valid((0.5, 0.3, 0.3)))          # sums to 1.10
+        self.assertFalse(lg.probs_valid((0.5, 0.3, 0.19)))         # sums to 0.99
+        self.assertFalse(lg.probs_valid(("x", "0.3", "0.3")))      # unparseable
+        self.assertFalse(lg.probs_valid((1.2, -0.1, -0.1)))        # out of [0,1]
+        self.assertFalse(lg.probs_valid((0.5, 0.5)))               # wrong arity
+
+
 class SettleTests(unittest.TestCase):
     def _setup(self, d, selection="home", market="h2h", line=""):
         path = Path(d) / "picks.csv"
@@ -218,6 +244,11 @@ class SettleTests(unittest.TestCase):
 
     def _match(self, sa, sb):
         return st.Match("D3", "D", 2, "X", "Y", sa, sb, "played")
+
+    def _fix(self, kickoff="13:00", date_et="2026-06-13"):
+        # closing snapshots default to TS (2026-06-13 10:00 ET); a 13:00 kickoff
+        # sits inside CLOSING_WINDOW so the close counts for CLV.
+        return {"match_id": "D3", "date_et": date_et, "kickoff_et_24h": kickoff}
 
     def test_winning_h2h_pick_pays_odds_minus_one(self):
         with tempfile.TemporaryDirectory() as d:
@@ -245,15 +276,34 @@ class SettleTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             path = self._setup(d)
             closing = h2h_rows("D3", 2.20, 3.40, 3.40, phase="closing")
-            od.settle_picks([self._match(2, 0)], closing, path)
+            od.settle_picks([self._match(2, 0)], closing, path,
+                            fixtures_rows=[self._fix()])
             p = od.load_picks(path)[0]
             # closing home implied (devig 2.20/3.40/3.40) ≈ .436 vs snapshot .40
             self.assertTrue(p["clv_pp"].startswith("+3"))
 
+    def test_stale_closing_snapshot_ignored_for_clv(self):
+        # a row tagged "closing" but logged ~a week before kickoff (the June-12
+        # bulk-snapshot bug) is NOT a real close: CLV must stay blank, not wrong.
+        with tempfile.TemporaryDirectory() as d:
+            path = self._setup(d)
+            closing = h2h_rows("D3", 2.20, 3.40, 3.40, phase="closing")  # ts = June 13 10:00
+            od.settle_picks([self._match(2, 0)], closing, path,
+                            fixtures_rows=[self._fix(kickoff="21:00", date_et="2026-06-20")])
+            self.assertEqual(od.load_picks(path)[0]["clv_pp"], "")
+
+    def test_clv_blank_without_fixtures_rows(self):
+        # no kickoff to verify the close against -> never invent a CLV figure
+        with tempfile.TemporaryDirectory() as d:
+            path = self._setup(d)
+            closing = h2h_rows("D3", 2.20, 3.40, 3.40, phase="closing")
+            od.settle_picks([self._match(2, 0)], closing, path)
+            self.assertEqual(od.load_picks(path)[0]["clv_pp"], "")
+
     def test_missing_closing_leaves_clv_blank(self):
         with tempfile.TemporaryDirectory() as d:
             path = self._setup(d)
-            od.settle_picks([self._match(2, 0)], [], path)
+            od.settle_picks([self._match(2, 0)], [], path, fixtures_rows=[self._fix()])
             self.assertEqual(od.load_picks(path)[0]["clv_pp"], "")
 
 

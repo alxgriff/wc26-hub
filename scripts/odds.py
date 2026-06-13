@@ -57,7 +57,7 @@ import statistics
 import sys
 import urllib.error
 import urllib.request
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -240,6 +240,17 @@ def latest_market(odds_rows: list, match_id: str, market: str,
     return out
 
 
+def _latest_phase_ts(odds_rows: list, match_id: str, market: str, phase: str,
+                     source_prefix: str = "median") -> str | None:
+    """Timestamp string of the most recent rows latest_market() would use for a
+    match/market/phase, or None — lets the caller judge how close a 'closing'
+    snapshot actually is to kickoff."""
+    ts = [r["timestamp"] for r in odds_rows
+          if r["match_id"] == match_id and r["market"] == market
+          and r["phase"] == phase and r["source"].startswith(source_prefix)]
+    return max(ts) if ts else None
+
+
 def all_paired_lines(market_data: dict, sel_a: str, sel_b: str,
                      negate_b: bool = False) -> list:
     """Every line quoted on BOTH sides of a two-way market, as
@@ -282,11 +293,15 @@ def paired_lines(market_data: dict, sel_a: str, sel_b: str,
 # ---------------------------------------------------------------- evaluation
 
 def consensus_probs(match_id: str, ledger_rows: list) -> tuple | None:
-    """The PUBLISHED consensus W/D/L from the prediction ledger (the
-    accountable number we bet against). None if not logged."""
+    """The PUBLISHED consensus W/D/L from the prediction ledger (the accountable
+    number we bet against). None if not logged, OR if the logged probabilities
+    fail the 1.0±0.001 contract — a corrupt row must never silently drive an
+    (immutable) recorded bet. Same gate the site uses to suppress the call."""
     row = next((r for r in ledger_rows
                 if r["match_id"] == match_id and r["source"] == lg.PUBLISHED_SOURCE), None)
     if row is None:
+        return None
+    if not lg.probs_valid((row.get("p_home"), row.get("p_draw"), row.get("p_away"))):
         return None
     return float(row["p_home"]), float(row["p_draw"]), float(row["p_away"])
 
@@ -302,7 +317,12 @@ def evaluate_match(match_id: str, odds_rows: list, ledger_rows: list,
     probs = consensus_probs(match_id, ledger_rows)
     if h2h and all((s, "") in h2h for s in H2H_SELECTIONS):
         if probs is None:
-            out["missing"].append("no logged consensus prediction — 1X2 edge not computed")
+            published = any(r["match_id"] == match_id
+                            and r["source"] == lg.PUBLISHED_SOURCE for r in ledger_rows)
+            out["missing"].append(
+                "logged consensus fails the 1.0±0.001 probability contract — "
+                "1X2 edge not computed, pick suppressed" if published
+                else "no logged consensus prediction — 1X2 edge not computed")
         else:
             odds3 = [h2h[(s, "")][0] for s in H2H_SELECTIONS]
             implied = devig(odds3)
@@ -478,12 +498,43 @@ def _market_keys(market: str, selection: str, line: str) -> list:
             else [("home", other), ("away", line)])
 
 
+CLOSING_WINDOW = timedelta(hours=6)   # a "closing" snapshot must sit within this
+                                      # of kickoff (before it) to count for CLV
+
+
+def _closing_is_timely(odds_rows: list, pick: dict, kickoff) -> bool:
+    """A closing snapshot counts for CLV only when it was taken within
+    CLOSING_WINDOW before kickoff. An unknown kickoff, or a timestamp that is far
+    from / after kickoff, means it is not a real close (the bulk June-12 snapshot
+    is tagged 'closing' but covers matches out to June 27) — so CLV stays blank
+    rather than being computed against a non-closing line (never invented)."""
+    if kickoff is None:
+        return False
+    ts = _latest_phase_ts(odds_rows, pick["match_id"], pick["market"], "closing")
+    if not ts:
+        return False
+    try:
+        t = datetime.fromisoformat(ts)
+    except ValueError:
+        return False
+    return timedelta(0) <= (kickoff - t) <= CLOSING_WINDOW
+
+
 def settle_picks(matches: list, odds_rows: list,
-                 picks_path: Path = PICKS_LOG) -> list:
+                 picks_path: Path = PICKS_LOG,
+                 fixtures_rows: list | None = None) -> list:
     """Grade open picks whose match is played: units (odds−1 won, −1 lost) and
-    CLV vs the closing snapshot when one exists."""
+    CLV vs the closing snapshot when a TRUE one exists. ``fixtures_rows`` supply
+    kickoff times so a row tagged 'closing' but logged far from kickoff is
+    rejected for CLV; without them CLV cannot be verified and is left blank."""
     picks = load_picks(picks_path)
     by_mid = {m.match_id: m for m in matches if m.is_played}
+    kickoff_by_mid = {}
+    for row in (fixtures_rows or []):
+        try:
+            kickoff_by_mid[row["match_id"]] = lg.kickoff_dt(row)
+        except (KeyError, ValueError):
+            continue
     lines = []
     for p in picks:
         if p["status"] != "open" or p["match_id"] not in by_mid:
@@ -519,7 +570,8 @@ def settle_picks(matches: list, odds_rows: list,
 
         closing = latest_market(odds_rows, p["match_id"], p["market"], phase="closing")
         keys = _market_keys(p["market"], p["selection"], p["line"])
-        if closing and all(k in closing for k in keys):
+        if (closing and all(k in closing for k in keys)
+                and _closing_is_timely(odds_rows, p, kickoff_by_mid.get(p["match_id"]))):
             implied = devig([closing[k][0] for k in keys])
             idx = [k[0] for k in keys].index(p["selection"])
             clv = implied[idx] - float(p["implied_p"])
@@ -961,7 +1013,8 @@ def main(argv: list | None = None) -> int:
 
     matches = st.load_fixtures(REPO_ROOT / "data" / "fixtures.csv")
     if args.command == "settle":
-        for line in settle_picks(matches, load_odds()):
+        fixtures_rows = be.read_rows(REPO_ROOT / "data" / "fixtures.csv")
+        for line in settle_picks(matches, load_odds(), fixtures_rows=fixtures_rows):
             print(line)
         summary = units_summary(load_picks())
         print(summary or "no settled picks yet")

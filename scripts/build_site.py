@@ -1435,7 +1435,7 @@ def _logged_call(match_id: str, ledger: dict | None, fixture_row: dict,
     it withstands integrity checks: probabilities valid per the contract, and
     the log timestamp VERIFIABLY before kickoff. Anything unverifiable renders
     as 'no logged call' rather than being stamped pre-kickoff."""
-    import math
+    import ledger as lg
     from datetime import datetime as _dt
     if ledger is None:
         return None
@@ -1450,8 +1450,7 @@ def _logged_call(match_id: str, ledger: dict | None, fixture_row: dict,
     except (KeyError, ValueError):
         warnings.append(f"{match_id}: malformed ledger row — rendered as no logged call")
         return None
-    if (not all(math.isfinite(p) and 0 <= p <= 1 for p in probs)
-            or abs(sum(probs) - 1.0) > 0.001):
+    if not lg.probs_valid(probs):   # same gate as the bet-driving consensus
         warnings.append(f"{match_id}: ledger probabilities fail the 1.0±0.001 "
                         "contract — rendered as no logged call")
         return None
