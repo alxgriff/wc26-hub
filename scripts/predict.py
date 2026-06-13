@@ -37,8 +37,9 @@ Model, per match (team_a = listed-first side; hfa_team gets the host bonus):
 W/D/L, modal/expected score, Over/Under and BTTS all come from the (normalised)
 matrix, so probabilities sum to 1.
 
-Constants live in Config and are tunable; the defaults are the proposed values
-pending the user's final sign-off before any prediction is published.
+Constants live in Config and are tunable; the defaults were signed off by the
+user on 2026-06-12 and are live. Revisit them against accumulating Brier rather
+than by hand (the predictor's stated philosophy: fit, don't hand-pick).
 
 Importable API:
     model = load_ratings()                       # RatingModel
@@ -192,12 +193,22 @@ def load_ratings(ratings_dir: str | Path = RATINGS_DIR,
     canon = set()
     for m in st.load_fixtures(fixtures):
         canon |= {m.team_a, m.team_b}
+    # Elo + Futi are REQUIRED and must be complete (the core model inputs).
     for label, src in (("Elo", elo), ("Futi", futi)):
         missing = sorted(canon - set(src))
         if missing:
             raise ValueError(
                 f"{label} ratings missing team(s) after canon normalization: "
                 f"{', '.join(missing)} — fix the source or the alias map before joining")
+    # Opta + Market are optional/secondary and may be PARTIAL, but any row whose
+    # name doesn't resolve to the canon is a normalization miss — stop and report
+    # it (per the data contract) rather than silently dropping that row's team.
+    for label, src in (("Opta", opta), ("Market", market)):
+        extra = sorted(set(src) - canon)
+        if extra:
+            raise ValueError(
+                f"{label} ratings have non-canon team(s): {', '.join(extra)} — "
+                "normalize to the CLAUDE.md canon (extend the alias map) or fix the source")
 
     teams = sorted(canon)
     E = {t: float(elo[t]["Elo_Rating"]) for t in teams}
@@ -214,7 +225,9 @@ def load_ratings(ratings_dir: str | Path = RATINGS_DIR,
 
     zA, zD = _zscores(FA), _zscores(FD)
     rE, rF, rS = _ranks(E), _ranks(FR), _ranks(strength)
-    rO = _ranks({t: float(opta[t]["Win_Tournament_%"]) for t in teams}) if opta else {}
+    # Opta may be partial — rank only the teams it actually covers (a missing
+    # team gets opta_rank None, never a KeyError).
+    rO = _ranks({t: float(opta[t]["Win_Tournament_%"]) for t in teams if t in opta}) if opta else {}
     # market ranks: competition ranking so the big tie blocks (five at 66-1,
     # ten at 1000-1) share a rank instead of getting arbitrary order
     rM = {}
@@ -230,8 +243,8 @@ def load_ratings(ratings_dir: str | Path = RATINGS_DIR,
             team=t, elo=E[t], futi=FR[t], attack=FA[t], defense=FD[t],
             strength=strength[t], z_att=zA[t], z_def=zD[t],
             elo_rank=rE[t], futi_rank=rF[t], consensus_rank=rS[t],
-            opta_advance=float(opta[t]["Advance_From_Group_%"]) if opta else None,
-            opta_wincup=float(opta[t]["Win_Tournament_%"]) if opta else None,
+            opta_advance=float(opta[t]["Advance_From_Group_%"]) if (opta and t in opta) else None,
+            opta_wincup=float(opta[t]["Win_Tournament_%"]) if (opta and t in opta) else None,
             opta_rank=rO.get(t),
             market_odds=float(market[t]["Decimal_Odds"]) if t in market else None,
             market_implied=float(market[t]["Implied_Devig_%"]) if t in market else None,
@@ -290,10 +303,14 @@ def predict_match(model: RatingModel, team_a: str, team_b: str,
 
 # ---------------------------------------------------------------- match-level overlay
 
-def load_match_overlay(path: str | Path = RATINGS_DIR / OPTA_MATCH_FILE) -> dict:
+def load_match_overlay(path: str | Path = RATINGS_DIR / OPTA_MATCH_FILE,
+                       known_ids: set | None = None) -> dict:
     """Per-match W/D/L probabilities from an external source (CLAUDE.md preferred
-    schema). Accepts percentages or fractions; validates each row sums to 1 ±
-    0.001 after normalisation of units, per the data contract. Returns
+    schema). Accepts percentages or fractions; a ±0.005 corruption guard
+    tolerates 0.1%-rounded published sources, then each row is renormalised to
+    sum to exactly 1.0 (so the CLAUDE.md 1.0±0.001 contract holds on the OUTPUT).
+    When ``known_ids`` is given, a match_id not in it is a typo/phantom row —
+    stop and report rather than silently degrading that match to model-only. Returns
     {match_id: {"p_home","p_draw","p_away","source","asof"}} (fractions)."""
     path = Path(path)
     if not path.exists():
@@ -302,6 +319,10 @@ def load_match_overlay(path: str | Path = RATINGS_DIR / OPTA_MATCH_FILE) -> dict
     with path.open(encoding="utf-8-sig", newline="") as f:
         for row in csv.DictReader(f):
             mid = (row.get("match_id") or "").strip()
+            if known_ids is not None and mid not in known_ids:
+                raise ValueError(
+                    f"{path.name}: overlay match_id {mid!r} is not a known fixture "
+                    "— fix the id (a typo would silently drop the overlay for that match)")
             ps = [float(row[k]) for k in ("p_home", "p_draw", "p_away")]
             total = sum(ps)
             if 97.0 <= total <= 103.0:          # given as percentages
@@ -309,10 +330,11 @@ def load_match_overlay(path: str | Path = RATINGS_DIR / OPTA_MATCH_FILE) -> dict
                 total = sum(ps)
             if abs(total - 1.0) > 0.005:
                 raise ValueError(
-                    f"{path.name}: {mid} probabilities sum to {total:.4f}, "
-                    "outside tolerance (CLAUDE.md contract: 1.0 ± 0.001 after "
-                    "normalisation; published sources are often rounded to 0.1%)")
-            ps = [p / total for p in ps]        # renormalise rounding residue
+                    f"{path.name}: {mid} probabilities sum to {total:.4f}, outside "
+                    "the ±0.005 corruption guard (a 0.1%-rounded source sums to ≤0.0015 "
+                    "off; this large a gap is a transcription/source error). Rows are "
+                    "renormalised to exactly 1.0 below, so the 1.0±0.001 output contract holds")
+            ps = [p / total for p in ps]        # renormalise rounding residue to exactly 1.0
             out[mid] = {"p_home": ps[0], "p_draw": ps[1], "p_away": ps[2],
                         "source": (row.get("source") or "").strip(),
                         "asof": (row.get("asof") or "").strip()}
@@ -338,7 +360,9 @@ def _pct(x: float) -> str:
 def _disagreement(model: RatingModel, t: TeamRating) -> str | None:
     """Flag when the model (Elo+Futi) and real public sentiment (de-vigged
     outright market, with Opta as secondary) rank a team very differently — a
-    cue for the write-up, not a model input."""
+    cue for the write-up, not a model input. market_rank is a competition rank
+    (ties share a value), so inside a large tie-block the >=10-rank trigger is
+    slightly coarse at the margins; acceptable for an editorial cue."""
     if t.market_rank is None or abs(t.consensus_rank - t.market_rank) < 10:
         return None   # trigger on the real market only; Opta is context, not a trigger
     bits = [f"model #{t.consensus_rank}", f"market #{t.market_rank}"]

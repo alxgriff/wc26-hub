@@ -198,7 +198,7 @@ def log_slate(editorial_date: date, fixtures_path: Path,
         return [f"no matches on editorial date {editorial_date}"]
 
     model = pr.load_ratings(fixtures=fixtures_path)
-    overlay = pr.load_match_overlay()
+    overlay = pr.load_match_overlay(known_ids={r["match_id"] for r in rows})
     ledger = load_ledger(ledger_path)
     played = {r["match_id"] for r in rows if (r.get("status") or "").strip() == "played"}
     stamp = now.isoformat(timespec="seconds")
@@ -212,6 +212,9 @@ def log_slate(editorial_date: date, fixtures_path: Path,
         pred = pr.predict_match(model, team_a, team_b, hfa_team=hfa)
         score = f"{pred.modal_score[0]}-{pred.modal_score[1]}"
         ov = overlay.get(mid)
+        if ov and abs((pred.p_a - pred.p_b) - (ov["p_home"] - ov["p_away"])) > 0.40:
+            lines.append(f"{mid}: WARNING overlay and model disagree sharply on the "
+                         "home-vs-away lean — check the overlay isn't reversed (p_home/p_away)")
 
         to_log = [("model", (pred.p_a, pred.p_draw, pred.p_b), score)]
         if ov:

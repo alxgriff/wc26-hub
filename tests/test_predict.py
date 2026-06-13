@@ -144,6 +144,15 @@ class OverlayTests(unittest.TestCase):
     def test_missing_file_is_noop(self):
         self.assertEqual(pr.load_match_overlay(Path("nope") / "missing.csv"), {})
 
+    def test_unknown_match_id_raises_when_known_ids_given(self):
+        # a typo'd overlay id would silently drop the overlay for that match
+        with tempfile.TemporaryDirectory() as d:
+            p = self._overlay_file(d, [["DZ", 0.5, 0.25, 0.25, "opta", "x"]])
+            with self.assertRaises(ValueError):
+                pr.load_match_overlay(p, known_ids={"D1", "D2"})
+            ov = pr.load_match_overlay(p, known_ids={"DZ"})   # known -> loads fine
+            self.assertIn("DZ", ov)
+
     def test_blend_is_equal_weight_average_and_sums_to_one(self):
         m = model(mk("A", 1800), mk("B", 1800))
         p = pr.predict_match(m, "A", "B")           # symmetric model
