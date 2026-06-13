@@ -183,6 +183,16 @@ class ThirdPlaceTests(unittest.TestCase):
         self.assertEqual(order(s, "C")[2], "C3t")  # 4 pts
         self.assertEqual([r.team for r in s.third_place], ["C3t", "B3t", "A3t"])
 
+    def test_malformed_group_excluded_from_thirds(self):
+        # a group with the wrong team count must not feed the best-thirds cutline
+        good = _hierarchy_group("A", ["A1t", "A2t", "A3t", "A4t"], third_win=(2, 0))
+        bad = [st.Match("Z1", "Z", 1, "Z1t", "Z2t", 1, 0, "played"),
+               st.Match("Z2", "Z", 1, "Z1t", "Z3t", 1, 0, "played"),
+               st.Match("Z3", "Z", 1, "Z2t", "Z3t", 1, 0, "played")]  # only 3 teams
+        s = st.compute_standings(good + bad)
+        self.assertEqual([r.team for r in s.third_place], ["A3t"])     # Z's 3rd excluded
+        self.assertTrue(any("malformed" in w for w in s.warnings))
+
     def test_cutline_marks_exactly_eight(self):
         # Nine groups whose third-placed teams all finish on 3 pts but with
         # strictly increasing GD (third_win n-0 -> GD n-4): position 8 is the

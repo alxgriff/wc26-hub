@@ -138,7 +138,7 @@ def _word(bucket: str) -> str:
         "top2": "through (top 2)",
         "third": "3rd — into the best-thirds race",
         "out": "eliminated (4th)",
-        "margin": "margin-dependent (goal difference decides)",
+        "margin": "margin-dependent (goal difference/goals, then head-to-head, decide)",
     }[bucket]
 
 

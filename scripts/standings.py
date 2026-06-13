@@ -199,7 +199,14 @@ def load_discipline(path: str | Path = DISCIPLINE) -> dict[str, int]:
         return {}
     totals: dict[str, int] = {}
     with path.open(newline="", encoding="utf-8-sig") as f:
-        for row in csv.DictReader(f):
+        reader = csv.DictReader(f)
+        missing = sorted({"team", *FAIR_PLAY_POINTS} - set(reader.fieldnames or []))
+        if missing:
+            raise ValueError(
+                f"{path.name}: discipline file missing column(s): {', '.join(missing)} "
+                "— a renamed/typo'd card column would silently count as 0 deductions, "
+                "and fair play is the decisive group/third-place tiebreaker")
+        for row in reader:
             team = (row.get("team") or "").strip()
             if not team:
                 continue
@@ -248,8 +255,14 @@ def compute_standings(
         for cluster in _clusters(rows, _overall_key):
             ordered.extend(_break_group_tie(cluster, gm, fp, notes, g))
         groups[g] = GroupTable(g, ordered, notes)
-        if len(ordered) >= 3:
+        # Only a well-formed group of GROUP_SIZE feeds the cross-group cutline; a
+        # malformed group (canon typo -> 5th team, or a missing team) would
+        # otherwise poison the 8-best-thirds qualification math.
+        if len(teams) == GROUP_SIZE and len(ordered) >= 3:
             thirds.append(ordered[2])
+        elif len(teams) != GROUP_SIZE:
+            warnings.append(f"Group {g}: malformed ({len(teams)} teams) — its "
+                            "third-place team is excluded from the best-thirds cutline")
 
     third_notes: list[str] = []
     third_ranked: list[TeamRow] = []
@@ -319,8 +332,9 @@ def _break_group_tie(
         mini = {r.team: r for r in _accumulate(sorted(teams), group_matches, group)}
         subs = _clusters(cluster, key=lambda r: _overall_key(mini[r.team]))
         if len(subs) > 1:
-            _note(notes, f"Group {group}: head-to-head separates {_names(cluster)} "
-                         f"(level on points, goal difference and goals scored).")
+            _note(notes, f"Group {group}: the head-to-head mini-table (its points, "
+                         f"then goal difference, then goals) separates {_names(cluster)} "
+                         "(level on overall points, goal difference and goals scored).")
             out: list[TeamRow] = []
             for sub in subs:
                 out.extend(_break_group_tie(sub, group_matches, fair_play, notes, group, _prev=teams))

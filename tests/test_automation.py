@@ -96,6 +96,19 @@ class DisciplineTests(unittest.TestCase):
     def test_missing_file_is_empty(self):
         self.assertEqual(bs.load_discipline(Path("does/not/exist.csv")), {})
 
+    def test_missing_card_column_raises_not_silently_zero(self):
+        # a renamed/dropped card column must stop-and-report, not score 0 silently
+        with tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False,
+                                         encoding="utf-8") as f:
+            f.write("match_id,team,yellows,direct_reds\n")   # missing two card columns
+            f.write("A1,Mexico,2,1\n")
+            path = Path(f.name)
+        try:
+            with self.assertRaises(ValueError):
+                bs.load_discipline(path)
+        finally:
+            path.unlink()
+
 
 class BlurbFactPackTests(unittest.TestCase):
     def test_fact_pack_grounds_the_slate(self):
