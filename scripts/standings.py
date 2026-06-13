@@ -252,7 +252,7 @@ def compute_standings(
         rows = _accumulate(teams, gm, g)
         notes: list[str] = []
         ordered: list[TeamRow] = []
-        for cluster in _clusters(rows, _overall_key):
+        for cluster in _clusters(rows, _points_key):   # 2026: head-to-head precedes overall GD
             ordered.extend(_break_group_tie(cluster, gm, fp, notes, g))
         groups[g] = GroupTable(g, ordered, notes)
         # Only a well-formed group of GROUP_SIZE feeds the cross-group cutline; a
@@ -266,8 +266,8 @@ def compute_standings(
 
     third_notes: list[str] = []
     third_ranked: list[TeamRow] = []
-    for cluster in _clusters(thirds, _overall_key):
-        third_ranked.extend(_fair_play_then_lots(cluster, fp, third_notes, "Third-place ranking"))
+    for cluster in _clusters(thirds, _overall_key):   # third-place: points, GD, goals (no H2H)
+        third_ranked.extend(_fair_play_then_ranking(cluster, fp, third_notes, "Third-place ranking"))
 
     played = sum(1 for m in matches if m.is_played)
     return Standings(groups, third_ranked, third_notes, played, len(matches), warnings)
@@ -275,6 +275,10 @@ def compute_standings(
 
 def _overall_key(r: TeamRow) -> tuple[int, int, int]:
     return (r.points, r.gd, r.gf)
+
+
+def _points_key(r: TeamRow) -> tuple[int]:
+    return (r.points,)
 
 
 def _accumulate(teams: Iterable[str], matches: Iterable[Match], group: str) -> list[TeamRow]:
@@ -321,50 +325,90 @@ def _break_group_tie(
     fair_play: Mapping[str, int],
     notes: list[str],
     group: str,
-    _prev: frozenset[str] | None = None,
 ) -> list[TeamRow]:
-    """Order teams tied on overall points/GD/GF: head-to-head mini-table,
-    re-applied recursively to subsets that stay tied, then fair play, then lots."""
+    """Order teams tied ON POINTS by the 2026 FIFA criteria, in order: head-to-head
+    mini-table (its points, then GD, then goals; re-applied to subsets that stay
+    level), then overall goal difference, then overall goals scored, then fair-play
+    conduct, then FIFA World Ranking. NB pre-2026 placed overall GD/goals BEFORE
+    head-to-head; 2026 is Euro-style — head-to-head comes first."""
     if len(cluster) == 1:
         return list(cluster)
+    out: list[TeamRow] = []
+    for sub in _h2h_partition(cluster, group_matches, group, notes):
+        out.extend(_overall_then_conduct(sub, fair_play, notes, group))
+    return out
+
+
+def _h2h_partition(
+    cluster: list[TeamRow],
+    group_matches: list[Match],
+    group: str,
+    notes: list[str],
+    _prev: frozenset[str] | None = None,
+) -> list[list[TeamRow]]:
+    """Partition a points-tied cluster by the head-to-head mini-table (its points,
+    then GD, then goals), re-applied to subsets that stay level. Returns the ranked
+    subsets, each a maximal set head-to-head cannot separate."""
+    if len(cluster) == 1:
+        return [cluster]
     teams = frozenset(r.team for r in cluster)
-    if teams != _prev:  # _prev guard: head-to-head already failed to split this exact set
-        mini = {r.team: r for r in _accumulate(sorted(teams), group_matches, group)}
-        subs = _clusters(cluster, key=lambda r: _overall_key(mini[r.team]))
-        if len(subs) > 1:
-            _note(notes, f"Group {group}: the head-to-head mini-table (its points, "
-                         f"then goal difference, then goals) separates {_names(cluster)} "
-                         "(level on overall points, goal difference and goals scored).")
-            out: list[TeamRow] = []
-            for sub in subs:
-                out.extend(_break_group_tie(sub, group_matches, fair_play, notes, group, _prev=teams))
-            return out
-    return _fair_play_then_lots(cluster, fair_play, notes, f"Group {group}")
+    if teams == _prev:                       # head-to-head already failed to split this set
+        return [cluster]
+    mini = {r.team: r for r in _accumulate(sorted(teams), group_matches, group)}
+    subs = _clusters(cluster, key=lambda r: _overall_key(mini[r.team]))
+    if len(subs) == 1:
+        return [cluster]
+    _note(notes, f"Group {group}: head-to-head (its points, then goal difference, then "
+                 f"goals) separates {_names(cluster)} (level on points).")
+    out: list[list[TeamRow]] = []
+    for sub in subs:
+        out.extend(_h2h_partition(sub, group_matches, group, notes, _prev=teams))
+    return out
 
 
-def _fair_play_then_lots(
+def _overall_then_conduct(
+    sub: list[TeamRow],
+    fair_play: Mapping[str, int],
+    notes: list[str],
+    group: str,
+) -> list[TeamRow]:
+    """Within a set head-to-head could not separate: overall goal difference, then
+    overall goals scored, then fair-play conduct, then FIFA World Ranking."""
+    if len(sub) == 1:
+        return list(sub)
+    ov = _clusters(sub, key=lambda r: (r.gd, r.gf))
+    if len(ov) > 1:
+        _note(notes, f"Group {group}: overall goal difference/goals separate "
+                     f"{_names(sub)} (level on points and head-to-head).")
+    out: list[TeamRow] = []
+    for s2 in ov:
+        out.extend(_fair_play_then_ranking(s2, fair_play, notes, f"Group {group}"))
+    return out
+
+
+def _fair_play_then_ranking(
     cluster: list[TeamRow],
     fair_play: Mapping[str, int],
     notes: list[str],
     label: str,
 ) -> list[TeamRow]:
+    """Fair-play conduct, then FIFA World Ranking. 2026 replaced 'drawing of lots'
+    with the FIFA Men's World Ranking as the final tiebreaker; we don't model that
+    ranking, so a residual tie after fair play is flagged provisional rather than
+    resolved (shown alphabetically)."""
     if len(cluster) == 1:
         return list(cluster)
     subs = _clusters(cluster, key=lambda r: (fair_play.get(r.team, 0),))
     if len(subs) > 1:
-        _note(notes, f"{label}: fair play points separate {_names(cluster)}.")
+        _note(notes, f"{label}: fair play separates {_names(cluster)}.")
     out: list[TeamRow] = []
     for sub in subs:
         if len(sub) > 1:
             sub = sorted(sub, key=lambda r: r.team)
-            if all(r.played == 0 for r in sub):
-                pass  # nothing played yet; alphabetical is just display order
-            elif all(r.played == GAMES_PER_TEAM for r in sub):
-                _note(notes, f"⚠️ {label}: {_names(sub)} cannot be separated by any "
-                             f"tiebreaker — drawing of lots required (shown alphabetically).")
-            else:
-                _note(notes, f"{label}: {_names(sub)} level on all criteria so far "
-                             f"(order provisional, shown alphabetically).")
+            if not all(r.played == 0 for r in sub):   # nothing played => alphabetical is just display
+                _note(notes, f"⚠️ {label}: {_names(sub)} level on all modelled criteria — "
+                             "FIFA World Ranking decides (not modelled here); order "
+                             "provisional, shown alphabetically.")
         out.extend(sub)
     return out
 

@@ -104,10 +104,10 @@ class TiebreakTests(unittest.TestCase):
             self.assertEqual((r.points, r.gd, r.gf), (6, 1, 3))
         self.assertEqual(order(s, "E"), ["Y", "Z", "X", "W"])
 
-    def test_gd_outranks_gf_and_head_to_head(self):
-        # U and V both finish on 4 pts. V has more goals scored (5 v 2) AND
-        # won the head-to-head, but U's goal difference is better (+1 v -1),
-        # and GD comes before both GF and head-to-head in the contract.
+    def test_head_to_head_outranks_overall_gd(self):
+        # U and V both finish on 4 pts. U's overall GD is better (+1 v -1), but V
+        # WON the head-to-head (beat U 1-0) — and 2026 applies head-to-head BEFORE
+        # overall GD, so V ranks above U (this flipped from the pre-2026 order).
         matches = [
             mk("K1", "U", "V", 0, 1),
             mk("K2", "M", "N", 0, 1),
@@ -117,13 +117,15 @@ class TiebreakTests(unittest.TestCase):
             mk("K6", "V", "M", 2, 2),
         ]
         s = st.compute_standings(matches)
-        u, v = s.groups["K"].rows[1], s.groups["K"].rows[2]
+        v, u = s.groups["K"].rows[1], s.groups["K"].rows[2]
         self.assertEqual((u.points, u.gd, u.gf), (4, 1, 2))
         self.assertEqual((v.points, v.gd, v.gf), (4, -1, 5))
-        self.assertEqual(order(s, "K"), ["N", "U", "V", "M"])
+        self.assertEqual(order(s, "K"), ["N", "V", "U", "M"])   # V > U on head-to-head
+        self.assertTrue(any("head-to-head" in n for n in s.groups["K"].notes))
 
     def test_points_outrank_gd(self):
-        # E reaches 6 pts with GD -3; H has GD +3 but only 3 pts.
+        # E reaches 6 pts with GD -3; H has GD +3 but only 3 pts — points dominate.
+        # Within the ties: E>F and G>H by head-to-head (E beat F, G beat H).
         matches = [
             mk("L1", "E", "F", 1, 0),
             mk("L2", "G", "H", 1, 0),
@@ -133,10 +135,11 @@ class TiebreakTests(unittest.TestCase):
             mk("L6", "F", "G", 1, 0),
         ]
         s = st.compute_standings(matches)
-        self.assertEqual(order(s, "L"), ["F", "E", "H", "G"])
-        e, h = s.groups["L"].rows[1], s.groups["L"].rows[2]
-        self.assertEqual((e.points, e.gd), (6, -3))
-        self.assertEqual((h.points, h.gd), (3, 3))
+        self.assertEqual(order(s, "L"), ["E", "F", "G", "H"])
+        by = {r.team: r for r in s.groups["L"].rows}
+        self.assertEqual((by["E"].points, by["E"].gd), (6, -3))
+        self.assertEqual((by["H"].points, by["H"].gd), (3, 3))
+        self.assertLess(order(s, "L").index("E"), order(s, "L").index("H"))  # 6pts > 3pts
 
     def test_fair_play_separates_when_head_to_head_cannot(self):
         # All six matches drawn 0-0: head-to-head is useless, fair play decides.
@@ -146,11 +149,13 @@ class TiebreakTests(unittest.TestCase):
         self.assertEqual(order(s, "G"), ["Alpha", "Beta", "Gamma", "Delta"])
         self.assertTrue(any("fair play" in n for n in s.groups["G"].notes))
 
-    def test_completed_dead_heat_flags_drawing_of_lots(self):
+    def test_completed_dead_heat_flags_fifa_ranking(self):
         matches = _all_draws("F", ["Foo", "Bar", "Baz", "Qux"])
         s = st.compute_standings(matches)
         self.assertEqual(order(s, "F"), ["Bar", "Baz", "Foo", "Qux"])  # alphabetical fallback
-        self.assertTrue(any("lots" in n for n in s.groups["F"].notes))
+        # 2026 replaced 'drawing of lots' with the FIFA World Ranking (not modelled here)
+        self.assertTrue(any("FIFA World Ranking" in n for n in s.groups["F"].notes))
+        self.assertFalse(any("lots" in n for n in s.groups["F"].notes))
 
     def test_mid_group_tie_is_flagged_provisional_not_lots(self):
         # One round played, two drawn games -> two separate 2-way ties at
@@ -210,7 +215,7 @@ class ThirdPlaceTests(unittest.TestCase):
         self.assertTrue(row8.endswith("| ✅ |"))
         self.assertFalse(row9.endswith("| ✅ |"))
 
-    def test_cutline_tie_on_all_criteria_flagged_for_lots(self):
+    def test_cutline_tie_on_all_criteria_flagged_for_fifa_ranking(self):
         # Bottom two thirds (groups A and B) finish identical on every
         # criterion and straddle the cutline at positions 8/9: alphabetical
         # display order, but the lots flag must be raised.
@@ -220,7 +225,7 @@ class ThirdPlaceTests(unittest.TestCase):
             matches += _hierarchy_group(g, [f"{g}1t", f"{g}2t", f"{g}3t", f"{g}4t"], third_win=(n, 0))
         s = st.compute_standings(matches)
         self.assertEqual([r.team for r in s.third_place[7:]], ["A3t", "B3t"])
-        self.assertTrue(any("lots" in n for n in s.third_place_notes))
+        self.assertTrue(any("FIFA World Ranking" in n for n in s.third_place_notes))
 
     def test_render_marks_qualifying_thirds(self):
         matches = (

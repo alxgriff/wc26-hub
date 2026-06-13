@@ -37,9 +37,16 @@ specifies weights. Probabilities must sum to 1.0 ± 0.001 per match.
 ## Tournament rules (encoded in standings/scenario scripts)
 - 12 groups of 4, single round-robin. Top 2 per group + 8 best third-placed
   teams advance to a Round of 32.
-- Group tiebreakers, in order: points, goal difference, goals scored,
-  head-to-head, fair play points, drawing of lots.
-- Third-place ranking across groups: points, GD, goals scored, fair play, lots.
+- Group tiebreakers, in order (2026 FIFA, Euro-style — verified 2026-06-13 against
+  the FWC2026 Regulations, May 2025): points; then HEAD-TO-HEAD among the tied teams
+  (its points, then GD, then goals scored, reapplied to any still-level subset); then
+  overall goal difference; overall goals scored; fair-play conduct; FIFA Men's World
+  Ranking (most recent, then progressively older). NB head-to-head comes BEFORE
+  overall GD — this CHANGED from the pre-2026 order, and there is no "drawing of lots".
+- Third-place ranking across groups (no head-to-head — different groups): points,
+  overall GD, goals scored, fair-play conduct, FIFA World Ranking.
+- FIFA World Ranking is not modelled in-repo: a residual tie after fair play is
+  flagged provisional (shown alphabetically), never silently resolved.
 - MD3 games within a group kick off simultaneously.
 
 ## Daily edition workflow (scripts/build_edition.py output)
