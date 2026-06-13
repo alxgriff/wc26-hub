@@ -5,7 +5,7 @@ import re
 import sys
 import tempfile
 import unittest
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
@@ -113,13 +113,47 @@ class MdToHtmlTests(unittest.TestCase):
         self.assertEqual(out.count("<p>"), 2)
 
 
+class WireLinkifyTests(unittest.TestCase):
+    """The Wire relays UNVERIFIED, auto-gathered news; a poisoned source URL
+    must not break out of the href it is linkified into (stored-XSS guard)."""
+
+    def test_quote_in_url_cannot_break_out_of_href(self):
+        # _linkify runs on already-escaped text (md_to_html, quote=False), so a
+        # literal " survives into the URL token unless the regex stops at it.
+        evil = sc.md_to_html('source: http://x.com/a"onmouseover="alert(1) end')
+        out = bs._linkify(evil)
+        self.assertIn('href="http://x.com/a"', out)   # URL token stops at the quote
+        self.assertNotIn('a"onmouseover', out)         # no attribute breakout
+
+    def test_query_ampersand_not_double_escaped(self):
+        out = bs._linkify(sc.md_to_html("http://x.com/?a=1&b=2"))
+        self.assertIn('href="http://x.com/?a=1&amp;b=2"', out)
+        self.assertNotIn("&amp;amp;", out)
+
+
 class FullSiteTests(unittest.TestCase):
+    # Build against a FROZEN June-12 snapshot with a pinned clock, NOT the live
+    # data/ tree. These assertions encode point-in-time world state (a group
+    # that "hasn't kicked off yet", an open pick), so reading the live, evolving
+    # files made the suite go red purely from overnight results landing — which
+    # blocked the 2026-06-13 publish. The snapshot + injected ``now`` keep the
+    # tests measuring rendering logic, not the current tournament state.
+    SNAP = REPO / "tests" / "fixtures" / "site_snapshot"
+
     @classmethod
     def setUpClass(cls):
+        import ledger as lg
         cls.tmp = tempfile.TemporaryDirectory()
         cls.out = Path(cls.tmp.name)
-        cls.warnings = bs.build_site(cls.out, date(2026, 6, 12), "2026-06-12 09:00",
-                                     predictor=None, odds_engine=None)
+        cls.warnings = bs.build_site(
+            cls.out, date(2026, 6, 12), "2026-06-12 09:00",
+            fixtures=cls.SNAP / "fixtures.csv",
+            discipline=cls.SNAP / "discipline.csv",
+            predictions_log=cls.SNAP / "predictions_log.csv",
+            picks_log=cls.SNAP / "picks_log.csv",
+            blurbs_dir=cls.SNAP, news_dir=cls.SNAP,
+            now=datetime(2026, 6, 12, 9, 0, tzinfo=lg.ET),
+            predictor=None, odds_engine=None)
 
     @classmethod
     def tearDownClass(cls):
@@ -181,6 +215,8 @@ class FullSiteTests(unittest.TestCase):
         # the D1 pick recorded by the morning run shows as an open bet
         self.assertIn("Paraguay", rec)
         self.assertIn("status-open", rec)
+        # the Calls-vs-Bets explainer: a correct call can sit beside a losing bet
+        self.assertIn("underpriced", rec)
         self.assertTrue((self.out / "data" / "2026-06-12.json").exists())
 
     def test_logged_call_is_graded_on_played_match(self):

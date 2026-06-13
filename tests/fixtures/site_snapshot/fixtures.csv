@@ -1,0 +1,73 @@
+﻿match_id,group,matchday,date_et,kickoff_et_24h,kickoff_et,team_a,team_b,stadium,city,country,tv_us,score_a,score_b,status,notes
+A1,A,1,2026-06-11,15:00,3:00 PM,Mexico,South Africa,Estadio Azteca,Mexico City,Mexico,,2,0,played,"Tournament opener; Julián Quiñones scored the World Cup's first goal"
+A2,A,1,2026-06-11,22:00,10:00 PM,South Korea,Czechia,Estadio Akron,Guadalajara,Mexico,FS1,2,1,played,
+A3,A,2,2026-06-18,12:00,12:00 PM,Czechia,South Africa,Mercedes-Benz Stadium,Atlanta,USA,Fox,,,scheduled,
+A4,A,2,2026-06-18,21:00,9:00 PM,Mexico,South Korea,Estadio Akron,Guadalajara,Mexico,Fox,,,scheduled,
+A5,A,3,2026-06-24,21:00,9:00 PM,Czechia,Mexico,Estadio Azteca,Mexico City,Mexico,Fox,,,scheduled,"Simultaneous with A6 (matchday 3 rule)"
+A6,A,3,2026-06-24,21:00,9:00 PM,South Africa,South Korea,Estadio BBVA,Monterrey,Mexico,FS1,,,scheduled,"Simultaneous with A5 (matchday 3 rule)"
+B1,B,1,2026-06-12,15:00,3:00 PM,Canada,Bosnia and Herzegovina,BMO Field,Toronto,Canada,Fox,,,scheduled,
+B2,B,1,2026-06-13,15:00,3:00 PM,Qatar,Switzerland,Levi's Stadium,Santa Clara,USA,Fox,,,scheduled,
+B3,B,2,2026-06-18,15:00,3:00 PM,Switzerland,Bosnia and Herzegovina,SoFi Stadium,Inglewood,USA,Fox,,,scheduled,
+B4,B,2,2026-06-18,18:00,6:00 PM,Canada,Qatar,BC Place,Vancouver,Canada,FS1,,,scheduled,
+B5,B,3,2026-06-24,15:00,3:00 PM,Switzerland,Canada,BC Place,Vancouver,Canada,Fox,,,scheduled,"Simultaneous with B6 (matchday 3 rule)"
+B6,B,3,2026-06-24,15:00,3:00 PM,Bosnia and Herzegovina,Qatar,Lumen Field,Seattle,USA,FS1,,,scheduled,"Simultaneous with B5 (matchday 3 rule)"
+C1,C,1,2026-06-13,18:00,6:00 PM,Brazil,Morocco,MetLife Stadium,East Rutherford,USA,FS1,,,scheduled,
+C2,C,1,2026-06-13,21:00,9:00 PM,Haiti,Scotland,Gillette Stadium,Foxborough,USA,FS1,,,scheduled,
+C3,C,2,2026-06-19,18:00,6:00 PM,Scotland,Morocco,Gillette Stadium,Foxborough,USA,Fox,,,scheduled,
+C4,C,2,2026-06-19,20:30,8:30 PM,Brazil,Haiti,Lincoln Financial Field,Philadelphia,USA,Fox,,,scheduled,
+C5,C,3,2026-06-24,18:00,6:00 PM,Scotland,Brazil,Hard Rock Stadium,Miami Gardens,USA,Fox,,,scheduled,"Simultaneous with C6 (matchday 3 rule)"
+C6,C,3,2026-06-24,18:00,6:00 PM,Morocco,Haiti,Mercedes-Benz Stadium,Atlanta,USA,FS1,,,scheduled,"Simultaneous with C5 (matchday 3 rule)"
+D1,D,1,2026-06-12,21:00,9:00 PM,United States,Paraguay,SoFi Stadium,Inglewood,USA,Fox,,,scheduled,
+D2,D,1,2026-06-14,00:00,12:00 AM,Australia,Türkiye,BC Place,Vancouver,Canada,FS1,,,scheduled,"Kicks off 9:00 PM June 13 local (Pacific); belongs to the June 13 evening slate. Confirmed via Football Australia and Destination Vancouver"
+D3,D,2,2026-06-19,15:00,3:00 PM,United States,Australia,Lumen Field,Seattle,USA,Fox,,,scheduled,
+D4,D,2,2026-06-19,23:00,11:00 PM,Türkiye,Paraguay,Levi's Stadium,Santa Clara,USA,FS1,,,scheduled,
+D5,D,3,2026-06-25,22:00,10:00 PM,Türkiye,United States,SoFi Stadium,Inglewood,USA,Fox,,,scheduled,"Simultaneous with D6 (matchday 3 rule)"
+D6,D,3,2026-06-25,22:00,10:00 PM,Paraguay,Australia,Levi's Stadium,Santa Clara,USA,FS1,,,scheduled,"Simultaneous with D5 (matchday 3 rule)"
+E1,E,1,2026-06-14,13:00,1:00 PM,Germany,Curaçao,NRG Stadium,Houston,USA,Fox,,,scheduled,
+E2,E,1,2026-06-14,19:00,7:00 PM,Côte d'Ivoire,Ecuador,Lincoln Financial Field,Philadelphia,USA,FS1,,,scheduled,
+E3,E,2,2026-06-20,16:00,4:00 PM,Germany,Côte d'Ivoire,BMO Field,Toronto,Canada,Fox,,,scheduled,
+E4,E,2,2026-06-20,20:00,8:00 PM,Ecuador,Curaçao,Arrowhead Stadium,Kansas City,USA,FS1,,,scheduled,
+E5,E,3,2026-06-25,16:00,4:00 PM,Curaçao,Côte d'Ivoire,Lincoln Financial Field,Philadelphia,USA,FS1,,,scheduled,"Simultaneous with E6 (matchday 3 rule)"
+E6,E,3,2026-06-25,16:00,4:00 PM,Ecuador,Germany,MetLife Stadium,East Rutherford,USA,Fox,,,scheduled,"Simultaneous with E5 (matchday 3 rule)"
+F1,F,1,2026-06-14,16:00,4:00 PM,Netherlands,Japan,AT&T Stadium,Arlington,USA,Fox,,,scheduled,
+F2,F,1,2026-06-14,22:00,10:00 PM,Sweden,Tunisia,Estadio BBVA,Monterrey,Mexico,FS1,,,scheduled,
+F3,F,2,2026-06-20,13:00,1:00 PM,Netherlands,Sweden,NRG Stadium,Houston,USA,Fox,,,scheduled,
+F4,F,2,2026-06-21,00:00,12:00 AM,Tunisia,Japan,Estadio BBVA,Monterrey,Mexico,FS1,,,scheduled,"Kicks off 10:00 PM June 20 local (Monterrey); belongs to the June 20 evening slate. Re-verify kickoff before the June 20 edition"
+F5,F,3,2026-06-25,19:00,7:00 PM,Japan,Sweden,AT&T Stadium,Arlington,USA,FS1,,,scheduled,"Simultaneous with F6 (matchday 3 rule)"
+F6,F,3,2026-06-25,19:00,7:00 PM,Tunisia,Netherlands,Arrowhead Stadium,Kansas City,USA,Fox,,,scheduled,"Simultaneous with F5 (matchday 3 rule)"
+G1,G,1,2026-06-15,15:00,3:00 PM,Belgium,Egypt,Lumen Field,Seattle,USA,Fox,,,scheduled,
+G2,G,1,2026-06-15,21:00,9:00 PM,Iran,New Zealand,SoFi Stadium,Inglewood,USA,FS1,,,scheduled,
+G3,G,2,2026-06-21,15:00,3:00 PM,Belgium,Iran,SoFi Stadium,Inglewood,USA,FS1,,,scheduled,
+G4,G,2,2026-06-21,21:00,9:00 PM,New Zealand,Egypt,BC Place,Vancouver,Canada,FS1,,,scheduled,
+G5,G,3,2026-06-26,23:00,11:00 PM,Egypt,Iran,Lumen Field,Seattle,USA,FS1,,,scheduled,"Simultaneous with G6 (matchday 3 rule)"
+G6,G,3,2026-06-26,23:00,11:00 PM,New Zealand,Belgium,BC Place,Vancouver,Canada,Fox,,,scheduled,"Simultaneous with G5 (matchday 3 rule)"
+H1,H,1,2026-06-15,12:00,12:00 PM,Spain,Cape Verde,Mercedes-Benz Stadium,Atlanta,USA,Fox,,,scheduled,
+H2,H,1,2026-06-15,18:00,6:00 PM,Saudi Arabia,Uruguay,Hard Rock Stadium,Miami Gardens,USA,FS1,,,scheduled,
+H3,H,2,2026-06-21,12:00,12:00 PM,Spain,Saudi Arabia,Mercedes-Benz Stadium,Atlanta,USA,Fox,,,scheduled,
+H4,H,2,2026-06-21,18:00,6:00 PM,Uruguay,Cape Verde,Hard Rock Stadium,Miami Gardens,USA,FS1,,,scheduled,
+H5,H,3,2026-06-26,20:00,8:00 PM,Cape Verde,Saudi Arabia,NRG Stadium,Houston,USA,FS1,,,scheduled,"Simultaneous with H6 (matchday 3 rule)"
+H6,H,3,2026-06-26,20:00,8:00 PM,Uruguay,Spain,Estadio Akron,Guadalajara,Mexico,Fox,,,scheduled,"Simultaneous with H5 (matchday 3 rule)"
+I1,I,1,2026-06-16,15:00,3:00 PM,France,Senegal,MetLife Stadium,East Rutherford,USA,Fox,,,scheduled,
+I2,I,1,2026-06-16,18:00,6:00 PM,Iraq,Norway,Gillette Stadium,Foxborough,USA,Fox,,,scheduled,
+I3,I,2,2026-06-22,17:00,5:00 PM,France,Iraq,Lincoln Financial Field,Philadelphia,USA,Fox,,,scheduled,
+I4,I,2,2026-06-22,20:00,8:00 PM,Norway,Senegal,MetLife Stadium,East Rutherford,USA,Fox,,,scheduled,
+I5,I,3,2026-06-26,15:00,3:00 PM,Norway,France,Gillette Stadium,Foxborough,USA,Fox,,,scheduled,"Simultaneous with I6 (matchday 3 rule)"
+I6,I,3,2026-06-26,15:00,3:00 PM,Senegal,Iraq,BMO Field,Toronto,Canada,FS1,,,scheduled,"Simultaneous with I5 (matchday 3 rule)"
+J1,J,1,2026-06-16,21:00,9:00 PM,Argentina,Algeria,Arrowhead Stadium,Kansas City,USA,Fox,,,scheduled,
+J2,J,1,2026-06-17,00:00,12:00 AM,Austria,Jordan,Levi's Stadium,Santa Clara,USA,FS1,,,scheduled,"Kicks off 9:00 PM June 16 local (Pacific); belongs to the June 16 evening slate"
+J3,J,2,2026-06-22,13:00,1:00 PM,Argentina,Austria,AT&T Stadium,Arlington,USA,Fox,,,scheduled,
+J4,J,2,2026-06-22,23:00,11:00 PM,Jordan,Algeria,Levi's Stadium,Santa Clara,USA,FS1,,,scheduled,
+J5,J,3,2026-06-27,22:00,10:00 PM,Jordan,Argentina,AT&T Stadium,Arlington,USA,Fox,,,scheduled,"Simultaneous with J6 (matchday 3 rule)"
+J6,J,3,2026-06-27,22:00,10:00 PM,Algeria,Austria,Arrowhead Stadium,Kansas City,USA,FS1,,,scheduled,"Simultaneous with J5 (matchday 3 rule)"
+K1,K,1,2026-06-17,13:00,1:00 PM,Portugal,DR Congo,NRG Stadium,Houston,USA,Fox,,,scheduled,
+K2,K,1,2026-06-17,22:00,10:00 PM,Uzbekistan,Colombia,Estadio Azteca,Mexico City,Mexico,FS1,,,scheduled,
+K3,K,2,2026-06-23,13:00,1:00 PM,Portugal,Uzbekistan,NRG Stadium,Houston,USA,Fox,,,scheduled,
+K4,K,2,2026-06-23,22:00,10:00 PM,Colombia,DR Congo,Estadio Akron,Guadalajara,Mexico,FS1,,,scheduled,
+K5,K,3,2026-06-27,19:30,7:30 PM,Colombia,Portugal,Hard Rock Stadium,Miami Gardens,USA,Fox,,,scheduled,"Simultaneous with K6 (matchday 3 rule)"
+K6,K,3,2026-06-27,19:30,7:30 PM,DR Congo,Uzbekistan,Mercedes-Benz Stadium,Atlanta,USA,FS1,,,scheduled,"Simultaneous with K5 (matchday 3 rule)"
+L1,L,1,2026-06-17,16:00,4:00 PM,England,Croatia,AT&T Stadium,Arlington,USA,Fox,,,scheduled,
+L2,L,1,2026-06-17,19:00,7:00 PM,Ghana,Panama,BMO Field,Toronto,Canada,FS1,,,scheduled,
+L3,L,2,2026-06-23,16:00,4:00 PM,England,Ghana,Gillette Stadium,Foxborough,USA,Fox,,,scheduled,
+L4,L,2,2026-06-23,19:00,7:00 PM,Panama,Croatia,BMO Field,Toronto,Canada,Fox,,,scheduled,
+L5,L,3,2026-06-27,17:00,5:00 PM,Panama,England,MetLife Stadium,East Rutherford,USA,Fox,,,scheduled,"Simultaneous with L6 (matchday 3 rule)"
+L6,L,3,2026-06-27,17:00,5:00 PM,Croatia,Ghana,Lincoln Financial Field,Philadelphia,USA,FS1,,,scheduled,"Simultaneous with L5 (matchday 3 rule)"

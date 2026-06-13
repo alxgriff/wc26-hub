@@ -1,0 +1,4 @@
+﻿match_id,market,selection,line,odds,book,edge_pp,our_p,implied_p,stake,timestamp,status,units,clv_pp
+D1,h2h,away,,4.00,betonlineag,11.0,0.3575,0.2477,1,2026-06-12T16:25:19-04:00,open,,
+D1,totals,over,2.0,1.87,mybookieag,10.6,0.6259,0.5195,1,2026-06-12T19:00:33-04:00,open,,
+D1,spreads,away,0.5,1.80,bovada,10.5,0.6444,0.5398,1,2026-06-12T19:00:33-04:00,open,,

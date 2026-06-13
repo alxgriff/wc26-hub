@@ -613,7 +613,13 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
 
 NEWS_DIR = REPO_ROOT / "news"
 _WIRE_SECTION_RE = re.compile(r"^### ([A-L][1-6]):", re.MULTILINE)
-_URL_RE = re.compile(r"https?://[^\s<)\]]+")
+# Exclude quotes and angle brackets so a URL token can never carry an
+# attribute-breakout char into the href below. _linkify runs on ALREADY-escaped
+# text (md_to_html, quote=False), so a literal " in an unverified news URL would
+# otherwise close the href and inject a live event handler (stored XSS). We stop
+# the match at the quote rather than re-escaping, which would double-escape the
+# &amp; already produced for query-string ampersands.
+_URL_RE = re.compile(r"""https?://[^\s<>"')\]]+""")
 
 
 def load_wire(news_dir: Path = NEWS_DIR) -> dict[str, tuple[str, str]]:
@@ -807,11 +813,12 @@ def render_record_calls(matches: "list[st.Match]", rows: list[dict],
     return table, cumulative
 
 
-def render_record_bets(rows: list[dict], root: str = "") -> tuple[str, str]:
+def render_record_bets(rows: list[dict], root: str = "",
+                       picks_log: Path | None = None) -> tuple[str, str]:
     """(bets_table_html, units_line_text) for the record page."""
     try:
         import odds as od
-        picks = od.load_picks()
+        picks = od.load_picks(picks_log) if picks_log else od.load_picks()
         units = od.units_summary(picks)
     except Exception:
         return ('<p class="standfirst">Picks ledger unavailable.</p>',
@@ -866,9 +873,10 @@ def render_record_bets(rows: list[dict], root: str = "") -> tuple[str, str]:
 
 def render_record_page(matches: "list[st.Match]", rows: list[dict],
                        ledger: dict | None, css: str, generated_at: str,
-                       template_dir: Path = TEMPLATE_DIR) -> str:
+                       template_dir: Path = TEMPLATE_DIR,
+                       picks_log: Path | None = None) -> str:
     calls_html, cumulative = render_record_calls(matches, rows, ledger)
-    bets_html, units_line = render_record_bets(rows)
+    bets_html, units_line = render_record_bets(rows, picks_log=picks_log)
     tpl = Template((template_dir / "record.html").read_text(encoding="utf-8"))
     return tpl.safe_substitute(
         site_css=css,
@@ -1242,11 +1250,23 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                kb_path: Path = KB_GUIDE,
                template_dir: Path = TEMPLATE_DIR,
                editions_dir: Path = REPO_ROOT / "editions",
+               discipline: Path = DISCIPLINE,
+               blurbs_dir: Path = BLURBS_DIR,
+               news_dir: Path = NEWS_DIR,
+               predictions_log: Path | None = None,
+               picks_log: Path | None = None,
+               now=None,
                predictor="auto", odds_engine="auto") -> list[str]:
     """Render the whole site (index + team cards + match previews + data.json)
     into out_dir. Returns warnings. ``predictor`` and ``odds_engine`` are
     "auto" (load the real modules defensively), None (placeholder state), or
-    a callable (tests)."""
+    a callable (tests).
+
+    All data inputs are injectable so tests (and historical re-builds) run
+    against a frozen snapshot rather than the live, evolving ``data/`` tree:
+    ``predictions_log``/``picks_log`` default to the ledger/odds module paths,
+    and ``now`` pins the wall clock used for kicked-off/awaiting state (default
+    real time) so a pinned ``target`` actually freezes the rendered world."""
     warnings: list[str] = []
 
     matches = st.load_fixtures(fixtures)
@@ -1254,16 +1274,16 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     for r in rows:  # load_fixtures validated the stripped values; use the same
         for k in ("match_id", "group", "team_a", "team_b"):
             r[k] = (r.get(k) or "").strip()
-    fair_play = load_discipline()
+    fair_play = load_discipline(discipline)
     s = st.compute_standings(matches, fair_play=fair_play)
     warnings.extend(s.warnings)
     forms = form_by_team(matches)
     fates, md3_reports = compute_fates(matches, warnings)
-    wire = load_wire()
+    wire = load_wire(news_dir)
     css = _site_css(template_dir)
 
     blurb_html = ""
-    blurb_path = BLURBS_DIR / f"{target.isoformat()}.md"
+    blurb_path = blurbs_dir / f"{target.isoformat()}.md"
     if blurb_path.exists():
         blurb_text = blurb_path.read_text(encoding="utf-8").strip()
         if blurb_text:
@@ -1301,7 +1321,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                     f"{_sel_label(p['market'], p['selection'], p['line'], r['team_a'], r['team_b'])}"
                     f" {p['edge']:+.1%}{more}")
 
-    ledger = _load_ledger(warnings)
+    ledger = _load_ledger(warnings, predictions_log, now)
     index, data = build_page(matches, rows, target, generated_at,
                              template_path=template_dir / "page.html",
                              editions_dir=editions_dir, css=css,
@@ -1320,7 +1340,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 
     (out_dir / "record.html").write_text(
-        render_record_page(matches, rows, ledger, css, generated_at, template_dir),
+        render_record_page(matches, rows, ledger, css, generated_at, template_dir,
+                           picks_log=picks_log),
         encoding="utf-8")
 
     fixture_teams = sorted({m.team_a for m in matches} | {m.team_b for m in matches})
@@ -1385,20 +1406,23 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     return warnings
 
 
-def _load_ledger(warnings: list[str]) -> dict | None:
+def _load_ledger(warnings: list[str], predictions_path=None, now=None) -> dict | None:
     """The prediction-ledger API surface this renderer relies on, loaded
     defensively: rows, the published-source constant, the canonical Brier
     function, and kickoff math. A missing/changed ledger module degrades to
-    'no logged call', never a retroactive grade."""
+    'no logged call', never a retroactive grade. ``predictions_path``/``now``
+    are injectable so a build can be pinned to a frozen ledger and a fixed
+    clock instead of the live file and real wall-clock time."""
     try:
         import ledger as lg
-        return {"rows": lg.load_ledger(),
+        rows = lg.load_ledger(predictions_path) if predictions_path else lg.load_ledger()
+        return {"rows": rows,
                 "published": getattr(lg, "PUBLISHED_SOURCE", "consensus"),
                 "brier": lg.brier,
                 "kickoff_dt": lg.kickoff_dt,
                 "grade": lg.grade,
                 "cumulative": lg.cumulative_line,
-                "now": lg.now_et()}
+                "now": now or lg.now_et()}
     except Exception as e:
         warnings.append(f"prediction ledger unavailable ({e.__class__.__name__}: {e}) "
                         "— played matches render as 'no logged call'")

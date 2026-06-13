@@ -30,6 +30,21 @@ $site_css
 
 <main>
 
+<section aria-labelledby="how-h" class="how-to-read">
+  <h2 id="how-h" class="sr-only">How to read this page</h2>
+  <p class="standfirst">Two independent scorecards. They measure different things and can disagree on the same match — that is the method working, not a contradiction.</p>
+  <div class="callout-grid">
+    <div class="callout">
+      <span class="tag">The Calls · Brier</span>
+      <p>How good our <strong>forecast</strong> was — the probability we put on each result before kickoff, graded by Brier score once the match is settled. Lower is better: 0 is perfect, 0.667 a coin flip, 2 as wrong as possible. This measures being right, not betting.</p>
+    </div>
+    <div class="callout">
+      <span class="tag">The Bets · Units &amp; CLV</span>
+      <p>Paper picks recorded only when our probability beats the market <strong>price</strong> — scored in units (flat 1u) and closing-line value. A pick can lose while the call was right: we may rate the favorite to win yet bet the other side because the book underpriced it. D1 is the case in point — we called the USA, who won, but Paraguay was the value bet.</p>
+    </div>
+  </div>
+</section>
+
 <section id="calls" aria-labelledby="calls-h">
   <div class="sec-head">
     <span class="kicker">Brier</span>
