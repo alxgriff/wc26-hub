@@ -423,8 +423,24 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
     <span class="kicker">Brier</span>
     <h2 id="calls-h">The Calls</h2>
   </div>
-  <p class="standfirst">No graded calls yet — grades land when a logged match gets its result entered.</p>
-
+  <p class="standfirst">Ledger to date: 1 graded prediction, 1 correct call, cumulative Brier 0.589 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max)</p>
+<div class="record-wrap">
+  <table>
+    <caption class="sr-only">Every logged call graded: probabilities, result, hit or miss, Brier score</caption>
+    <thead><tr><th class="lbl" scope="col">Match</th><th scope="col">Logged H/D/A</th><th scope="col">Final</th><th scope="col">Outcome</th><th scope="col">Hit</th><th scope="col">Brier</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="lbl"><a href="matches/D1.html">United States v Paraguay</a></td>
+        <td>38%/27%/36% (1-1)</td>
+        <td>4–1</td>
+        <td>home</td>
+        <td><span class="hit hit-y" aria-hidden="true">✓</span><span class="sr-only">correct call</span></td>
+        <td class="pts">0.589</td>
+      </tr>
+      <tr class="subtotal"><td colspan="4">June 12 — 1 graded</td><td>1/1</td><td>0.589</td></tr>
+    </tbody>
+  </table>
+</div>
 </section>
 
 <section id="bets" aria-labelledby="bets-h">
@@ -432,7 +448,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
     <span class="kicker">Units &amp; CLV</span>
     <h2 id="bets-h">The Bets</h2>
   </div>
-  <p class="standfirst">No picks settled yet. 3 open picks, 3u at risk.</p>
+  <p class="standfirst">Picks: 3 settled (1W-2L), -1.13u at flat 1u stakes; avg CLV -0.2pp over 3 closing line(s) 4 open picks, 4u at risk.</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">Every recorded pick: selection, price, edge at record, settlement, units, closing line value</caption>
@@ -445,9 +461,9 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
         <td>4.00</td>
         <td class="lbl">betonlineag</td>
         <td>11.0pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
+        <td class="lbl status-lost">lost</td>
+        <td class="pts">-1.00</td>
+        <td>-0.7pp</td>
       </tr>
       <tr>
         <td class="lbl">Jun 12</td>
@@ -456,9 +472,9 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
         <td>1.87</td>
         <td class="lbl">mybookieag</td>
         <td>10.6pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
+        <td class="lbl status-won">won</td>
+        <td class="pts">+0.87</td>
+        <td>-0.0pp</td>
       </tr>
       <tr>
         <td class="lbl">Jun 12</td>
@@ -467,6 +483,50 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
         <td>1.80</td>
         <td class="lbl">bovada</td>
         <td>10.5pp</td>
+        <td class="lbl status-lost">lost</td>
+        <td class="pts">-1.00</td>
+        <td>+0.0pp</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 13</td>
+        <td class="lbl"><a href="matches/B2.html">Qatar v Switzerland</a></td>
+        <td class="lbl">Switzerland -1.5</td>
+        <td>1.67</td>
+        <td class="lbl">betus</td>
+        <td>8.9pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 13</td>
+        <td class="lbl"><a href="matches/D2.html">Australia v Türkiye</a></td>
+        <td class="lbl">Australia +0.5</td>
+        <td>2.25</td>
+        <td class="lbl">betus</td>
+        <td>8.8pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 13</td>
+        <td class="lbl"><a href="matches/D2.html">Australia v Türkiye</a></td>
+        <td class="lbl">Over 2.5</td>
+        <td>2.05</td>
+        <td class="lbl">bovada</td>
+        <td>6.8pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 13</td>
+        <td class="lbl"><a href="matches/D2.html">Australia v Türkiye</a></td>
+        <td class="lbl">Australia</td>
+        <td>5.40</td>
+        <td class="lbl">betonlineag</td>
+        <td>5.8pp</td>
         <td class="lbl status-open">open</td>
         <td class="pts">—</td>
         <td>—</td>
@@ -480,7 +540,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 
 <footer>
   <p class="colophon">
-    Generated 2026-06-12 19:00 · calls graded from data/predictions_log.csv (logged
+    Generated 2026-06-13 14:03 · calls graded from data/predictions_log.csv (logged
     pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
     at fresh prices, revisions explicit, settled rows immutable) · Brier: 0 best ·
     0.667 coin-flip · 2 worst · CLV = closing implied minus our implied at record ·

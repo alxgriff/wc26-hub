@@ -1,4 +1,8 @@
 ﻿match_id,market,selection,line,odds,book,edge_pp,our_p,implied_p,stake,timestamp,status,units,clv_pp
-D1,h2h,away,,4.00,betonlineag,11.0,0.3575,0.2477,1,2026-06-12T16:25:19-04:00,open,,
-D1,totals,over,2.0,1.87,mybookieag,10.6,0.6259,0.5195,1,2026-06-12T19:00:33-04:00,open,,
-D1,spreads,away,0.5,1.80,bovada,10.5,0.6444,0.5398,1,2026-06-12T19:00:33-04:00,open,,
+D1,h2h,away,,4.00,betonlineag,11.0,0.3575,0.2477,1,2026-06-12T16:25:19-04:00,lost,-1.00,-0.7
+D1,totals,over,2.0,1.87,mybookieag,10.6,0.6259,0.5195,1,2026-06-12T19:00:33-04:00,won,+0.87,-0.0
+D1,spreads,away,0.5,1.80,bovada,10.5,0.6444,0.5398,1,2026-06-12T19:00:33-04:00,lost,-1.00,+0.0
+B2,spreads,away,-1.5,1.67,betus,8.9,0.6739,0.5850,1,2026-06-13T09:59:50-04:00,open,,
+D2,spreads,home,0.5,2.25,betus,8.8,0.5219,0.4340,1,2026-06-13T09:59:50-04:00,open,,
+D2,totals,over,2.5,2.05,bovada,6.8,0.5401,0.4723,1,2026-06-13T09:59:50-04:00,open,,
+D2,h2h,home,,5.40,betonlineag,5.8,0.2417,0.1836,1,2026-06-13T09:59:50-04:00,open,,

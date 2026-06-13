@@ -5,7 +5,7 @@ A3,A,2,2026-06-18,12:00,12:00 PM,Czechia,South Africa,Mercedes-Benz Stadium,Atla
 A4,A,2,2026-06-18,21:00,9:00 PM,Mexico,South Korea,Estadio Akron,Guadalajara,Mexico,Fox,,,scheduled,
 A5,A,3,2026-06-24,21:00,9:00 PM,Czechia,Mexico,Estadio Azteca,Mexico City,Mexico,Fox,,,scheduled,"Simultaneous with A6 (matchday 3 rule)"
 A6,A,3,2026-06-24,21:00,9:00 PM,South Africa,South Korea,Estadio BBVA,Monterrey,Mexico,FS1,,,scheduled,"Simultaneous with A5 (matchday 3 rule)"
-B1,B,1,2026-06-12,15:00,3:00 PM,Canada,Bosnia and Herzegovina,BMO Field,Toronto,Canada,Fox,,,scheduled,
+B1,B,1,2026-06-12,15:00,3:00 PM,Canada,Bosnia and Herzegovina,BMO Field,Toronto,Canada,Fox,1,1,played,
 B2,B,1,2026-06-13,15:00,3:00 PM,Qatar,Switzerland,Levi's Stadium,Santa Clara,USA,Fox,,,scheduled,
 B3,B,2,2026-06-18,15:00,3:00 PM,Switzerland,Bosnia and Herzegovina,SoFi Stadium,Inglewood,USA,Fox,,,scheduled,
 B4,B,2,2026-06-18,18:00,6:00 PM,Canada,Qatar,BC Place,Vancouver,Canada,FS1,,,scheduled,
@@ -17,7 +17,7 @@ C3,C,2,2026-06-19,18:00,6:00 PM,Scotland,Morocco,Gillette Stadium,Foxborough,USA
 C4,C,2,2026-06-19,20:30,8:30 PM,Brazil,Haiti,Lincoln Financial Field,Philadelphia,USA,Fox,,,scheduled,
 C5,C,3,2026-06-24,18:00,6:00 PM,Scotland,Brazil,Hard Rock Stadium,Miami Gardens,USA,Fox,,,scheduled,"Simultaneous with C6 (matchday 3 rule)"
 C6,C,3,2026-06-24,18:00,6:00 PM,Morocco,Haiti,Mercedes-Benz Stadium,Atlanta,USA,FS1,,,scheduled,"Simultaneous with C5 (matchday 3 rule)"
-D1,D,1,2026-06-12,21:00,9:00 PM,United States,Paraguay,SoFi Stadium,Inglewood,USA,Fox,,,scheduled,
+D1,D,1,2026-06-12,21:00,9:00 PM,United States,Paraguay,SoFi Stadium,Inglewood,USA,Fox,4,1,played,
 D2,D,1,2026-06-14,00:00,12:00 AM,Australia,Türkiye,BC Place,Vancouver,Canada,FS1,,,scheduled,"Kicks off 9:00 PM June 13 local (Pacific); belongs to the June 13 evening slate. Confirmed via Football Australia and Destination Vancouver"
 D3,D,2,2026-06-19,15:00,3:00 PM,United States,Australia,Lumen Field,Seattle,USA,Fox,,,scheduled,
 D4,D,2,2026-06-19,23:00,11:00 PM,Türkiye,Paraguay,Levi's Stadium,Santa Clara,USA,FS1,,,scheduled,
