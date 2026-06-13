@@ -195,6 +195,30 @@ class LateCapMappingTests(unittest.TestCase):
         midnight = {"_late_cap": True, "kickoff_et_24h": "00:00"}
         self.assertGreater(be._kickoff_sort_key(midnight), be._kickoff_sort_key(evening))
 
+    def test_live_fixtures_late_cap_set_is_exactly_the_sanctioned_three(self):
+        repo = Path(__file__).resolve().parents[1]
+        rows = be.read_rows(repo / "data" / "fixtures.csv")
+        midnight = {r["match_id"] for r in rows
+                    if (r.get("kickoff_et_24h") or "").strip() == "00:00"}
+        self.assertEqual(midnight, be.EXPECTED_LATE_CAPS)   # two-way: no more, no fewer
+
+    def test_unexpected_midnight_id_is_not_shifted(self):
+        # a stray 00:00 on a non-sanctioned id stays on its own date
+        self.assertEqual(be.editorial_date_of("2026-06-14", "00:00", "E1"), date(2026, 6, 14))
+        self.assertEqual(be.editorial_date_of("2026-06-14", "00:00", "D2"), date(2026, 6, 13))
+
+    def test_kickoff_sort_key_tolerates_malformed(self):
+        self.assertEqual(be._kickoff_sort_key({"kickoff_et_24h": "TBD"}), 99 * 60)
+        self.assertGreater(be._kickoff_sort_key({"kickoff_et_24h": "TBD"}),
+                           be._kickoff_sort_key({"kickoff_et_24h": "21:00"}))
+
+    def test_overnight_played_with_blank_score_flags_not_dash(self):
+        rows = [{"match_id": "A1", "team_a": "X", "team_b": "Y", "status": "played",
+                 "score_a": "", "score_b": "", "notes": "",
+                 "_editorial": date(2026, 6, 11), "_late_cap": False}]
+        out = "\n".join(be._overnight_section(rows, date(2026, 6, 11)))
+        self.assertIn("result not yet entered", out)
+
 
 # ---- (c) Stakes replacement leaves The Call / Odds untouched ---------------
 

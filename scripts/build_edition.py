@@ -67,25 +67,35 @@ def read_rows(path: str | Path) -> list[dict]:
         rows = list(csv.DictReader(f))
     for r in rows:
         kick = (r.get("kickoff_et_24h") or "").strip()
-        r["_late_cap"] = kick == LATE_CAP_KICKOFF
-        r["_editorial"] = editorial_date_of((r.get("date_et") or "").strip(), kick)
+        mid = (r.get("match_id") or "").strip()
+        # only the three sanctioned 00:00 games shift to the previous edition; a
+        # stray 00:00 kickoff elsewhere stays on its own date (and is warned about)
+        r["_late_cap"] = kick == LATE_CAP_KICKOFF and mid in EXPECTED_LATE_CAPS
+        r["_editorial"] = editorial_date_of((r.get("date_et") or "").strip(), kick, mid)
     return rows
 
 
-def editorial_date_of(date_et: str, kickoff_et_24h: str) -> date:
-    """Edition date for a match: its ET calendar date, shifted one day earlier
-    for the 🌙 late-cap games that kick off at 12:00 AM ET."""
+def editorial_date_of(date_et: str, kickoff_et_24h: str, match_id: str = "") -> date:
+    """Edition date for a match: its ET calendar date, shifted one day earlier for
+    the three sanctioned 🌙 late-cap games (D2/J2/F4) at 12:00 AM ET. A stray 00:00
+    kickoff on any other fixture is NOT shifted (the 'only these may shift' contract
+    self-enforces). Called without match_id, it shifts on the kickoff alone."""
     d = date.fromisoformat(date_et)
-    if kickoff_et_24h.strip() == LATE_CAP_KICKOFF:
+    if (kickoff_et_24h.strip() == LATE_CAP_KICKOFF
+            and (not match_id or match_id in EXPECTED_LATE_CAPS)):
         return d - timedelta(days=1)
     return d
 
 
 def _kickoff_sort_key(row: dict) -> int:
     """Minutes past midnight, with late-cap (00:00) pushed to end-of-day so the
-    🌙 game sorts *after* the evening games it shares an edition with."""
-    h, m = (int(x) for x in (row.get("kickoff_et_24h") or "0:0").split(":"))
-    mins = h * 60 + m
+    🌙 game sorts *after* the evening games it shares an edition with. A malformed
+    kickoff sorts last (sentinel) rather than crashing the whole edition build."""
+    try:
+        h, m = (int(x) for x in (row.get("kickoff_et_24h") or "0:0").split(":"))
+        mins = h * 60 + m
+    except (ValueError, TypeError):
+        return 99 * 60   # unknown/malformed kickoff -> sort after everything
     return mins + 24 * 60 if row.get("_late_cap") else mins
 
 
@@ -422,9 +432,12 @@ def _overnight_section(rows: list[dict], yesterday: date,
     for r in prior:
         moon = " 🌙" if r.get("_late_cap") else ""
         note = (r.get("notes") or "").strip()
-        if (r.get("status") or "").strip().lower() == "played":
+        sa, sb = (r.get("score_a") or "").strip(), (r.get("score_b") or "").strip()
+        # guard the importable API (which bypasses load_fixtures validation): a
+        # "played" row with a blank score must NOT publish a dash with empty operands
+        if (r.get("status") or "").strip().lower() == "played" and sa != "" and sb != "":
             line = (f"- **{r['match_id']}**{moon} {r['team_a']} "
-                    f"{r['score_a']}–{r['score_b']} {r['team_b']}")
+                    f"{sa}–{sb} {r['team_b']}")
             if note:
                 line += f" — {note}"
             out.append(line)
@@ -478,7 +491,10 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
     calls = calls or {}
     odds_bodies = odds_bodies or {}
 
-    unexpected = {r["match_id"] for r in rows if r.get("_late_cap")} - EXPECTED_LATE_CAPS
+    # key on the raw kickoff, not _late_cap (which is now gated to the sanctioned
+    # ids) — this is exactly how a stray 00:00 fixture surfaces for review
+    unexpected = {r["match_id"] for r in rows
+                  if (r.get("kickoff_et_24h") or "").strip() == LATE_CAP_KICKOFF} - EXPECTED_LATE_CAPS
     if unexpected:
         warnings.append(
             f"unexpected 00:00 ET kickoff(s) {sorted(unexpected)} — only "
@@ -685,8 +701,9 @@ def main(argv: list[str] | None = None) -> int:
         import predict as pr
         odds_rows = od.load_odds()
         if odds_rows:
-            for line in od.settle_picks(matches, odds_rows, fixtures_rows=rows):
-                print(f"picks: {line}", file=sys.stderr)
+            # NB: settling picks is the pipeline's job (odds.py settle), not the
+            # renderer's — building an edition must not mutate the picks ledger as
+            # a side effect. We only READ here.
             ledger_rows = lg.load_ledger()
             model = pr.load_ratings(fixtures=args.fixtures)
             now = lg.now_et()
