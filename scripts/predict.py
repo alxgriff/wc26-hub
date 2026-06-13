@@ -97,6 +97,9 @@ def _canon(name: str) -> str:
 
 # ---------------------------------------------------------------- config / types
 
+_ET_FRACTION = 30.0 / 90.0   # extra time is 30' of regulation's 90' (knockout layer)
+
+
 @dataclass
 class Config:
     mu0: float = 2.6        # baseline total goals at even strength / even att-def
@@ -108,6 +111,18 @@ class Config:
     max_goals: int = 8      # score-matrix truncation (captures >99.99%)
     w_elo: float = 1.0      # consensus weights (equal by default)
     w_futi: float = 1.0
+    # Dixon-Coles low-score dependence. 0.0 = INERT: identical to independent
+    # Poisson. Activate only from a data fit (fit_rho.py); football fits are small
+    # and negative — typically about -0.13 to -0.18 (allow down to ~-0.20). Never
+    # hand-pick it (the project's fit-don't-invent rule).
+    rho: float = 0.0
+    # Knockout resolution — used only by resolve_knockout(); predict_match (group
+    # play) is unaffected. et_caution<1 reflects more cautious extra time;
+    # shootout_home is a flat coin-flip — do NOT tilt by strength as a default
+    # (shootouts are close to a fair lottery; a small favourite edge is the only
+    # defensible refinement, and only if a backtest supports it).
+    et_caution: float = 0.85
+    shootout_home: float = 0.5
 
 
 @dataclass
@@ -157,6 +172,22 @@ class Prediction:
     btts: float
     dnb_a: float = 0.0    # draw-no-bet: P(team_a wins | not a draw) — Phase 5 market
     top_scores: list = field(default_factory=list)   # [((i,j), prob), ...]
+
+
+@dataclass
+class KnockoutPrediction:
+    """Single-elimination result: who advances. The 90-minute prediction is in
+    ``reg``; only the terminal resolution (extra time + shootout) differs from a
+    group game."""
+    team_a: str
+    team_b: str
+    hfa_team: str | None
+    p_advance_a: float
+    p_advance_b: float
+    reg: Prediction          # the 90-minute prediction (W/D/L, score model, totals)
+    et_wdl: tuple            # (P(a), P(draw), P(b)) within extra time
+    p_reach_et: float        # P(level after 90) == reg.p_draw
+    p_reach_shootout: float  # P(reach penalties) == p_reach_et * P(draw in ET)
 
 
 # ---------------------------------------------------------------- loading
@@ -263,6 +294,46 @@ def _poisson(k: int, lam: float) -> float:
     return math.exp(-lam) * lam ** k / math.factorial(k)
 
 
+def _dc_tau(i: int, j: int, lam_a: float, lam_b: float, rho: float) -> float:
+    """Dixon-Coles low-score dependence correction (Dixon & Coles 1997).
+
+    Touches only the (0,0),(0,1),(1,0),(1,1) cells; rho<0 lifts 0-0 and 1-1 (and
+    trims 1-0/0-1), the empirically correct draw-inflation direction. rho=0 returns
+    1.0 everywhere, i.e. plain independent Poisson.
+
+    NOTE the deliberate cross-mapping (this IS canonical Dixon-Coles, not a bug):
+    the (0,1) cell — where team_b/away scored the lone goal — is weighted by lam_a
+    (the team_a/home expectation), and (1,0) by lam_b. Do not "simplify" this to
+    i->lam_a / j->lam_b; that is the common swapped-index error.
+    """
+    if i == 0 and j == 0:
+        return 1.0 - lam_a * lam_b * rho
+    if i == 0 and j == 1:
+        return 1.0 + lam_a * rho
+    if i == 1 and j == 0:
+        return 1.0 + lam_b * rho
+    if i == 1 and j == 1:
+        return 1.0 - rho
+    return 1.0
+
+
+def _wdl(lam_a: float, lam_b: float, cfg: Config) -> tuple:
+    """(P(team_a wins), P(draw), P(team_b wins)) from a normalised, DC-corrected
+    Poisson score matrix. Mirrors predict_match's matrix step intentionally so the
+    knockout layer can reuse it without touching predict_match's hot path."""
+    N = cfg.max_goals
+    pa = [_poisson(i, lam_a) for i in range(N + 1)]
+    pb = [_poisson(j, lam_b) for j in range(N + 1)]
+    m = {(i, j): pa[i] * pb[j] for i in range(N + 1) for j in range(N + 1)}
+    if cfg.rho:
+        m = {(i, j): m[(i, j)] * _dc_tau(i, j, lam_a, lam_b, cfg.rho) for (i, j) in m}
+    z = sum(m.values())
+    p_a = sum(p for (i, j), p in m.items() if i > j) / z
+    p_d = sum(p for (i, j), p in m.items() if i == j) / z
+    p_b = sum(p for (i, j), p in m.items() if i < j) / z
+    return p_a, p_d, p_b
+
+
 def predict_match(model: RatingModel, team_a: str, team_b: str,
                   hfa_team: str | None = None) -> Prediction:
     """Predict team_a vs team_b. ``hfa_team`` (one of the two, or None) receives
@@ -285,6 +356,9 @@ def predict_match(model: RatingModel, team_a: str, team_b: str,
     pa = [_poisson(i, lam_a) for i in range(N + 1)]
     pb = [_poisson(j, lam_b) for j in range(N + 1)]
     matrix = {(i, j): pa[i] * pb[j] for i in range(N + 1) for j in range(N + 1)}
+    if cfg.rho:                                          # Dixon-Coles low-score correction
+        matrix = {(i, j): matrix[(i, j)] * _dc_tau(i, j, lam_a, lam_b, cfg.rho)
+                  for (i, j) in matrix}
     z = sum(matrix.values())
     matrix = {k: v / z for k, v in matrix.items()}      # normalise: sums to 1
 
@@ -299,6 +373,33 @@ def predict_match(model: RatingModel, team_a: str, team_b: str,
     dnb_a = p_a / (p_a + p_b) if (p_a + p_b) > 0 else 0.5
     return Prediction(team_a, team_b, hfa_team, p_a, p_draw, p_b, lam_a, lam_b,
                       total, top[0][0], over, btts, dnb_a, top)
+
+
+def resolve_knockout(model: RatingModel, team_a: str, team_b: str,
+                     hfa_team: str | None = None) -> KnockoutPrediction:
+    """Advance probabilities for a single-elimination match.
+
+    Reuses ``predict_match`` for the 90-minute result, then routes the draw mass
+    through extra time and a coin-flip shootout. The core model (consensus,
+    supremacy, Poisson matrix, Dixon-Coles) is unchanged — only the terminal
+    resolution differs from a group game:
+
+        P(A advances) = P(A wins in 90)
+                      + P(draw in 90) * [ P(A wins ET) + P(draw ET) * P(A wins SO) ]
+    """
+    cfg = model.config
+    reg = predict_match(model, team_a, team_b, hfa_team=hfa_team)
+    # Extra time: same per-team rates scaled to 30' with a caution discount. Both
+    # lambdas scale equally, so the supremacy split is preserved; _wdl applies the
+    # same Dixon-Coles correction.
+    k = _ET_FRACTION * cfg.et_caution
+    et_a, et_d, et_b = _wdl(reg.lambda_a * k, reg.lambda_b * k, cfg)
+    s = cfg.shootout_home                       # P(team_a wins the shootout); flat 0.5
+    p_adv_a = reg.p_a + reg.p_draw * (et_a + et_d * s)
+    p_adv_b = 1.0 - p_adv_a                      # exact: et_a+et_d+et_b = p_a+p_draw+p_b = 1
+    return KnockoutPrediction(
+        team_a, team_b, hfa_team, p_adv_a, p_adv_b, reg,
+        (et_a, et_d, et_b), reg.p_draw, reg.p_draw * et_d)
 
 
 # ---------------------------------------------------------------- match-level overlay

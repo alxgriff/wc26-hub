@@ -61,7 +61,9 @@ and multiple reproductions — see Sources):
 - `λ_a` = expected goals for `team_a` (listed-first side), `λ_b` for `team_b`.
 - **ρ < 0 raises P(0-0) and P(1-1)** and slightly lowers P(1-0)/P(0-1) — the
   empirically correct direction. ρ is "almost always estimated as a small
-  negative value, typically between −0.03 and −0.15."
+  negative value"; published football fits typically cluster **−0.13 to −0.18**
+  (the often-quoted −0.03…−0.15 band is loose at the low-magnitude end — allow the
+  grid search down to ~−0.20). [corrected 2026-06-13: independent lit review]
 - Apply τ to the **un-normalised** score matrix, *then* let the existing
   normalisation run. This is exactly the literature form
   `P(x,y) = τ(x,y)·Poisson(x;λ_a)·Poisson(y;λ_b)` followed by renormalisation,
@@ -117,12 +119,70 @@ size the effect — not committed numbers):
 The correction is self-targeting: large on close, low-scoring ties; negligible on
 mismatches. That is the desired behaviour.
 
+### 1.2 Knockout resolution layer (mechanism)
+
+**Why.** A knockout match cannot end level after 90 minutes: if tied it goes to
+extra time (two full 15-minute halves, not sudden death), then a penalty shootout.
+The current `predict_match` returns a 90-minute W/D/L — the wrong terminal shape for
+a knockout. **This is NOT a reason for a second model.** The core (consensus,
+supremacy, Poisson matrix, the 1.1 DC correction) is identical for a knockout; only
+the *draw mass* must be re-routed into "advance" probability. So this is a thin layer
+on top of the matrix `predict_match` already produces. (Blending two models would be
+strictly worse: two parameter sets, an arbitrary blend weight, and loss of the single
+coherent score distribution everything downstream reads.)
+
+**Behaviour-preserving.** The layer activates **only for knockout fixtures** (gate on
+a `stage`/`round` flag, or an explicit `advance=True` argument). Group-stage calls are
+untouched — `predict_match` keeps returning 90-minute W/D/L exactly as today.
+
+**Resolution (reuses the 90-minute matrix):**
+```
+P(A advances) = p_a + p_draw · P(A advances | level after 90)
+
+P(A advances | level after 90) = q_a + q_d · s_a
+    where (q_a, q_d, q_b) = W/D/L from an extra-time Poisson matrix with
+        λ_ET_a = lam_a · (30/90) · c ,   λ_ET_b = lam_b · (30/90) · c
+        (same supremacy share; the same _dc_tau correction applies), and
+    s_a = P(A wins the shootout) = 0.5     # flat — see below
+```
+
+**Defaults (documented, tunable):**
+- `c` — extra-time caution/fatigue discount on the per-minute scoring rate. Default
+  `0.85`; **flagged for calibration in 2.5.** (`c = 1.0` treats ET as simply
+  proportional to its length; empirically ET is a touch more cautious, hence `< 1`.)
+- **Shootout `s_a = 0.5`, flat, NO strength tilt.** A 2025 study of 268 UEFA shootouts
+  (2000–2025) finds them "equivalent to a perfect lottery": Elo-stronger teams do
+  **not** win more often, and kicking order / venue / momentum show no effect. **Do
+  NOT add a supremacy-based shootout tilt** — unsupported and only adds noise.
+
+**Do NOT bump the regulation total for knockouts.** Independent stats sources show
+knockout matches average **fewer** goals per 90' than group games (~2.3–2.5 from the
+Round of 16 on vs ~2.7 in groups), **not more**. The often-quoted "~2.8 knockout"
+figure is inflated because it counts extra-time goals — which this layer already adds
+via the ET period. So if anything regulation μ for knockouts is slightly *lower*;
+raising it would be doubly wrong. Keep regulation μ as-is (any small fitted adjustment
+belongs in 2.5 and must be validated, not assumed). [corrected 2026-06-13: the earlier
+"knockouts higher-scoring" premise was refuted in direction — independent review]
+
+**Tests:**
+- **Group untouched:** every group-fixture output is identical to pre-change.
+- **Normalisation:** `P(A advances) + P(B advances) = 1` for knockout fixtures.
+- **Monotonicity / symmetry:** stronger A ⇒ higher P(A advances); at equal strength
+  with `s_a = 0.5`, P(A advances) → 0.5.
+- **Frequency band (from WC history):** ~32% of knockout matches reach extra time;
+  in the modern (post-2004, no golden goal) era the MAJORITY of those go to penalties,
+  so **≈20–25% of knockout matches reach a shootout** (FiveThirtyEight: 25.3% over the
+  last five men's WCs). Averaged over a realistic slate, the layer's implied reach-ET /
+  reach-shootout rates should land near ~32% / ~20–25%. [corrected 2026-06-13: the
+  earlier "~40% of ET → pens, ≈13% shootout" was backwards/too low — independent review]
+
 ---
 
 ## Tier 2 — Data-dependent (needs a historical corpus; unlocks 1.1's ρ and honest validation)
 
-> **Data acquisition (applies to 2.1 and 3.2 — read this first).** Both datasets
-> live on Kaggle, which requires authentication; the implementing agent's sandbox
+> **Data acquisition (applies to the Tier 2 / Tier 3 Kaggle pulls — read this
+> first).** These datasets live on Kaggle, which requires authentication; the
+> implementing agent's sandbox
 > will usually **not** have the user's Kaggle credentials *or* network access to
 > kaggle.com. **Do not assume you can download them at runtime.** Expect the files
 > to be placed in the repo by the user, verify their presence, and stop-and-report
@@ -172,49 +232,82 @@ if not corpus.exists():
 - **Slugs change:** if a dataset slug 404s, report it rather than guessing an
   alternate — the user will supply the file.
 
-### 2.1 Acquire a historical international-match corpus
+### 2.1 Build the corpus: competitive internationals, recent window (not 1872-present)
 
-**Dataset:** `martj42 / international-football-results-from-1872-to-present`
-(Kaggle) — ~49,000 men's full internationals, `date, home_team, away_team,
-home_score, away_score, tournament, city, country, neutral`, using current team
-names. This is the canonical free source.
-- Store under `data/History/` with provenance + as-of date in
-  `data/History/DATA_QUALITY.md`, matching the existing Ratings audit style.
-- Normalise team names to the CLAUDE.md canon via the existing `ALIAS` map; extend
-  the map and **stop-and-report on any unresolved name** (same contract as the
-  ratings join).
+**Dataset:** `martj42 / international-football-results-from-1872-to-present` (~49,000
+rows) — but **do not use it wholesale.** "Every match since 1872" mixes eras and match
+types that don't reflect the current game. Note: **size is not the concern** (the file
+is ~5 MB, loads instantly; fitting ρ is a millisecond op) — *relevance* is. Curate:
+- **Drop friendlies** (`tournament == 'Friendly'`): rotated squads and low stakes make
+  their scorelines noisy and unrepresentative of competitive national-team football.
+- **Restrict to a recent window** — default start ~2010 (last four cycles). Don't
+  hard-code a year blindly: **plot annual goals-per-match and draw-rate and set the
+  cutoff where they stabilise**, then report the choice.
+- **Tag each match with its `tournament` type** (World Cup, continental finals,
+  qualifiers, Nations League, …) so ρ-sensitivity and validation can be sliced by
+  regime in 2.2 / 2.3 without re-deriving.
+- Store under `data/History/` with provenance + window + as-of in
+  `data/History/DATA_QUALITY.md`. Canon-normalise names via `ALIAS`; stop-and-report
+  on misses.
 
-### 2.2 `fit_rho.py` — estimate ρ from data
+**Data gap that affects the knockout work (2.5).** martj42 carries `tournament` but
+**no round/stage column**, so you cannot separate group from knockout matches from it.
+For the knockout-layer calibration you need a curated knockout-match list — e.g.
+derived from `openfootball` world-cup data (which encodes rounds) or compiled for the
+past ~20 years of WC + continental knockouts. Treat this as its own data dependency;
+**do not fabricate stage labels** from the results file.
 
-- Fit ρ by **maximising the Dixon-Coles log-likelihood** (or, simpler and robust,
-  grid-search ρ ∈ [−0.20, 0] minimising out-of-sample multiclass log-loss / Brier
-  on W/D/L) over the corpus, holding the model's λ-generation fixed.
-- Optionally restrict to recent internationals and/or major-tournament matches so
-  ρ reflects the relevant regime; report ρ and its sensitivity.
-- Output: write the fitted ρ into `Config.rho` (or a small `data/calibration.json`
-  the loader reads), with the fit date and sample size recorded. Only then does
-  the Tier-1 mechanism become active in production.
+### 2.2 `fit_rho.py` — estimate ρ on the broad competitive set
 
-### 2.3 Backtest harness — validate calibration BEFORE trusting live Brier
+- **Fit broad, not major-tournament-only.** ρ only "sees" the 0-0/0-1/1-0/1-1 corner,
+  so it is robust to era and essentially unaffected by blowouts — a broad competitive
+  sample gives a tighter, lower-variance estimate. (Restricting to major tournaments
+  shrinks the sample hard and selects a partly mismatched regime, e.g. cautious
+  knockouts — the wrong move for this parameter.)
+- Fit by **maximising the Dixon-Coles log-likelihood**, or (simpler, robust) grid-
+  search ρ ∈ [−0.20, 0] minimising out-of-sample multiclass log-loss / Brier on W/D/L,
+  holding λ-generation fixed. Report ρ and its sensitivity **across `tournament`
+  slices** as a diagnostic (expect it to be fairly stable).
+- **Recency, done the canonical way:** to weight recent matches more, apply
+  Dixon-Coles **exponential time-decay (a half-life)** to the *fitting* likelihood — a
+  soft down-weight — rather than a hard year cutoff. Half-life ≈ 1–2 years is a
+  reasonable starting point for internationals; tune it.
+  - **This does NOT contradict §0's "no time-decay in the predictor" rule.** That rule
+    forbids decay *inside `predict_match`*, which reads current exogenous ratings.
+    Time-decay *when fitting ρ on historical results* is a different operation and is
+    exactly what Dixon & Coles did. Keep the two strictly separate.
+- Output: write fitted ρ to `data/calibration.json` (the loader reads it into
+  `Config.rho`), with fit date, window, and sample size. Only then is the 1.1
+  mechanism active in production.
 
-- Replay historical matches through the model and measure calibration (reliability
-  curve, Brier, log-loss) for W/D/L, Over/Under, BTTS.
-- **Guardrail for the betting layer:** the current live ledger is three settled
-  picks (−1.13u) — statistically meaningless in either direction. Do **not** tune
-  anything to it. Gate any "edge" conclusion on **positive CLV over a meaningful
-  sample**, not unit profit. State this in the betting-layer docs.
+### 2.3 Backtest harness — fit broad, validate narrow
+
+- Replay historical matches through the model; measure calibration (reliability curve,
+  Brier, log-loss) for W/D/L, Over/Under, BTTS — and, for knockout matches,
+  advance-probability calibration.
+- **Fit broad, validate narrow.** Parameters (ρ, any regime adjustments) are *fit* on
+  the broad competitive set for sample size, but calibration is *reported on the
+  deployment context*: major-tournament matches, and — where stage labels exist (the
+  2.1 data gap) — **group vs knockout reported separately.** A model can be
+  well-calibrated overall yet off on the slice you actually publish.
+- **Guardrail for the betting layer:** the live ledger is three settled picks
+  (−1.13u) — statistically meaningless in either direction. Do **not** tune anything to
+  it. Gate any "edge" conclusion on **positive CLV over a meaningful sample**, not unit
+  profit. State this in the betting-layer docs.
 
 ### 2.4 Host-specific home-field advantage (HFA) that scales with host strength
 
 **Why (well-evidenced).** Current HFA is a single hand-set constant
 (`hfa = 60` Elo-pts) applied to any host at home. The literature says HFA is
 *not* one-size-fits-all:
-- **Host advantage scales with the host's own strength.** Krumer/Utrecht (2025),
-  on FIFA World Cups + continental championships: HA for tournament victory is
-  ~22pp for an average-Elo host, ranging ~9pp (one SD below average) to ~42pp
-  (one SD above). Stronger host ⇒ larger home edge. (This is tournament-victory
-  HA, i.e. compounded — use it for *direction and shape*, not as a per-match
-  number.)
+- **Host advantage scales with the host's own strength.** Kalwij (Utrecht Univ.,
+  *J. Quantitative Analysis in Sports* 2025, DOI 10.1515/jqas-2024-0056), on FIFA
+  World Cups + continental championships: HA for tournament victory is ~22pp for an
+  average-Elo host, ranging ~9pp (one SD below average) to ~42pp (one SD above).
+  Stronger host ⇒ larger home edge. (This is tournament-victory HA, i.e. *compounded*
+  over a multi-match run — use it for *direction and shape* at the advancement level,
+  not as a per-match number; at single-match level the relationship can even reverse.)
+  [corrected 2026-06-13: author is Kalwij, not Krumer — independent review]
 - **Per-match signature is asymmetric.** A WC-2026 model (Economics Observatory,
   June 2026): home advantage reduces goals *conceded* by ~0.2 and increases goals
   *scored* by ~0.1 — the defensive effect is the larger one.
@@ -240,6 +333,30 @@ rather than purely through the symmetric supremacy split, reflecting the
 > rank-corr per `DATA_QUALITY.md`): if added to the consensus, note it shares a
 > parent with the per-match Opta overlay, so using both double-counts Opta.
 > Weight for the overlap; don't blend naively.
+
+### 2.5 Knockout-layer calibration (pairs with the 1.2 mechanism)
+
+The 1.2 mechanism ships with documented defaults (`c = 0.85`, shootout `0.5`). This
+item *calibrates* it — and this is where the "major tournaments, last ~20 years" data
+instinct is actually correct, because the knockout regime **is** the deployment
+context for these parameters (unlike ρ, which is fit broad).
+
+- **Data:** a curated **knockout-match list** for the past ~20 years of WC +
+  continental tournaments (source per the 2.1 data gap — `openfootball` round-coded
+  data, or a compiled list). martj42's results file alone can't supply stage labels.
+- **Fit `c`** (the extra-time scoring discount) against observed extra-time goal rates
+  and the empirical **reach-shootout frequency** (target ≈ the ~32% reach-ET / **~20–25%**
+  reach-shootout marks from WC history). Do not eyeball it.
+- **Shootout stays `0.5`.** Re-confirm against the knockout list if you like, but the
+  prior is strong: shootouts are ≈ a fair lottery. **Do not fit a strength tilt.**
+- **Regulation total:** only consider a small knockout-specific regulation-μ
+  adjustment *if* the backtest (2.3) shows the regulation (pre-ET) scoreline
+  distribution is miscalibrated for knockouts — and remember the ET layer already
+  accounts for the extra-time goals inflating the naive "2.8 vs 2.6" figure, so the
+  regulation adjustment (if any) should be small. Validate; never assume.
+- **Validation:** report advance-probability calibration on held-out knockout matches
+  (reliability curve over P(advance); Brier). This is the "validate narrow" half of
+  2.3 applied to knockouts specifically.
 
 ---
 
@@ -295,7 +412,10 @@ Raise this as an investigation backed by the backtest; change nothing in
   recompute: `afonsofernandescruz / 2026-fifa-world-cup-historical-elo-ratings`
   (Kaggle) publishes pre-tournament and daily-during-tournament snapshots with a
   `snapshot_date` column and is documented as backtest-safe (no future leakage).
-  Validate its team-name canon and as-of date before wiring in.
+  Validate its team-name canon and as-of date before wiring in. **License: CC BY-SA
+  4.0** (attribution + share-alike) — unlike the CC0 martj42 results file — so if any
+  *derived* Elo is redistributed into `docs/`, the attribution/share-alike terms apply.
+  [added 2026-06-13: license caveat the spec omitted — independent review]
 
 ---
 
@@ -316,16 +436,18 @@ Raise this as an investigation backed by the backtest; change nothing in
 
 ## Global acceptance criteria
 
-1. **Behaviour-preserving defaults:** with `rho = 0.0` and a flat 60 host table,
-   `predict_match` reproduces current outputs exactly. Both are regression-tested.
-2. **No invented constants in production:** ρ and any HFA differentiation are
-   activated only from a fitted/fit-against-results value, with fit date and
-   sample size recorded.
+1. **Behaviour-preserving defaults:** with `rho = 0.0`, a flat 60 host table, and the
+   knockout layer gated to knockout fixtures only, `predict_match` reproduces current
+   group-stage outputs exactly. All three are regression-tested.
+2. **No invented constants in production:** ρ, any HFA differentiation, and the
+   knockout `c` are activated only from fitted / fit-against-results values, with fit
+   date and sample size recorded. The shootout term stays a flat `0.5` (no tilt).
 3. **No tuning to the live ledger:** calibration claims are validated on the
-   historical backtest (2.3); betting conclusions require positive CLV over a
+   historical backtest (2.3), with the deployment slice (tournament; group vs
+   knockout) reported separately; betting conclusions require positive CLV over a
    meaningful sample.
-4. **Keep existing tests green** (θ calibration, canon-resolution stop-and-report)
-   and add the ρ tests in 1.1.
+4. **Keep existing tests green** (θ calibration, canon-resolution stop-and-report) and
+   add the ρ tests (1.1) and the knockout-layer tests (1.2).
 
 ---
 
@@ -343,8 +465,9 @@ Raise this as an investigation backed by the backtest; change nothing in
 - Maher (1982) attack/defense Poisson structure — arXiv:1705.09575, arXiv:2508.05891,
   mdpi 2076-3417/14/16/7230.
 - Overdispersion from ability mismatch — JRSS-C 74(3):717 (Oxford Academic, 2025).
-- Host advantage scales with host strength — Krumer / Utrecht Univ. (2025),
-  research-portal.uu.nl: ~22pp average host, 9–42pp by strength.
+- Host advantage scales with host strength — Kalwij, Utrecht Univ., *J. Quantitative
+  Analysis in Sports* (2025), DOI 10.1515/jqas-2024-0056: ~22pp average host, 9–42pp by
+  strength. [corrected: was mis-cited as "Krumer"]
 - Per-match HA signature (−0.2 conceded / +0.1 scored) and WC-2026 context, plus
   endorsement of Elo+att/def hybrid — Economics Observatory (June 2026).
 - Partial-crowd HA still sizable — Scientific Reports s41598-021-00784-8 (2021).
@@ -353,3 +476,13 @@ Raise this as an investigation backed by the backtest; change nothing in
 - Historical corpus — Kaggle `martj42/international-football-results-from-1872-to-present`.
 - Daily Elo snapshots (backtest-safe) — Kaggle
   `afonsofernandescruz/2026-fifa-world-cup-historical-elo-ratings`.
+- Knockout format (no draw; ET two 15-min halves then shootout; 2026 ET from Round of
+  32) — ESPN, FOX Sports, AOL World Cup 2026 rules explainers (June 2026).
+- Knockout frequencies (~32% reach extra time; in the modern era MOST of those reach
+  penalties → ~20–25% reach a shootout, FiveThirtyEight 25.3% over the last five men's
+  WCs). Knockouts are LOWER-scoring per 90' than groups (~2.3–2.5 R16-on vs ~2.7); the
+  "~2.8 knockout" figure is ET-inflated. [corrected: earlier ~13%/~2.8-higher figures
+  were wrong in level and direction — independent review]
+- Penalty shootouts ≈ a fair lottery (stronger team no advantage; no order/venue/
+  momentum effect), 268 UEFA shootouts 2000–2025 — arXiv:2510.17641 (Dec 2025);
+  contested first-mover-advantage literature (Brams, NYU) noted for context.
