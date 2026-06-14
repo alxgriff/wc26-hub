@@ -644,11 +644,12 @@ def render_sweat(info: dict | None, team_a: str, team_b: str) -> str:
         if delta is None:
             return ""
         sign = "+" if delta > 0 else ""
+        fill_cls = "cond-dis-fill cond-dis-hot" if delta >= 5 else "cond-dis-fill"
         return (
             f'<div class="cond-team">'
             f'<span class="cond-tname">{_esc(team)}</span>'
             f'<div class="cond-dis-track" aria-label="Heat disadvantage {dis}/100">'
-            f'<div class="cond-dis-fill" style="width:{dis}%"></div></div>'
+            f'<div class="{fill_cls}" style="width:{dis}%"></div></div>'
             f'<span class="cond-delta">{sign}{delta:.1f}°C vs home</span>'
             f'</div>'
         )
