@@ -78,7 +78,6 @@ def load_annex_c(path: Path = ANNEX_C) -> dict[tuple[str, ...], dict[int, str]]:
     out: dict[tuple[str, ...], dict[int, str]] = {}
     with path.open(encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
-        slot_cols = [c for c in (reader.fieldnames or []) if c != "combo"]
         for row in reader:
             combo = tuple(sorted(row["combo"]))
             assign = {m: row[THIRD_MATCH_WINNER[m]] for m in THIRD_HOSTING}
@@ -145,12 +144,6 @@ def project(standings: "st.Standings", annex: dict | None = None) -> dict:
             prov = (row.played < st.GAMES_PER_TEAM) if row else True
             return team, f"3rd {g}", prov
         return None, "Best 3rd of " + "/".join(pool), True
-
-    def resolve(slot):
-        kind = slot[0]
-        if kind == "3RD":
-            return None  # filled by third_slot at the match level
-        return team_or_label(kind, slot[1])
 
     r32 = {}
     for m, (a, b) in R32_TEMPLATE.items():
