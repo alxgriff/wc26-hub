@@ -114,7 +114,9 @@ predictions → odds snapshot → evaluate + record picks → Sonnet stakes blur
 optional UNVERIFIED news digest (`fetch_news.py`, gated on the
 `ENABLE_NEWS_DIGEST` repo variable or a dispatch input; writes news/, never
 auto-publishes) → tests (hard gate) → site + edition build → push (= deploy).
-`closing-odds.yml` (11:30 AM + 6:30 PM ET) logs closing lines for CLV.
+`closing-odds.yml` (11:30 AM / 6:30 / 8:30 / 11:30 PM ET) logs closing lines for
+CLV and, from the evening runs on, also enters results + settles + rebuilds so
+scores and the record update same-day (the 7 AM build is the late-cap backstop).
 Secrets required: `ODDS_API_KEY`, `ANTHROPIC_API_KEY`.
 
 The news digest (enabled June 12 via the ENABLE_NEWS_DIGEST variable) is
