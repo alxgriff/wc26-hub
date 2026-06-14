@@ -1208,13 +1208,17 @@ def render_record_bets(rows: list[dict], root: str = "",
         status = p.get("status") or "open"
         units_cell = p.get("units") or ("—" if status == "open" else "")
         clv_cell = f'{p["clv_pp"]}pp' if p.get("clv_pp") else "—"
+        try:
+            odds_cell = f'<td title="{float(p["odds"]):.2f} decimal">{_american_odds(float(p["odds"]))}</td>'
+        except (ValueError, KeyError):
+            odds_cell = f'<td>{_esc(str(p.get("odds", "")))}</td>'
         body.append(
             f'      <tr>\n'
             f'        <td class="lbl">{_esc(when)}</td>\n'
             f'        <td class="lbl"><a href="{root}matches/{_esc(mid)}.html">'
             f'{_esc(a)} v {_esc(b)}</a></td>\n'
             f'        <td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}</td>\n'
-            f'        <td>{_esc(p["odds"])}</td>\n'
+            f'        {odds_cell}\n'
             f'        <td class="lbl">{_esc(p.get("book") or "")}</td>\n'
             f'        <td>{_esc(p.get("edge_pp") or "")}pp</td>\n'
             f'        <td class="lbl status-{_esc(status)}">{_esc(status)}</td>\n'

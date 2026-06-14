@@ -396,13 +396,14 @@ class TotalsLadderTests(unittest.TestCase):
         self.assertEqual(flags, [])
 
     def test_best_bets_empty_below_record_bar_and_best_bet_compat(self):
-        ev = {"h2h": [("away", "", 3.85, 0.25, 0.29, 0.04)],
+        # 3.5pp: under the 4pp record bar (June 14) but over the 3pp display threshold
+        ev = {"h2h": [("away", "", 3.85, 0.25, 0.285, 0.035)],
               "totals": [], "spreads": [], "btts": [], "missing": []}
         picks, _ = od.best_bets(ev)
         self.assertEqual(picks, [])
         pick, _ = od.best_bet(ev)            # display threshold still 3%
         self.assertIsNotNone(pick)
-        self.assertEqual(pick["edge"], 0.04)
+        self.assertEqual(pick["edge"], 0.035)
 
     def test_multi_pick_callout_with_correlation_note(self):
         info = {"evaluation": {"h2h": [("away", "", 3.85, 0.25, 0.36, 0.11)],

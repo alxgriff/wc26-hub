@@ -496,7 +496,11 @@ def evaluate_match(match_id: str, odds_rows: list, ledger_rows: list,
     return out
 
 
-RECORD_THRESHOLD = 0.05    # picks must clear a higher bar than table display
+RECORD_THRESHOLD = 0.04    # picks must clear a higher bar than table display.
+                           # Lowered 0.05->0.04 (user, June 14) to gather more model-
+                           # performance data once the Maher fix left the model well-
+                           # calibrated — a measured experiment: watch the [4,5)pp band's
+                           # CLV and revert if it's negative. Still ~4x the de-vig noise.
 MAX_PICKS_PER_MATCH = 3    # top edges across DISTINCT markets
 
 

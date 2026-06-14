@@ -98,7 +98,10 @@ specifies weights. Probabilities must sum to 1.0 ± 0.001 per match.
   method; power or Shin method optional upgrade later).
 - Edge_i = model_p_i − implied_i. Display threshold 3 percentage points;
   **recorded picks**: up to 3 per match, the best selection per distinct
-  market, each clearing a 5-point recording bar (user-set June 12) and a sanity
+  market, each clearing a **4-point recording bar** (user-set June 12 at 5pp,
+  lowered to 4pp June 14 to gather more model-performance data once the Maher
+  totals fix left the model well-calibrated — a measured experiment, revert if
+  the [4,5)pp band shows negative CLV) and a sanity
   ceiling. The sanity ceiling is **market-aware** (user-set June 14): 1X2 is
   checked against the published consensus, so it keeps the 15-point ceiling;
   totals/spreads/BTTS are model-priced from the same score matrix that makes the
