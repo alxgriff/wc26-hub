@@ -493,6 +493,185 @@ def load_odds_engine():
     return call, od.units_summary(picks), None
 
 
+# ---------------------------------------------------------------- the conditions (sweat factor)
+
+def load_weather_engine():
+    """Defensive adapter around weather.py (Phase 7). Returns (callable, None) or
+    (None, reason). The callable maps a fixtures row → enriched info dict or None.
+    Never breaks the build: any failure returns (None, reason)."""
+    log_path = REPO_ROOT / "data" / "weather_log.csv"
+    climate_path = REPO_ROOT / "data" / "team_climate.csv"
+    try:
+        import weather as wx
+        if not log_path.exists():
+            return None, "weather_log.csv not found — run weather.py --date first"
+        baselines = wx.load_team_climate(climate_path)
+    except Exception as e:
+        return None, f"weather engine unavailable ({e.__class__.__name__}: {e})"
+
+    def call(row: dict) -> dict | None:
+        try:
+            mid = row["match_id"]
+            wx_row = wx.to_dict(mid, log_path)
+            if wx_row is None:
+                return None
+            a, b = row["team_a"].strip(), row["team_b"].strip()
+            cc = str(wx_row.get("climate_controlled", "")).strip().lower() == "true"
+            result: dict = {
+                "temp_c": wx_row.get("temp_c", ""),
+                "rh_pct": wx_row.get("rh_pct", ""),
+                "wbgt_est": wx_row.get("wbgt_est", ""),
+                "climate_controlled": cc,
+                "as_of": wx_row.get("as_of", ""),
+                "source": wx_row.get("source", "forecast"),
+                "dis_a": None, "delta_a": None,
+                "dis_b": None, "delta_b": None,
+                "mhi": None, "sf": None, "severity": None,
+                "hum_desc": "",
+            }
+            if not cc:
+                wbgt = float(wx_row["wbgt_est"])
+                mhi_v, _, _ = wx.sweat_components(wbgt, wbgt)  # mhi only, delta=0
+                result["mhi"] = round(mhi_v)
+                result["hum_desc"] = wx._humidity_desc(float(wx_row["rh_pct"]))
+                for team, key in ((a, "a"), (b, "b")):
+                    bl = baselines.get(team)
+                    if bl and bl.baseline_wbgt is not None:
+                        mhi_v2, delta, dis = wx.sweat_components(wbgt, bl.baseline_wbgt)
+                        result[f"dis_{key}"] = round(dis)
+                        result[f"delta_{key}"] = delta
+                max_dis = max(
+                    result["dis_a"] if result["dis_a"] is not None else 0,
+                    result["dis_b"] if result["dis_b"] is not None else 0,
+                )
+                result["sf"] = wx.sweat_factor(mhi_v, max_dis)
+                result["severity"] = wx.severity_label(result["sf"])
+            return result
+        except Exception:
+            return None
+
+    return call, None
+
+
+def _sweat_blurb(info: dict, team_a: str, team_b: str) -> str:
+    """One factual sentence interpreting the sweat factor for this match."""
+    sf = info.get("sf") or 0
+    wbgt = float(info.get("wbgt_est") or 0)
+    dis_a = info.get("dis_a") or 0
+    delta_a = info.get("delta_a")
+    dis_b = info.get("dis_b") or 0
+    delta_b = info.get("delta_b")
+
+    # Identify which team has more/less disadvantage
+    if delta_a is not None and delta_b is not None:
+        if dis_a >= dis_b:
+            harder, easier = team_a, team_b
+            hard_dis, easy_dis = dis_a, dis_b
+            hard_delta, easy_delta = delta_a, delta_b
+        else:
+            harder, easier = team_b, team_a
+            hard_dis, easy_dis = dis_b, dis_a
+            hard_delta, easy_delta = delta_b, delta_a
+        mismatch = (hard_dis - easy_dis) >= 20
+    else:
+        harder = easier = None
+        hard_dis = easy_dis = 0
+        hard_delta = easy_delta = None
+        mismatch = False
+
+    def _sign(d: float) -> str:
+        return f"+{round(d)}" if d > 0 else str(round(d))
+
+    if sf < 25:
+        if mismatch and harder and hard_delta is not None:
+            return (f"{harder} step into conditions {_sign(hard_delta)}°C from their home baseline, "
+                    f"but the overall heat is low — unlikely to matter much.")
+        return "Comfortable conditions — heat is a non-factor for both sides."
+
+    if sf < 50:
+        if mismatch and harder and hard_delta is not None:
+            adapted = f"{easier} are the better-acclimated side" if (easy_delta or 0) < 3 else f"{easier} face a smaller adjustment"
+            return (f"Warm out; {harder} are {_sign(hard_delta)}°C outside their comfort zone "
+                    f"while {adapted}.")
+        return f"Warm conditions ({wbgt:.0f}°C WBGT) — a moderate physical test for both squads."
+
+    if sf < 75:
+        if mismatch and harder and hard_delta is not None:
+            if (easy_delta or 0) <= 0:
+                return (f"Hot match-up, and a real edge for {easier}: "
+                        f"{harder} are {_sign(hard_delta)}°C above their home climate "
+                        f"while {easier} are well-adapted to this heat.")
+            return (f"Significant heat; {harder} face the steeper climb "
+                    f"({_sign(hard_delta)}°C vs home) compared to {easier}.")
+        return f"Hot conditions ({wbgt:.0f}°C WBGT) — both sides will feel the physical load."
+
+    # Severe
+    if mismatch and harder and hard_delta is not None:
+        if (easy_delta or 0) <= 0:
+            return (f"Brutal heat — and {easier} hold a major acclimatization edge: "
+                    f"{harder} are {_sign(hard_delta)}°C above their home baseline "
+                    f"while {easier} are stepping into their climate.")
+        return (f"Severe heat, and {harder} carry the bigger burden: "
+                f"{_sign(hard_delta)}°C above their home baseline vs "
+                f"{_sign(easy_delta)}°C for {easier}.")
+    return f"Severe conditions ({wbgt:.0f}°C WBGT) — this is a demanding physical environment for both teams."
+
+
+def render_sweat(info: dict | None, team_a: str, team_b: str) -> str:
+    """Sweat Factor block. Placeholder when info is None."""
+    if info is None:
+        return (
+            '<div class="placeholder-slot">Sweat Factor forecast pending — this match is not '
+            'yet within the 16-day Open-Meteo forecast window. The section fills automatically '
+            'once available; no data is invented.</div>'
+        )
+    if info.get("climate_controlled"):
+        return '<p class="cond-ac">Indoors — climate-controlled. Heat not a factor.</p>'
+
+    temp = _esc(f"~{float(info['temp_c']):.0f}")
+    rh = _esc(f"{float(info['rh_pct']):.0f}")
+    wbgt = _esc(f"{float(info['wbgt_est']):.1f}")
+    hum = _esc(info.get("hum_desc") or "")
+    source = (info.get("source") or "forecast").capitalize()
+    as_of = _esc(info.get("as_of") or "")
+    stamp = f"{source} · as of {as_of}" if as_of else source
+    severity = _esc(info.get("severity") or "")
+    sev_cls = (info.get("severity") or "mild").lower()
+    mhi = info.get("mhi") or 0
+    blurb = _esc(_sweat_blurb(info, team_a, team_b))
+
+    def team_row(team: str, dis, delta) -> str:
+        if delta is None:
+            return ""
+        sign = "+" if delta > 0 else ""
+        fill_cls = "cond-dis-fill cond-dis-hot" if delta >= 5 else "cond-dis-fill"
+        return (
+            f'<div class="cond-team">'
+            f'<span class="cond-tname">{_esc(team)}</span>'
+            f'<div class="cond-dis-track" aria-label="Heat disadvantage {dis}/100">'
+            f'<div class="{fill_cls}" style="width:{dis}%"></div></div>'
+            f'<span class="cond-delta">{sign}{delta:.1f}°C vs home</span>'
+            f'</div>'
+        )
+
+    teams_html = "".join(filter(None, [
+        team_row(team_a, info.get("dis_a", 0) or 0, info.get("delta_a")),
+        team_row(team_b, info.get("dis_b", 0) or 0, info.get("delta_b")),
+    ]))
+
+    return (
+        f'<div class="conditions">\n'
+        f'  <span class="cond-stamp">{stamp}</span>\n'
+        f'  <p class="cond-stats">{temp}°C · {hum} ({rh}% RH) · WBGT {wbgt}</p>\n'
+        f'  <div class="cond-track" aria-label="Match heat index: {severity} ({mhi}/100)">'
+        f'<div class="cond-fill" style="width:{mhi}%"></div></div>\n'
+        f'  <p class="cond-sev cond-sev-{_esc(sev_cls)}">{severity}</p>\n'
+        f'  <p class="cond-blurb">{blurb}</p>\n'
+        + (f'  <div class="cond-teams">{teams_html}</div>\n' if teams_html else "")
+        + '</div>'
+    )
+
+
 _MARKET_LABELS = {"h2h": "1X2", "totals": "Total goals", "spreads": "Asian handicap",
                   "btts": "Both teams to score"}
 
@@ -1108,6 +1287,7 @@ def render_match_page(row: dict, s: "st.Standings",
                       odds_info: dict | None = None,
                       scenario_html: str = "",
                       wire_html: str = "",
+                      sweat_info: dict | None = None,
                       kicked_off: bool = False) -> str:
     mid, g = row["match_id"].strip(), row["group"].strip()
     team_a, team_b = row["team_a"].strip(), row["team_b"].strip()
@@ -1174,6 +1354,7 @@ def render_match_page(row: dict, s: "st.Standings",
         stakes_sentence=_esc(stakes),
         scenario_html=scenario_html,
         mini_table_html=mini,
+        sweat_html=render_sweat(sweat_info, team_a, team_b),
         card_html=render_card_sections(sections),
         wire_html=wire_html,
         odds_html=render_market(odds_info, team_a, team_b, odds_note, played=played),
@@ -1347,7 +1528,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                predictions_log: Path | None = None,
                picks_log: Path | None = None,
                now=None,
-               predictor="auto", odds_engine="auto") -> list[str]:
+               predictor="auto", odds_engine="auto",
+               weather_engine="auto") -> list[str]:
     """Render the whole site (index + team cards + match previews + data.json)
     into out_dir. Returns warnings. ``predictor`` and ``odds_engine`` are
     "auto" (load the real modules defensively), None (placeholder state), or
@@ -1393,6 +1575,13 @@ def build_site(out_dir: Path, target: date, generated_at: str,
             warnings.append(f"Odds sections render as placeholder: {odds_why}")
     else:
         odds_call, ledger_line = odds_engine, None
+
+    if weather_engine == "auto":
+        wx_call, wx_why = load_weather_engine()
+        if wx_why:
+            warnings.append(f"Conditions sections render as placeholder: {wx_why}")
+    else:
+        wx_call = weather_engine
 
     profiles, kb_warnings = sc.parse_kb(kb_path)
     warnings.extend(f"kb: {w}" for w in kb_warnings)
@@ -1485,6 +1674,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
             info = _safe_predict(predictor, row, warnings)
             predictions += info is not None
         odds_info = odds_call(row) if odds_call else None
+        sweat_info = wx_call(row) if wx_call else None
         scenario_html = ""
         if int(row["match_id"][1]) >= 5 and row["group"] in md3_reports:
             scenario_html = render_scenario_block(
@@ -1493,6 +1683,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                                  template_dir, warnings, odds_info=odds_info,
                                  scenario_html=scenario_html,
                                  wire_html=render_wire(wire.get(row["match_id"])),
+                                 sweat_info=sweat_info,
                                  kicked_off=kicked_off)
         (out_dir / "matches" / f"{row['match_id']}.html").write_text(
             page, encoding="utf-8")

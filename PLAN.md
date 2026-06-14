@@ -133,7 +133,35 @@ edition before trusting it. The checklist below remains the manual fallback.
 6. `git add -A; git commit -m "Edition YYYY-MM-DD"`.
 7. June 20 only: re-verify the F4 Tunisia–Japan kickoff first.
 
+## Phase 7 — Sweat Factor (weather-driven heat index) ✅ Shipped June 2026
+
+**Goal:** Per-match heat conditions + per-team climate disadvantage index, surfaced on
+match pages and in daily editions. Built on estimated WBGT (the actual tournament metric).
+Display-only feature — not an input to predict.py.
+
+**New files:**
+- `data/venues.csv` — 16 stadiums with lat/lon, roof type, and AC flag (static)
+- `data/team_climate.csv` — 48 teams with capital-city lat/lon + baseline WBGT (static)
+- `data/weather_log.csv` — append/upsert log, keyed (match_id, source) (updated daily)
+- `scripts/weather.py` — pure functions + network layer + CLI (51 tests)
+- `tests/test_weather.py` — 51 tests, no network (injectable opener)
+
+**Automation:** `weather.py --date` runs before the build in `daily-build.yml`
+(step before tests; `continue-on-error`). `--backfill` writes actual rows for played matches.
+
+**WBGT formula:** BOM shade approximation (temp + humidity; solar term deferred to v2).
+AC venues (AT&T, Mercedes-Benz, NRG) clamp to 21.0°C. Canopy (Hard Rock, SoFi) = open.
+
+**Open questions to sign off before first publication:**
+- CONFIG weights (w_mhi=0.5, w_dis=0.5) and normalization bounds (mhi 18–32, dis 0–10°C)
+- baseline_wbgt values: run `python scripts/weather.py --baselines` to replace estimates
+  with Open-Meteo historical archive values and commit the updated team_climate.csv
+
+**Attribution:** "Weather by Open-Meteo (CC BY 4.0)." — added to match page footers.
+
+---
+
 ## Suggested model split
 
-- **Smaller model handles fine:** daily ops, Phase 1 (precisely specced above), Phase 2, Phase 5 mechanics, Phase 6.
+- **Smaller model handles fine:** daily ops, Phase 1 (precisely specced above), Phase 2, Phase 5 mechanics, Phase 6, Phase 7.
 - **Ask for a stronger pass on:** Phase 3 (scenarios tiebreak/margin logic) before June 24, and the Phase 4 Poisson mapping when ratings arrive. Everything else here is deliberately mechanical.

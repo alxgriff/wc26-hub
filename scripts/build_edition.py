@@ -493,7 +493,8 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
                   calls: "dict[str, str] | None" = None,
                   graded: dict | None = None,
                   cumulative: str | None = None,
-                  odds_bodies: "dict[str, str] | None" = None) -> tuple[str, list[str]]:
+                  odds_bodies: "dict[str, str] | None" = None,
+                  conditions: "dict[str, str] | None" = None) -> tuple[str, list[str]]:
     """Render the full edition markdown for ``target``. Returns
     ``(markdown, warnings)``; warnings are data-integrity notes for stderr.
 
@@ -506,6 +507,7 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
     warnings: list[str] = []
     calls = calls or {}
     odds_bodies = odds_bodies or {}
+    conditions = conditions or {}
 
     # key on the raw kickoff, not _late_cap (which is now gated to the sanctioned
     # ids) — this is exactly how a stray 00:00 fixture surfaces for review
@@ -546,7 +548,10 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
     parts.append("## Today's slate")
     parts.append("")
     if today:
-        parts.extend(_slate_line(r) for r in today)
+        for r in today:
+            parts.append(_slate_line(r))
+            cond = conditions.get(r["match_id"])
+            parts.append(f"  {cond}" if cond else "  Conditions: forecast pending.")
     else:
         parts.append("_No matches today._")
     parts.append("")
@@ -752,10 +757,29 @@ def main(argv: list[str] | None = None) -> int:
         print(f"warning: odds evaluation unavailable ({e}) — Odds & Best Bet "
               "slots left in placeholder state", file=sys.stderr)
 
+    # Weather conditions (Phase 7): read from log only — no network at build time.
+    conditions: dict[str, str] = {}
+    try:
+        import weather as wx
+        wx_log = REPO_ROOT / "data" / "weather_log.csv"
+        wx_climate = REPO_ROOT / "data" / "team_climate.csv"
+        if wx_log.exists() and wx_climate.exists():
+            baselines = wx.load_team_climate(wx_climate)
+            for r in select_matches(rows, target):
+                wx_row = wx.to_dict(r["match_id"], wx_log)
+                if wx_row:
+                    conditions[r["match_id"]] = wx.render_edition_line(
+                        r["team_a"].strip(), r["team_b"].strip(), wx_row, baselines
+                    )
+    except Exception as e:
+        print(f"warning: weather conditions unavailable ({e}) — slate lines show "
+              "'forecast pending'", file=sys.stderr)
+
     edition, warnings = build_edition(target, rows, standings, args.cards_dir,
                                       matches=matches, calls=calls,
                                       graded=graded, cumulative=cumulative,
-                                      odds_bodies=odds_bodies)
+                                      odds_bodies=odds_bodies,
+                                      conditions=conditions)
     for w in warnings:
         print(f"warning: {w}", file=sys.stderr)
 

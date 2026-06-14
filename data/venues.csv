@@ -1,0 +1,17 @@
+stadium,city,lat,lon,roof,air_conditioned
+Estadio Azteca,Mexico City,19.303,-99.150,open,false
+Estadio Akron,Guadalajara,20.682,-103.463,open,false
+Estadio BBVA,Monterrey,25.669,-100.244,open,false
+AT&T Stadium,Arlington,32.747,-97.094,retractable,true
+Arrowhead Stadium,Kansas City,39.049,-94.484,open,false
+BC Place,Vancouver,49.277,-123.112,retractable,false
+BMO Field,Toronto,43.633,-79.419,open,false
+Gillette Stadium,Foxborough,42.091,-71.264,open,false
+Hard Rock Stadium,Miami Gardens,25.958,-80.239,canopy,false
+Levi's Stadium,Santa Clara,37.403,-121.970,open,false
+Lincoln Financial Field,Philadelphia,39.901,-75.167,open,false
+Lumen Field,Seattle,47.595,-122.332,open,false
+Mercedes-Benz Stadium,Atlanta,33.755,-84.401,retractable,true
+MetLife Stadium,East Rutherford,40.814,-74.074,open,false
+NRG Stadium,Houston,29.685,-95.411,retractable,true
+SoFi Stadium,Inglewood,33.954,-118.339,canopy,false
