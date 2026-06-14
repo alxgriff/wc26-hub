@@ -42,6 +42,10 @@ $site_css
       <span class="tag">The Bets · Units &amp; CLV</span>
       <p>Paper picks recorded only when our probability beats the market <strong>price</strong> — scored in units (flat 1u) and closing-line value. A pick can lose while the call was right: we may rate the favorite to win yet bet the other side because the book underpriced it. D1 is the case in point — we called the USA, who won, but Paraguay was the value bet.</p>
     </div>
+    <div class="callout">
+      <span class="tag">The Shadow Book · risky calls</span>
+      <p>The calls where our model and the market <strong>severely disagree</strong> — the edge is so large it's usually our error (a ratings quirk), occasionally a real overlay. <strong>Too risky to stake</strong>, so we track them on paper to learn who's right. Hypothetical units only, kept out of the units record above.</p>
+    </div>
   </div>
 </section>
 
@@ -63,6 +67,15 @@ $calls_html
 $bets_html
 </section>
 
+<section id="shadow" aria-labelledby="shadow-h">
+  <div class="sec-head">
+    <span class="kicker">Risky · model vs market</span>
+    <h2 id="shadow-h">The Shadow Book</h2>
+  </div>
+  <p class="standfirst">$shadow_line</p>
+$shadow_html
+</section>
+
 </main>
 
 <footer>
@@ -71,6 +84,8 @@ $bets_html
     pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
     at fresh prices, revisions explicit, settled rows immutable) · Brier: 0 best ·
     0.667 coin-flip · 2 worst · CLV = closing implied minus our implied at record ·
+    shadow book from data/shadow_picks_log.csv (severe model–market disagreements,
+    too risky to bet, paper-only, excluded from the units record) ·
     <a href="index.html">all standings</a> · <a href="$repo_url">source &amp; data</a>
   </p>
 </footer>

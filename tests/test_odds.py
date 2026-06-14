@@ -688,6 +688,60 @@ class ModelPricedSanityTests(unittest.TestCase):
         self.assertTrue(any("uncorroborated" in f for f in flags))
 
 
+class ShadowTrackTests(unittest.TestCase):
+    """The shadow ledger: the model's sanity-suppressed convictions, tracked-never-bet."""
+
+    def _ev(self, h2h_edge, totals_edge):
+        return {"h2h": [("away", "", 2.5, 0.40, 0.40 + h2h_edge, h2h_edge)],
+                "totals": [("over", "2.5", 1.9, 0.50, 0.50 + totals_edge, totals_edge)],
+                "spreads": [], "btts": [], "missing": []}
+
+    def test_flagged_bets_captures_suppressed_only(self):
+        # h2h 20pp > 15pp ceiling AND totals 12pp > 8pp ceiling -> both suppressed
+        ev = self._ev(0.20, 0.12)
+        self.assertEqual({p["market"] for p in od.flagged_bets(ev)}, {"h2h", "totals"})
+        self.assertEqual(od.best_bets(ev)[0], [])          # best_bets records NEITHER
+
+    def test_flagged_bets_excludes_recordable_edges(self):
+        # totals 6pp is a recordable pick (< 8pp cap), so NOT in the shadow set
+        ev = self._ev(0.20, 0.06)
+        self.assertEqual({p["market"] for p in od.flagged_bets(ev)}, {"h2h"})
+        self.assertEqual([p["market"] for p in od.best_bets(ev)[0]], ["totals"])
+
+    def test_record_pick_logs_zero_stake(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "shadow.csv"
+            pick = {"market": "h2h", "selection": "away", "line": "", "odds": 2.5,
+                    "implied_p": 0.37, "our_p": 0.58, "edge": 0.21}
+            od.record_pick("E2", pick, (2.55, "fanduel"), NOW, False,
+                           picks_path=path, stake="0")
+            self.assertEqual(od.load_picks(path)[0]["stake"], "0")
+
+    def test_shadow_summary_slices_and_marks_hypothetical(self):
+        picks = [{"market": "h2h", "status": "lost", "units": "-1.00"},
+                 {"market": "totals", "status": "won", "units": "+0.90"}]
+        s = od.shadow_summary(picks)
+        self.assertIn("not staked", s)
+        self.assertIn("1X2 0W-1L", s)
+        self.assertIn("model-priced 1W-0L", s)
+
+    def test_render_record_shadow_walls_off_and_frames(self):
+        import build_site as bs
+        rows = [{"match_id": "E2", "team_a": "Côte d'Ivoire", "team_b": "Ecuador",
+                 "_editorial": None}]
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "shadow.csv"
+            pick = {"market": "h2h", "selection": "away", "line": "", "odds": 2.5,
+                    "implied_p": 0.37, "our_p": 0.58, "edge": 0.21}
+            od.record_pick("E2", pick, (2.55, "fanduel"), NOW, False,
+                           picks_path=path, stake="0")
+            html, summary = bs.render_record_shadow(rows, shadow_log=path)
+        self.assertIn("Ecuador", html)
+        self.assertIn("risky", html.lower())              # reframed: severe disagreement
+        self.assertIn("paper", html.lower())              # honesty guardrail kept
+        self.assertIn("awaiting", summary.lower())        # the open conviction
+
+
 class AmericanOddsTests(unittest.TestCase):
     """Decimal -> American moneyline display (odds.american_odds)."""
 

@@ -74,6 +74,12 @@ import predict as pr        # noqa: E402  (totals model, name canon)
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ODDS_LOG = REPO_ROOT / "data" / "odds_log.csv"
 PICKS_LOG = REPO_ROOT / "data" / "picks_log.csv"
+SHADOW_PICKS_LOG = REPO_ROOT / "data" / "shadow_picks_log.csv"   # RISKY calls — a
+                            # SEVERE model<->market disagreement (edge above the sanity
+                            # ceiling). Tracked + settled like real picks at stake 0
+                            # (paper, too risky to bet) to learn whether the model's
+                            # strong convictions land. Kept strictly OUT of the
+                            # accountable units/CLV record (units_summary).
 KEY_FILE = REPO_ROOT / "data" / ".odds_api_key"
 API_BASE = "https://api.the-odds-api.com/v4"
 SPORT_KEY = "soccer_fifa_world_cup"
@@ -548,11 +554,32 @@ def best_bet(evaluation: dict, threshold: float = EDGE_THRESHOLD,
     return (picks[0] if picks else None), flags
 
 
+def flagged_bets(evaluation: dict, sanity: float = SANITY_EDGE,
+                 model_sanity: float = MODEL_PRICED_SANITY,
+                 limit: int = MAX_PICKS_PER_MATCH) -> list:
+    """The model's extreme convictions the sanity ceiling SUPPRESSES — the best
+    selection per market whose edge is AT/ABOVE the ceiling (the ones best_bets turns
+    into flags, never picks). Returned as pick dicts for the SHADOW ledger: tracked and
+    settled like real picks but never bet, so we can learn whether the model's
+    over-confident calls actually win without staking the blind spot."""
+    per_market: dict = {}
+    for market in ("h2h", "totals", "spreads", "btts"):
+        ceiling = _market_sanity(market, sanity, model_sanity)
+        for sel, line, odds, implied, our_p, edge in evaluation.get(market, []):
+            if edge >= ceiling:
+                cand = {"market": market, "selection": sel, "line": line,
+                        "odds": odds, "implied_p": implied, "our_p": our_p, "edge": edge}
+                cur = per_market.get(market)
+                if cur is None or cand["edge"] > cur["edge"]:
+                    per_market[market] = cand
+    return sorted(per_market.values(), key=lambda c: -c["edge"])[:limit]
+
+
 # ---------------------------------------------------------------- picks ledger
 
 def record_pick(match_id: str, pick: dict, best_price: tuple, now: datetime,
                 kickoff_passed: bool, picks_path: Path = PICKS_LOG,
-                allow_revise: bool = False) -> str:
+                allow_revise: bool = False, stake: str = "1") -> str:
     """Append/refresh the pick for (match_id, market). Best_price = (odds, book)
     actually loggable; refuses post-kickoff and never touches settled rows.
 
@@ -571,7 +598,7 @@ def record_pick(match_id: str, pick: dict, best_price: tuple, now: datetime,
     row = {"match_id": match_id, "market": pick["market"], "selection": pick["selection"],
            "line": _fmt_line(pick["line"]), "odds": f"{odds:.2f}", "book": book,
            "edge_pp": f"{pick['edge'] * 100:.1f}", "our_p": f"{pick['our_p']:.4f}",
-           "implied_p": f"{pick['implied_p']:.4f}", "stake": "1",
+           "implied_p": f"{pick['implied_p']:.4f}", "stake": stake,
            "timestamp": now.isoformat(timespec="seconds"),
            "status": "open", "units": "", "clv_pp": ""}
     if existing:
@@ -713,6 +740,36 @@ def units_summary(picks: list) -> str | None:
     if clvs:
         out += f"; avg CLV {statistics.mean(clvs):+.1f}pp over {len(clvs)} closing line(s)"
     return out
+
+
+def load_shadow_picks(path: Path = SHADOW_PICKS_LOG) -> list:
+    return load_picks(path)
+
+
+def _wlu(ps: list) -> tuple:
+    """(n, wins, losses, hypothetical units) for a settled-pick subset."""
+    w = sum(1 for p in ps if p["status"] in ("won", "half-won"))
+    l = sum(1 for p in ps if p["status"] in ("lost", "half-lost"))
+    u = sum(float(p["units"]) for p in ps if p["units"])
+    return len(ps), w, l, u
+
+
+def shadow_summary(picks: list) -> str | None:
+    """One line on the SHADOW track — the RISKY calls (severe model<->market
+    disagreement): hit rate + HYPOTHETICAL flat-1u units, sliced 1X2 (ratings calls) vs
+    model-priced. On paper, not staked — the figure says only whether these convictions
+    land (would they have won), never that we bet them."""
+    settled = [p for p in picks if p["status"] not in ("", "open")]
+    if not settled:
+        return None
+    n, w, l, u = _wlu(settled)
+    parts = [f"{n} settled, {w}W-{l}L, {u:+.2f}u paper (flat 1u, not staked)"]
+    for label, ms in (("1X2", ("h2h",)), ("model-priced", ("totals", "spreads", "btts"))):
+        sub = [p for p in settled if p["market"] in ms]
+        if sub:
+            sn, sw, sl, su = _wlu(sub)
+            parts.append(f"{label} {sw}W-{sl}L {su:+.2f}u")
+    return "; ".join(parts)
 
 
 # ---------------------------------------------------------------- rendering
@@ -1031,6 +1088,21 @@ def cmd_evaluate(target: date, fixtures: Path, threshold: float,
                                              allow_revise=revise))
                 except OddsError as e:
                     print(f"→ NOT recorded: {e}")
+        # SHADOW track: the risky calls (severe model-vs-market gap), logged on paper
+        # (too risky to bet) so we can later learn whether they land. Same freshness gate.
+        for fp in flagged_bets(ev) if record else []:
+            passed = now >= lg.kickoff_dt(fr)
+            age = _snapshot_age_hours(odds_rows, mid, now, market=fp["market"])
+            if age is None or age > max_snapshot_age:
+                continue
+            price = bp.get((fp["market"], fp["selection"], str(fp["line"])),
+                           (fp["odds"], "median"))
+            try:
+                print("→ [shadow] " + record_pick(mid, fp, price, now, passed,
+                                                  picks_path=SHADOW_PICKS_LOG,
+                                                  allow_revise=revise, stake="0"))
+            except OddsError:
+                pass   # already logged / post-kickoff: the first conviction stands
         if picks and (day_best is None or picks[0]["edge"] > day_best[1]["edge"]):
             day_best = (mid, picks[0])
     if day_best:
@@ -1201,12 +1273,20 @@ def main(argv: list | None = None) -> int:
         fixtures_rows = be.read_rows(REPO_ROOT / "data" / "fixtures.csv")
         for line in settle_picks(matches, load_odds(), fixtures_rows=fixtures_rows):
             print(line)
-        summary = units_summary(load_picks())
-        print(summary or "no settled picks yet")
+        # the shadow ledger settles the same way but stays OUT of the units record
+        for line in settle_picks(matches, load_odds(), picks_path=SHADOW_PICKS_LOG,
+                                 fixtures_rows=fixtures_rows):
+            print(f"[shadow] {line}")
+        print(units_summary(load_picks()) or "no settled picks yet")
+        sh = shadow_summary(load_shadow_picks())
+        if sh:
+            print("SHADOW (risky calls — model vs market, paper-only) — " + sh)
         return 0
 
-    summary = units_summary(load_picks())
-    print(summary or "no settled picks yet")
+    print(units_summary(load_picks()) or "no settled picks yet")
+    sh = shadow_summary(load_shadow_picks())
+    if sh:
+        print("SHADOW (tracked, never bet) — " + sh)
     return 0
 
 

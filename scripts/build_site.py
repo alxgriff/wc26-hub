@@ -1234,6 +1234,70 @@ def render_record_bets(rows: list[dict], root: str = "",
     return table, units_line
 
 
+def render_record_shadow(rows: list[dict], root: str = "",
+                         shadow_log: Path | None = None) -> tuple[str, str]:
+    """(shadow_table_html, summary_line) for the record page's Shadow Book — the RISKY
+    calls where the model and market severely disagree (edges above the sanity ceiling).
+    Tracked but too risky to stake; walled off from the units/CLV record; the units
+    shown are HYPOTHETICAL flat-1u, on paper, never staked."""
+    try:
+        import odds as od
+        picks = od.load_shadow_picks(shadow_log) if shadow_log else od.load_shadow_picks()
+        summary = od.shadow_summary(picks)
+    except Exception:
+        return "", "Shadow book unavailable."
+    if not picks:
+        return ('<p class="standfirst">Nothing in the shadow book yet — it fills as the '
+                'model flags edges above the sanity ceiling (the risky calls where model '
+                'and market severely disagree).</p>',
+                "Nothing tracked yet — the first risky call lands here.")
+    teams = {r["match_id"]: (r["team_a"], r["team_b"]) for r in rows}
+    editorial = {r["match_id"]: r.get("_editorial") for r in rows}
+    open_n = sum(1 for p in picks if p.get("status") == "open")
+    summary_line = (summary or "Nothing settled yet.") + (
+        f" {open_n} awaiting result." if open_n else "")
+    body = []
+    for p in sorted(picks, key=lambda p: (editorial.get(p["match_id"]) or date.min,
+                                          p["match_id"])):
+        mid = p["match_id"]
+        a, b = teams.get(mid, (mid, ""))
+        ed = editorial.get(mid)
+        when = f"{ed:%b} {ed.day}" if ed else ""
+        status = p.get("status") or "open"
+        units_cell = p.get("units") or ("—" if status == "open" else "")
+        try:
+            odds_cell = _american_odds(float(p["odds"]))
+            modp = f'{float(p["our_p"]) * 100:.0f}%'
+        except (ValueError, KeyError):
+            odds_cell, modp = _esc(str(p.get("odds", ""))), "—"
+        body.append(
+            f'      <tr>\n'
+            f'        <td class="lbl">{_esc(when)}</td>\n'
+            f'        <td class="lbl"><a href="{root}matches/{_esc(mid)}.html">'
+            f'{_esc(a)} v {_esc(b)}</a></td>\n'
+            f'        <td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}</td>\n'
+            f'        <td>{odds_cell}</td>\n'
+            f'        <td>{_esc(p.get("edge_pp") or "")}pp</td>\n'
+            f'        <td>{modp}</td>\n'
+            f'        <td class="lbl status-{_esc(status)}">{_esc(status)}</td>\n'
+            f'        <td class="pts">{_esc(units_cell)}</td>\n'
+            f'      </tr>')
+    table = (
+        '<div class="record-wrap">\n  <table>\n'
+        '    <caption class="sr-only">The shadow book: risky calls above the sanity '
+        'ceiling (severe model–market disagreement), tracked on paper but too risky to '
+        'stake, with hypothetical flat-1u units</caption>\n'
+        '    <thead><tr><th class="lbl" scope="col">Day</th>'
+        '<th class="lbl" scope="col">Match</th><th class="lbl" scope="col">Conviction</th>'
+        '<th scope="col">Odds</th><th scope="col">Edge</th>'
+        '<th scope="col">Model</th><th class="lbl" scope="col">Result</th>'
+        '<th scope="col">Units*</th></tr></thead>\n'
+        '    <tbody>\n' + "\n".join(body) + "\n    </tbody>\n  </table>\n</div>\n"
+        '<p class="odds-note">*hypothetical flat-1u, on paper — these are risky calls '
+        '(severe model–market gap), tracked to test the model, not staked.</p>')
+    return table, summary_line
+
+
 _ROUND_TITLES = ("Round of 32", "Round of 16", "Quarter-finals",
                  "Semi-finals", "Final")
 
@@ -1355,9 +1419,11 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
 def render_record_page(matches: "list[st.Match]", rows: list[dict],
                        ledger: dict | None, css: str, generated_at: str,
                        template_dir: Path = TEMPLATE_DIR,
-                       picks_log: Path | None = None) -> str:
+                       picks_log: Path | None = None,
+                       shadow_log: Path | None = None) -> str:
     calls_html, cumulative = render_record_calls(matches, rows, ledger)
     bets_html, units_line = render_record_bets(rows, picks_log=picks_log)
+    shadow_html, shadow_line = render_record_shadow(rows, shadow_log=shadow_log)
     tpl = Template((template_dir / "record.html").read_text(encoding="utf-8"))
     return tpl.safe_substitute(
         site_css=css,
@@ -1365,6 +1431,8 @@ def render_record_page(matches: "list[st.Match]", rows: list[dict],
         cumulative_line=_esc(cumulative),
         bets_html=bets_html,
         units_line=_esc(units_line),
+        shadow_html=shadow_html,
+        shadow_line=_esc(shadow_line),
         generated_at=_esc(generated_at),
         repo_url=REPO_URL,
     )
@@ -1741,6 +1809,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                news_dir: Path = NEWS_DIR,
                predictions_log: Path | None = None,
                picks_log: Path | None = None,
+               shadow_log: Path | None = None,
                now=None,
                predictor="auto", odds_engine="auto",
                weather_engine="auto", knockout_resolver="auto") -> list[str]:
@@ -1855,7 +1924,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
 
     (out_dir / "record.html").write_text(
         render_record_page(matches, rows, ledger, css, generated_at, template_dir,
-                           picks_log=picks_log),
+                           picks_log=picks_log, shadow_log=shadow_log),
         encoding="utf-8")
     if bracket_proj is not None:
         (out_dir / "bracket.html").write_text(
