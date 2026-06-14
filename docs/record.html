@@ -556,6 +556,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <span class="tag">The Bets · Units &amp; CLV</span>
       <p>Paper picks recorded only when our probability beats the market <strong>price</strong> — scored in units (flat 1u) and closing-line value. A pick can lose while the call was right: we may rate the favorite to win yet bet the other side because the book underpriced it. D1 is the case in point — we called the USA, who won, but Paraguay was the value bet.</p>
     </div>
+    <div class="callout">
+      <span class="tag">The Shadow Book · risky calls</span>
+      <p>The calls where our model and the market <strong>severely disagree</strong> — the edge is so large it's usually our error (a ratings quirk), occasionally a real overlay. <strong>Too risky to stake</strong>, so we track them on paper to learn who's right. Hypothetical units only, kept out of the units record above.</p>
+    </div>
   </div>
 </section>
 
@@ -743,14 +747,53 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </div>
 </section>
 
+<section id="shadow" aria-labelledby="shadow-h">
+  <div class="sec-head">
+    <span class="kicker">Risky · model vs market</span>
+    <h2 id="shadow-h">The Shadow Book</h2>
+  </div>
+  <p class="standfirst">Nothing settled yet. 2 awaiting result.</p>
+<div class="record-wrap">
+  <table>
+    <caption class="sr-only">The shadow book: risky calls above the sanity ceiling (severe model–market disagreement), tracked on paper but too risky to stake, with hypothetical flat-1u units</caption>
+    <thead><tr><th class="lbl" scope="col">Day</th><th class="lbl" scope="col">Match</th><th class="lbl" scope="col">Conviction</th><th scope="col">Odds</th><th scope="col">Edge</th><th scope="col">Model</th><th class="lbl" scope="col">Result</th><th scope="col">Units*</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="lbl">Jun 14</td>
+        <td class="lbl"><a href="matches/E2.html">Côte d&#x27;Ivoire v Ecuador</a></td>
+        <td class="lbl">Ecuador -0.25</td>
+        <td>+113</td>
+        <td>22.8pp</td>
+        <td>68%</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 14</td>
+        <td class="lbl"><a href="matches/E2.html">Côte d&#x27;Ivoire v Ecuador</a></td>
+        <td class="lbl">Ecuador</td>
+        <td>+165</td>
+        <td>20.9pp</td>
+        <td>58%</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p class="odds-note">*hypothetical flat-1u, on paper — these are risky calls (severe model–market gap), tracked to test the model, not staked.</p>
+</section>
+
 </main>
 
 <footer>
   <p class="colophon">
-    Generated 2026-06-14 12:49 · calls graded from data/predictions_log.csv (logged
+    Generated 2026-06-14 13:48 · calls graded from data/predictions_log.csv (logged
     pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
     at fresh prices, revisions explicit, settled rows immutable) · Brier: 0 best ·
     0.667 coin-flip · 2 worst · CLV = closing implied minus our implied at record ·
+    shadow book from data/shadow_picks_log.csv (severe model–market disagreements,
+    too risky to bet, paper-only, excluded from the units record) ·
     <a href="index.html">all standings</a> · <a href="https://github.com/alxgriff/wc26-hub">source &amp; data</a>
   </p>
 </footer>
