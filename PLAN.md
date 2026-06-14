@@ -1,9 +1,12 @@
-# WC26 Hub — Implementation Plan
+# WC26 Hub — Implementation Plan (historical) + daily ops
 
-Execution guide for completing the hub. Written June 12, 2026, after the
-standings engine shipped. Work through the phases in order; the **Daily ops
-checklist** at the bottom is the recurring loop that starts today.
+> **Status:** the original phased build is **complete — all of Phases 1–7 shipped.**
+> This file is kept for the per-phase specs and acceptance criteria (useful context),
+> and for the **Daily ops checklist** near the bottom, which is still the live recurring
+> loop / manual fallback. For current open work see [STATUS.md](STATUS.md); for the
+> module map see [ARCHITECTURE.md](ARCHITECTURE.md); for decisions see [DECISIONS.md](DECISIONS.md).
 
+Written June 12, 2026, after the standings engine shipped.
 Read CLAUDE.md first — its data contracts override everything here.
 
 ---
@@ -56,7 +59,7 @@ Read CLAUDE.md first — its data contracts override everything here.
    - Header note for MD2/MD3 cards: injury/selection notes are pre-baked — **verify day-of before publishing** (the card files say this themselves; anything "(verify before use)" must be web-verified or cut).
 6. **Tests** (`tests/test_build_edition.py`): synthetic card text + tmp fixtures CSV (use `tempfile`); cover (a) card extraction for all three formats (`## A1:` md1/md2, `### A5:` md3, H1-by-team-names template.md), (b) the 🌙 mapping — assert D2/J2/F4 land on June 13/16/20 editions and date-only queries for June 14 do NOT include D2, (c) Stakes replacement leaves The Call/Odds untouched, (d) missing card → placeholder + warning, not a crash.
 
-**Acceptance:** tests green; `python scripts/build_edition.py 2026-06-12` produces a readable edition with B1+D1 (or placeholders if template.md still missing); no invented content.
+**Acceptance:** tests green; `python scripts/build_edition.py YYYY-MM-DD` produces a readable edition with matched cards (or clearly-marked placeholders); no invented content.
 
 **June 20 edition special check:** F4 (Tunisia–Japan 🌙) kickoff is flagged for re-verification in fixtures notes + CLAUDE.md. Verify before publishing that edition; if unverifiable, print the flag in the edition.
 
@@ -86,7 +89,7 @@ Tests: Poisson path probabilities sum to 1; Brier of a certain correct call = 0,
 
 `data/odds_log.csv` (`match_id,market,selection,odds,source,timestamp`). De-vig 1X2 multiplicatively: `implied_i = (1/odds_i) / Σ(1/odds_j)`. Edge = model_p − implied; display threshold 3 percentage points. Recorded picks (evolved June 12): up to **3 per match**, the best selection per distinct market, each ≥ 5pp edge and ≤ 15pp sanity ceiling; same-match picks are correlated and the UI says so. Below the bar print "No bet" (a normal outcome). Log closing odds for every pick; CLV = closing implied − snapshot implied. Recaps report units (flat 1u) + CLV next to Brier. **If no odds snapshot was provided, the section stays in placeholder state — never fetch-and-guess, never invent.**
 
-## Phase 6 — static HTML site ✅ (shipped June 12; extended same day)
+## Phase 6 — static HTML site ✅ (shipped June 12; site has grown since — bracket & record pages, slate redesign. Weather is its own Phase 7 below, not part of this.)
 
 Live: `python scripts/build_site.py` renders docs/ — index (standings hub),
 48 team cards (`docs/teams/{slug}.html`, parsed from kb/ by site_content.py),
@@ -125,12 +128,12 @@ edition before trusting it. The checklist below remains the manual fallback.
 
 ## Daily ops checklist (manual fallback)
 
-1. Get yesterday's results from the user (scores for every match on yesterday's *editorial* date — including the 🌙 game on late-cap nights). Enter into `data/fixtures.csv` (status → `played`, scores in). **Today: A2 South Korea–Czechia is outstanding.**
+1. Get yesterday's results (scores for every match on yesterday's *editorial* date — including the 🌙 game on late-cap nights). Enter into `data/fixtures.csv` (status → `played`, scores in). The automation does this via `fetch_results.py`; this is the manual fallback.
 2. `python scripts/standings.py` — sanity-check tables; stderr must be silent (warnings = data problem, fix before publishing).
 3. Web-check overnight injury/team news for today's teams; surgically update today's cards if news demands (sourced facts only — don't regenerate cards).
 4. `python scripts/build_edition.py YYYY-MM-DD` (+ scenarios for MD3 groups from June 24; predictions/odds once Phases 4–5 live).
 5. Read the edition top to bottom before calling it done; anything "(verify before use)" gets verified or cut.
-6. `git add -A; git commit -m "Edition YYYY-MM-DD"`.
+6. Commit with explicit paths (not `git add -A`, which can sweep stray files): `git add data docs editions; git commit -m "Edition YYYY-MM-DD"`.
 7. June 20 only: re-verify the F4 Tunisia–Japan kickoff first.
 
 ## Phase 7 — Sweat Factor (weather-driven heat index) ✅ Shipped June 2026

@@ -1,7 +1,13 @@
 # WC26 Daily Hub
 
-**Roadmap:** see PLAN.md for the phased implementation plan, per-script specs,
-and the daily ops checklist.
+**Project docs** (read in this order for a fast start):
+- [ARCHITECTURE.md](ARCHITECTURE.md) — what lives where: modules, data flow, files, CI/deploy.
+- [STATUS.md](STATUS.md) — what's shipped and what's still open.
+- [DECISIONS.md](DECISIONS.md) — the load-bearing choices and why.
+- [PLAN.md](PLAN.md) — original phased plan (all phases shipped) + the daily ops checklist.
+- [MODEL_IMPROVEMENTS.md](MODEL_IMPROVEMENTS.md) — the detailed predictor roadmap.
+
+This file (CLAUDE.md) holds the **data contracts and rules** — they override everything else.
 
 Daily 2026 World Cup group-stage guide + game predictor. One edition per ET
 date (June 11–27), built from pre-baked match cards + computed standings +
