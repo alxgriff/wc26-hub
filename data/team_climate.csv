@@ -1,49 +1,49 @@
-team,baseline_lat,baseline_lon,baseline_wbgt,source,asof
-Algeria,36.737,3.087,23.5,estimate,2026-06-13
-Argentina,-34.603,-58.381,14.5,estimate,2026-06-13
-Australia,-33.869,151.209,13.0,estimate,2026-06-13
-Austria,48.208,16.374,22.5,estimate,2026-06-13
-Belgium,50.846,4.352,19.5,estimate,2026-06-13
-Bosnia and Herzegovina,43.848,18.365,23.0,estimate,2026-06-13
-Brazil,-15.779,-47.930,22.0,estimate,2026-06-13
-Canada,45.421,-75.697,24.0,estimate,2026-06-13
-Cape Verde,14.917,-23.508,26.0,estimate,2026-06-13
-Colombia,4.711,-74.073,17.5,estimate,2026-06-13
-Croatia,45.815,15.982,25.0,estimate,2026-06-13
-Curaçao,12.116,-68.932,29.5,estimate,2026-06-13
-Czechia,50.075,14.438,22.0,estimate,2026-06-13
-Côte d'Ivoire,5.345,-4.014,28.5,estimate,2026-06-13
-DR Congo,-4.322,15.322,27.0,estimate,2026-06-13
-Ecuador,-0.229,-78.525,17.0,estimate,2026-06-13
-Egypt,30.059,31.229,29.0,estimate,2026-06-13
-England,51.507,-0.128,20.5,estimate,2026-06-13
-France,48.864,2.350,23.0,estimate,2026-06-13
-Germany,52.520,13.405,21.0,estimate,2026-06-13
-Ghana,5.560,-0.197,29.0,estimate,2026-06-13
-Haiti,18.542,-72.336,30.5,estimate,2026-06-13
-Iran,35.689,51.389,27.5,estimate,2026-06-13
-Iraq,33.341,44.401,32.0,estimate,2026-06-13
-Japan,35.689,139.692,26.5,estimate,2026-06-13
-Jordan,31.955,35.945,28.0,estimate,2026-06-13
-Mexico,19.427,-99.133,20.0,estimate,2026-06-13
-Morocco,34.020,-6.832,23.5,estimate,2026-06-13
-Netherlands,52.370,4.897,19.5,estimate,2026-06-13
-New Zealand,-41.286,174.776,13.5,estimate,2026-06-13
-Norway,59.913,10.752,18.5,estimate,2026-06-13
-Panama,8.994,-79.519,31.0,estimate,2026-06-13
-Paraguay,-25.286,-57.647,19.0,estimate,2026-06-13
-Portugal,38.717,-9.142,24.0,estimate,2026-06-13
-Qatar,25.286,51.533,34.5,estimate,2026-06-13
-Saudi Arabia,24.688,46.722,31.0,estimate,2026-06-13
-Scotland,55.953,-3.188,18.0,estimate,2026-06-13
-Senegal,14.716,-17.467,29.0,estimate,2026-06-13
-South Africa,-26.205,28.050,18.5,estimate,2026-06-13
-South Korea,37.566,126.978,25.5,estimate,2026-06-13
-Spain,40.416,-3.703,25.5,estimate,2026-06-13
-Sweden,59.334,18.065,19.5,estimate,2026-06-13
-Switzerland,46.948,7.447,22.0,estimate,2026-06-13
-Tunisia,36.820,10.165,27.0,estimate,2026-06-13
-Türkiye,39.921,32.854,25.5,estimate,2026-06-13
-United States,38.895,-77.037,27.5,estimate,2026-06-13
-Uruguay,-34.901,-56.165,14.0,estimate,2026-06-13
-Uzbekistan,41.299,69.240,29.0,estimate,2026-06-13
+﻿team,baseline_lat,baseline_lon,baseline_wbgt,source,asof
+Algeria,36.737,3.087,26.7,openmeteo-archive,2026-06-13
+Argentina,-34.603,-58.381,14.5,openmeteo-archive,2026-06-13
+Australia,-33.869,151.209,14.8,openmeteo-archive,2026-06-13
+Austria,48.208,16.374,22.5,openmeteo-archive,2026-06-13
+Belgium,50.846,4.352,19.8,openmeteo-archive,2026-06-13
+Bosnia and Herzegovina,43.848,18.365,23.0,openmeteo-archive,2026-06-13
+Brazil,-15.779,-47.93,19.6,openmeteo-archive,2026-06-13
+Canada,45.421,-75.697,22.1,openmeteo-archive,2026-06-13
+Cape Verde,14.917,-23.508,27.5,openmeteo-archive,2026-06-13
+Colombia,4.711,-74.073,16.1,openmeteo-archive,2026-06-13
+Croatia,45.815,15.982,23.7,openmeteo-archive,2026-06-13
+Curaçao,12.116,-68.932,31.5,openmeteo-archive,2026-06-13
+Czechia,50.075,14.438,21.1,openmeteo-archive,2026-06-13
+Côte d'Ivoire,5.345,-4.014,28.8,openmeteo-archive,2026-06-13
+DR Congo,-4.322,15.322,27.0,openmeteo-archive,2026-06-13
+Ecuador,-0.229,-78.525,14.9,openmeteo-archive,2026-06-13
+Egypt,30.059,31.229,28.1,openmeteo-archive,2026-06-13
+England,51.507,-0.128,19.2,openmeteo-archive,2026-06-13
+France,48.864,2.35,20.8,openmeteo-archive,2026-06-13
+Germany,52.52,13.405,20.5,openmeteo-archive,2026-06-13
+Ghana,5.56,-0.197,29.1,openmeteo-archive,2026-06-13
+Haiti,18.542,-72.336,30.3,openmeteo-archive,2026-06-13
+Iran,35.689,51.389,25.1,openmeteo-archive,2026-06-13
+Iraq,33.341,44.401,29.1,openmeteo-archive,2026-06-13
+Japan,35.689,139.692,27.9,openmeteo-archive,2026-06-13
+Jordan,31.955,35.945,23.9,openmeteo-archive,2026-06-13
+Mexico,19.427,-99.133,19.7,openmeteo-archive,2026-06-13
+Morocco,34.02,-6.832,25.0,openmeteo-archive,2026-06-13
+Netherlands,52.37,4.897,19.5,openmeteo-archive,2026-06-13
+New Zealand,-41.286,174.776,14.4,openmeteo-archive,2026-06-13
+Norway,59.913,10.752,18.2,openmeteo-archive,2026-06-13
+Panama,8.994,-79.519,30.7,openmeteo-archive,2026-06-13
+Paraguay,-25.286,-57.647,21.3,openmeteo-archive,2026-06-13
+Portugal,38.717,-9.142,23.0,openmeteo-archive,2026-06-13
+Qatar,25.286,51.533,33.2,openmeteo-archive,2026-06-13
+Saudi Arabia,24.688,46.722,27.4,openmeteo-archive,2026-06-13
+Scotland,55.953,-3.188,17.2,openmeteo-archive,2026-06-13
+Senegal,14.716,-17.467,29.4,openmeteo-archive,2026-06-13
+South Africa,-26.205,28.05,11.9,openmeteo-archive,2026-06-13
+South Korea,37.566,126.978,26.6,openmeteo-archive,2026-06-13
+Spain,40.416,-3.703,23.0,openmeteo-archive,2026-06-13
+Sweden,59.334,18.065,18.9,openmeteo-archive,2026-06-13
+Switzerland,46.948,7.447,20.6,openmeteo-archive,2026-06-13
+Tunisia,36.82,10.165,27.2,openmeteo-archive,2026-06-13
+Türkiye,39.921,32.854,21.8,openmeteo-archive,2026-06-13
+United States,38.895,-77.037,25.9,openmeteo-archive,2026-06-13
+Uruguay,-34.901,-56.165,14.8,openmeteo-archive,2026-06-13
+Uzbekistan,41.299,69.24,25.0,openmeteo-archive,2026-06-13
