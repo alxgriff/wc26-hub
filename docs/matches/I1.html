@@ -554,10 +554,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">France win 65 percent, draw 21 percent, Senegal win 13 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:65">65%</span><span class="pd" style="flex:21">21%</span><span class="pb" style="flex:13">13%</span></div>
-  <div class="scale" aria-hidden="true"><span>France 65%</span><span>draw 21%</span><span>Senegal 13%</span></div>
-  <p class="factline">most likely score <b>1–0</b> · expected goals <b>2.59</b> · over 2.5 <b>48%</b> · both score <b>43%</b><br>single source: rating model (Elo+Futi)</p>
+  <p class="sr-only">France win 65 percent, draw 22 percent, Senegal win 14 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:65">65%</span><span class="pd" style="flex:22">22%</span><span class="pb" style="flex:14">14%</span></div>
+  <div class="scale" aria-hidden="true"><span>France 65%</span><span>draw 22%</span><span>Senegal 14%</span></div>
+  <p class="factline">most likely score <b>1–0</b> · expected goals <b>2.53</b> · over 2.5 <b>46%</b> · both score <b>42%</b><br>single source: rating model (Elo+Futi)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> France favored but this is the most live MD1 upset spot among the giants.</p></blockquote></div>
 </section>
@@ -647,16 +647,16 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">The Market</span>
     <h2 id="odds-h">Odds &amp; best bet</h2>
   </div>
-<p class="odds-note">model projection: <b>2.59</b> total goals · over 1.5 <b>73%</b> · over 2.5 <b>48%</b> · over 3.5 <b>26%</b></p>
+<p class="odds-note">model projection: <b>2.53</b> total goals · over 1.5 <b>72%</b> · over 2.5 <b>46%</b> · over 3.5 <b>25%</b></p>
 <div class="edge-wrap">
   <table>
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.95 decimal">-105</td><td>49%</td><td>48%</td><td class="edge-neg">-1.1%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.87 decimal">-115</td><td>51%</td><td>52%</td><td class="">+1.1%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">France -1</td><td title="1.80 decimal">-125</td><td>53%</td><td>53%</td><td class="edge-neg">-0.7%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Senegal +1</td><td title="2.07 decimal">+107</td><td>47%</td><td>47%</td><td class="">+0.7%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.95 decimal">-105</td><td>49%</td><td>46%</td><td class="edge-neg">-2.5%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.87 decimal">-115</td><td>51%</td><td>54%</td><td class="">+2.5%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">France -1</td><td title="1.80 decimal">-125</td><td>53%</td><td>52%</td><td class="edge-neg">-1.5%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Senegal +1</td><td title="2.07 decimal">+107</td><td>47%</td><td>48%</td><td class="">+1.5%</td></tr>
     </tbody>
   </table>
 </div>
@@ -682,7 +682,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.8746,lb=0.7124,N=8,SHOW=6,i,j;
+  var la=1.8350,lb=0.6974,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

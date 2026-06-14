@@ -934,7 +934,7 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-14 11:24",
+ "generated_at": "2026-06-14 12:49",
  "slate_date": "2026-06-14",
  "bracket": {
   "schema": 1,
@@ -1155,7 +1155,7 @@
    "73": {
     "team": "Canada",
     "loser": "South Korea",
-    "p": 0.5268010589464568,
+    "p": 0.5259682715634892,
     "source": "model"
    }
   },
