@@ -19,6 +19,7 @@
   --green-soft:rgba(28,107,53,.10);
   --verm:#a83018;
   --verm-soft:rgba(168,48,24,.08);
+  --crimson:#7a0c0c;
   --amber:#8a5a00;
   --amber-soft:rgba(138,90,0,.14);
   --serif:"Fraunces",Georgia,"Times New Roman",serif;
@@ -35,6 +36,7 @@
     --green-soft:rgba(98,185,126,.12);
     --verm:#e8765a;
     --verm-soft:rgba(232,118,90,.10);
+    --crimson:#c41a1a;
     --amber:#d9a948;
     --amber-soft:rgba(217,169,72,.12);
   }
@@ -379,6 +381,29 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .wire ul{margin:0 0 .7em 1.2em;font-size:.95rem;line-height:1.55}
 .wire li{margin-bottom:.45em}
 .wire a{word-break:break-all}
+
+/* ---------- sweat factor / conditions meter ---------- */
+.conditions{margin:.2rem 0 .4rem}
+.cond-stamp{display:block;font-family:var(--mono);font-size:.67rem;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.55rem}
+.cond-stats{font-size:.9rem;margin-bottom:.35rem}
+.cond-track{height:8px;background:var(--hairline);border-radius:4px;margin:.2rem 0 .25rem;position:relative;overflow:hidden}
+.cond-fill{position:absolute;inset:0;right:auto;border-radius:4px;background:var(--verm)}
+.cond-sev{font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--verm);margin:.1rem 0 .8rem}
+.cond-teams{display:grid;gap:.5rem;margin-top:.2rem}
+.cond-team{display:grid;grid-template-columns:minmax(8rem,auto) 1fr auto;align-items:center;gap:.5rem;font-size:.85rem}
+.cond-tname{font-weight:700}
+.cond-dis-track{height:4px;background:var(--hairline);border-radius:2px;position:relative;overflow:hidden}
+.cond-dis-fill{position:absolute;inset:0;right:auto;border-radius:2px;background:var(--amber)}
+.cond-dis-hot{background:var(--crimson)}
+.cond-delta{color:var(--ink-soft);font-family:var(--mono);font-size:.7rem;white-space:nowrap;text-align:right}
+.cond-ac{font-family:var(--mono);font-size:.82rem;color:var(--ink-soft);margin:.2rem 0}
+/* severity colour overrides */
+.cond-sev-severe{color:var(--verm)}
+.cond-sev-high{color:var(--amber)}
+.cond-sev-moderate{color:var(--amber)}
+.cond-sev-mild{color:var(--ink-soft)}
+.cond-sev-indoors{color:var(--ink-soft)}
+.cond-blurb{font-size:.9rem;color:var(--ink-soft);font-style:italic;margin:.35rem 0 .6rem}
 
 /* ---------- match pages: article column + margin-notes rail ----------
    Print idiom: the whole article (call, stakes, read, wire, market) flows
@@ -1181,7 +1206,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
   </div>
 <p class="ledger-line">Picks: 3 settled (1W-2L), -1.13u at flat 1u stakes; avg CLV -0.2pp over 3 closing line(s)</p>
   <p class="colophon">
-    Generated 2026-06-13 20:40 · standings computed from data/fixtures.csv by scripts/standings.py ·
+    Generated 2026-06-13 20:43 · standings computed from data/fixtures.csv by scripts/standings.py ·
     tiebreakers (2026): points, head-to-head, goal difference, goals scored, fair play, FIFA ranking ·
     <a href="https://github.com/alxgriff/wc26-hub">source &amp; data</a> · machine-readable copy embedded below
   </p>
@@ -2120,7 +2145,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
   "notes": []
  },
  "warnings": [],
- "generated_at": "2026-06-13 20:40",
+ "generated_at": "2026-06-13 20:43",
  "slate_date": "2026-06-13"
 }
 </script>
