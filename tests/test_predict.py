@@ -29,6 +29,40 @@ def model(*teams, **cfg):
     return pr.RatingModel({t.team: t for t in teams}, pr.Config(**cfg), "2026-06-11")
 
 
+class MaherBlendTests(unittest.TestCase):
+    """Tier 3.1 Maher-form total blend: inert at 0.0, lifts mismatch totals when on,
+    leaves even matchups untouched, and preserves the Elo-supremacy share."""
+
+    # a real mismatch: Strong has a high attack / solid defense, Weak the opposite,
+    # so the per-side terms h_a (Strong att vs Weak def) and h_b diverge sharply.
+    def _mismatch(self, **cfg):
+        return model(mk("Strong", 2000, 1.5, 1.0), mk("Weak", 1500, -1.0, -1.5), **cfg)
+
+    def test_inert_at_zero_matches_default(self):
+        base = pr.predict_match(self._mismatch(), "Strong", "Weak")
+        zero = pr.predict_match(self._mismatch(maher_w=0.0), "Strong", "Weak")
+        self.assertEqual((base.lambda_a, base.lambda_b, base.total),
+                         (zero.lambda_a, zero.lambda_b, zero.total))   # byte-identical
+
+    def test_blend_raises_mismatch_total(self):
+        off = pr.predict_match(self._mismatch(), "Strong", "Weak")
+        on = pr.predict_match(self._mismatch(maher_w=1.0), "Strong", "Weak")
+        self.assertGreater(on.total, off.total)                        # the slope fix
+        self.assertGreater(on.lambda_a, off.lambda_a)                  # favourite gains the goals
+
+    def test_share_preserved(self):
+        # the Elo-supremacy split (lam_a / total) must not move with the blend
+        off = pr.predict_match(self._mismatch(), "Strong", "Weak")
+        on = pr.predict_match(self._mismatch(maher_w=1.0), "Strong", "Weak")
+        self.assertAlmostEqual(on.lambda_a / on.total, off.lambda_a / off.total, places=9)
+
+    def test_even_matchup_unchanged_even_when_on(self):
+        # h_a == h_b at a symmetric matchup => convexity equality => total untouched
+        m = model(mk("A", 1800, 0.3, 0.3), mk("B", 1800, 0.3, 0.3), maher_w=1.0)
+        p = pr.predict_match(m, "A", "B")
+        self.assertAlmostEqual(p.total, m.config.mu0, places=9)   # zero texture, blend a no-op
+
+
 class MatchModelTests(unittest.TestCase):
     def test_probabilities_sum_to_one(self):
         m = model(mk("A", 1900, 0.5, -0.2), mk("B", 1650, -0.3, 0.4))

@@ -125,8 +125,9 @@ def empirical_table(rows: list) -> dict:
     return table
 
 
-def model_table(fixtures_path: Path) -> dict:
-    model = pr.load_ratings(fixtures=fixtures_path)
+def model_table(fixtures_path: Path, maher_w: float = 0.0) -> dict:
+    cfg = pr.Config(maher_w=maher_w)        # explicit Config => calibration.json not read
+    model = pr.load_ratings(fixtures=fixtures_path, config=cfg)
     buckets: dict = {b: [] for b in BINS}
     for fr_row in be.read_rows(fixtures_path):
         try:
@@ -156,6 +157,9 @@ def main(argv: list | None = None) -> int:
     ap.add_argument("--elo-start", default="1994-01-01", help="build Elo from (warmup)")
     ap.add_argument("--analyze-from", default="2010-01-01", help="analyse matches on/after")
     ap.add_argument("--fixtures", type=Path, default=REPO / "data" / "fixtures.csv")
+    ap.add_argument("--maher-w", type=float, default=0.0,
+                    help="Tier 3.1 Maher-form total blend to apply to the MODEL column "
+                         "(0 = current model; try 0.5/1.0 to see if it fixes the slope)")
     args = ap.parse_args(argv)
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
@@ -168,7 +172,10 @@ def main(argv: list | None = None) -> int:
     corpus = fr.load_curated(args.corpus, args.elo_start)
     rows = forward_elo(corpus, args.analyze_from)
     emp = empirical_table(rows)
-    mod = model_table(args.fixtures)
+    mod = model_table(args.fixtures, maher_w=args.maher_w)
+    if args.maher_w:
+        print(f"** MODEL column uses Tier 3.1 Maher blend maher_w={args.maher_w} "
+              "(prototype; not activated in production) **\n")
 
     print(f"Corpus: {len(corpus):,} competitive matches (Elo from {args.elo_start}); "
           f"{len(rows):,} analysed (>= {args.analyze_from}, "
