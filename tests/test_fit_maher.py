@@ -63,5 +63,29 @@ class CurveHelperTests(unittest.TestCase):
         self.assertAlmostEqual(c[lo], fm._total(2.45, 0.30, 1.0, 2.0, -1.0))
 
 
+class OosGateTests(unittest.TestCase):
+    """Leakage-critical correctness of the OOS W/D/L gate helpers."""
+
+    def test_elo_pass_records_pre_match_not_post(self):
+        # the FIRST A-vs-B game must see both at 1500 (its own result must NOT leak in)
+        ms = [{"home": "A", "away": "B", "hs": 3, "as": 0, "neutral": True, "date": "2020-01-01"},
+              {"home": "A", "away": "B", "hs": 0, "as": 0, "neutral": True, "date": "2020-06-01"}]
+        out = fm._elo_pass(ms)
+        self.assertEqual((out[0]["elo_h"], out[0]["elo_a"]), (1500.0, 1500.0))
+        self.assertGreater(out[1]["elo_h"], out[1]["elo_a"])   # A's win in game 1 shows by game 2
+
+    def test_attdef_z_sign_conventions(self):
+        # prolific team -> high z_att; stingy team -> high z_def (suppression)
+        ms = ([{"home": "Goals", "away": "X", "hs": 5, "as": 2, "neutral": True, "date": "2020-01-01"}] * 12
+              + [{"home": "Wall", "away": "Y", "hs": 0, "as": 0, "neutral": True, "date": "2020-01-01"}] * 12
+              + [{"home": "X", "away": "Y", "hs": 1, "as": 1, "neutral": True, "date": "2020-01-01"}] * 12)
+        za, zd = fm._attdef_z(ms)
+        self.assertGreater(za["Goals"], za["Wall"])            # scores 5 vs 0
+        self.assertGreater(zd["Wall"], zd["Goals"])            # concedes 0 vs 2 -> stingier = higher
+
+    def test_oos_fit_caps_w_at_full_maher(self):
+        self.assertEqual(max(fm.OOS_W_GRID), 1.0)              # no >1 extrapolation artifact
+
+
 if __name__ == "__main__":
     unittest.main()
