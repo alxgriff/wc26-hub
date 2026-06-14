@@ -1,0 +1,233 @@
+#!/usr/bin/env python3
+"""As-it-stands 2026 World Cup knockout-bracket projector.
+
+Projects the Round of 32 -> Final bracket AS IF the current group standings were
+final. The 2026 bracket is a pure, draw-free function of final group positions +
+a predetermined fixture template (matches 73-104) + Annex C of the FIFA WC2026
+regulations (the 495-combination third-place table; see data/annex_c.csv).
+
+GATED, per the feature brief: a group with no games played renders as abstract
+slots ("Winner E", "Runner-up F"); the eight "group winner vs best third" matches
+resolve only once ALL 12 groups have a standing (so the cross-group third-place set
+is meaningful) and the third-place cutline isn't flagged provisional. Strictly an
+"as it stands" scenario tool — it shows WHO would land WHERE in the R32 and the
+fixed paths beyond; it does NOT predict match winners (the tree shows the shape).
+
+Reuses scripts/standings.py (group tables + the best-8 third ranking, already
+ordered to the 2026 tiebreakers). Structural only; no model/prediction. Pure
+functions, no I/O beyond loading the committed Annex C table.
+
+CLI:  python scripts/bracket.py [--fixtures data/fixtures.csv]
+"""
+from __future__ import annotations
+
+import csv
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import standings as st  # noqa: E402
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+ANNEX_C = REPO_ROOT / "data" / "annex_c.csv"
+
+# --- R32 fixture template (matches 73-88). Slot is ("W", g) | ("RU", g) | ("3RD", pool)
+R32_TEMPLATE: dict[int, tuple] = {
+    73: (("RU", "A"), ("RU", "B")),
+    74: (("W", "E"),  ("3RD", "ABCDF")),
+    75: (("W", "F"),  ("RU", "C")),
+    76: (("W", "C"),  ("RU", "F")),
+    77: (("W", "I"),  ("3RD", "CDFGH")),
+    78: (("RU", "E"), ("RU", "I")),
+    79: (("W", "A"),  ("3RD", "CEFHI")),
+    80: (("W", "L"),  ("3RD", "EHIJK")),
+    81: (("W", "D"),  ("3RD", "BEFIJ")),
+    82: (("W", "G"),  ("3RD", "AEHIJ")),
+    83: (("RU", "K"), ("RU", "L")),
+    84: (("W", "H"),  ("RU", "J")),
+    85: (("W", "B"),  ("3RD", "EFGIJ")),
+    86: (("W", "J"),  ("RU", "H")),
+    87: (("W", "K"),  ("3RD", "DEIJL")),
+    88: (("RU", "D"), ("RU", "G")),
+}
+# matches that host a best-third, and the winner-slot column (in annex_c) that names its third
+THIRD_HOSTING = tuple(m for m, (_a, b) in R32_TEMPLATE.items() if b[0] == "3RD")
+THIRD_MATCH_WINNER = {m: "1" + a[1] for m, (a, b) in R32_TEMPLATE.items() if b[0] == "3RD"}
+
+# --- Bracket tree: each later match is the winners of two earlier matches.
+BRACKET_TREE: dict[int, tuple[int, int]] = {
+    89: (74, 77), 90: (73, 75), 91: (76, 78), 92: (79, 80),
+    93: (83, 84), 94: (81, 82), 95: (86, 88), 96: (85, 87),
+    97: (89, 90), 98: (93, 94), 99: (91, 92), 100: (95, 96),
+    101: (97, 98), 102: (99, 100),
+    104: (101, 102),            # Final
+}
+THIRD_PLACE_MATCH = 103         # losers of 101 & 102
+ROUND_NAME = {32: "Round of 32", 16: "Round of 16", 8: "Quarter-finals",
+              4: "Semi-finals", 2: "Final"}
+
+
+def load_annex_c(path: Path = ANNEX_C) -> dict[tuple[str, ...], dict[int, str]]:
+    """{sorted 8-group combo: {r32_match_no: group whose third fills it}}, loaded
+    from data/annex_c.csv with integrity checks. Stop-and-report on any violation."""
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"{path} not found — regenerate it with scripts/parse_annex_c.py "
+            "(FIFA WC2026 Annex C, via the public Wikipedia template).")
+    out: dict[tuple[str, ...], dict[int, str]] = {}
+    with path.open(encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f)
+        slot_cols = [c for c in (reader.fieldnames or []) if c != "combo"]
+        for row in reader:
+            combo = tuple(sorted(row["combo"]))
+            assign = {m: row[THIRD_MATCH_WINNER[m]] for m in THIRD_HOSTING}
+            if tuple(sorted(assign.values())) != combo:
+                raise ValueError(f"annex_c {row['combo']}: thirds not a permutation of the combo")
+            for m, g in assign.items():
+                if g not in R32_TEMPLATE[m][1][1]:        # respects the slot's candidate pool
+                    raise ValueError(f"annex_c {row['combo']}: 3{g} not eligible for match {m} "
+                                     f"(pool {R32_TEMPLATE[m][1][1]})")
+            out[combo] = assign
+    if len(out) != 495:
+        raise ValueError(f"annex_c.csv: expected 495 combinations, got {len(out)}")
+    return out
+
+
+def _group_started(gt: "st.GroupTable") -> bool:
+    return any(r.played > 0 for r in gt.rows)
+
+
+def _slot_label(kind: str, g: str) -> str:
+    return {"W": f"Winner {g}", "RU": f"Runner-up {g}"}[kind]
+
+
+def project(standings: "st.Standings", annex: dict | None = None) -> dict:
+    """Project the R32->Final bracket from current standings (as if final). Returns a
+    pure dict (see to_dict for the shape). Gated: unstarted groups -> abstract slots;
+    third-hosting matches resolve only when all 12 groups have a standing and the
+    third-place cutline is not flagged provisional."""
+    annex = annex if annex is not None else load_annex_c()
+    groups = standings.groups
+    warnings: list[str] = list(standings.warnings)
+
+    def team_or_label(kind: str, g: str):
+        """(team_name | None, label, provisional?) for a Winner/Runner-up slot."""
+        gt = groups.get(g)
+        idx = 0 if kind == "W" else 1
+        if gt is None or not _group_started(gt) or len(gt.rows) <= idx:
+            return None, _slot_label(kind, g), True
+        return gt.rows[idx].team, _slot_label(kind, g), gt.rows[idx].played < st.GAMES_PER_TEAM
+
+    # --- can the 8 third-hosting matches be resolved?
+    all_started = len(groups) == 12 and all(_group_started(gt) for gt in groups.values())
+    cutline_provisional = any("provisional" in n or "FIFA World Ranking" in n
+                              for n in standings.third_place_notes)
+    third_assign: dict[int, str] = {}
+    thirds_resolved = False
+    if all_started and len(standings.third_place) >= st.QUALIFYING_THIRDS:
+        qualifying = standings.third_place[:st.QUALIFYING_THIRDS]
+        combo = tuple(sorted(r.group for r in qualifying))
+        if combo in annex and not cutline_provisional:
+            third_assign = annex[combo]
+            thirds_resolved = True
+        elif cutline_provisional:
+            warnings.append("Third-place cutline is provisional (teams level on all "
+                            "modelled criteria) — the eight winner-vs-third matches are not resolved.")
+
+    def third_slot(match_no: int):
+        pool = R32_TEMPLATE[match_no][1][1]
+        if thirds_resolved:
+            g = third_assign[match_no]
+            gt = groups.get(g)
+            row = gt.rows[2] if gt and len(gt.rows) > 2 else None
+            team = row.team if row else None
+            prov = (row.played < st.GAMES_PER_TEAM) if row else True
+            return team, f"3rd {g}", prov
+        return None, "Best 3rd of " + "/".join(pool), True
+
+    def resolve(slot):
+        kind = slot[0]
+        if kind == "3RD":
+            return None  # filled by third_slot at the match level
+        return team_or_label(kind, slot[1])
+
+    r32 = {}
+    for m, (a, b) in R32_TEMPLATE.items():
+        sa = team_or_label(a[0], a[1]) if a[0] != "3RD" else third_slot(m)
+        sb = team_or_label(b[0], b[1]) if b[0] != "3RD" else third_slot(m)
+        prov = bool(sa[2] or sb[2] or sa[0] is None or sb[0] is None)
+        half = "top" if m in _TOP_HALF_R32 else "bottom"
+        r32[m] = {"match": m, "home": sa[0], "home_label": sa[1],
+                  "away": sb[0], "away_label": sb[1], "provisional": prov, "half": half}
+
+    return {
+        "schema": 1,
+        "as_of_matches_played": standings.played,
+        "fully_projectable": all_started and thirds_resolved,
+        "thirds_resolved": thirds_resolved,
+        "r32": r32,
+        "tree": {m: list(pair) for m, pair in BRACKET_TREE.items()},
+        "third_place_match": THIRD_PLACE_MATCH,
+        "warnings": warnings,
+    }
+
+
+# the eight R32 matches feeding semi-final 101 (top) vs 102 (bottom)
+_TOP_HALF_R32 = frozenset({73, 74, 75, 77, 81, 82, 83, 84})
+
+
+def render_markdown(projection: dict) -> str:
+    out = ["# Knockout bracket — as it stands", ""]
+    n = projection["as_of_matches_played"]
+    out.append(f"*Projection from the current group standings as if they were final "
+               f"({n}/72 group matches played). Provisional — slots fill in as groups "
+               f"play; “Best 3rd of {{…}}” resolves once all 12 groups have a standing.*")
+    out.append("")
+    if not projection["thirds_resolved"]:
+        out.append("> ⚠️ The eight *winner-vs-best-third* matches are not yet resolved "
+                   "(the cross-group third-place set isn't settled).")
+        out.append("")
+
+    def line(m):
+        e = projection["r32"][m]
+        h = e["home"] or f"*{e['home_label']}*"
+        a = e["away"] or f"*{e['away_label']}*"
+        flag = " ·provisional" if e["provisional"] else ""
+        return f"- **M{m}:** {h} vs {a}{flag}"
+
+    for half, title in (("top", "Top half → Semi-final 1"), ("bottom", "Bottom half → Semi-final 2")):
+        out.append(f"## {title}")
+        for m in sorted(projection["r32"]):
+            if projection["r32"][m]["half"] == half:
+                out.append(line(m))
+        out.append("")
+
+    for w in projection["warnings"]:
+        out.append(f"_{w}_")
+    return "\n".join(out).rstrip() + "\n"
+
+
+def to_dict(projection: dict) -> dict:
+    return projection   # already a pure, JSON-safe dict
+
+
+def main(argv: list | None = None) -> int:
+    import argparse
+    ap = argparse.ArgumentParser(description="Project the as-it-stands WC26 knockout bracket.")
+    ap.add_argument("--fixtures", type=Path, default=REPO_ROOT / "data" / "fixtures.csv")
+    args = ap.parse_args(argv)
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
+    matches = st.load_fixtures(args.fixtures)
+    standings = st.compute_standings(matches, fair_play=st.load_discipline())
+    proj = project(standings)
+    print(render_markdown(proj))
+    for w in proj["warnings"]:
+        print(f"warning: {w}", file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
