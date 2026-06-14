@@ -57,10 +57,10 @@ body{
 a{color:inherit}
 main{display:block}
 a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--verm);outline-offset:2px}
-.slate-scroll,.thirds-wrap{scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
-.slate-scroll::-webkit-scrollbar,.thirds-wrap::-webkit-scrollbar{height:8px}
+.slate-scroll,.thirds-wrap,.bracket-wrap{scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
+.slate-scroll::-webkit-scrollbar,.thirds-wrap::-webkit-scrollbar,.bracket-wrap::-webkit-scrollbar{height:8px}
 .slate-scroll::-webkit-scrollbar-thumb{background:var(--hairline)}
-.thirds-wrap::-webkit-scrollbar-thumb{background:var(--hairline)}
+.thirds-wrap::-webkit-scrollbar-thumb,.bracket-wrap::-webkit-scrollbar-thumb{background:var(--hairline)}
 .skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:var(--paper);padding:8px 14px;font-family:var(--mono);font-size:.8rem;z-index:9}
 .skip:focus{left:8px;top:8px}
 
@@ -398,6 +398,32 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
   .read-grid>.callout-grid{grid-column:2;grid-row:span 9;grid-template-columns:1fr;margin:18px 0 0}
 }
 
+/* ---------- knockout bracket (as-it-stands) ----------
+   Rounds rail left-to-right; each round is a column of match cards. Horizontally
+   scrollable as a whole on narrow screens. R32 names link to team pages; open
+   slots (gated groups, unresolved thirds, downstream 'Winner N') read muted. */
+.bracket-wrap{overflow-x:auto;padding-bottom:8px}
+.bracket{list-style:none;display:flex;gap:clamp(12px,2.2vw,26px);min-width:min-content;align-items:start}
+.bround{min-width:178px;flex:0 0 auto}
+.bround h3{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--verm);border-bottom:2px solid var(--ink);padding-bottom:5px;margin-bottom:12px}
+.bround ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.btie{border:1px solid var(--ink);background:var(--paper-2);box-shadow:2px 2px 0 var(--hairline);padding:7px 9px 8px;position:relative}
+.btie.prov{border-style:dashed}
+.bm{display:block;font-family:var(--mono);font-size:.56rem;font-weight:700;letter-spacing:.16em;color:var(--ink-soft);margin-bottom:4px}
+.bpair{display:flex;flex-direction:column;gap:3px}
+.bteam{font-size:.9rem;line-height:1.25;font-weight:700;padding:1px 0;border-bottom:1px dotted var(--hairline)}
+.bpair .bteam:last-child{border-bottom:0}
+.bteam a{text-decoration:none}
+.bteam a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
+.bteam.tbd,.bteam.feed{font-weight:500;font-style:italic;color:var(--ink-soft)}
+.bteam.feed{font-family:var(--mono);font-style:normal;font-size:.74rem;letter-spacing:.04em}
+.bracket-third{margin-top:22px;max-width:200px}
+.bracket-third h3{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--hairline);padding-bottom:5px;margin-bottom:10px}
+.bracket-third ul{list-style:none}
+.bnotes{list-style:none;margin:14px 0 0;font-family:var(--mono);font-size:.72rem;color:var(--amber);line-height:1.6}
+.bnotes li{padding-left:1.1em;text-indent:-1.1em}
+.bnotes li::before{content:"⚠ "}
+
 </style>
 </head>
 <body>
@@ -522,11 +548,14 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.25</td><td>2.02</td><td>47%</td><td>47%</td><td class="edge-neg">-0.6%</td></tr>
       <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td>2.06</td><td>47%</td><td>53%</td><td class="edge-pos">+6.6%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td>1.80</td><td>53%</td><td>47%</td><td class="edge-neg">-6.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Panama +1</td><td>1.86</td><td>52%</td><td>34%</td><td class="edge-neg">-17.7%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Croatia -1</td><td>1.98</td><td>48%</td><td>66%</td><td class="edge-pos">+17.7%</td></tr>
     </tbody>
   </table>
 </div>
 <div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2.5</strong> (Total goals) @ 2.06, edge <strong>+6.6%</strong> — best price 2.17 (betus). Flat 1u, paper record.</p></div>
-<p class="odds-note">market snapshot Jun 13, 9:59 AM ET · median odds across books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only · no logged consensus prediction — 1X2 edge not computed · spreads quoted but no line has both sides.</p>
+<p class="verify-flag">spreads away -1: edge +17.7% implausibly large — verify odds freshness and team news before trusting</p>
+<p class="odds-note">market snapshot Jun 13, 9:59 AM ET · median odds across books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only · no logged consensus prediction — 1X2 edge not computed.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> under 2.5; Croatia win to nil.</p></blockquote></div>
 </section>
 

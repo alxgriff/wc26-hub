@@ -170,6 +170,7 @@ class FullSiteTests(unittest.TestCase):
     def test_internal_links_resolve(self):
         href = re.compile(r'href="((?:\.\./)?(?:teams|matches)/[^"#]+)"')
         for page in [self.out / "index.html",
+                     self.out / "bracket.html",
                      self.out / "teams" / "mexico.html",
                      self.out / "matches" / "A1.html"]:
             text = page.read_text(encoding="utf-8")
@@ -218,6 +219,22 @@ class FullSiteTests(unittest.TestCase):
         # the Calls-vs-Bets explainer: a correct call can sit beside a losing bet
         self.assertIn("underpriced", rec)
         self.assertTrue((self.out / "data" / "2026-06-12.json").exists())
+
+    def test_bracket_page_gated_and_linked(self):
+        # Snapshot has only group A played -> the as-it-stands bracket exists, is
+        # fully gated (no cross-group third-place set yet), links its resolved
+        # teams, and is reachable from the index nav + carried in data.json.
+        idx = (self.out / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="bracket.html"', idx)
+        brk = (self.out / "bracket.html").read_text(encoding="utf-8")
+        self.assertIn("The Bracket", brk)
+        self.assertIn("Best 3rd of", brk)                 # third slots unresolved
+        self.assertIn("Winner E", brk)                    # unstarted group -> abstract
+        self.assertIn('teams/mexico.html', brk)           # resolved group-A slot links
+        self.assertNotIn("All eight group-winner", brk)   # thirds not resolved
+        data = json.loads((self.out / "data.json").read_text(encoding="utf-8"))
+        self.assertIn("bracket", data)
+        self.assertFalse(data["bracket"]["thirds_resolved"])
 
     def test_logged_call_is_graded_on_played_match(self):
         logged = {"p_a": 0.5, "p_draw": 0.3, "p_b": 0.2,

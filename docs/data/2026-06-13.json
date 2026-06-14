@@ -62,7 +62,10 @@
      "fate": null
     }
    ],
-   "notes": []
+   "notes": [
+    "Group A: overall goal difference/goals separate Mexico / South Korea (level on points and head-to-head).",
+    "Group A: overall goal difference/goals separate Czechia / South Africa (level on points and head-to-head)."
+   ]
   },
   "B": {
    "rows": [
@@ -124,7 +127,7 @@
     }
    ],
    "notes": [
-    "Group B: Bosnia and Herzegovina / Canada level on all criteria so far (order provisional, shown alphabetically)."
+    "⚠️ Group B: Bosnia and Herzegovina / Canada level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
    ]
   },
   "C": {
@@ -247,7 +250,9 @@
      "fate": null
     }
    ],
-   "notes": []
+   "notes": [
+    "Group D: overall goal difference/goals separate Australia / Paraguay / Türkiye (level on points and head-to-head)."
+   ]
   },
   "E": {
    "rows": [
@@ -924,6 +929,222 @@
   "notes": []
  },
  "warnings": [],
- "generated_at": "2026-06-13 14:03",
- "slate_date": "2026-06-13"
+ "generated_at": "2026-06-13 20:21",
+ "slate_date": "2026-06-13",
+ "bracket": {
+  "schema": 1,
+  "as_of_matches_played": 4,
+  "fully_projectable": false,
+  "thirds_resolved": false,
+  "r32": {
+   "73": {
+    "match": 73,
+    "home": "South Korea",
+    "home_label": "Runner-up A",
+    "away": "Canada",
+    "away_label": "Runner-up B",
+    "provisional": true,
+    "half": "top"
+   },
+   "74": {
+    "match": 74,
+    "home": null,
+    "home_label": "Winner E",
+    "away": null,
+    "away_label": "Best 3rd of A/B/C/D/F",
+    "provisional": true,
+    "half": "top"
+   },
+   "75": {
+    "match": 75,
+    "home": null,
+    "home_label": "Winner F",
+    "away": null,
+    "away_label": "Runner-up C",
+    "provisional": true,
+    "half": "top"
+   },
+   "76": {
+    "match": 76,
+    "home": null,
+    "home_label": "Winner C",
+    "away": null,
+    "away_label": "Runner-up F",
+    "provisional": true,
+    "half": "bottom"
+   },
+   "77": {
+    "match": 77,
+    "home": null,
+    "home_label": "Winner I",
+    "away": null,
+    "away_label": "Best 3rd of C/D/F/G/H",
+    "provisional": true,
+    "half": "top"
+   },
+   "78": {
+    "match": 78,
+    "home": null,
+    "home_label": "Runner-up E",
+    "away": null,
+    "away_label": "Runner-up I",
+    "provisional": true,
+    "half": "bottom"
+   },
+   "79": {
+    "match": 79,
+    "home": "Mexico",
+    "home_label": "Winner A",
+    "away": null,
+    "away_label": "Best 3rd of C/E/F/H/I",
+    "provisional": true,
+    "half": "bottom"
+   },
+   "80": {
+    "match": 80,
+    "home": null,
+    "home_label": "Winner L",
+    "away": null,
+    "away_label": "Best 3rd of E/H/I/J/K",
+    "provisional": true,
+    "half": "bottom"
+   },
+   "81": {
+    "match": 81,
+    "home": "United States",
+    "home_label": "Winner D",
+    "away": null,
+    "away_label": "Best 3rd of B/E/F/I/J",
+    "provisional": true,
+    "half": "top"
+   },
+   "82": {
+    "match": 82,
+    "home": null,
+    "home_label": "Winner G",
+    "away": null,
+    "away_label": "Best 3rd of A/E/H/I/J",
+    "provisional": true,
+    "half": "top"
+   },
+   "83": {
+    "match": 83,
+    "home": null,
+    "home_label": "Runner-up K",
+    "away": null,
+    "away_label": "Runner-up L",
+    "provisional": true,
+    "half": "top"
+   },
+   "84": {
+    "match": 84,
+    "home": null,
+    "home_label": "Winner H",
+    "away": null,
+    "away_label": "Runner-up J",
+    "provisional": true,
+    "half": "top"
+   },
+   "85": {
+    "match": 85,
+    "home": "Bosnia and Herzegovina",
+    "home_label": "Winner B",
+    "away": null,
+    "away_label": "Best 3rd of E/F/G/I/J",
+    "provisional": true,
+    "half": "bottom"
+   },
+   "86": {
+    "match": 86,
+    "home": null,
+    "home_label": "Winner J",
+    "away": null,
+    "away_label": "Runner-up H",
+    "provisional": true,
+    "half": "bottom"
+   },
+   "87": {
+    "match": 87,
+    "home": null,
+    "home_label": "Winner K",
+    "away": null,
+    "away_label": "Best 3rd of D/E/I/J/L",
+    "provisional": true,
+    "half": "bottom"
+   },
+   "88": {
+    "match": 88,
+    "home": "Australia",
+    "home_label": "Runner-up D",
+    "away": null,
+    "away_label": "Runner-up G",
+    "provisional": true,
+    "half": "bottom"
+   }
+  },
+  "tree": {
+   "89": [
+    74,
+    77
+   ],
+   "90": [
+    73,
+    75
+   ],
+   "91": [
+    76,
+    78
+   ],
+   "92": [
+    79,
+    80
+   ],
+   "93": [
+    83,
+    84
+   ],
+   "94": [
+    81,
+    82
+   ],
+   "95": [
+    86,
+    88
+   ],
+   "96": [
+    85,
+    87
+   ],
+   "97": [
+    89,
+    90
+   ],
+   "98": [
+    93,
+    94
+   ],
+   "99": [
+    91,
+    92
+   ],
+   "100": [
+    95,
+    96
+   ],
+   "101": [
+    97,
+    98
+   ],
+   "102": [
+    99,
+    100
+   ],
+   "104": [
+    101,
+    102
+   ]
+  },
+  "third_place_match": 103,
+  "warnings": []
+ }
 }

@@ -43,6 +43,7 @@ import standings as st            # noqa: E402
 import build_edition as be        # noqa: E402
 import site_content as sc         # noqa: E402
 import scenarios as scen          # noqa: E402
+import bracket as bk              # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = REPO_ROOT / "templates"
@@ -881,6 +882,84 @@ def render_record_bets(rows: list[dict], root: str = "",
     return table, units_line
 
 
+_BRACKET_ROUNDS = (
+    ("Round of 16", (89, 90, 91, 92, 93, 94, 95, 96)),
+    ("Quarter-finals", (97, 98, 99, 100)),
+    ("Semi-finals", (101, 102)),
+    ("Final", (104,)),
+)
+
+
+def render_bracket_html(proj: dict, root: str = "") -> str:
+    """The as-it-stands knockout bracket (bracket.project output) as HTML rounds.
+    R32 slots resolve to linked team names where the group has played, abstract
+    'Winner E' / 'Best 3rd of …' labels where gated; downstream rounds show the
+    fixed 'Winner <match>' paths (no winners are projected — that is follow-up
+    work). Presentation only; the projection itself is computed in bracket.py."""
+    r32 = {int(k): v for k, v in proj["r32"].items()}
+    tree = {int(k): tuple(v) for k, v in proj["tree"].items()}
+
+    def slot(team, label, *, feed=False):
+        if team:
+            return (f'<span class="bteam"><a href="{_team_link(team, root)}">'
+                    f'{_esc(team)}</a></span>')
+        cls = "bteam feed" if feed else "bteam tbd"
+        return f'<span class="{cls}">{_esc(label)}</span>'
+
+    def tie(m, a, b, prov):
+        cls = "btie prov" if prov else "btie"
+        return (f'<li class="{cls}" id="m{m}"><span class="bm">{m}</span>'
+                f'<div class="bpair">{a}{b}</div></li>')
+
+    def block(title, items):
+        return (f'<li class="bround"><h3>{_esc(title)}</h3>'
+                f'<ul>{"".join(items)}</ul></li>')
+
+    r32_items = []
+    for m in range(73, 89):
+        e = r32[m]
+        r32_items.append(tie(m, slot(e["home"], e["home_label"]),
+                             slot(e["away"], e["away_label"]), e["provisional"]))
+    blocks = [block("Round of 32", r32_items)]
+
+    for title, nums in _BRACKET_ROUNDS:
+        items = []
+        for m in nums:
+            x, y = tree[m]
+            items.append(tie(m, slot(None, f"Winner {x}", feed=True),
+                             slot(None, f"Winner {y}", feed=True), True))
+        blocks.append(block(title, items))
+
+    third = tie(proj["third_place_match"],
+                slot(None, "Loser 101", feed=True),
+                slot(None, "Loser 102", feed=True), True)
+    return (f'<ol class="bracket">{"".join(blocks)}</ol>'
+            f'<div class="bracket-third"><h3>Third-place play-off</h3>'
+            f'<ul>{third}</ul></div>')
+
+
+def render_bracket_page(proj: dict, css: str, generated_at: str,
+                        template_dir: Path = TEMPLATE_DIR) -> str:
+    n = proj["as_of_matches_played"]
+    resolved = ("All eight group-winner-vs-best-third matches are projected from "
+                "the current third-place race." if proj["thirds_resolved"] else
+                "The eight group-winner-vs-best-third matches aren’t resolved yet — "
+                "they fill in once all twelve groups have a standing and the "
+                "third-place cutline is settled.")
+    notes_html = "".join(f'<li>{_esc(w)}</li>' for w in proj["warnings"])
+    notes_html = f'<ul class="bnotes">{notes_html}</ul>' if notes_html else ""
+    tpl = Template((template_dir / "bracket.html").read_text(encoding="utf-8"))
+    return tpl.safe_substitute(
+        site_css=css,
+        bracket_html=render_bracket_html(proj, root=""),
+        played=n, total=72, progress_pct=round(n / 72 * 100),
+        resolved_note=_esc(resolved),
+        notes_html=notes_html,
+        generated_at=_esc(generated_at),
+        repo_url=REPO_URL,
+    )
+
+
 def render_record_page(matches: "list[st.Match]", rows: list[dict],
                        ledger: dict | None, css: str, generated_at: str,
                        template_dir: Path = TEMPLATE_DIR,
@@ -1334,6 +1413,15 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                     f" {p['edge']:+.1%}{more}")
 
     ledger = _load_ledger(warnings, predictions_log, now)
+    # as-it-stands knockout bracket — gated projection from the live standings.
+    # Annex C is committed static data; a missing/corrupt table degrades to no
+    # bracket page + a warning rather than a broken build (never an invented slot).
+    bracket_proj = None
+    try:
+        bracket_proj = bk.project(s)
+    except (FileNotFoundError, ValueError) as e:
+        warnings.append(f"Bracket page skipped: {e}")
+
     index, data = build_page(matches, rows, target, generated_at,
                              template_path=template_dir / "page.html",
                              editions_dir=editions_dir, css=css,
@@ -1342,6 +1430,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                              overnight_html=render_overnight(rows, target,
                                                              matches, ledger),
                              fates=fates)
+    if bracket_proj is not None:
+        data["bracket"] = bk.to_dict(bracket_proj)
     (out_dir / "index.html").write_text(index, encoding="utf-8")
     (out_dir / "data.json").write_text(
         json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -1355,6 +1445,10 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         render_record_page(matches, rows, ledger, css, generated_at, template_dir,
                            picks_log=picks_log),
         encoding="utf-8")
+    if bracket_proj is not None:
+        (out_dir / "bracket.html").write_text(
+            render_bracket_page(bracket_proj, css, generated_at, template_dir),
+            encoding="utf-8")
 
     fixture_teams = sorted({m.team_a for m in matches} | {m.team_b for m in matches})
     for team in fixture_teams:
@@ -1530,7 +1624,7 @@ def main(argv: list[str] | None = None) -> int:
     if not args.fixtures.exists():
         print(f"error: {args.fixtures} not found.", file=sys.stderr)
         return 1
-    for tname in ("page.html", "team.html", "match.html", "site.css"):
+    for tname in ("page.html", "team.html", "match.html", "bracket.html", "site.css"):
         if not (args.template_dir / tname).exists():
             print(f"error: template {args.template_dir / tname} not found.", file=sys.stderr)
             return 1

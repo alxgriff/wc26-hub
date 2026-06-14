@@ -57,10 +57,10 @@ body{
 a{color:inherit}
 main{display:block}
 a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--verm);outline-offset:2px}
-.slate-scroll,.thirds-wrap{scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
-.slate-scroll::-webkit-scrollbar,.thirds-wrap::-webkit-scrollbar{height:8px}
+.slate-scroll,.thirds-wrap,.bracket-wrap{scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
+.slate-scroll::-webkit-scrollbar,.thirds-wrap::-webkit-scrollbar,.bracket-wrap::-webkit-scrollbar{height:8px}
 .slate-scroll::-webkit-scrollbar-thumb{background:var(--hairline)}
-.thirds-wrap::-webkit-scrollbar-thumb{background:var(--hairline)}
+.thirds-wrap::-webkit-scrollbar-thumb,.bracket-wrap::-webkit-scrollbar-thumb{background:var(--hairline)}
 .skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:var(--paper);padding:8px 14px;font-family:var(--mono);font-size:.8rem;z-index:9}
 .skip:focus{left:8px;top:8px}
 
@@ -398,6 +398,32 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
   .read-grid>.callout-grid{grid-column:2;grid-row:span 9;grid-template-columns:1fr;margin:18px 0 0}
 }
 
+/* ---------- knockout bracket (as-it-stands) ----------
+   Rounds rail left-to-right; each round is a column of match cards. Horizontally
+   scrollable as a whole on narrow screens. R32 names link to team pages; open
+   slots (gated groups, unresolved thirds, downstream 'Winner N') read muted. */
+.bracket-wrap{overflow-x:auto;padding-bottom:8px}
+.bracket{list-style:none;display:flex;gap:clamp(12px,2.2vw,26px);min-width:min-content;align-items:start}
+.bround{min-width:178px;flex:0 0 auto}
+.bround h3{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--verm);border-bottom:2px solid var(--ink);padding-bottom:5px;margin-bottom:12px}
+.bround ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.btie{border:1px solid var(--ink);background:var(--paper-2);box-shadow:2px 2px 0 var(--hairline);padding:7px 9px 8px;position:relative}
+.btie.prov{border-style:dashed}
+.bm{display:block;font-family:var(--mono);font-size:.56rem;font-weight:700;letter-spacing:.16em;color:var(--ink-soft);margin-bottom:4px}
+.bpair{display:flex;flex-direction:column;gap:3px}
+.bteam{font-size:.9rem;line-height:1.25;font-weight:700;padding:1px 0;border-bottom:1px dotted var(--hairline)}
+.bpair .bteam:last-child{border-bottom:0}
+.bteam a{text-decoration:none}
+.bteam a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
+.bteam.tbd,.bteam.feed{font-weight:500;font-style:italic;color:var(--ink-soft)}
+.bteam.feed{font-family:var(--mono);font-style:normal;font-size:.74rem;letter-spacing:.04em}
+.bracket-third{margin-top:22px;max-width:200px}
+.bracket-third h3{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--hairline);padding-bottom:5px;margin-bottom:10px}
+.bracket-third ul{list-style:none}
+.bnotes{list-style:none;margin:14px 0 0;font-family:var(--mono);font-size:.72rem;color:var(--amber);line-height:1.6}
+.bnotes li{padding-left:1.1em;text-indent:-1.1em}
+.bnotes li::before{content:"⚠ "}
+
 </style>
 </head>
 <body>
@@ -431,7 +457,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
   <p class="sr-only">Qatar win 6 percent, draw 13 percent, Switzerland win 82 percent.</p>
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:6">6%</span><span class="pd" style="flex:13">13%</span><span class="pb" style="flex:82">82%</span></div>
   <div class="scale" aria-hidden="true"><span>Qatar 6%</span><span>draw 13%</span><span>Switzerland 82%</span></div>
-  <p class="factline">most likely score <b>0–2</b> · expected goals <b>3.01</b> · over 2.5 <b>58%</b> · both score <b>25%</b><br>2-source consensus: rating model + Opta supercomputer (theanalyst.com)</p>
+  <p class="factline">predicted score <b>0-2</b><br>published consensus — logged Jun 12, 3:53 PM ET, pre-kickoff<br><b>Awaiting result</b> — kickoff has passed; this logged call is frozen and will be graded when the score is entered.</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> large quality gap; Swiss tactical flexibility vs a declining block profiles as comfortable.</p></blockquote></div>
 </section>
@@ -485,7 +511,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
     </tbody>
   </table>
   <ul class="notes">
-    <li class="warn"><span class="dag">†</span> Bosnia and Herzegovina / Canada level on all criteria so far (order provisional, shown alphabetically).</li>
+    <li class="warn"><span class="dag">†</span> Bosnia and Herzegovina / Canada level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.</li>
   </ul>
 </article>
   </div>
@@ -539,8 +565,8 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
       <tr><td class="lbl">1X2</td><td class="lbl">Switzerland</td><td>1.21</td><td>79%</td><td>82%</td><td class="">+2.4%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td>1.62</td><td>60%</td><td>58%</td><td class="edge-neg">-1.8%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td>2.39</td><td>40%</td><td>42%</td><td class="">+1.8%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.0</td><td>1.92</td><td>50%</td><td>46%</td><td class="edge-neg">-4.1%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.0</td><td>1.90</td><td>50%</td><td>54%</td><td class="edge-pos">+4.1%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td>1.92</td><td>50%</td><td>46%</td><td class="edge-neg">-4.1%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td>1.90</td><td>50%</td><td>54%</td><td class="edge-pos">+4.1%</td></tr>
       <tr><td class="lbl">Asian handicap</td><td class="lbl">Qatar +1.5</td><td>2.34</td><td>42%</td><td>33%</td><td class="edge-neg">-8.9%</td></tr>
       <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Switzerland -1.5</td><td>1.66</td><td>58%</td><td>67%</td><td class="edge-pos">+8.9%</td></tr>
     </tbody>
@@ -548,7 +574,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 </div>
 <div class="bet-callout"><span class="tag">Best bet</span><p><strong>Switzerland -1.5</strong> (Asian handicap) @ 1.66, edge <strong>+8.9%</strong> — best price 1.67 (betus). Flat 1u, paper record.</p></div>
 <p class="odds-note">Logged pick: Switzerland -1.5 @ 1.67 (betus), edge 8.9pp · open.</p>
-<p class="odds-note">market snapshot Jun 13, 9:59 AM ET · median odds across books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only · O/U 3.0 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
+<p class="odds-note">market snapshot Jun 13, 9:59 AM ET · median odds across books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> Switzerland −1 handicap.</p></blockquote></div>
 </section>
 
