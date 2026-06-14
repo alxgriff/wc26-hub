@@ -568,7 +568,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Brier</span>
     <h2 id="calls-h">The Calls</h2>
   </div>
-  <p class="standfirst">Ledger to date: 5 graded predictions, 2 correct calls, cumulative Brier 0.802 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max)</p>
+  <p class="standfirst">Ledger to date: 7 graded predictions, 3 correct calls, cumulative Brier 0.698 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max)</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">Every logged call graded: probabilities, result, hit or miss, Brier score</caption>
@@ -616,6 +616,23 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td class="pts">0.900</td>
       </tr>
       <tr class="subtotal"><td colspan="4">June 13 — 4 graded</td><td>1/4</td><td>0.855</td></tr>
+      <tr>
+        <td class="lbl"><a href="matches/E1.html">Germany v Curaçao</a></td>
+        <td>91%/8%/1% (2-0)</td>
+        <td>7–1</td>
+        <td>home</td>
+        <td><span class="hit hit-y" aria-hidden="true">✓</span><span class="sr-only">correct call</span></td>
+        <td class="pts">0.014</td>
+      </tr>
+      <tr>
+        <td class="lbl"><a href="matches/F1.html">Netherlands v Japan</a></td>
+        <td>45%/25%/30% (1-1)</td>
+        <td>2–2</td>
+        <td>draw</td>
+        <td><span class="hit hit-n" aria-hidden="true">✗</span><span class="sr-only">missed</span></td>
+        <td class="pts">0.860</td>
+      </tr>
+      <tr class="subtotal"><td colspan="4">June 14 — 2 graded</td><td>1/2</td><td>0.437</td></tr>
     </tbody>
   </table>
 </div>
@@ -626,7 +643,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Units &amp; CLV</span>
     <h2 id="bets-h">The Bets</h2>
   </div>
-  <p class="standfirst">Picks: 7 settled (3W-4L), +2.52u at flat 1u stakes; avg CLV -0.3pp over 7 closing line(s) 5 open picks, 5u at risk.</p>
+  <p class="standfirst">Picks: 9 settled (4W-5L), +2.52u at flat 1u stakes; avg CLV -0.2pp over 8 closing line(s) 3 open picks, 3u at risk.</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">Every recorded pick: selection, price, edge at record, settlement, units, closing line value</caption>
@@ -727,8 +744,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td title="2.00 decimal">+100</td>
         <td class="lbl">betmgm</td>
         <td>4.6pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
+        <td class="lbl status-won">won</td>
+        <td class="pts">+1.00</td>
         <td>—</td>
       </tr>
       <tr>
@@ -738,9 +755,9 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td title="3.82 decimal">+282</td>
         <td class="lbl">betus</td>
         <td>4.2pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
+        <td class="lbl status-lost">lost</td>
+        <td class="pts">-1.00</td>
+        <td>+0.5pp</td>
       </tr>
       <tr>
         <td class="lbl">Jun 14</td>
@@ -810,7 +827,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 
 <footer>
   <p class="colophon">
-    Generated 2026-06-14 14:05 · calls graded from data/predictions_log.csv (logged
+    Generated 2026-06-14 22:44 · calls graded from data/predictions_log.csv (logged
     pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
     at fresh prices, revisions explicit, settled rows immutable) · Brier: 0 best ·
     0.667 coin-flip · 2 worst · CLV = closing implied minus our implied at record ·

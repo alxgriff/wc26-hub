@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 8,
+ "played": 10,
  "total": 72,
  "groups": {
   "A": {
@@ -261,16 +261,16 @@
    "rows": [
     {
      "pos": 1,
-     "team": "Curaçao",
+     "team": "Germany",
      "group": "E",
-     "p": 0,
-     "w": 0,
+     "p": 1,
+     "w": 1,
      "d": 0,
      "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
-     "pts": 0,
+     "gf": 7,
+     "ga": 1,
+     "gd": 6,
+     "pts": 3,
      "fate": null
     },
     {
@@ -303,20 +303,22 @@
     },
     {
      "pos": 4,
-     "team": "Germany",
+     "team": "Curaçao",
      "group": "E",
-     "p": 0,
+     "p": 1,
      "w": 0,
      "d": 0,
-     "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
+     "l": 1,
+     "gf": 1,
+     "ga": 7,
+     "gd": -6,
      "pts": 0,
      "fate": null
     }
    ],
-   "notes": []
+   "notes": [
+    "Group E: overall goal difference/goals separate Curaçao / Côte d'Ivoire / Ecuador (level on points and head-to-head)."
+   ]
   },
   "F": {
    "rows": [
@@ -324,28 +326,28 @@
      "pos": 1,
      "team": "Japan",
      "group": "F",
-     "p": 0,
+     "p": 1,
      "w": 0,
-     "d": 0,
+     "d": 1,
      "l": 0,
-     "gf": 0,
-     "ga": 0,
+     "gf": 2,
+     "ga": 2,
      "gd": 0,
-     "pts": 0,
+     "pts": 1,
      "fate": null
     },
     {
      "pos": 2,
      "team": "Netherlands",
      "group": "F",
-     "p": 0,
+     "p": 1,
      "w": 0,
-     "d": 0,
+     "d": 1,
      "l": 0,
-     "gf": 0,
-     "ga": 0,
+     "gf": 2,
+     "ga": 2,
      "gd": 0,
-     "pts": 0,
+     "pts": 1,
      "fate": null
     },
     {
@@ -377,7 +379,9 @@
      "fate": null
     }
    ],
-   "notes": []
+   "notes": [
+    "⚠️ Group F: Japan / Netherlands level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
+   ]
   },
   "G": {
    "rows": [
@@ -934,11 +938,11 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-14 14:05",
+ "generated_at": "2026-06-14 22:44",
  "slate_date": "2026-06-14",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 8,
+  "as_of_matches_played": 10,
   "fully_projectable": false,
   "thirds_resolved": false,
   "r32": {
@@ -953,7 +957,7 @@
    },
    "74": {
     "match": 74,
-    "home": null,
+    "home": "Germany",
     "home_label": "Winner E",
     "away": null,
     "away_label": "Best 3rd of A/B/C/D/F",
@@ -962,7 +966,7 @@
    },
    "75": {
     "match": 75,
-    "home": null,
+    "home": "Japan",
     "home_label": "Winner F",
     "away": "Brazil",
     "away_label": "Runner-up C",
@@ -973,7 +977,7 @@
     "match": 76,
     "home": "Scotland",
     "home_label": "Winner C",
-    "away": null,
+    "away": "Netherlands",
     "away_label": "Runner-up F",
     "provisional": true,
     "half": "bottom"
@@ -989,7 +993,7 @@
    },
    "78": {
     "match": 78,
-    "home": null,
+    "home": "Côte d'Ivoire",
     "home_label": "Runner-up E",
     "away": null,
     "away_label": "Runner-up I",
@@ -1157,12 +1161,42 @@
     "loser": "South Korea",
     "p": 0.5259682715634892,
     "source": "model"
+   },
+   "75": {
+    "team": "Brazil",
+    "loser": "Japan",
+    "p": 0.7175322200078255,
+    "source": "model"
+   },
+   "76": {
+    "team": "Netherlands",
+    "loser": "Scotland",
+    "p": 0.8111043891802026,
+    "source": "model"
+   },
+   "90": {
+    "team": "Brazil",
+    "loser": "Canada",
+    "p": 0.8741441143367906,
+    "source": "model"
    }
   },
   "participants": {
    "73": [
     "South Korea",
     "Canada"
+   ],
+   "75": [
+    "Japan",
+    "Brazil"
+   ],
+   "76": [
+    "Scotland",
+    "Netherlands"
+   ],
+   "90": [
+    "Canada",
+    "Brazil"
    ]
   },
   "champion": null
