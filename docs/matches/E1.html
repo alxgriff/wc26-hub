@@ -665,23 +665,23 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">1X2</td><td class="lbl">Germany</td><td>1.03</td><td>93%</td><td>91%</td><td class="edge-neg">-1.8%</td></tr>
-      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td>19.00</td><td>5%</td><td>8%</td><td class="">+2.7%</td></tr>
-      <tr><td class="lbl">1X2</td><td class="lbl">Curaçao</td><td>44.00</td><td>2%</td><td>1%</td><td class="edge-neg">-0.9%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 4.25</td><td>1.93</td><td>49%</td><td>19%</td><td class="edge-neg">-30.6%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 4.25</td><td>1.89</td><td>51%</td><td>81%</td><td class="edge-pos">+30.6%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 4.5</td><td>2.12</td><td>45%</td><td>19%</td><td class="edge-neg">-26.3%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 4.5</td><td>1.75</td><td>55%</td><td>81%</td><td class="edge-pos">+26.3%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Germany -3.5</td><td>1.91</td><td>50%</td><td>29%</td><td class="edge-neg">-21.1%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Curaçao +3.5</td><td>1.91</td><td>50%</td><td>71%</td><td class="edge-pos">+21.1%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Germany</td><td title="1.03 decimal">-3333</td><td>93%</td><td>91%</td><td class="edge-neg">-1.8%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="19.00 decimal">+1800</td><td>5%</td><td>8%</td><td class="">+2.7%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Curaçao</td><td title="44.00 decimal">+4300</td><td>2%</td><td>1%</td><td class="edge-neg">-0.9%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 4.25</td><td title="1.93 decimal">-108</td><td>49%</td><td>19%</td><td class="edge-neg">-30.6%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 4.25</td><td title="1.89 decimal">-112</td><td>51%</td><td>81%</td><td class="edge-pos">+30.6%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 4.5</td><td title="2.12 decimal">+112</td><td>45%</td><td>19%</td><td class="edge-neg">-26.3%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 4.5</td><td title="1.75 decimal">-134</td><td>55%</td><td>81%</td><td class="edge-pos">+26.3%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Germany -3.5</td><td title="1.91 decimal">-110</td><td>50%</td><td>29%</td><td class="edge-neg">-21.1%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Curaçao +3.5</td><td title="1.91 decimal">-110</td><td>50%</td><td>71%</td><td class="edge-pos">+21.1%</td></tr>
     </tbody>
   </table>
 </div>
 <p class="no-bet"><b>NO BET</b> — no edge clears the 5% recording bar (a normal, expected result).</p>
-<p class="verify-flag">totals under 4.25: edge +30.6% implausibly large — verify odds freshness and team news before trusting</p>
-<p class="verify-flag">totals under 4.5: edge +26.3% implausibly large — verify odds freshness and team news before trusting</p>
-<p class="verify-flag">spreads away 3.5: edge +21.1% implausibly large — verify odds freshness and team news before trusting</p>
-<p class="odds-note">market snapshot Jun 14, 7:42 AM ET · median odds across books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only.</p>
+<p class="verify-flag">totals under 4.25: model-priced edge +30.6% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">totals under 4.5: model-priced edge +26.3% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">spreads away 3.5: model-priced edge +21.1% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 14, 7:42 AM ET · median across 9 books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> Germany −2 handicap value check.</p></blockquote></div>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
