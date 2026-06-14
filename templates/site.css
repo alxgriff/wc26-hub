@@ -8,6 +8,7 @@
   --green-soft:rgba(28,107,53,.10);
   --verm:#a83018;
   --verm-soft:rgba(168,48,24,.08);
+  --crimson:#7a0c0c;
   --amber:#8a5a00;
   --amber-soft:rgba(138,90,0,.14);
   --serif:"Fraunces",Georgia,"Times New Roman",serif;
@@ -24,6 +25,7 @@
     --green-soft:rgba(98,185,126,.12);
     --verm:#e8765a;
     --verm-soft:rgba(232,118,90,.10);
+    --crimson:#c41a1a;
     --amber:#d9a948;
     --amber-soft:rgba(217,169,72,.12);
   }
@@ -381,7 +383,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .cond-tname{font-weight:700}
 .cond-dis-track{height:4px;background:var(--hairline);border-radius:2px;position:relative;overflow:hidden}
 .cond-dis-fill{position:absolute;inset:0;right:auto;border-radius:2px;background:var(--amber)}
-.cond-dis-hot{background:var(--verm)}
+.cond-dis-hot{background:var(--crimson)}
 .cond-delta{color:var(--ink-soft);font-family:var(--mono);font-size:.7rem;white-space:nowrap;text-align:right}
 .cond-ac{font-family:var(--mono);font-size:.82rem;color:var(--ink-soft);margin:.2rem 0}
 /* severity colour overrides */
