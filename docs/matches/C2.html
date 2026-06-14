@@ -470,6 +470,50 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bnotes li::before{content:"⚠ "}
 @media (max-width:640px){.bracket-wrap{--bmh:38px;--bgap:10px;--bgut:22px}.bround{width:124px}.bslot{font-size:.74rem}}
 
+/* ---------- outcome grid (score matrix toggle) ---------- */
+.outcome-grid-wrap{margin:1.4rem 0 .4rem}
+.outcome-grid-toggle{
+  display:inline-flex;align-items:center;gap:.35em;list-style:none;
+  font-family:var(--mono);font-size:.74rem;font-weight:500;letter-spacing:.03em;
+  color:var(--ink-soft);cursor:pointer;
+  padding:.4em .85em;border:1px solid var(--hairline);border-radius:3px;
+  background:var(--paper-2);
+}
+.outcome-grid-toggle::-webkit-details-marker{display:none}
+.outcome-grid-toggle::before{content:"▸ ";font-size:.7em}
+details[open] .outcome-grid-toggle::before{content:"▾ "}
+.outcome-grid-toggle:hover{color:var(--ink);border-color:var(--ink-soft)}
+.outcome-grid-inner{margin-top:.9rem}
+.og-lede{font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:.4rem 0 .85rem;line-height:1.55}
+.og-qbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.og-q{font-family:var(--mono);font-size:.7rem;letter-spacing:.02em;padding:6px 10px;
+  border-radius:999px;border:1px solid var(--hairline);background:transparent;
+  color:var(--ink-soft);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.og-q[aria-pressed="true"]{font-weight:600}
+.og-q.awin[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#f5f1e6}
+.og-q.draw[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:#1b1812}
+.og-q.bwin[aria-pressed="true"]{background:var(--verm);border-color:var(--verm);color:#f5f1e6}
+.og-q.over[aria-pressed="true"],.og-q.btts[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.og-readout{font-family:var(--mono);font-size:.82rem;min-height:1.6em;margin-bottom:10px;color:var(--ink-soft)}
+.og-readout b{color:var(--ink)}
+.og-big{font-size:1.25rem;font-weight:700;color:var(--ink)}
+.og-matrix{display:grid;grid-template-columns:auto repeat(6,1fr);gap:3px;max-width:360px}
+.og-corner,.og-ax-top,.og-ax-side{font-family:var(--mono);font-size:.55rem;color:var(--ink-soft);
+  display:flex;align-items:center;justify-content:center}
+.og-corner{align-items:flex-end;padding-bottom:2px}
+.og-cell{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.62rem;font-weight:500;color:var(--ink);
+  background:var(--paper-2);transition:opacity .15s,box-shadow .15s;position:relative}
+.og-cell.og-modal::after{content:"modal";position:absolute;bottom:1px;left:0;right:0;
+  font-size:.4rem;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink);opacity:.65;text-align:center}
+.og-cell.og-dim{opacity:.12}
+.og-cell.og-hot{box-shadow:inset 0 0 0 2px var(--ink)}
+.og-axhint{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);
+  display:flex;justify-content:space-between;margin-top:6px;max-width:360px}
+.og-tail{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);margin-top:5px}
+@media(prefers-reduced-motion:reduce){.og-cell{transition:none}}
+
 </style>
 </head>
 <body>
@@ -503,7 +547,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
   <p class="sr-only">Haiti win 14 percent, draw 19 percent, Scotland win 67 percent.</p>
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:14">14%</span><span class="pd" style="flex:19">19%</span><span class="pb" style="flex:67">67%</span></div>
   <div class="scale" aria-hidden="true"><span>Haiti 14%</span><span>draw 19%</span><span>Scotland 67%</span></div>
-  <p class="factline">most likely score <b>0–2</b> · expected goals <b>2.96</b> · over 2.5 <b>57%</b> · both score <b>44%</b><br>2-source consensus: rating model + Opta supercomputer (theanalyst.com)</p>
+  <p class="factline">predicted score <b>0-2</b><br>published consensus — logged Jun 12, 3:53 PM ET, pre-kickoff<br><b>Awaiting result</b> — kickoff has passed; this logged call is frozen and will be graded when the score is entered.</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> high-variance; Haiti's press vs Scotland's thin midfield makes this far livelier than the ratings gap.</p></blockquote></div>
 </section>
@@ -570,8 +614,8 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
   <p class="cond-stats">~28°C · moderate humidity (68% RH) · WBGT 30.1</p>
   <div class="cond-track" aria-label="Match heat index: Severe (87/100)"><div class="cond-fill" style="width:87%"></div></div>
   <p class="cond-sev cond-sev-severe">Severe</p>
-  <p class="cond-blurb">Brutal heat — and Haiti hold a major acclimatization edge: Scotland are +12°C above their home baseline while Haiti are stepping into their climate.</p>
-  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Haiti</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-0.4°C vs home</span></div><div class="cond-team"><span class="cond-tname">Scotland</span><div class="cond-dis-track" aria-label="Heat disadvantage 100/100"><div class="cond-dis-fill cond-dis-hot" style="width:100%"></div></div><span class="cond-delta">+12.1°C vs home</span></div></div>
+  <p class="cond-blurb">Brutal heat — and Haiti hold a major acclimatization edge: Scotland are +13°C above their home baseline while Haiti are stepping into their climate.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Haiti</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-0.2°C vs home</span></div><div class="cond-team"><span class="cond-tname">Scotland</span><div class="cond-dis-track" aria-label="Heat disadvantage 100/100"><div class="cond-dis-fill cond-dis-hot" style="width:100%"></div></div><span class="cond-delta">+12.9°C vs home</span></div></div>
 </div>
 </section>
 
@@ -635,6 +679,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 <p class="verify-flag">spreads away -1: edge +15.1% implausibly large — verify odds freshness and team news before trusting</p>
 <p class="odds-note">market snapshot Jun 13, 9:59 AM ET · median odds across books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> both teams to score; over 2.5.</p></blockquote></div>
+
 </section>
 
 <section aria-labelledby="teams-h">

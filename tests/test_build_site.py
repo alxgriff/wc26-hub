@@ -169,5 +169,56 @@ class CliTests(unittest.TestCase):
             self.assertEqual(len(data["groups"]), 12)
 
 
+class OutcomeGridTests(unittest.TestCase):
+    def test_returns_empty_when_no_info(self):
+        self.assertEqual(bs.render_outcome_grid(None, "Brazil", "Morocco"), "")
+
+    def test_returns_empty_when_lambdas_missing(self):
+        info = {"p_a": 0.55, "p_draw": 0.26, "p_b": 0.19}
+        self.assertEqual(bs.render_outcome_grid(info, "Brazil", "Morocco"), "")
+
+    def test_renders_details_element_with_lambdas(self):
+        info = {"lambda_a": 1.51, "lambda_b": 0.76}
+        html = bs.render_outcome_grid(info, "Brazil", "Morocco")
+        self.assertIn("<details", html)
+        self.assertIn("outcome-grid-wrap", html)
+        self.assertIn("1.5100", html)
+        self.assertIn("0.7600", html)
+
+    def test_team_names_in_buttons_and_js(self):
+        info = {"lambda_a": 1.2, "lambda_b": 0.9}
+        html = bs.render_outcome_grid(info, "Brazil", "Morocco")
+        self.assertIn("Brazil win</button>", html)
+        self.assertIn("Morocco win</button>", html)
+        self.assertIn("Brazil win", html)  # in JS LABELS
+        self.assertIn("Morocco win", html)
+
+    def test_html_escaping_in_buttons(self):
+        info = {"lambda_a": 1.0, "lambda_b": 1.0}
+        html = bs.render_outcome_grid(info, "R&B FC", "X's XI")
+        self.assertIn("R&amp;B FC win</button>", html)
+        # single quote must be JS-escaped in the LABELS string
+        self.assertIn(r"X\'s XI win", html)
+
+    def test_js_str_escapes_single_quote_and_backslash(self):
+        self.assertEqual(bs._js_str("Côte d'Ivoire"), "Côte d\\'Ivoire")
+        self.assertEqual(bs._js_str("back\\slash"), "back\\\\slash")
+        self.assertEqual(bs._js_str("plain"), "plain")
+
+    def test_script_tag_present(self):
+        info = {"lambda_a": 1.51, "lambda_b": 0.76}
+        html = bs.render_outcome_grid(info, "Brazil", "Morocco")
+        self.assertIn("<script>", html)
+        self.assertIn("</script>", html)
+
+    def test_no_unsubstituted_placeholders(self):
+        info = {"lambda_a": 1.51, "lambda_b": 0.76}
+        html = bs.render_outcome_grid(info, "Brazil", "Morocco")
+        self.assertNotIn("__LA__", html)
+        self.assertNotIn("__LB__", html)
+        self.assertNotIn("__TEAM_A__", html)
+        self.assertNotIn("__TEAM_B__", html)
+
+
 if __name__ == "__main__":
     unittest.main()
