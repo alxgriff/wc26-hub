@@ -317,7 +317,8 @@ class OddsWiringTests(unittest.TestCase):
         self.assertIn("Under 2.5", out)
         self.assertIn("pick-row", out)
         self.assertIn("Best bet", out)
-        self.assertIn("best price 2.10 (fanduel)", out)
+        self.assertIn("best price +110 (fanduel)", out)   # 2.10 decimal -> American
+        self.assertIn('title="2.05 decimal">+105', out)   # table cell: American + decimal tooltip
         self.assertIn("+6.5%", out)
         self.assertIn("market snapshot", out)
         self.assertIn("one informational note", out)

@@ -567,7 +567,9 @@ class BttsAndSpreadsEvalTests(unittest.TestCase):
         sel, line, o, imp, our_p, edge = ev["spreads"][0]
         self.assertEqual((sel, line), ("home", "-0.5"))
         self.assertAlmostEqual(our_p, od.ah_prob(od.margin_dist(2.0, 1.0), -0.5), places=9)
-        pick, _ = od.best_bet(ev, threshold=0.001)
+        # cap off (model_sanity high): this asserts spreads are WIRED into best_bet,
+        # not the Option-2 policy (which a large spread edge would otherwise trip)
+        pick, _ = od.best_bet(ev, threshold=0.001, model_sanity=0.5)
         self.assertIsNotNone(pick)
 
     def test_btts_evaluated_from_model(self):
@@ -600,7 +602,8 @@ class RenderTests(unittest.TestCase):
         out = od.render_odds_section("D3", ev, pick, [],
                                      {("h2h", "home", ""): (2.55, "fanduel")})
         self.assertIn("Best bet: home", out)
-        self.assertIn("best price 2.55 (fanduel)", out)
+        self.assertIn("@ +150,", out)                     # 2.50 decimal -> American
+        self.assertIn("best price +155 (fanduel)", out)   # 2.55 decimal -> American
         self.assertIn("Flat 1u (paper)", out)
         self.assertIn("display threshold", out)   # 3pp marker is wired, not inert
 
@@ -648,6 +651,66 @@ class SourceLabelTests(unittest.TestCase):
                + h2h_rows("D3", 2.5, 3.3, 3.1, source="best:draftkings",
                           ts="2026-06-13T10:00:00-04:00"))
         self.assertEqual(od.snapshot_source_label(old + new, "D3"), "DraftKings line")
+
+
+class ModelPricedSanityTests(unittest.TestCase):
+    """Option 2 (June 14): model-priced markets (no consensus cross-check) clear a
+    stricter sanity ceiling than corroborated 1X2."""
+
+    def _ev(self, market, edge):
+        sel = {"h2h": "home", "totals": "over", "spreads": "home", "btts": "yes"}[market]
+        line = {"h2h": "", "totals": "2.5", "spreads": "-0.5", "btts": ""}[market]
+        base = {"h2h": [], "totals": [], "spreads": [], "btts": [], "missing": []}
+        base[market] = [(sel, line, 2.0, 0.50, 0.50 + edge, edge)]
+        return base
+
+    def test_model_priced_edge_above_cap_is_flagged_not_recorded(self):
+        for market in ("totals", "spreads", "btts"):
+            picks, flags = od.best_bets(self._ev(market, 0.10))   # 10pp > 8pp cap
+            self.assertEqual(picks, [], market)
+            self.assertTrue(any("uncorroborated" in f for f in flags), market)
+
+    def test_same_edge_on_consensus_1x2_is_recorded(self):
+        # 10pp on 1X2 is corroborated (vs consensus) and well under its 15pp ceiling
+        picks, flags = od.best_bets(self._ev("h2h", 0.10))
+        self.assertEqual(len(picks), 1)
+        self.assertEqual(picks[0]["market"], "h2h")
+        self.assertEqual(flags, [])
+
+    def test_model_priced_edge_below_cap_still_records(self):
+        picks, flags = od.best_bets(self._ev("totals", 0.06))    # 6pp in [5pp, 8pp)
+        self.assertEqual(len(picks), 1)
+        self.assertEqual(flags, [])
+
+    def test_cap_is_inclusive_at_eight_points(self):
+        picks, flags = od.best_bets(self._ev("spreads", 0.08))   # AT the ceiling -> flagged
+        self.assertEqual(picks, [])
+        self.assertTrue(any("uncorroborated" in f for f in flags))
+
+
+class AmericanOddsTests(unittest.TestCase):
+    """Decimal -> American moneyline display (odds.american_odds)."""
+
+    CASES = [(2.50, "+150"), (1.50, "-200"), (2.00, "+100"), (1.04, "-2500"),
+             (36.0, "+3500"), (1.91, "-110"), (3.40, "+240")]
+
+    def test_decimal_to_american(self):
+        for dec, want in self.CASES:
+            self.assertEqual(od.american_odds(dec), want, f"decimal {dec}")
+
+    def test_underdog_positive_favorite_negative(self):
+        self.assertTrue(od.american_odds(2.20).startswith("+"))
+        self.assertTrue(od.american_odds(1.80).startswith("-"))
+        self.assertEqual(od.american_odds(2.00), "+100")   # even money
+
+    def test_degenerate_odds_safe(self):
+        self.assertEqual(od.american_odds(1.0), "n/a")     # devig forbids it; no zero-div
+
+    def test_build_site_mirror_stays_in_lockstep(self):
+        # build_site keeps its own _american_odds; guard against drift
+        import build_site as bs
+        for dec, _ in self.CASES + [(1.33, ""), (5.0, ""), (1.0, "")]:
+            self.assertEqual(bs._american_odds(dec), od.american_odds(dec), f"decimal {dec}")
 
 
 if __name__ == "__main__":

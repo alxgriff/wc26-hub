@@ -378,12 +378,14 @@ class TotalsLadderTests(unittest.TestCase):
         self.assertTrue(any("push" in l for l in lines))
 
     def test_best_bets_top3_distinct_markets_at_record_bar(self):
+        # 1X2 edge can run to 15pp; model-priced legs must stay under the stricter
+        # 8pp cap to be recordable (Option 2, June 14), so they sit in [5pp, 8pp).
         ev = {"h2h": [("away", "", 3.85, 0.25, 0.36, 0.11),
                       ("home", "", 2.10, 0.45, 0.38, -0.07)],
-              "totals": [("over", "2.0", 1.79, 0.53, 0.62, 0.09),
-                         ("over", "2.5", 2.37, 0.40, 0.49, 0.09),   # same market
+              "totals": [("over", "2.0", 1.79, 0.555, 0.62, 0.065),
+                         ("over", "2.5", 2.37, 0.42, 0.49, 0.07),   # same market, best totals
                          ("under", "2.5", 1.62, 0.60, 0.51, -0.09)],
-              "spreads": [("away", "0.5", 1.77, 0.55, 0.64, 0.098)],
+              "spreads": [("away", "0.5", 1.77, 0.565, 0.64, 0.075)],
               "btts": [("yes", "", 1.90, 0.52, 0.56, 0.04)],        # below 5% bar
               "missing": []}
         picks, flags = od.best_bets(ev)

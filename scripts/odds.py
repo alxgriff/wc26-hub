@@ -85,7 +85,14 @@ PICK_COLUMNS = ["match_id", "market", "selection", "line", "odds", "book",
                 "status", "units", "clv_pp"]
 
 EDGE_THRESHOLD = 0.03      # user-tunable via --threshold
-SANITY_EDGE = 0.15         # above this: flag, never auto-pick
+SANITY_EDGE = 0.15         # corroborated 1X2 (vs consensus): flag above this
+# Model-priced markets (totals/spreads/BTTS) are priced from the SAME score matrix
+# that generates the edge — there is no independent consensus cross-check (1X2 has
+# one; see the module docstring) — so a large edge is far more likely model error
+# than market error. They clear a STRICTER sanity ceiling (user-set June 14):
+# flagged above MODEL_PRICED_SANITY, recordable only in [RECORD_THRESHOLD, this).
+MODEL_PRICED_MARKETS = ("totals", "spreads", "btts")
+MODEL_PRICED_SANITY = 0.08
 H2H_SELECTIONS = ("home", "draw", "away")
 
 # Single-book sourcing (June 14): the snapshot pulls one bookmaker — the one the
@@ -101,6 +108,19 @@ BOOK_DISPLAY = {"draftkings": "DraftKings", "fanduel": "FanDuel", "betmgm": "Bet
 def _book_display(key: str) -> str:
     """Pretty book name for provenance notes; unknown keys pass through as-is."""
     return BOOK_DISPLAY.get(key, key)
+
+
+def american_odds(decimal: float) -> str:
+    """Decimal odds -> American moneyline string (the intuitive US form):
+    2.50 -> '+150', 1.50 -> '-200', 2.00 -> '+100'. Both sides always carry a
+    sign so '+120' / '-200' read unambiguously. Decimal <= 1.0 cannot occur
+    (devig rejects it) but degrades to 'n/a' rather than dividing by zero.
+    Display only — odds_log/picks_log stay decimal, the canonical math form."""
+    if decimal <= 1.0:
+        return "n/a"
+    if decimal >= 2.0:
+        return f"+{round((decimal - 1) * 100)}"
+    return f"-{round(100 / (decimal - 1))}"
 
 
 class OddsError(ValueError):
@@ -474,23 +494,39 @@ RECORD_THRESHOLD = 0.05    # picks must clear a higher bar than table display
 MAX_PICKS_PER_MATCH = 3    # top edges across DISTINCT markets
 
 
+def _market_sanity(market: str, sanity: float, model_sanity: float) -> float:
+    """Flag ceiling for a market. Model-priced markets (no independent
+    corroboration) clear a stricter bar than consensus-checked 1X2."""
+    return model_sanity if market in MODEL_PRICED_MARKETS else sanity
+
+
 def best_bets(evaluation: dict, threshold: float = RECORD_THRESHOLD,
-              sanity: float = SANITY_EDGE,
+              sanity: float = SANITY_EDGE, model_sanity: float = MODEL_PRICED_SANITY,
               limit: int = MAX_PICKS_PER_MATCH) -> tuple:
     """(picks, flags): the best selection per market with edge ≥ threshold
-    and ≤ sanity, ranked by edge, capped at ``limit``. One pick per market by
-    construction — ladder lines within a market are mutually exclusive
-    alternatives, and same-match picks are correlated enough already (they
-    tend to win and lose together; the units record swings accordingly).
-    Edges above the sanity ceiling become flags, never picks."""
+    and < the market's sanity ceiling, ranked by edge, capped at ``limit``. One
+    pick per market by construction — ladder lines within a market are mutually
+    exclusive alternatives, and same-match picks are correlated enough already
+    (they tend to win and lose together; the units record swings accordingly).
+    Edges at/above the ceiling become flags, never picks. The ceiling is market-
+    aware: consensus-checked 1X2 uses ``sanity`` (15pp); model-priced totals/
+    spreads/BTTS use the stricter ``model_sanity`` (8pp) because a large edge on a
+    self-priced market is far more likely our miscalibration than market error."""
     flags = []
     per_market: dict = {}
     for market in ("h2h", "totals", "spreads", "btts"):
+        ceiling = _market_sanity(market, sanity, model_sanity)
         for sel, line, odds, implied, our_p, edge in evaluation.get(market, []):
-            if edge >= sanity:   # inclusive: an edge AT the ceiling is the case the rule targets
-                flags.append(f"{market} {sel}{f' {line}' if line else ''}: edge "
-                             f"{edge:+.1%} implausibly large — verify odds freshness "
-                             "and team news before trusting")
+            if edge >= ceiling:   # inclusive: an edge AT the ceiling is the case the rule targets
+                tag = f"{market} {sel}{f' {line}' if line else ''}"
+                if market in MODEL_PRICED_MARKETS:
+                    flags.append(f"{tag}: model-priced edge {edge:+.1%} exceeds the "
+                                 f"{ceiling:.0%} cap for uncorroborated markets (priced "
+                                 "from our own score matrix, no consensus cross-check) "
+                                 "— not recorded")
+                else:
+                    flags.append(f"{tag}: edge {edge:+.1%} implausibly large — verify "
+                                 "odds freshness and team news before trusting")
             elif edge >= threshold:
                 cand = {"market": market, "selection": sel, "line": line,
                         "odds": odds, "implied_p": implied,
@@ -503,11 +539,12 @@ def best_bets(evaluation: dict, threshold: float = RECORD_THRESHOLD,
 
 
 def best_bet(evaluation: dict, threshold: float = EDGE_THRESHOLD,
-             sanity: float = SANITY_EDGE) -> tuple:
+             sanity: float = SANITY_EDGE,
+             model_sanity: float = MODEL_PRICED_SANITY) -> tuple:
     """(pick | None, flags): the single largest qualifying edge at the
     display threshold. Kept for compatibility; recording uses best_bets."""
     picks, flags = best_bets(evaluation, threshold=threshold, sanity=sanity,
-                             limit=1)
+                             model_sanity=model_sanity, limit=1)
     return (picks[0] if picks else None), flags
 
 
@@ -702,7 +739,7 @@ def render_odds_section(match_id: str, evaluation: dict, pick,
         for mk, (sel, line, odds, implied, our_p, edge) in labelled:
             clears = edge >= threshold
             actionable += int(clears)
-            lines.append(f"| {mk} | {sel} | {odds:.2f} | {implied:.0%} | "
+            lines.append(f"| {mk} | {sel} | {american_odds(odds)} | {implied:.0%} | "
                          f"{our_p:.0%} | {edge:+.1%}{' ✓' if clears else ''} |")
         if actionable:
             lines.append("")
@@ -711,7 +748,9 @@ def render_odds_section(match_id: str, evaluation: dict, pick,
         if evaluation.get("spreads") or evaluation.get("btts") or evaluation["totals"]:
             lines.append("")
             lines.append("_Totals/AH/BTTS are model-priced from the score matrix "
-                         "(the Opta overlay covers W/D/L only)._")
+                         "(the Opta overlay covers W/D/L only) — no independent "
+                         f"consensus check, so they clear a stricter {MODEL_PRICED_SANITY:.0%} "
+                         f"edge ceiling vs {SANITY_EDGE:.0%} for 1X2._")
         if source_label:
             lines.append("")
             lines.append(f"_Odds source: {source_label}, de-vigged multiplicatively._")
@@ -719,11 +758,11 @@ def render_odds_section(match_id: str, evaluation: dict, pick,
     if picks:
         for i, pk in enumerate(picks, 1):
             bp = best_prices.get((pk["market"], pk["selection"], str(pk["line"])))
-            price = f" — best price {bp[0]:.2f} ({bp[1]})" if bp else ""
+            price = f" — best price {american_odds(bp[0])} ({bp[1]})" if bp else ""
             ln = f" {pk['line']}" if pk["line"] else ""
             label = "Best bet" if len(picks) == 1 else f"Pick {i}"
             lines.append(f"**{label}: {pk['selection']}{ln} ({pk['market']}) "
-                         f"@ {pk['odds']:.2f}, edge {pk['edge']:+.1%}**{price}. "
+                         f"@ {american_odds(pk['odds'])}, edge {pk['edge']:+.1%}**{price}. "
                          "Flat 1u (paper).")
         if len(picks) > 1:
             lines.append("_Same-match picks are correlated — they tend to win "

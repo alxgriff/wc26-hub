@@ -97,8 +97,14 @@ specifies weights. Probabilities must sum to 1.0 ± 0.001 per match.
   method; power or Shin method optional upgrade later).
 - Edge_i = model_p_i − implied_i. Display threshold 3 percentage points;
   **recorded picks**: up to 3 per match, the best selection per distinct
-  market, each clearing a 5-point recording bar (user-set June 12) and the
-  15-point sanity ceiling. Same-match picks are correlated — disclose it
+  market, each clearing a 5-point recording bar (user-set June 12) and a sanity
+  ceiling. The sanity ceiling is **market-aware** (user-set June 14): 1X2 is
+  checked against the published consensus, so it keeps the 15-point ceiling;
+  totals/spreads/BTTS are model-priced from the same score matrix that makes the
+  edge (no independent cross-check), so they clear a **stricter 8-point ceiling**
+  — a large self-priced edge is far more likely our miscalibration than market
+  error (see the Germany–Curaçao total-goals saturation case). Same-match picks
+  are correlated — disclose it
   wherever they're shown. Otherwise output "No bet" — a legitimate,
   expected result.
 - Track closing line value: log closing odds for every pick; CLV = closing

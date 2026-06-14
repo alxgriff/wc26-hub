@@ -513,6 +513,8 @@ def load_odds_engine():
                 "recorded": [p for p in picks if p["match_id"] == mid],
                 "threshold": od.EDGE_THRESHOLD,
                 "record_threshold": record_threshold,
+                "model_sanity": od.MODEL_PRICED_SANITY,
+                "sanity": od.SANITY_EDGE,
                 "source_label": od.snapshot_source_label(odds_rows, mid),
                 "snapshot_ts": max(r["timestamp"] for r in match_rows),
                 "projection": {"total": pred.total,
@@ -851,6 +853,17 @@ def _fmt_snapshot_ts(ts: str) -> str:
         return ts
 
 
+def _american_odds(decimal: float) -> str:
+    """Decimal -> American moneyline ('+150' / '-200'). Local mirror of
+    odds.american_odds — the HTML layer keeps its own formatters (like
+    _sel_label / _fmt_snapshot_ts) and a test asserts the two stay in lockstep."""
+    if decimal <= 1.0:
+        return "n/a"
+    if decimal >= 2.0:
+        return f"+{round((decimal - 1) * 100)}"
+    return f"-{round(100 / (decimal - 1))}"
+
+
 def render_market(odds_info: dict | None, team_a: str, team_b: str,
                   prebaked: str | None, played: bool = False) -> str:
     """Odds & Best Bet block: the de-vigged edge table + the pick when the
@@ -885,7 +898,8 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
             rows_html.append(
                 f'      <tr{cls}><td class="lbl">{_esc(_MARKET_LABELS[market])}</td>'
                 f'<td class="lbl">{_esc(_sel_label(market, sel, line, team_a, team_b))}</td>'
-                f'<td>{odds_v:.2f}</td><td>{implied:.0%}</td><td>{our_p:.0%}</td>'
+                f'<td title="{odds_v:.2f} decimal">{_american_odds(odds_v)}</td>'
+                f'<td>{implied:.0%}</td><td>{our_p:.0%}</td>'
                 f'<td class="{edge_cls}">{edge:+.1%}</td></tr>')
     if rows_html:
         parts.append(
@@ -903,11 +917,11 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
         for i, pk in enumerate(picks, 1):
             bp = odds_info["best_prices"].get(
                 (pk["market"], pk["selection"], str(pk["line"])))
-            price = f' — best price {bp[0]:.2f} ({_esc(bp[1])})' if bp else ""
+            price = f' — best price {_american_odds(bp[0])} ({_esc(bp[1])})' if bp else ""
             num = f'{i}. ' if len(picks) > 1 else ""
             pick_lines.append(
                 f'<p>{num}<strong>{_esc(_sel_label(pk["market"], pk["selection"], pk["line"], team_a, team_b))}'
-                f'</strong> ({_MARKET_LABELS[pk["market"]]}) @ {pk["odds"]:.2f}, '
+                f'</strong> ({_MARKET_LABELS[pk["market"]]}) @ {_american_odds(pk["odds"])}, '
                 f'edge <strong>{pk["edge"]:+.1%}</strong>{price}. Flat 1u, paper record.</p>')
         corr = ('<p class="odds-note">same-match picks are correlated — they tend '
                 'to win and lose together; the units record swings accordingly.</p>'
@@ -922,8 +936,12 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
 
     for rec in odds_info.get("recorded", []):
         status = rec.get("status", "open")
+        try:
+            rec_odds = _american_odds(float(rec["odds"]))
+        except (TypeError, ValueError, KeyError):   # never break the build on a bad log row
+            rec_odds = _esc(str(rec.get("odds", "")))
         line_bits = [f'Logged pick: {_esc(_sel_label(rec["market"], rec["selection"], rec["line"], team_a, team_b))} '
-                     f'@ {_esc(rec["odds"])} ({_esc(rec["book"])}), edge {_esc(rec["edge_pp"])}pp']
+                     f'@ {rec_odds} ({_esc(rec["book"])}), edge {_esc(rec["edge_pp"])}pp']
         if status != "open":
             line_bits.append(f'settled <b>{_esc(status)}</b> for {_esc(rec["units"])}u')
             if rec.get("clv_pp"):
@@ -939,8 +957,12 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
     notes = [f'market snapshot {_esc(_fmt_snapshot_ts(odds_info["snapshot_ts"]))} · '
              f'{src}, de-vigged multiplicatively']
     if ev.get("totals") or ev.get("spreads") or ev.get("btts"):
+        ms = odds_info.get("model_sanity", 0.08)
+        sn = odds_info.get("sanity", 0.15)
         notes.append("totals / handicap / BTTS are model-priced from the score "
-                     "matrix — the Opta overlay covers W/D/L only")
+                     "matrix — the Opta overlay covers W/D/L only, and with no "
+                     f"independent consensus check they clear a stricter {ms:.0%} "
+                     f"edge ceiling vs {sn:.0%} for 1X2")
     notes.extend(ev.get("missing", []))
     parts.append('<p class="odds-note">' + " · ".join(_esc(n) for n in notes) + ".</p>")
 
