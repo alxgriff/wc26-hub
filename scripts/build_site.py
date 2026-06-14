@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """WC26 static site builder — standings hub + team cards + matchup previews.
 
-Outputs (all self-contained HTML, inline CSS from templates/site.css, zero JS):
+Outputs (all self-contained HTML, inline CSS from templates/site.css, minimal inline JS):
 
     docs/index.html          the standings front page
     docs/teams/{slug}.html   48 team cards (kb profile + live standing + fixtures)
@@ -337,6 +337,7 @@ def load_predictor(fixtures: Path | None = None):
                 "over25": p.over.get(2.5), "btts": p.btts,
                 "hfa": hfa, "consensus": bool(o),
                 "source": (o or {}).get("source", ""),
+                "lambda_a": p.lambda_a, "lambda_b": p.lambda_b,
             }
         except Exception:
             return None
@@ -669,6 +670,121 @@ def render_sweat(info: dict | None, team_a: str, team_b: str) -> str:
         f'  <p class="cond-blurb">{blurb}</p>\n'
         + (f'  <div class="cond-teams">{teams_html}</div>\n' if teams_html else "")
         + '</div>'
+    )
+
+
+def _js_str(s: str) -> str:
+    """Escape a string for embedding in a single-quoted JS string literal."""
+    return s.replace("\\", "\\\\").replace("'", "\\'")
+
+
+# JS template for the Poisson score matrix. __LA__ / __LB__ are replaced with
+# per-match xG floats; __TEAM_A__ / __TEAM_B__ with JS-escaped team names.
+_OUTCOME_GRID_JS = """\
+(function(){
+  var la=__LA__,lb=__LB__,N=8,SHOW=6,i,j;
+  function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
+  var pa=[],pb=[];
+  for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
+  var M=[],z=0;
+  for(i=0;i<=N;i++){M[i]=[];for(j=0;j<=N;j++){M[i][j]=pa[i]*pb[j];z+=M[i][j];}}
+  for(i=0;i<=N;i++)for(j=0;j<=N;j++)M[i][j]/=z;
+  var maxp=0,mi=0,mj=0;
+  for(i=0;i<=N;i++)for(j=0;j<=N;j++){if(M[i][j]>maxp){maxp=M[i][j];mi=i;mj=j;}}
+  function region(i,j,q){
+    if(q==='awin')return i>j; if(q==='draw')return i===j; if(q==='bwin')return i<j;
+    if(q==='over')return(i+j)>2.5; if(q==='btts')return i>=1&&j>=1; return true;
+  }
+  function rColor(i,j){return i>j?'98,185,126':i===j?'217,169,72':'232,118,90';}
+  var mx=document.getElementById('og-matrix');
+  var html='<div class="og-corner">A \\\\ B</div>';
+  for(j=0;j<SHOW;j++)html+='<div class="og-ax-top">'+j+'</div>';
+  for(i=0;i<SHOW;i++){
+    html+='<div class="og-ax-side">'+i+'</div>';
+    for(j=0;j<SHOW;j++){
+      var p=M[i][j]*100;
+      var alpha=Math.pow(M[i][j]/maxp,0.55)*0.92+0.05;
+      var cls='og-cell'+(i===mi&&j===mj?' og-modal':'');
+      html+='<div class="'+cls+'" data-i="'+i+'" data-j="'+j+'" '
+        +'style="background:rgba('+rColor(i,j)+','+alpha.toFixed(3)+')" '
+        +'aria-label="'+i+'-'+j+', '+p.toFixed(1)+'%">'
+        +'<span>'+(p>=0.5?Math.round(p):'·')+'</span></div>';
+    }
+  }
+  mx.innerHTML=html;
+  var cells=[].slice.call(mx.querySelectorAll('.og-cell'));
+  var tail=0;
+  for(i=0;i<=N;i++)for(j=0;j<=N;j++){if(i>=SHOW||j>=SHOW)tail+=M[i][j];}
+  document.getElementById('og-tail').textContent=
+    'Showing 0–5 each side. Scores beyond: '+(tail*100).toFixed(1)+'% — still counted.';
+  var LABELS={
+    awin:['__TEAM_A__ win','98,185,126'],
+    draw:['Draw','217,169,72'],
+    bwin:['__TEAM_B__ win','232,118,90'],
+    over:['Over 2.5 goals','236,229,210'],
+    btts:['Both teams score','236,229,210']
+  };
+  var readout=document.getElementById('og-readout'),active=null;
+  function apply(q){
+    if(!q){cells.forEach(function(c){c.classList.remove('og-dim','og-hot');});readout.innerHTML='';return;}
+    cells.forEach(function(c){
+      var hit=region(+c.dataset.i,+c.dataset.j,q);
+      c.classList.toggle('og-dim',!hit);c.classList.toggle('og-hot',hit);
+    });
+    var sum=0;
+    for(i=0;i<=N;i++)for(j=0;j<=N;j++){if(region(i,j,q))sum+=M[i][j];}
+    var L=LABELS[q];
+    readout.innerHTML='<b>'+L[0]+'</b> = <span class="og-big">'+Math.round(sum*100)+'%</span>';
+  }
+  document.getElementById('og-qbar').addEventListener('click',function(e){
+    var btn=e.target.closest('.og-q');if(!btn)return;
+    var q=btn.dataset.q,on=(active!==q);
+    [].forEach.call(this.querySelectorAll('.og-q'),function(b){b.setAttribute('aria-pressed','false');});
+    if(on){btn.setAttribute('aria-pressed','true');active=q;apply(q);}
+    else{active=null;apply(null);}
+  });
+})();"""
+
+
+def render_outcome_grid(info: dict | None, team_a: str, team_b: str) -> str:
+    """Collapsible Poisson score-matrix under The Market section.
+    Only renders for scheduled matches where the live predictor provides lambda
+    values; returns '' otherwise — no placeholder, purely additive."""
+    la = (info or {}).get("lambda_a")
+    lb = (info or {}).get("lambda_b")
+    if la is None or lb is None:
+        return ""
+    a_esc = _esc(team_a)
+    b_esc = _esc(team_b)
+    js = (_OUTCOME_GRID_JS
+          .replace("__LA__", f"{la:.4f}")
+          .replace("__LB__", f"{lb:.4f}")
+          .replace("__TEAM_A__", _js_str(team_a))
+          .replace("__TEAM_B__", _js_str(team_b)))
+    return (
+        f'<details class="outcome-grid-wrap">\n'
+        f'<summary class="outcome-grid-toggle">Show score grid</summary>\n'
+        f'<div class="outcome-grid-inner">\n'
+        f'<p class="og-lede">Each cell is one exact scoreline. '
+        f'Greener = {a_esc} win, gold = draw, red = {b_esc} win; '
+        f'brighter = more likely. Press a button to highlight cells that count toward that outcome.</p>\n'
+        f'<div class="og-qbar" id="og-qbar">\n'
+        f'  <button class="og-q awin" data-q="awin" aria-pressed="false">{a_esc} win</button>\n'
+        f'  <button class="og-q draw" data-q="draw" aria-pressed="false">Draw</button>\n'
+        f'  <button class="og-q bwin" data-q="bwin" aria-pressed="false">{b_esc} win</button>\n'
+        f'  <button class="og-q over" data-q="over" aria-pressed="false">Over 2.5</button>\n'
+        f'  <button class="og-q btts" data-q="btts" aria-pressed="false">Both score</button>\n'
+        f'</div>\n'
+        f'<div class="og-readout" id="og-readout"></div>\n'
+        f'<div class="og-matrix" id="og-matrix"></div>\n'
+        f'<div class="og-axhint">'
+        f'<span>← {b_esc} goals (top)</span>'
+        f'<span>{a_esc} goals (side) ↓</span>'
+        f'</div>\n'
+        f'<p class="og-tail" id="og-tail"></p>\n'
+        f'</div>\n'
+        f'</details>\n'
+        f'<script>\n{js}\n</script>'
     )
 
 
@@ -1375,6 +1491,7 @@ def render_match_page(row: dict, s: "st.Standings",
         card_html=render_card_sections(sections),
         wire_html=wire_html,
         odds_html=render_market(odds_info, team_a, team_b, odds_note, played=played),
+        outcome_grid_html=render_outcome_grid(info, team_a, team_b),
         repo_url=REPO_URL,
     )
 
