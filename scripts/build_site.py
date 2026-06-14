@@ -1061,60 +1061,77 @@ def render_record_bets(rows: list[dict], root: str = "",
     return table, units_line
 
 
-_BRACKET_ROUNDS = (
-    ("Round of 16", (89, 90, 91, 92, 93, 94, 95, 96)),
-    ("Quarter-finals", (97, 98, 99, 100)),
-    ("Semi-finals", (101, 102)),
-    ("Final", (104,)),
-)
+_ROUND_TITLES = ("Round of 32", "Round of 16", "Quarter-finals",
+                 "Semi-finals", "Final")
+
+
+def _bracket_ordered_rounds() -> list[list[int]]:
+    """Match numbers per round in *bracket* (in-order traversal) order, so a column
+    laid out top-to-bottom places each match exactly between the two feeders below
+    it. Derived from bracket.BRACKET_TREE — the winner-of wiring is the single
+    source of truth for who-feeds-whom; this just reads the tree's leaf order."""
+    parent: dict[int, int] = {}
+    for m, (a, b) in bk.BRACKET_TREE.items():
+        parent[a] = m
+        parent[b] = m
+    root = max(bk.BRACKET_TREE)            # the Final
+    leaves: list[int] = []
+
+    def walk(m: int) -> None:
+        kids = bk.BRACKET_TREE.get(m)
+        if kids:
+            walk(kids[0])
+            walk(kids[1])
+        else:
+            leaves.append(m)               # an R32 match
+
+    walk(root)
+    rounds = [leaves]
+    while len(rounds[-1]) > 1:
+        prev = rounds[-1]
+        rounds.append([parent[prev[i]] for i in range(0, len(prev), 2)])
+    return rounds                          # [R32(16), R16(8), QF(4), SF(2), Final(1)]
 
 
 def render_bracket_html(proj: dict, root: str = "") -> str:
-    """The as-it-stands knockout bracket (bracket.project output) as HTML rounds.
-    R32 slots resolve to linked team names where the group has played, abstract
-    'Winner E' / 'Best 3rd of …' labels where gated; downstream rounds show the
-    fixed 'Winner <match>' paths (no winners are projected — that is follow-up
-    work). Presentation only; the projection itself is computed in bracket.py."""
+    """The as-it-stands knockout bracket as a traditional left-to-right cascade:
+    R32 cards on the left, each later round's matches centred between their two
+    feeders, connector lines implying where a winner advances (so no match numbers
+    are needed). R32 slots resolve to linked team names where the group has played
+    and abstract 'Winner E' / 'Best 3rd of …' labels where gated; downstream slots
+    are blank fill-in lines — winners aren't projected yet (that is follow-up work).
+    Presentation only; the projection itself is computed in bracket.py."""
     r32 = {int(k): v for k, v in proj["r32"].items()}
-    tree = {int(k): tuple(v) for k, v in proj["tree"].items()}
+    rounds = _bracket_ordered_rounds()
 
-    def slot(team, label, *, feed=False):
+    def slot(team=None, label=None):
         if team:
-            return (f'<span class="bteam"><a href="{_team_link(team, root)}">'
-                    f'{_esc(team)}</a></span>')
-        cls = "bteam feed" if feed else "bteam tbd"
-        return f'<span class="{cls}">{_esc(label)}</span>'
+            return (f'<span class="bslot" title="{_esc(team)}">'
+                    f'<a href="{_team_link(team, root)}">{_esc(team)}</a></span>')
+        if label:
+            return f'<span class="bslot tbd" title="{_esc(label)}">{_esc(label)}</span>'
+        return '<span class="bslot tbd"></span>'      # blank — filled by position
 
-    def tie(m, a, b, prov):
-        cls = "btie prov" if prov else "btie"
-        return (f'<li class="{cls}" id="m{m}"><span class="bm">{m}</span>'
-                f'<div class="bpair">{a}{b}</div></li>')
+    def card(m, a, b):
+        return f'<li class="btie" id="m{m}"><div class="bpair">{a}{b}</div></li>'
 
-    def block(title, items):
-        return (f'<li class="bround"><h3>{_esc(title)}</h3>'
-                f'<ul>{"".join(items)}</ul></li>')
-
-    r32_items = []
-    for m in range(73, 89):
-        e = r32[m]
-        r32_items.append(tie(m, slot(e["home"], e["home_label"]),
-                             slot(e["away"], e["away_label"]), e["provisional"]))
-    blocks = [block("Round of 32", r32_items)]
-
-    for title, nums in _BRACKET_ROUNDS:
+    cols = []
+    for r, nums in enumerate(rounds):
         items = []
         for m in nums:
-            x, y = tree[m]
-            items.append(tie(m, slot(None, f"Winner {x}", feed=True),
-                             slot(None, f"Winner {y}", feed=True), True))
-        blocks.append(block(title, items))
+            if r == 0:
+                e = r32[m]
+                items.append(card(m, slot(team=e["home"], label=e["home_label"]),
+                                  slot(team=e["away"], label=e["away_label"])))
+            else:
+                items.append(card(m, slot(), slot()))
+        cols.append(f'<li class="bround" data-r="{r}"><h3>{_esc(_ROUND_TITLES[r])}</h3>'
+                    f'<ul>{"".join(items)}</ul></li>')
 
-    third = tie(proj["third_place_match"],
-                slot(None, "Loser 101", feed=True),
-                slot(None, "Loser 102", feed=True), True)
-    return (f'<ol class="bracket">{"".join(blocks)}</ol>'
-            f'<div class="bracket-third"><h3>Third-place play-off</h3>'
-            f'<ul>{third}</ul></div>')
+    third = (f'<div class="bracket-third"><h3>Third-place play-off</h3>'
+             f'<p class="bthird-sub">The two semi-final losers</p>'
+             f'<ul>{card(proj["third_place_match"], slot(), slot())}</ul></div>')
+    return f'<ol class="bracket">{"".join(cols)}</ol>{third}'
 
 
 def render_bracket_page(proj: dict, css: str, generated_at: str,

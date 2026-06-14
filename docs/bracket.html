@@ -19,7 +19,6 @@
   --green-soft:rgba(28,107,53,.10);
   --verm:#a83018;
   --verm-soft:rgba(168,48,24,.08);
-  --crimson:#7a0c0c;
   --amber:#8a5a00;
   --amber-soft:rgba(138,90,0,.14);
   --serif:"Fraunces",Georgia,"Times New Roman",serif;
@@ -36,7 +35,6 @@
     --green-soft:rgba(98,185,126,.12);
     --verm:#e8765a;
     --verm-soft:rgba(232,118,90,.10);
-    --crimson:#c41a1a;
     --amber:#d9a948;
     --amber-soft:rgba(217,169,72,.12);
   }
@@ -382,29 +380,6 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .wire li{margin-bottom:.45em}
 .wire a{word-break:break-all}
 
-/* ---------- sweat factor / conditions meter ---------- */
-.conditions{margin:.2rem 0 .4rem}
-.cond-stamp{display:block;font-family:var(--mono);font-size:.67rem;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.55rem}
-.cond-stats{font-size:.9rem;margin-bottom:.35rem}
-.cond-track{height:8px;background:var(--hairline);border-radius:4px;margin:.2rem 0 .25rem;position:relative;overflow:hidden}
-.cond-fill{position:absolute;inset:0;right:auto;border-radius:4px;background:var(--verm)}
-.cond-sev{font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--verm);margin:.1rem 0 .8rem}
-.cond-teams{display:grid;gap:.5rem;margin-top:.2rem}
-.cond-team{display:grid;grid-template-columns:minmax(8rem,auto) 1fr auto;align-items:center;gap:.5rem;font-size:.85rem}
-.cond-tname{font-weight:700}
-.cond-dis-track{height:4px;background:var(--hairline);border-radius:2px;position:relative;overflow:hidden}
-.cond-dis-fill{position:absolute;inset:0;right:auto;border-radius:2px;background:var(--amber)}
-.cond-dis-hot{background:var(--crimson)}
-.cond-delta{color:var(--ink-soft);font-family:var(--mono);font-size:.7rem;white-space:nowrap;text-align:right}
-.cond-ac{font-family:var(--mono);font-size:.82rem;color:var(--ink-soft);margin:.2rem 0}
-/* severity colour overrides */
-.cond-sev-severe{color:var(--verm)}
-.cond-sev-high{color:var(--amber)}
-.cond-sev-moderate{color:var(--amber)}
-.cond-sev-mild{color:var(--ink-soft)}
-.cond-sev-indoors{color:var(--ink-soft)}
-.cond-blurb{font-size:.9rem;color:var(--ink-soft);font-style:italic;margin:.35rem 0 .6rem}
-
 /* ---------- match pages: article column + margin-notes rail ----------
    Print idiom: the whole article (call, stakes, read, wire, market) flows
    as one measured column while the key-duel / watch-for / selection /
@@ -424,30 +399,51 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 }
 
 /* ---------- knockout bracket (as-it-stands) ----------
-   Rounds rail left-to-right; each round is a column of match cards. Horizontally
-   scrollable as a whole on narrow screens. R32 names link to team pages; open
-   slots (gated groups, unresolved thirds, downstream 'Winner N') read muted. */
-.bracket-wrap{overflow-x:auto;padding-bottom:8px}
-.bracket{list-style:none;display:flex;gap:clamp(12px,2.2vw,26px);min-width:min-content;align-items:start}
-.bround{min-width:178px;flex:0 0 auto}
-.bround h3{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--verm);border-bottom:2px solid var(--ink);padding-bottom:5px;margin-bottom:12px}
-.bround ul{list-style:none;display:flex;flex-direction:column;gap:10px}
-.btie{border:1px solid var(--ink);background:var(--paper-2);box-shadow:2px 2px 0 var(--hairline);padding:7px 9px 8px;position:relative}
-.btie.prov{border-style:dashed}
-.bm{display:block;font-family:var(--mono);font-size:.56rem;font-weight:700;letter-spacing:.16em;color:var(--ink-soft);margin-bottom:4px}
-.bpair{display:flex;flex-direction:column;gap:3px}
-.bteam{font-size:.9rem;line-height:1.25;font-weight:700;padding:1px 0;border-bottom:1px dotted var(--hairline)}
-.bpair .bteam:last-child{border-bottom:0}
-.bteam a{text-decoration:none}
-.bteam a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
-.bteam.tbd,.bteam.feed{font-weight:500;font-style:italic;color:var(--ink-soft)}
-.bteam.feed{font-family:var(--mono);font-style:normal;font-size:.74rem;letter-spacing:.04em}
-.bracket-third{margin-top:22px;max-width:200px}
-.bracket-third h3{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--hairline);padding-bottom:5px;margin-bottom:10px}
+   Traditional left-to-right cascade. Each round is a fixed-height column; a match
+   in round r sits exactly between its two feeders in round r-1, so progression is
+   implied by position (no match numbers). Geometry is deterministic: every card is
+   --bmh tall, the R32 pitch is --bu (=card+gap), and round r has pitch 2^r·--bu —
+   so the per-round top offset and inner gap are pure calc(). Connector lines: each
+   feeder draws a horizontal stub right (::after) to the next column's edge, and the
+   top card of each pair draws the vertical bar (::before) joining the pair there.
+   Cards are a fixed height with ellipsis so content can't break the math. */
+.bracket-wrap{--bmh:42px;--bgap:14px;--bgut:30px;--bu:calc(var(--bmh) + var(--bgap));--bline:var(--ink-soft);overflow-x:auto;padding-bottom:10px}
+.bracket{list-style:none;display:flex;gap:var(--bgut);min-width:min-content;align-items:start}
+.bround{flex:0 0 auto;width:150px}
+.bround h3{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--verm);border-bottom:2px solid var(--ink);padding-bottom:5px;margin-bottom:14px;white-space:nowrap}
+.bround ul{list-style:none;display:flex;flex-direction:column}
+.bround[data-r="0"] ul{gap:var(--bgap)}
+.bround[data-r="1"] ul{padding-top:calc(.5*var(--bu));gap:calc(2*var(--bu) - var(--bmh))}
+.bround[data-r="2"] ul{padding-top:calc(1.5*var(--bu));gap:calc(4*var(--bu) - var(--bmh))}
+.bround[data-r="3"] ul{padding-top:calc(3.5*var(--bu));gap:calc(8*var(--bu) - var(--bmh))}
+.bround[data-r="4"] ul{padding-top:calc(7.5*var(--bu))}
+.btie{position:relative;height:var(--bmh);display:flex;align-items:center}
+.bpair{display:flex;flex-direction:column;justify-content:center;gap:3px;width:100%;min-width:0}
+.bslot{display:block;font-size:.8rem;line-height:1.35;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bslot a{text-decoration:none}
+.bslot a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
+.bslot.tbd{font-weight:500;font-style:italic;color:var(--ink-soft)}
+/* R32 cards are boxed (they carry names); downstream cards are open fill-in lines */
+.bround[data-r="0"] .btie{border:1px solid var(--ink);background:var(--paper-2);box-shadow:2px 2px 0 var(--hairline);padding:3px 8px}
+.bround:not([data-r="0"]) .bslot{min-height:1.15em;border-bottom:1px dotted var(--hairline)}
+/* connectors: horizontal stub out of every feeder to the next column edge */
+.bround:not([data-r="4"]) .btie::after{content:"";position:absolute;left:100%;top:calc(50% - .5px);width:var(--bgut);height:1px;background:var(--bline)}
+/* vertical bar on the top card of each pair, at the next column edge, spanning the pair pitch */
+.bround:not([data-r="4"]) .btie:nth-child(odd)::before{content:"";position:absolute;left:calc(100% + var(--bgut) - 1px);top:50%;width:1px;background:var(--bline)}
+.bround[data-r="0"] .btie:nth-child(odd)::before{height:var(--bu)}
+.bround[data-r="1"] .btie:nth-child(odd)::before{height:calc(2*var(--bu))}
+.bround[data-r="2"] .btie:nth-child(odd)::before{height:calc(4*var(--bu))}
+.bround[data-r="3"] .btie:nth-child(odd)::before{height:calc(8*var(--bu))}
+.bracket-third{margin-top:26px;max-width:230px}
+.bracket-third h3{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--hairline);padding-bottom:5px;margin-bottom:4px}
+.bthird-sub{font-style:italic;color:var(--ink-soft);font-size:.78rem;margin-bottom:10px}
 .bracket-third ul{list-style:none}
+.bracket-third .btie{border:1px solid var(--hairline);background:var(--paper-2);padding:3px 8px;height:auto}
+.bracket-third .bslot{min-height:1.15em;border-bottom:1px dotted var(--hairline)}
 .bnotes{list-style:none;margin:14px 0 0;font-family:var(--mono);font-size:.72rem;color:var(--amber);line-height:1.6}
 .bnotes li{padding-left:1.1em;text-indent:-1.1em}
 .bnotes li::before{content:"⚠ "}
+@media (max-width:640px){.bracket-wrap{--bmh:38px;--bgap:10px;--bgut:22px}.bround{width:124px}.bslot{font-size:.74rem}}
 
 </style>
 </head>
@@ -479,7 +475,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
     </div>
     <div class="callout">
       <span class="tag">What's gated</span>
-      <p>Groups that haven't kicked off show abstract slots (<em>Winner E</em>, <em>Best 3rd of …</em>). The eight group-winner-vs-best-third matches aren’t resolved yet — they fill in once all twelve groups have a standing and the third-place cutline is settled. Everything here is provisional and shifts with every result. Downstream rounds show the fixed paths — winners aren't projected yet.</p>
+      <p>Groups that haven't kicked off show abstract slots (<em>Winner E</em>, <em>Best 3rd of …</em>). The eight group-winner-vs-best-third matches aren’t resolved yet — they fill in once all twelve groups have a standing and the third-place cutline is settled. Everything here is provisional and shifts with every result. Later rounds are blank — the connector lines show where each winner advances; we don't project winners yet.</p>
     </div>
   </div>
   
@@ -490,9 +486,9 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
     <span class="kicker">R32 → Final</span>
     <h2 id="bracket-h">The Draw, As It Stands</h2>
   </div>
-  <p class="standfirst">Scroll sideways on a narrow screen. Linked names are locked into their group position as it stands; italic slots are still open.</p>
+  <p class="standfirst">Read it left to right and follow the lines: each match feeds the slot it connects to. Linked names hold their group position as it stands; italic and blank slots are still open. Scroll sideways on a narrow screen.</p>
   <div class="bracket-wrap" tabindex="0" role="region" aria-label="Knockout bracket, scrollable">
-<ol class="bracket"><li class="bround"><h3>Round of 32</h3><ul><li class="btie prov" id="m73"><span class="bm">73</span><div class="bpair"><span class="bteam"><a href="teams/south-korea.html">South Korea</a></span><span class="bteam"><a href="teams/canada.html">Canada</a></span></div></li><li class="btie prov" id="m74"><span class="bm">74</span><div class="bpair"><span class="bteam tbd">Winner E</span><span class="bteam tbd">Best 3rd of A/B/C/D/F</span></div></li><li class="btie prov" id="m75"><span class="bm">75</span><div class="bpair"><span class="bteam tbd">Winner F</span><span class="bteam tbd">Runner-up C</span></div></li><li class="btie prov" id="m76"><span class="bm">76</span><div class="bpair"><span class="bteam tbd">Winner C</span><span class="bteam tbd">Runner-up F</span></div></li><li class="btie prov" id="m77"><span class="bm">77</span><div class="bpair"><span class="bteam tbd">Winner I</span><span class="bteam tbd">Best 3rd of C/D/F/G/H</span></div></li><li class="btie prov" id="m78"><span class="bm">78</span><div class="bpair"><span class="bteam tbd">Runner-up E</span><span class="bteam tbd">Runner-up I</span></div></li><li class="btie prov" id="m79"><span class="bm">79</span><div class="bpair"><span class="bteam"><a href="teams/mexico.html">Mexico</a></span><span class="bteam tbd">Best 3rd of C/E/F/H/I</span></div></li><li class="btie prov" id="m80"><span class="bm">80</span><div class="bpair"><span class="bteam tbd">Winner L</span><span class="bteam tbd">Best 3rd of E/H/I/J/K</span></div></li><li class="btie prov" id="m81"><span class="bm">81</span><div class="bpair"><span class="bteam"><a href="teams/united-states.html">United States</a></span><span class="bteam tbd">Best 3rd of B/E/F/I/J</span></div></li><li class="btie prov" id="m82"><span class="bm">82</span><div class="bpair"><span class="bteam tbd">Winner G</span><span class="bteam tbd">Best 3rd of A/E/H/I/J</span></div></li><li class="btie prov" id="m83"><span class="bm">83</span><div class="bpair"><span class="bteam tbd">Runner-up K</span><span class="bteam tbd">Runner-up L</span></div></li><li class="btie prov" id="m84"><span class="bm">84</span><div class="bpair"><span class="bteam tbd">Winner H</span><span class="bteam tbd">Runner-up J</span></div></li><li class="btie prov" id="m85"><span class="bm">85</span><div class="bpair"><span class="bteam"><a href="teams/bosnia-and-herzegovina.html">Bosnia and Herzegovina</a></span><span class="bteam tbd">Best 3rd of E/F/G/I/J</span></div></li><li class="btie prov" id="m86"><span class="bm">86</span><div class="bpair"><span class="bteam tbd">Winner J</span><span class="bteam tbd">Runner-up H</span></div></li><li class="btie prov" id="m87"><span class="bm">87</span><div class="bpair"><span class="bteam tbd">Winner K</span><span class="bteam tbd">Best 3rd of D/E/I/J/L</span></div></li><li class="btie prov" id="m88"><span class="bm">88</span><div class="bpair"><span class="bteam"><a href="teams/australia.html">Australia</a></span><span class="bteam tbd">Runner-up G</span></div></li></ul></li><li class="bround"><h3>Round of 16</h3><ul><li class="btie prov" id="m89"><span class="bm">89</span><div class="bpair"><span class="bteam feed">Winner 74</span><span class="bteam feed">Winner 77</span></div></li><li class="btie prov" id="m90"><span class="bm">90</span><div class="bpair"><span class="bteam feed">Winner 73</span><span class="bteam feed">Winner 75</span></div></li><li class="btie prov" id="m91"><span class="bm">91</span><div class="bpair"><span class="bteam feed">Winner 76</span><span class="bteam feed">Winner 78</span></div></li><li class="btie prov" id="m92"><span class="bm">92</span><div class="bpair"><span class="bteam feed">Winner 79</span><span class="bteam feed">Winner 80</span></div></li><li class="btie prov" id="m93"><span class="bm">93</span><div class="bpair"><span class="bteam feed">Winner 83</span><span class="bteam feed">Winner 84</span></div></li><li class="btie prov" id="m94"><span class="bm">94</span><div class="bpair"><span class="bteam feed">Winner 81</span><span class="bteam feed">Winner 82</span></div></li><li class="btie prov" id="m95"><span class="bm">95</span><div class="bpair"><span class="bteam feed">Winner 86</span><span class="bteam feed">Winner 88</span></div></li><li class="btie prov" id="m96"><span class="bm">96</span><div class="bpair"><span class="bteam feed">Winner 85</span><span class="bteam feed">Winner 87</span></div></li></ul></li><li class="bround"><h3>Quarter-finals</h3><ul><li class="btie prov" id="m97"><span class="bm">97</span><div class="bpair"><span class="bteam feed">Winner 89</span><span class="bteam feed">Winner 90</span></div></li><li class="btie prov" id="m98"><span class="bm">98</span><div class="bpair"><span class="bteam feed">Winner 93</span><span class="bteam feed">Winner 94</span></div></li><li class="btie prov" id="m99"><span class="bm">99</span><div class="bpair"><span class="bteam feed">Winner 91</span><span class="bteam feed">Winner 92</span></div></li><li class="btie prov" id="m100"><span class="bm">100</span><div class="bpair"><span class="bteam feed">Winner 95</span><span class="bteam feed">Winner 96</span></div></li></ul></li><li class="bround"><h3>Semi-finals</h3><ul><li class="btie prov" id="m101"><span class="bm">101</span><div class="bpair"><span class="bteam feed">Winner 97</span><span class="bteam feed">Winner 98</span></div></li><li class="btie prov" id="m102"><span class="bm">102</span><div class="bpair"><span class="bteam feed">Winner 99</span><span class="bteam feed">Winner 100</span></div></li></ul></li><li class="bround"><h3>Final</h3><ul><li class="btie prov" id="m104"><span class="bm">104</span><div class="bpair"><span class="bteam feed">Winner 101</span><span class="bteam feed">Winner 102</span></div></li></ul></li></ol><div class="bracket-third"><h3>Third-place play-off</h3><ul><li class="btie prov" id="m103"><span class="bm">103</span><div class="bpair"><span class="bteam feed">Loser 101</span><span class="bteam feed">Loser 102</span></div></li></ul></div>
+<ol class="bracket"><li class="bround" data-r="0"><h3>Round of 32</h3><ul><li class="btie" id="m74"><div class="bpair"><span class="bslot tbd" title="Winner E">Winner E</span><span class="bslot tbd" title="Best 3rd of A/B/C/D/F">Best 3rd of A/B/C/D/F</span></div></li><li class="btie" id="m77"><div class="bpair"><span class="bslot tbd" title="Winner I">Winner I</span><span class="bslot tbd" title="Best 3rd of C/D/F/G/H">Best 3rd of C/D/F/G/H</span></div></li><li class="btie" id="m73"><div class="bpair"><span class="bslot" title="South Korea"><a href="teams/south-korea.html">South Korea</a></span><span class="bslot" title="Canada"><a href="teams/canada.html">Canada</a></span></div></li><li class="btie" id="m75"><div class="bpair"><span class="bslot tbd" title="Winner F">Winner F</span><span class="bslot tbd" title="Runner-up C">Runner-up C</span></div></li><li class="btie" id="m83"><div class="bpair"><span class="bslot tbd" title="Runner-up K">Runner-up K</span><span class="bslot tbd" title="Runner-up L">Runner-up L</span></div></li><li class="btie" id="m84"><div class="bpair"><span class="bslot tbd" title="Winner H">Winner H</span><span class="bslot tbd" title="Runner-up J">Runner-up J</span></div></li><li class="btie" id="m81"><div class="bpair"><span class="bslot" title="United States"><a href="teams/united-states.html">United States</a></span><span class="bslot tbd" title="Best 3rd of B/E/F/I/J">Best 3rd of B/E/F/I/J</span></div></li><li class="btie" id="m82"><div class="bpair"><span class="bslot tbd" title="Winner G">Winner G</span><span class="bslot tbd" title="Best 3rd of A/E/H/I/J">Best 3rd of A/E/H/I/J</span></div></li><li class="btie" id="m76"><div class="bpair"><span class="bslot tbd" title="Winner C">Winner C</span><span class="bslot tbd" title="Runner-up F">Runner-up F</span></div></li><li class="btie" id="m78"><div class="bpair"><span class="bslot tbd" title="Runner-up E">Runner-up E</span><span class="bslot tbd" title="Runner-up I">Runner-up I</span></div></li><li class="btie" id="m79"><div class="bpair"><span class="bslot" title="Mexico"><a href="teams/mexico.html">Mexico</a></span><span class="bslot tbd" title="Best 3rd of C/E/F/H/I">Best 3rd of C/E/F/H/I</span></div></li><li class="btie" id="m80"><div class="bpair"><span class="bslot tbd" title="Winner L">Winner L</span><span class="bslot tbd" title="Best 3rd of E/H/I/J/K">Best 3rd of E/H/I/J/K</span></div></li><li class="btie" id="m86"><div class="bpair"><span class="bslot tbd" title="Winner J">Winner J</span><span class="bslot tbd" title="Runner-up H">Runner-up H</span></div></li><li class="btie" id="m88"><div class="bpair"><span class="bslot" title="Australia"><a href="teams/australia.html">Australia</a></span><span class="bslot tbd" title="Runner-up G">Runner-up G</span></div></li><li class="btie" id="m85"><div class="bpair"><span class="bslot" title="Bosnia and Herzegovina"><a href="teams/bosnia-and-herzegovina.html">Bosnia and Herzegovina</a></span><span class="bslot tbd" title="Best 3rd of E/F/G/I/J">Best 3rd of E/F/G/I/J</span></div></li><li class="btie" id="m87"><div class="bpair"><span class="bslot tbd" title="Winner K">Winner K</span><span class="bslot tbd" title="Best 3rd of D/E/I/J/L">Best 3rd of D/E/I/J/L</span></div></li></ul></li><li class="bround" data-r="1"><h3>Round of 16</h3><ul><li class="btie" id="m89"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li><li class="btie" id="m90"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li><li class="btie" id="m93"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li><li class="btie" id="m94"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li><li class="btie" id="m91"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li><li class="btie" id="m92"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li><li class="btie" id="m95"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li><li class="btie" id="m96"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li></ul></li><li class="bround" data-r="2"><h3>Quarter-finals</h3><ul><li class="btie" id="m97"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li><li class="btie" id="m98"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li><li class="btie" id="m99"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li><li class="btie" id="m100"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li></ul></li><li class="bround" data-r="3"><h3>Semi-finals</h3><ul><li class="btie" id="m101"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li><li class="btie" id="m102"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li></ul></li><li class="bround" data-r="4"><h3>Final</h3><ul><li class="btie" id="m104"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li></ul></li></ol><div class="bracket-third"><h3>Third-place play-off</h3><p class="bthird-sub">The two semi-final losers</p><ul><li class="btie" id="m103"><div class="bpair"><span class="bslot tbd"></span><span class="bslot tbd"></span></div></li></ul></div>
   </div>
 </section>
 
@@ -500,7 +496,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 
 <footer>
   <p class="colophon">
-    Generated 2026-06-13 19:27 · projected from data/fixtures.csv by scripts/bracket.py ·
+    Generated 2026-06-13 20:40 · projected from data/fixtures.csv by scripts/bracket.py ·
     R32 template + Annex C third-place table (data/annex_c.csv) · gated: unstarted
     groups and the unsettled third-place cutline render as open slots · strictly
     provisional, a scenario tool · <a href="index.html">all standings</a> ·
