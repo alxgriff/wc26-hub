@@ -110,8 +110,10 @@ class PageTests(unittest.TestCase):
                            thirds_section.index("the cutline"))
 
     def test_slate_includes_moon_flag_for_late_cap(self):
-        self.assertIn("D1t v D2t", self.page)
-        self.assertIn("☾", self.page)
+        self.assertIn('class="matchup"', self.page)   # fixture-board matchup link
+        self.assertIn(">D1t</span>", self.page)        # both sides rendered
+        self.assertIn(">D2t</span>", self.page)
+        self.assertIn("☾", self.page)                  # late-cap moon flag
 
     def test_accessibility_basics_present(self):
         for needle in ('lang="en"', 'name="viewport"', '<caption class="sr-only">',
@@ -147,7 +149,9 @@ class PageTests(unittest.TestCase):
         self.assertNotIn("No. -", page)
 
     def test_keyboard_scroll_regions_present(self):
-        self.assertEqual(self.page.count('tabindex="0"'), 2)
+        # the third-place table is still a horizontal scroll region; the slate is
+        # now a responsive grid (no longer a scroll region)
+        self.assertEqual(self.page.count('tabindex="0"'), 1)
         self.assertIn("<main>", self.page)
 
 

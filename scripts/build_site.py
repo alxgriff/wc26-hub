@@ -260,7 +260,7 @@ def render_slate(today: list[dict], root: str = "",
     if not today:
         return '    <li class="empty">No matches on this editorial date.</li>'
     picks = picks or {}
-    chips = []
+    cards = []
     for r in today:
         mid = r["match_id"]
         moon = '<span class="moon" aria-label="midnight kickoff, this slate"> ☾</span>' \
@@ -271,21 +271,25 @@ def render_slate(today: list[dict], root: str = "",
         href = f'{root}matches/{_esc(mid)}.html'
         played = (r.get("status") or "").strip().lower() == "played"
         if played:
-            label = (f'{_esc(r["team_a"])} {_esc(str(r["score_a"]))}–'
-                     f'{_esc(str(r["score_b"]))} {_esc(r["team_b"])}')
-            time_bit = "FT"
+            kick = '<p class="kick"><span class="ftbadge">Full time</span></p>'
+            centre = (f'<span class="sc">{_esc(str(r["score_a"]))}–'
+                      f'{_esc(str(r["score_b"]))}</span>')
         else:
-            label = f'{_esc(r["team_a"])} v {_esc(r["team_b"])}'
-            time_bit = _esc((r.get("kickoff_et") or "").strip()) + " ET"
+            kick = (f'<p class="kick">{_esc((r.get("kickoff_et") or "").strip())} ET'
+                    f'{moon}</p>')
+            centre = '<span class="v">v</span>'
+        # the whole matchup is one link to the preview (a large, single target)
+        matchup = (f'<a class="matchup" href="{href}">'
+                   f'<span class="team ta">{_esc(r["team_a"])}</span>{centre}'
+                   f'<span class="team tb">{_esc(r["team_b"])}</span></a>')
         pick_html = ""
         if mid in picks:
-            pick_html = f'<span class="pickline">▸ best bet: {_esc(picks[mid])}</span>'
-        chips.append(
-            f'    <li><span class="t">{time_bit}{moon}</span>'
-            f'<span class="teams"><a href="{href}">{label}</a></span>'
-            f'<span class="meta">{_esc(mid)} · {_esc(tv)} · {_esc(venue)} · preview →</span>'
-            f'{pick_html}</li>')
-    return "\n".join(chips)
+            pick_html = f'<p class="pickline">▸ best bet: {_esc(picks[mid])}</p>'
+        cards.append(
+            f'    <li class="card">{kick}{matchup}'
+            f'<p class="meta">{_esc(mid)} · {_esc(tv)} · {_esc(venue)} · '
+            f'<span class="pv">preview →</span></p>{pick_html}</li>')
+    return "\n".join(cards)
 
 
 def _group_nav(groups: "dict[str, st.GroupTable]") -> str:

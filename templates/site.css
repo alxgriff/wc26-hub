@@ -48,9 +48,8 @@ body{
 a{color:inherit}
 main{display:block}
 a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--verm);outline-offset:2px}
-.slate-scroll,.thirds-wrap,.bracket-wrap{scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
-.slate-scroll::-webkit-scrollbar,.thirds-wrap::-webkit-scrollbar,.bracket-wrap::-webkit-scrollbar{height:8px}
-.slate-scroll::-webkit-scrollbar-thumb{background:var(--hairline)}
+.thirds-wrap,.bracket-wrap{scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
+.thirds-wrap::-webkit-scrollbar,.bracket-wrap::-webkit-scrollbar{height:8px}
 .thirds-wrap::-webkit-scrollbar-thumb,.bracket-wrap::-webkit-scrollbar-thumb{background:var(--hairline)}
 .skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:var(--paper);padding:8px 14px;font-family:var(--mono);font-size:.8rem;z-index:9}
 .skip:focus{left:8px;top:8px}
@@ -98,19 +97,27 @@ section{margin-top:46px}
 .sec-head .kicker{font-family:var(--mono);font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:var(--verm);font-weight:700;white-space:nowrap}
 .standfirst{font-style:italic;color:var(--ink-soft);font-size:.95rem;margin:-8px 0 18px}
 
-/* ---------- today's slate ---------- */
-.slate-scroll{overflow-x:auto;padding-bottom:8px;scroll-snap-type:x proximity}
-.slate{list-style:none;display:flex;gap:10px}
-.slate li{
-  scroll-snap-align:start;flex:0 0 auto;min-width:218px;
-  border:1px solid var(--ink);background:var(--paper-2);
-  padding:10px 13px 11px;box-shadow:3px 3px 0 var(--hairline);
-}
-.slate .t{font-family:var(--mono);font-weight:700;font-size:.8rem}
-.slate .t .moon{color:var(--amber)}
-.slate .teams{display:block;font-weight:700;font-size:1.02rem;line-height:1.25;margin:3px 0 4px}
-.slate .meta{font-family:var(--mono);font-size:.68rem;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase}
-.slate li.empty{font-style:italic;color:var(--ink-soft);border-style:dashed;box-shadow:none}
+/* ---------- today's slate (fixture-board cards in a responsive grid) ----------
+   1 column on phones -> 2 on tablets -> up to 3 on wide screens (auto-fill keeps a
+   lone card from stretching). Each card is a symmetrical matchup: the two sides
+   flank a vermillion "v" disc that becomes the scoreline once the game is played. */
+.slate{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px;align-items:start}
+.slate .card{border:1px solid var(--ink);background:var(--paper-2);box-shadow:3px 3px 0 var(--hairline);padding:13px 14px 12px;text-align:center}
+@media (hover:hover){.slate .card{transition:transform .18s ease,box-shadow .18s ease}.slate .card:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--hairline)}}
+.slate .kick{font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.slate .kick .moon{color:var(--amber)}
+.slate .kick .ftbadge{color:var(--verm)}
+.slate .matchup{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin:11px 0 9px;text-decoration:none;color:inherit}
+.slate .team{font-family:var(--serif);font-weight:900;font-size:1.05rem;line-height:1.1;letter-spacing:-.01em}
+.slate .matchup:hover .team,.slate .matchup:focus-visible .team{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
+.slate .ta{text-align:right}
+.slate .tb{text-align:left}
+.slate .v{width:30px;height:30px;border-radius:50%;background:var(--verm);color:var(--paper);display:grid;place-items:center;font-family:var(--serif);font-style:italic;font-weight:700;font-size:.92rem;margin:0 auto}
+.slate .sc{min-width:46px;font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.slate .meta{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;border-top:1px solid var(--hairline);padding-top:8px}
+.slate .pv{color:var(--verm);font-weight:700}
+.slate .pickline{margin-top:8px;display:inline-block;font-family:var(--mono);font-size:.66rem;color:var(--green);background:var(--green-soft);font-weight:700;padding:2px 8px;letter-spacing:.02em}
+.slate .empty{grid-column:1/-1;font-style:italic;color:var(--ink-soft);border:1px dashed var(--hairline);padding:14px;text-align:center}
 
 /* ---------- group cards ---------- */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(310px,100%),1fr));gap:20px}
@@ -220,9 +227,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
 @media (max-width:480px){
-  .slate-scroll{overflow-x:visible}
-  .slate{flex-direction:column}
-  .slate li{min-width:0}
   th,td{padding:7px 3px}
   .card{padding:11px 10px 9px}
 }
@@ -296,8 +300,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .callout ul{margin:2px 0 0 1.1em;font-size:.92rem;line-height:1.55}
 .callout li{margin-bottom:.35em}
 tbody th.team a{text-decoration:none}
-tbody th.team a:hover,.slate .teams a:hover{text-decoration:underline;text-decoration-color:var(--verm)}
-.slate .teams a{text-decoration:none}
+tbody th.team a:hover{text-decoration:underline;text-decoration-color:var(--verm)}
 
 /* ---------- odds & best bet ---------- */
 .edge-wrap{max-width:680px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
@@ -322,8 +325,6 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
 .blurb{max-width:72ch;margin:-4px 0 20px;font-size:1.04rem;line-height:1.6}
 .blurb p{margin:0 0 .7em}
 .blurb .blurb-tag{font-family:var(--mono);font-size:.64rem;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase;margin:0}
-
-.slate .pickline{display:block;font-family:var(--mono);font-size:.68rem;font-weight:700;color:var(--verm);margin-top:5px;letter-spacing:.03em}
 
 /* ---------- overnight + the record ---------- */
 .overnight{list-style:none;max-width:72ch}
