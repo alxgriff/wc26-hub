@@ -553,13 +553,77 @@ def load_weather_engine():
     return call, None
 
 
+def _sweat_blurb(info: dict, team_a: str, team_b: str) -> str:
+    """One factual sentence interpreting the sweat factor for this match."""
+    sf = info.get("sf") or 0
+    wbgt = float(info.get("wbgt_est") or 0)
+    dis_a = info.get("dis_a") or 0
+    delta_a = info.get("delta_a")
+    dis_b = info.get("dis_b") or 0
+    delta_b = info.get("delta_b")
+
+    # Identify which team has more/less disadvantage
+    if delta_a is not None and delta_b is not None:
+        if dis_a >= dis_b:
+            harder, easier = team_a, team_b
+            hard_dis, easy_dis = dis_a, dis_b
+            hard_delta, easy_delta = delta_a, delta_b
+        else:
+            harder, easier = team_b, team_a
+            hard_dis, easy_dis = dis_b, dis_a
+            hard_delta, easy_delta = delta_b, delta_a
+        mismatch = (hard_dis - easy_dis) >= 20
+    else:
+        harder = easier = None
+        hard_dis = easy_dis = 0
+        hard_delta = easy_delta = None
+        mismatch = False
+
+    def _sign(d: float) -> str:
+        return f"+{round(d)}" if d > 0 else str(round(d))
+
+    if sf < 25:
+        if mismatch and harder and hard_delta is not None:
+            return (f"{harder} step into conditions {_sign(hard_delta)}°C from their home baseline, "
+                    f"but the overall heat is low — unlikely to matter much.")
+        return "Comfortable conditions — heat is a non-factor for both sides."
+
+    if sf < 50:
+        if mismatch and harder and hard_delta is not None:
+            adapted = f"{easier} are the better-acclimated side" if (easy_delta or 0) < 3 else f"{easier} face a smaller adjustment"
+            return (f"Warm out; {harder} are {_sign(hard_delta)}°C outside their comfort zone "
+                    f"while {adapted}.")
+        return f"Warm conditions ({wbgt:.0f}°C WBGT) — a moderate physical test for both squads."
+
+    if sf < 75:
+        if mismatch and harder and hard_delta is not None:
+            if (easy_delta or 0) <= 0:
+                return (f"Hot match-up, and a real edge for {easier}: "
+                        f"{harder} are {_sign(hard_delta)}°C above their home climate "
+                        f"while {easier} are well-adapted to this heat.")
+            return (f"Significant heat; {harder} face the steeper climb "
+                    f"({_sign(hard_delta)}°C vs home) compared to {easier}.")
+        return f"Hot conditions ({wbgt:.0f}°C WBGT) — both sides will feel the physical load."
+
+    # Severe
+    if mismatch and harder and hard_delta is not None:
+        if (easy_delta or 0) <= 0:
+            return (f"Brutal heat — and {easier} hold a major acclimatization edge: "
+                    f"{harder} are {_sign(hard_delta)}°C above their home baseline "
+                    f"while {easier} are stepping into their climate.")
+        return (f"Severe heat, and {harder} carry the bigger burden: "
+                f"{_sign(hard_delta)}°C above their home baseline vs "
+                f"{_sign(easy_delta)}°C for {easier}.")
+    return f"Severe conditions ({wbgt:.0f}°C WBGT) — this is a demanding physical environment for both teams."
+
+
 def render_sweat(info: dict | None, team_a: str, team_b: str) -> str:
-    """The Conditions block. Placeholder when info is None."""
+    """Sweat Factor block. Placeholder when info is None."""
     if info is None:
         return (
-            '<div class="placeholder-slot">Weather forecast pending — this match is not '
-            'yet within the 16-day Open-Meteo forecast window. The conditions section '
-            'fills automatically once available; no data is invented.</div>'
+            '<div class="placeholder-slot">Sweat Factor forecast pending — this match is not '
+            'yet within the 16-day Open-Meteo forecast window. The section fills automatically '
+            'once available; no data is invented.</div>'
         )
     if info.get("climate_controlled"):
         return '<p class="cond-ac">Indoors — climate-controlled. Heat not a factor.</p>'
@@ -574,6 +638,7 @@ def render_sweat(info: dict | None, team_a: str, team_b: str) -> str:
     severity = _esc(info.get("severity") or "")
     sev_cls = (info.get("severity") or "mild").lower()
     mhi = info.get("mhi") or 0
+    blurb = _esc(_sweat_blurb(info, team_a, team_b))
 
     def team_row(team: str, dis, delta) -> str:
         if delta is None:
@@ -600,6 +665,7 @@ def render_sweat(info: dict | None, team_a: str, team_b: str) -> str:
         f'  <div class="cond-track" aria-label="Match heat index: {severity} ({mhi}/100)">'
         f'<div class="cond-fill" style="width:{mhi}%"></div></div>\n'
         f'  <p class="cond-sev cond-sev-{_esc(sev_cls)}">{severity}</p>\n'
+        f'  <p class="cond-blurb">{blurb}</p>\n'
         + (f'  <div class="cond-teams">{teams_html}</div>\n' if teams_html else "")
         + '</div>'
     )
