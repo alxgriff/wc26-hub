@@ -256,8 +256,11 @@ def load_ratings(ratings_dir: str | Path = RATINGS_DIR,
         cal = _load_calibration()          # activate fitted knobs if any were persisted
         if cal and cal.get("rho") is not None:
             config.rho = float(cal["rho"])
-        if cal and cal.get("maher_w") is not None:
-            config.maher_w = float(cal["maher_w"])
+        # Tier 3.1 total-goals knobs, activated only from a fitted+validated
+        # calibration.json (fit_maher.py); absent => the inert defaults above.
+        for _k in ("maher_w", "alpha", "mu0"):
+            if cal and cal.get(_k) is not None:
+                setattr(config, _k, float(cal[_k]))
         if cal and cal.get("hfa") is not None:
             config.hfa = float(cal["hfa"])
         if cal and cal.get("hfa_by_host"):
