@@ -170,6 +170,57 @@ def project(standings: "st.Standings", annex: dict | None = None) -> dict:
 _TOP_HALF_R32 = frozenset({73, 74, 75, 77, 81, 82, 83, 84})
 
 
+def feed(projection: dict, resolver, results: "dict | None" = None) -> dict:
+    """Propagate winners through the bracket tree, filling downstream rounds.
+
+    ``resolver(team_a, team_b) -> {"winner", "loser", "p"} | None`` decides a single
+    knockout tie (the model lives outside this module — build_site injects one built
+    on predict.resolve_knockout; tests inject a deterministic one, so this stays
+    model-agnostic). ``results`` optionally maps a match number to the winning team
+    name; an actual result overrides the model (the hook for real knockout results
+    once those fixtures exist). Only ties with BOTH sides concretely known are
+    resolved, so projection halts at the gating frontier — an abstract 'Winner E'
+    feeder blocks everything above it, exactly as it stands.
+
+    Returns a NEW projection dict with two added keys: ``winners`` {match: {team,
+    loser, p, source}} and ``participants`` {match: [team_a, team_b]}, plus
+    ``champion`` (the projected Final winner, or None). The input is not mutated."""
+    results = results or {}
+    tree = {int(k): tuple(v) for k, v in projection["tree"].items()}
+    r32 = {int(k): v for k, v in projection["r32"].items()}
+    winners: dict[int, dict] = {}
+    participants: dict[int, list] = {}
+
+    def decide(m: int, a, b) -> None:
+        if not a or not b:
+            return
+        participants[m] = [a, b]
+        if m in results:
+            w = results[m]
+            winners[m] = {"team": w, "loser": b if w == a else a,
+                          "p": None, "source": "result"}
+            return
+        r = resolver(a, b)
+        if r and r.get("winner"):
+            winners[m] = {"team": r["winner"], "loser": r.get("loser"),
+                          "p": r.get("p"), "source": "model"}
+
+    for m in range(73, 89):                      # R32 from resolved group positions
+        decide(m, r32[m]["home"], r32[m]["away"])
+    for m in sorted(tree):                        # R16->Final; feeders are lower-numbered
+        a = winners.get(tree[m][0], {}).get("team")
+        b = winners.get(tree[m][1], {}).get("team")
+        decide(m, a, b)
+    tp = projection["third_place_match"]          # losers of the two semi-finals
+    decide(tp, winners.get(101, {}).get("loser"), winners.get(102, {}).get("loser"))
+
+    out = dict(projection)
+    out["winners"] = winners
+    out["participants"] = participants
+    out["champion"] = winners.get(max(tree), {}).get("team")
+    return out
+
+
 def render_markdown(projection: dict) -> str:
     out = ["# Knockout bracket — as it stands", ""]
     n = projection["as_of_matches_played"]

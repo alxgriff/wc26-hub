@@ -444,10 +444,15 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bround[data-r="4"] ul{padding-top:calc(7.5*var(--bu))}
 .btie{position:relative;height:var(--bmh);display:flex;align-items:center}
 .bpair{display:flex;flex-direction:column;justify-content:center;gap:3px;width:100%;min-width:0}
-.bslot{display:block;font-size:.8rem;line-height:1.35;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bslot{display:flex;align-items:baseline;gap:5px;font-size:.8rem;line-height:1.35;font-weight:700}
+.bn{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bp{flex:0 0 auto;font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);letter-spacing:.02em}
 .bslot a{text-decoration:none}
 .bslot a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
 .bslot.tbd{font-weight:500;font-style:italic;color:var(--ink-soft)}
+/* projected advancer (bracket.feed): the winning slot in green; the other reads muted */
+.bslot.win .bn{color:var(--green)}
+.btie:has(.win) .bslot:not(.win) .bn{color:var(--ink-soft);font-weight:500}
 /* R32 cards are boxed (they carry names); downstream cards are open fill-in lines */
 .bround[data-r="0"] .btie{border:1px solid var(--ink);background:var(--paper-2);box-shadow:2px 2px 0 var(--hairline);padding:3px 8px}
 .bround:not([data-r="0"]) .bslot{min-height:1.15em;border-bottom:1px dotted var(--hairline)}
@@ -468,6 +473,10 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bnotes{list-style:none;margin:14px 0 0;font-family:var(--mono);font-size:.72rem;color:var(--amber);line-height:1.6}
 .bnotes li{padding-left:1.1em;text-indent:-1.1em}
 .bnotes li::before{content:"⚠ "}
+/* projected champion banner (only once the whole bracket resolves) */
+.bchamp{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:2px solid var(--green);background:var(--green-soft);padding:12px 18px;margin:18px 0 0}
+.bchamp .lbl{font-family:var(--mono);font-size:.64rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--green)}
+.bchamp strong{font-size:1.5rem;font-weight:900;letter-spacing:-.01em}
 @media (max-width:640px){.bracket-wrap{--bmh:38px;--bgap:10px;--bgut:22px}.bround{width:124px}.bslot{font-size:.74rem}}
 
 /* ---------- outcome grid (score matrix toggle) ---------- */

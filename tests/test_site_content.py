@@ -153,7 +153,7 @@ class FullSiteTests(unittest.TestCase):
             picks_log=cls.SNAP / "picks_log.csv",
             blurbs_dir=cls.SNAP, news_dir=cls.SNAP,
             now=datetime(2026, 6, 12, 9, 0, tzinfo=lg.ET),
-            predictor=None, odds_engine=None)
+            predictor=None, odds_engine=None, knockout_resolver=None)
 
     @classmethod
     def tearDownClass(cls):
@@ -288,7 +288,7 @@ class FullSiteTests(unittest.TestCase):
         stale = self.out / "teams" / "old-team-name.html"
         stale.write_text("stale", encoding="utf-8")
         warnings = bs.build_site(self.out, date(2026, 6, 12), "t", predictor=None,
-                                 odds_engine=None)
+                                 odds_engine=None, knockout_resolver=None)
         self.assertFalse(stale.exists())
         self.assertTrue(any("stale" in w for w in warnings))
 
@@ -366,6 +366,30 @@ class OddsWiringTests(unittest.TestCase):
                                     bs._site_css(), odds_info=info)
         self.assertIn("edge-wrap", page)
         self.assertIn("United States", page)
+
+
+class BracketRenderTests(unittest.TestCase):
+    def test_projected_winners_render_green_with_prob(self):
+        import standings as st
+        import bracket as bk
+        from test_bracket import _full_groups, _alpha_resolver
+        s = st.compute_standings(_full_groups())
+        proj = bk.feed(bk.project(s, bk.load_annex_c()), _alpha_resolver)
+        html = bs.render_bracket_html(proj)
+        self.assertIn('class="bslot win"', html)            # projected advancer marked
+        self.assertIn('class="bp">60%</span>', html)        # advance probability shown
+        self.assertIn(f'>{bs._esc(proj["champion"])}<', html)  # downstream filled, not blank
+        page = bs.render_bracket_page(proj, "", "t")
+        self.assertIn("Projected to lift the trophy", page)
+        self.assertIn(proj["champion"], page)
+
+    def test_unfed_projection_stays_blank_downstream(self):
+        import standings as st
+        import bracket as bk
+        snap = REPO / "tests" / "fixtures" / "site_snapshot" / "fixtures.csv"
+        html = bs.render_bracket_html(bk.project(st.compute_standings(st.load_fixtures(snap))))
+        self.assertNotIn('class="bslot win"', html)         # no winners projected
+        self.assertIn('class="bslot tbd"', html)            # blank / abstract slots remain
 
 
 if __name__ == "__main__":

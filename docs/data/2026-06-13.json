@@ -929,7 +929,7 @@
   "notes": []
  },
  "warnings": [],
- "generated_at": "2026-06-13 20:28",
+ "generated_at": "2026-06-13 22:22",
  "slate_date": "2026-06-13",
  "bracket": {
   "schema": 1,
@@ -1145,6 +1145,21 @@
    ]
   },
   "third_place_match": 103,
-  "warnings": []
+  "warnings": [],
+  "winners": {
+   "73": {
+    "team": "Canada",
+    "loser": "South Korea",
+    "p": 0.5268010589464568,
+    "source": "model"
+   }
+  },
+  "participants": {
+   "73": [
+    "South Korea",
+    "Canada"
+   ]
+  },
+  "champion": null
  }
 }

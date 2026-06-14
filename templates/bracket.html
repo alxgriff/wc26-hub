@@ -32,19 +32,21 @@ $site_css
 
 <section aria-labelledby="how-h" class="how-to-read">
   <h2 id="how-h" class="sr-only">How to read this page</h2>
-  <p class="standfirst">A scenario tool, not a prediction. It answers one question: if the group tables froze right now, who would meet whom in the Round of 32?</p>
+  <p class="standfirst">If the group tables froze right now, who would meet whom — and how far would each side go? The draw is a lookup; the run beyond it is the model's best guess.</p>
   <div class="callout-grid">
     <div class="callout">
-      <span class="tag">How it's built</span>
-      <p>The 2026 bracket is fixed in advance — no post-group draw. Group winners, runners-up and the eight best third-placed teams drop into predetermined slots (matches 73–104), with the thirds assigned by the FIFA regulations' 495-row Annex C table. So this is a lookup, not a forecast.</p>
+      <span class="tag">The draw (a lookup)</span>
+      <p>The 2026 bracket is fixed in advance — no post-group draw. Group winners, runners-up and the eight best third-placed teams drop into predetermined slots (matches 73–104), with the thirds assigned by the FIFA regulations' 495-row Annex C table. So <em>who reaches the Round of 32</em> is settled, not forecast.</p>
     </div>
     <div class="callout">
-      <span class="tag">What's gated</span>
-      <p>Groups that haven't kicked off show abstract slots (<em>Winner E</em>, <em>Best 3rd of …</em>). $resolved_note Everything here is provisional and shifts with every result. Later rounds are blank — the connector lines show where each winner advances; we don't project winners yet.</p>
+      <span class="tag">The run (a projection)</span>
+      <p>Beyond the R32, each tie is played out by the model: the projected advancer is shown in green with its chance to advance (90′ + extra time + a coin-flip shootout). Groups that haven't kicked off show abstract slots (<em>Winner E</em>, <em>Best 3rd of …</em>); $resolved_note The cascade only extends as far as both sides of a tie are known, and it all shifts with every result.</p>
     </div>
   </div>
   $notes_html
 </section>
+
+$champion_html
 
 <section id="bracket" aria-labelledby="bracket-h">
   <div class="sec-head">

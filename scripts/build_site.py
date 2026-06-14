@@ -345,6 +345,31 @@ def load_predictor(fixtures: Path | None = None):
     return call, None
 
 
+def load_knockout_resolver():
+    """Defensive adapter for projecting knockout ties (companion to load_predictor).
+    Returns resolver(team_a, team_b) -> {"winner","loser","p"} | None, or None if
+    predict.py is unavailable — in which case the bracket stays structural (blank
+    downstream). Neutral venue: host HFA is NOT applied, because knockout venues
+    aren't modelled in-repo. ``p`` is the winner's probability of advancing (90' +
+    extra time + shootout, per predict.resolve_knockout)."""
+    try:
+        import predict as pr
+        model = pr.load_ratings()
+    except Exception:
+        return None
+
+    def resolve(a: str, b: str):
+        try:
+            kp = pr.resolve_knockout(model, a, b)        # neutral (no hfa_team)
+            if kp.p_advance_a >= kp.p_advance_b:
+                return {"winner": a, "loser": b, "p": kp.p_advance_a}
+            return {"winner": b, "loser": a, "p": kp.p_advance_b}
+        except Exception:
+            return None
+
+    return resolve
+
+
 def render_call(info: dict | None, team_a: str, team_b: str,
                 prebaked_lean: str | None,
                 result: tuple[int, int] | None = None,
@@ -1218,22 +1243,42 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
     R32 cards on the left, each later round's matches centred between their two
     feeders, connector lines implying where a winner advances (so no match numbers
     are needed). R32 slots resolve to linked team names where the group has played
-    and abstract 'Winner E' / 'Best 3rd of …' labels where gated; downstream slots
-    are blank fill-in lines — winners aren't projected yet (that is follow-up work).
-    Presentation only; the projection itself is computed in bracket.py."""
+    and abstract 'Winner E' / 'Best 3rd of …' labels where gated. If bracket.feed
+    has run (``winners``/``participants`` present), downstream slots fill with the
+    model's projected advancer — green, with its chance to advance — and the loser
+    reads muted; otherwise downstream slots stay blank fill-in lines. The cascade
+    only extends as far as both sides of a tie are concretely known.
+    Presentation only; the projection + propagation are computed in bracket.py."""
     r32 = {int(k): v for k, v in proj["r32"].items()}
     rounds = _bracket_ordered_rounds()
+    winners = {int(k): v for k, v in proj.get("winners", {}).items()}
+    parts = {int(k): tuple(v) for k, v in proj.get("participants", {}).items()}
 
-    def slot(team=None, label=None):
+    def slot(team=None, label=None, *, win=False, p=None):
         if team:
-            return (f'<span class="bslot" title="{_esc(team)}">'
-                    f'<a href="{_team_link(team, root)}">{_esc(team)}</a></span>')
-        if label:
-            return f'<span class="bslot tbd" title="{_esc(label)}">{_esc(label)}</span>'
-        return '<span class="bslot tbd"></span>'      # blank — filled by position
+            name = f'<a href="{_team_link(team, root)}">{_esc(team)}</a>'
+            cls, title = "bslot", team
+        elif label:
+            name, cls, title = _esc(label), "bslot tbd", label
+        else:
+            name, cls, title = "", "bslot tbd", ""
+        if win:
+            cls += " win"
+        pct = (f'<span class="bp">{round(p * 100)}%</span>'
+               if win and p is not None else "")
+        ttl = f' title="{_esc(title)}"' if title else ""
+        return f'<span class="{cls}"{ttl}><span class="bn">{name}</span>{pct}</span>'
 
-    def card(m, a, b):
-        return f'<li class="btie" id="m{m}"><div class="bpair">{a}{b}</div></li>'
+    def card(m, a_team, a_label, b_team, b_label):
+        w = winners.get(m, {})
+        wt, p = w.get("team"), w.get("p")
+        sa = slot(team=a_team, label=a_label, win=a_team is not None and a_team == wt, p=p)
+        sb = slot(team=b_team, label=b_label, win=b_team is not None and b_team == wt, p=p)
+        return f'<li class="btie" id="m{m}"><div class="bpair">{sa}{sb}</div></li>'
+
+    def downstream_card(m):
+        a, b = parts.get(m, (None, None))
+        return card(m, a, None, b, None)
 
     cols = []
     for r, nums in enumerate(rounds):
@@ -1241,16 +1286,15 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
         for m in nums:
             if r == 0:
                 e = r32[m]
-                items.append(card(m, slot(team=e["home"], label=e["home_label"]),
-                                  slot(team=e["away"], label=e["away_label"])))
+                items.append(card(m, e["home"], e["home_label"], e["away"], e["away_label"]))
             else:
-                items.append(card(m, slot(), slot()))
+                items.append(downstream_card(m))
         cols.append(f'<li class="bround" data-r="{r}"><h3>{_esc(_ROUND_TITLES[r])}</h3>'
                     f'<ul>{"".join(items)}</ul></li>')
 
     third = (f'<div class="bracket-third"><h3>Third-place play-off</h3>'
              f'<p class="bthird-sub">The two semi-final losers</p>'
-             f'<ul>{card(proj["third_place_match"], slot(), slot())}</ul></div>')
+             f'<ul>{downstream_card(proj["third_place_match"])}</ul></div>')
     return f'<ol class="bracket">{"".join(cols)}</ol>{third}'
 
 
@@ -1264,12 +1308,16 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
                 "third-place cutline is settled.")
     notes_html = "".join(f'<li>{_esc(w)}</li>' for w in proj["warnings"])
     notes_html = f'<ul class="bnotes">{notes_html}</ul>' if notes_html else ""
+    champ = proj.get("champion")
+    champion_html = (f'<p class="bchamp"><span class="lbl">Projected to lift the '
+                     f'trophy</span><strong>{_esc(champ)}</strong></p>' if champ else "")
     tpl = Template((template_dir / "bracket.html").read_text(encoding="utf-8"))
     return tpl.safe_substitute(
         site_css=css,
         bracket_html=render_bracket_html(proj, root=""),
         played=n, total=72, progress_pct=round(n / 72 * 100),
         resolved_note=_esc(resolved),
+        champion_html=champion_html,
         notes_html=notes_html,
         generated_at=_esc(generated_at),
         repo_url=REPO_URL,
@@ -1667,7 +1715,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                picks_log: Path | None = None,
                now=None,
                predictor="auto", odds_engine="auto",
-               weather_engine="auto") -> list[str]:
+               weather_engine="auto", knockout_resolver="auto") -> list[str]:
     """Render the whole site (index + team cards + match previews + data.json)
     into out_dir. Returns warnings. ``predictor`` and ``odds_engine`` are
     "auto" (load the real modules defensively), None (placeholder state), or
@@ -1748,6 +1796,15 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         bracket_proj = bk.project(s)
     except (FileNotFoundError, ValueError) as e:
         warnings.append(f"Bracket page skipped: {e}")
+    if bracket_proj is not None:
+        if knockout_resolver == "auto":
+            knockout_resolver = load_knockout_resolver()
+            if knockout_resolver is None:
+                warnings.append("Bracket winners not projected: prediction model unavailable")
+        if knockout_resolver:
+            # results=None: no knockout has been played yet (group stage only);
+            # actual results will override the model here once those fixtures exist
+            bracket_proj = bk.feed(bracket_proj, knockout_resolver)
 
     index, data = build_page(matches, rows, target, generated_at,
                              template_path=template_dir / "page.html",

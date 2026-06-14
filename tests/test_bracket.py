@@ -93,5 +93,59 @@ class ProjectionTests(unittest.TestCase):
         self.assertIn("Best 3rd of", md)                   # third slots unresolved
 
 
+def _alpha_resolver(a, b):
+    """Deterministic stand-in for the model: the alphabetically-first team always
+    advances, at a fixed probability. Lets feed() be tested without predict.py."""
+    winner, loser = (a, b) if a <= b else (b, a)
+    return {"winner": winner, "loser": loser, "p": 0.6}
+
+
+class FeedTests(unittest.TestCase):
+    def test_feed_propagates_to_a_champion(self):
+        s = st.compute_standings(_full_groups())
+        proj = bk.project(s, bk.load_annex_c())
+        fed = bk.feed(proj, _alpha_resolver)
+        # all 32 ties (R32..Final plus the third-place play-off) resolve on a
+        # fully-played tournament — i.e. every match number 73..104
+        self.assertEqual({int(k) for k in fed["winners"]}, set(range(73, 105)))
+        # the champion is the alphabetically-first team to enter the bracket
+        entrants = [e["home"] for e in proj["r32"].values()] + \
+                   [e["away"] for e in proj["r32"].values()]
+        self.assertEqual(fed["champion"], min(entrants))
+        # every winner is one of that tie's two participants, p carried through
+        for m, w in fed["winners"].items():
+            self.assertIn(w["team"], fed["participants"][m])
+            if w["source"] == "model":
+                self.assertEqual(w["p"], 0.6)
+        # third-place play-off is the two semi-final losers
+        tp = proj["third_place_match"]
+        self.assertEqual(set(fed["participants"][tp]),
+                         {fed["winners"][101]["loser"], fed["winners"][102]["loser"]})
+
+    def test_results_override_the_model(self):
+        s = st.compute_standings(_full_groups())
+        proj = bk.project(s, bk.load_annex_c())
+        # force the underdog (alphabetically-last R32 entrant's match) via results
+        any_r32 = next(iter(proj["r32"]))
+        e = proj["r32"][any_r32]
+        forced = max(e["home"], e["away"])             # the one _alpha_resolver would NOT pick
+        fed = bk.feed(proj, _alpha_resolver, results={any_r32: forced})
+        self.assertEqual(fed["winners"][any_r32]["team"], forced)
+        self.assertEqual(fed["winners"][any_r32]["source"], "result")
+        self.assertIsNone(fed["winners"][any_r32]["p"])
+
+    def test_gating_halts_propagation(self):
+        # only group A has played -> no full R32 tie has both sides known except via
+        # started groups; nothing should propagate past the gating frontier.
+        s = st.compute_standings(st.load_fixtures(SNAP))
+        proj = bk.project(s)
+        fed = bk.feed(proj, _alpha_resolver)
+        self.assertIsNone(fed["champion"])             # cannot reach the Final
+        self.assertEqual(fed["winners"], {})           # no R32 tie has both sides known
+        # any resolved tie would have two concrete (non-None) participants
+        for m, pr in fed["participants"].items():
+            self.assertTrue(all(pr))
+
+
 if __name__ == "__main__":
     unittest.main()
