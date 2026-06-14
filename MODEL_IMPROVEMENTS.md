@@ -390,6 +390,10 @@ context for these parameters (unlike ρ, which is fit broad).
 
 ### 3.1 Goals total vs strength gap — REVISED; the earlier patch idea was wrong
 
+> **Plain-English version:** see [TOTALS_FIX_EXPLAINER.md](TOTALS_FIX_EXPLAINER.md) — a
+> non-specialist walkthrough of the blind spot, the fix, the trade-offs, and why we're
+> confident. The notes below are the technical record.
+
 > **RESULT (2026-06-14): backtested — the gap is a MEAN error; "(a) leave as-is" is
 > rejected, "(b) Maher-form" is warranted, "(c) NB" is secondary.**
 > `scripts/backtest_totals.py` built a forward Elo over **10,495 competitive

@@ -6,6 +6,7 @@
 - [DECISIONS.md](DECISIONS.md) — the load-bearing choices and why.
 - [PLAN.md](PLAN.md) — original phased plan (all phases shipped) + the daily ops checklist.
 - [MODEL_IMPROVEMENTS.md](MODEL_IMPROVEMENTS.md) — the detailed predictor roadmap.
+- [TOTALS_FIX_EXPLAINER.md](TOTALS_FIX_EXPLAINER.md) — plain-English explainer of the June 14 Maher-form totals fix (for non-specialists).
 
 This file (CLAUDE.md) holds the **data contracts and rules** — they override everything else.
 
