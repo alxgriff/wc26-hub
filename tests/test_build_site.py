@@ -220,5 +220,60 @@ class OutcomeGridTests(unittest.TestCase):
         self.assertNotIn("__TEAM_B__", html)
 
 
+class SweatFahrenheitTests(unittest.TestCase):
+    """render_sweat and _sweat_blurb display temperatures in °F, not °C."""
+
+    def _info(self, temp_c=30.0, rh=60.0, wbgt=28.0, delta_a=8.0, delta_b=-2.0,
+              dis_a=60, dis_b=10, sf=55, severity="High", mhi=60):
+        return {
+            "temp_c": temp_c, "rh_pct": rh, "wbgt_est": wbgt,
+            "delta_a": delta_a, "delta_b": delta_b,
+            "dis_a": dis_a, "dis_b": dis_b,
+            "sf": sf, "severity": severity, "mhi": mhi,
+            "source": "forecast", "as_of": "2026-06-14 06:00",
+            "climate_controlled": False,
+        }
+
+    def test_temp_displayed_in_fahrenheit(self):
+        html = bs.render_sweat(self._info(temp_c=30.0), "Brazil", "Morocco")
+        self.assertIn("86°F", html)       # 30*9/5+32 = 86
+        self.assertNotIn("30°C", html)
+
+    def test_wbgt_displayed_in_fahrenheit(self):
+        html = bs.render_sweat(self._info(wbgt=28.0), "Brazil", "Morocco")
+        self.assertIn("82.4°F", html)     # 28*9/5+32 = 82.4
+        self.assertNotIn("28°C", html)
+
+    def test_team_delta_displayed_in_fahrenheit(self):
+        html = bs.render_sweat(self._info(delta_a=10.0, delta_b=-5.0), "Scotland", "Panama")
+        self.assertIn("+18.0°F vs home", html)   # 10*9/5 = 18
+        self.assertIn("-9.0°F vs home", html)     # -5*9/5 = -9
+
+    def test_crimson_threshold_still_uses_celsius(self):
+        # delta_a=5.0°C (exactly on threshold) → crimson bar
+        html = bs.render_sweat(self._info(delta_a=5.0), "Scotland", "Panama")
+        self.assertIn("cond-dis-hot", html)
+        # delta_a=4.9°C (just under) → no crimson
+        html2 = bs.render_sweat(self._info(delta_a=4.9), "Scotland", "Panama")
+        self.assertNotIn("cond-dis-hot", html2)
+
+    def test_blurb_uses_fahrenheit(self):
+        html = bs.render_sweat(self._info(sf=60, delta_a=8.0, delta_b=1.0,
+                                          dis_a=70, dis_b=10), "Scotland", "Panama")
+        self.assertIn("°F", html)
+        self.assertNotIn("°C", html)
+
+    def test_no_celsius_anywhere_in_output(self):
+        html = bs.render_sweat(self._info(), "Brazil", "Morocco")
+        self.assertNotIn("°C", html)
+
+    def test_climate_controlled_unchanged(self):
+        info = {"climate_controlled": True}
+        html = bs.render_sweat(info, "Brazil", "Morocco")
+        self.assertIn("climate-controlled", html)
+        self.assertNotIn("°C", html)
+        self.assertNotIn("°F", html)
+
+
 if __name__ == "__main__":
     unittest.main()
