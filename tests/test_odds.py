@@ -426,6 +426,29 @@ class ApiMappingTests(unittest.TestCase):
         self.assertEqual(rows, [])                       # never logged on unknown time
         self.assertTrue(any("fail-closed" in l for l in lines))
 
+    def test_single_bookmaker_filter_logs_only_that_book(self):
+        # the event carries fanduel + betmgm; a {"fanduel"} filter logs ONLY
+        # fanduel and the median collapses to that one book's price.
+        rows, _ = od.snapshot_from_api([self._event()], self.FIXTURE_ROWS,
+                                       "snapshot", NOW, bookmaker_keys={"fanduel"})
+        best_books = {r["source"] for r in rows if r["source"].startswith("best:")}
+        self.assertEqual(best_books, {"best:fanduel"})
+        med = {(r["market"], r["selection"], r["line"]): r["odds"]
+               for r in rows if r["source"].startswith("median")}
+        best = {(r["market"], r["selection"], r["line"]): r["odds"]
+                for r in rows if r["source"].startswith("best:")}
+        self.assertEqual(med, best)                       # median of one book = that book
+        self.assertTrue(all("betmgm" not in r["source"] for r in rows))
+
+    def test_filter_with_no_matching_book_skips_and_reports(self):
+        # the user's book quotes nothing on this event: report it, log nothing
+        # (never fall back to other books behind the single-source contract).
+        rows, lines = od.snapshot_from_api([self._event()], self.FIXTURE_ROWS,
+                                           "snapshot", NOW,
+                                           bookmaker_keys={"draftkings"})
+        self.assertEqual(rows, [])
+        self.assertTrue(any("no draftkings odds" in l for l in lines))
+
 
 class ApiErrorTests(unittest.TestCase):
     def test_urlerror_becomes_keyless_oddserror(self):
@@ -580,6 +603,51 @@ class RenderTests(unittest.TestCase):
         self.assertIn("best price 2.55 (fanduel)", out)
         self.assertIn("Flat 1u (paper)", out)
         self.assertIn("display threshold", out)   # 3pp marker is wired, not inert
+
+
+class FetchParamTests(unittest.TestCase):
+    """--bookmaker -> the-odds-api source selector (single book vs full region)."""
+
+    def test_single_bookmaker_uses_bookmakers_param(self):
+        self.assertEqual(od._odds_query_params("draftkings"),
+                         {"bookmakers": "draftkings"})
+        self.assertEqual(od._odds_query_params(" DraftKings "),
+                         {"bookmakers": "draftkings"})   # trimmed + lowercased
+
+    def test_all_or_empty_falls_back_to_us_region(self):
+        for val in ("all", "ALL", "", None):
+            self.assertEqual(od._odds_query_params(val), {"regions": "us"})
+
+    def test_default_is_draftkings(self):
+        self.assertEqual(od.DEFAULT_BOOKMAKER, "draftkings")
+        self.assertEqual(od._odds_query_params(od.DEFAULT_BOOKMAKER),
+                         {"bookmakers": "draftkings"})
+
+
+class SourceLabelTests(unittest.TestCase):
+    """snapshot_source_label — honest provenance for the edition/site note."""
+
+    def test_single_book_named_from_best_row(self):
+        rows = (h2h_rows("D3", 2.5, 3.3, 3.1, source="median/1books")
+                + h2h_rows("D3", 2.5, 3.3, 3.1, source="best:draftkings"))
+        self.assertEqual(od.snapshot_source_label(rows, "D3"), "DraftKings line")
+
+    def test_multi_book_reports_count(self):
+        rows = h2h_rows("D3", 2.5, 3.3, 3.1, source="median/7books")
+        self.assertEqual(od.snapshot_source_label(rows, "D3"), "median across 7 books")
+
+    def test_no_snapshot_is_blank(self):
+        self.assertEqual(od.snapshot_source_label([], "D3"), "")
+
+    def test_only_latest_timestamp_counts(self):
+        # a stale 9-book snapshot must not mislabel today's single-book one
+        old = h2h_rows("D3", 2.0, 3.0, 4.0, source="median/9books",
+                       ts="2026-06-13T08:00:00-04:00")
+        new = (h2h_rows("D3", 2.5, 3.3, 3.1, source="median/1books",
+                        ts="2026-06-13T10:00:00-04:00")
+               + h2h_rows("D3", 2.5, 3.3, 3.1, source="best:draftkings",
+                          ts="2026-06-13T10:00:00-04:00"))
+        self.assertEqual(od.snapshot_source_label(old + new, "D3"), "DraftKings line")
 
 
 if __name__ == "__main__":

@@ -87,6 +87,12 @@ specifies weights. Probabilities must sum to 1.0 ± 0.001 per match.
   source, phase, timestamp. The 1X2 edge is vs the published consensus;
   totals/handicap/BTTS are model-priced from the score matrix (the overlay
   covers W/D/L only). Draw-no-bet is computed but not yet snapshotted/recorded.
+- **Odds source: a single book — DraftKings by default** (`odds.py fetch
+  --bookmaker`, user-set June 14), the book actually bet at, so the de-vigged
+  implied is the line you can really take rather than a cross-market consensus
+  you can't. `--bookmaker all` restores the multi-book US region. The median/best
+  log rows are retained (identical under one book); provenance is labelled
+  honestly (`snapshot_source_label`) — never claim a market median over one book.
 - De-vig the 1X2: implied_i = (1/odds_i) / Σ(1/odds_j) (multiplicative
   method; power or Shin method optional upgrade later).
 - Edge_i = model_p_i − implied_i. Display threshold 3 percentage points;

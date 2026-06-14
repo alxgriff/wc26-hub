@@ -513,6 +513,7 @@ def load_odds_engine():
                 "recorded": [p for p in picks if p["match_id"] == mid],
                 "threshold": od.EDGE_THRESHOLD,
                 "record_threshold": record_threshold,
+                "source_label": od.snapshot_source_label(odds_rows, mid),
                 "snapshot_ts": max(r["timestamp"] for r in match_rows),
                 "projection": {"total": pred.total,
                                "over": {f"{k:g}": v for k, v in pred.over.items()}},
@@ -934,8 +935,9 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
     for fl in odds_info.get("flags", []):
         parts.append(f'<p class="verify-flag">{_esc(fl)}</p>')
 
+    src = odds_info.get("source_label") or "market snapshot"
     notes = [f'market snapshot {_esc(_fmt_snapshot_ts(odds_info["snapshot_ts"]))} · '
-             'median odds across books, de-vigged multiplicatively']
+             f'{src}, de-vigged multiplicatively']
     if ev.get("totals") or ev.get("spreads") or ev.get("btts"):
         notes.append("totals / handicap / BTTS are model-priced from the score "
                      "matrix — the Opta overlay covers W/D/L only")

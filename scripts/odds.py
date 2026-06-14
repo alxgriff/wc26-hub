@@ -8,9 +8,13 @@ call); defaults confirmed: 3pp edge threshold, flat 1u stakes, 1X2 + totals
 markets, >15pp sanity flag; paper units only for now.
 
 Methodology (per CLAUDE.md, with reviewed extensions):
-  * Snapshot the market at publish time to ``data/odds_log.csv``. We log the
-    per-selection MEDIAN across books (fair-value reference, robust to one
-    stale book) and the BEST available price (what a bet would settle at).
+  * Snapshot odds at publish time to ``data/odds_log.csv``. By default we pull a
+    SINGLE bookmaker — DraftKings (``--bookmaker``), the book actually bet at — so
+    the de-vigged implied is the line you can really take, not a cross-market
+    consensus you can't. ``--bookmaker all`` restores the multi-book US region.
+    We still log a per-selection MEDIAN row (fair-value reference; the median of
+    one book is just that book) and the BEST available price (what a bet would
+    settle at) — identical under a single book, distinct only across many.
   * De-vig multiplicatively: implied_i = (1/odds_i) / Σ(1/odds_j). (Shin is
     the documented upgrade for longshot bias — later.)
   * Edge_i = our_p_i − implied_i, where our_p is the ledger's consensus W/D/L
@@ -35,7 +39,8 @@ Schemas (CLAUDE.md base + documented extensions ``line``/``phase``/pick fields):
                  our_p, implied_p, stake, timestamp, status, units, clv_pp
 
 CLI:
-    python scripts/odds.py fetch [--phase snapshot|closing]   # odds API (key req.)
+    python scripts/odds.py fetch [--phase snapshot|closing] [--bookmaker draftkings]
+                                                              # odds API (key req.)
     python scripts/odds.py enter D3 h2h 2.45,3.20,3.10 --source betmgm
     python scripts/odds.py enter D3 totals 2.5 1.95,1.87 --source betmgm
     python scripts/odds.py evaluate 2026-06-13                # edges + best bets
@@ -82,6 +87,20 @@ PICK_COLUMNS = ["match_id", "market", "selection", "line", "odds", "book",
 EDGE_THRESHOLD = 0.03      # user-tunable via --threshold
 SANITY_EDGE = 0.15         # above this: flag, never auto-pick
 H2H_SELECTIONS = ("home", "draw", "away")
+
+# Single-book sourcing (June 14): the snapshot pulls one bookmaker — the one the
+# user actually bets — so the de-vigged implied is the line they can take, not a
+# cross-market consensus they can't. DraftKings by default; --bookmaker overrides,
+# and --bookmaker all restores the full multi-book US region.
+DEFAULT_BOOKMAKER = "draftkings"
+BOOK_DISPLAY = {"draftkings": "DraftKings", "fanduel": "FanDuel", "betmgm": "BetMGM",
+                "caesars": "Caesars", "pointsbetus": "PointsBet",
+                "betrivers": "BetRivers"}
+
+
+def _book_display(key: str) -> str:
+    """Pretty book name for provenance notes; unknown keys pass through as-is."""
+    return BOOK_DISPLAY.get(key, key)
 
 
 class OddsError(ValueError):
@@ -273,6 +292,29 @@ def latest_market(odds_rows: list, match_id: str, market: str,
         out[(r["selection"], _fmt_line(r["line"]))] = (float(r["odds"]),
                                                        int(m.group(1)) if m else 1)
     return out
+
+
+def snapshot_source_label(odds_rows: list, match_id: str,
+                          phase: str = "snapshot") -> str:
+    """Human provenance for a match's snapshot, for the edition/site note. A
+    single book is named ("DraftKings line"); multiple books read as "median
+    across N books". "" when there is no snapshot. The displayed numbers must
+    never describe a sourcing the log doesn't actually have."""
+    rows = [r for r in odds_rows
+            if r["match_id"] == match_id and r["phase"] == phase]
+    if not rows:
+        return ""
+    last_ts = max(r["timestamp"] for r in rows)
+    latest = [r for r in rows if r["timestamp"] == last_ts]
+    n = max((int(m.group(1)) for r in latest
+             if (m := re.search(r"/(\d+)books", r["source"]))), default=1)
+    if n > 1:
+        return f"median across {n} books"
+    books = {r["source"].split("best:", 1)[1] for r in latest
+             if r["source"].startswith("best:")}
+    if len(books) == 1:
+        return f"{_book_display(next(iter(books)))} line"
+    return "single book"
 
 
 def _latest_phase_ts(odds_rows: list, match_id: str, market: str, phase: str,
@@ -640,9 +682,12 @@ def units_summary(picks: list) -> str | None:
 
 def render_odds_section(match_id: str, evaluation: dict, pick,
                         flags: list, best_prices: dict,
-                        threshold: float = EDGE_THRESHOLD) -> str:
+                        threshold: float = EDGE_THRESHOLD,
+                        source_label: str = "") -> str:
     """Markdown body for a card's Odds & Best Bet slot. ``pick`` accepts a
-    single pick dict (legacy) or the ranked list from best_bets."""
+    single pick dict (legacy) or the ranked list from best_bets. ``source_label``
+    (from snapshot_source_label) names where the odds came from — provenance the
+    note must state honestly rather than assuming a market median."""
     picks = pick if isinstance(pick, list) else ([pick] if pick else [])
     lines = []
     labelled = ([("1X2", r) for r in evaluation["h2h"]]
@@ -651,7 +696,7 @@ def render_odds_section(match_id: str, evaluation: dict, pick,
                 + [("BTTS", r) for r in evaluation.get("btts", [])])
     rows = [r for _, r in labelled]
     if rows:
-        lines += ["| Market | Sel | Odds (median) | Implied | Ours | Edge |",
+        lines += ["| Market | Sel | Odds | Implied | Ours | Edge |",
                   "|:--|:--|--:|--:|--:|--:|"]
         actionable = 0
         for mk, (sel, line, odds, implied, our_p, edge) in labelled:
@@ -667,6 +712,9 @@ def render_odds_section(match_id: str, evaluation: dict, pick,
             lines.append("")
             lines.append("_Totals/AH/BTTS are model-priced from the score matrix "
                          "(the Opta overlay covers W/D/L only)._")
+        if source_label:
+            lines.append("")
+            lines.append(f"_Odds source: {source_label}, de-vigged multiplicatively._")
         lines.append("")
     if picks:
         for i, pk in enumerate(picks, 1):
@@ -753,10 +801,22 @@ def _match_event(event: dict, fixture_rows: list) -> dict | None:
     return None
 
 
+def _odds_query_params(bookmaker: str | None) -> dict:
+    """The-odds-api source selector. A specific bookmaker key requests ONLY that
+    book (the 'bookmakers' param, which the API prioritises over 'regions');
+    'all' / '' / None falls back to the whole US region (multi-book)."""
+    if bookmaker and bookmaker.strip().lower() != "all":
+        return {"bookmakers": bookmaker.strip().lower()}
+    return {"regions": "us"}
+
+
 def snapshot_from_api(events: list, fixture_rows: list, phase: str,
-                      now: datetime) -> tuple:
+                      now: datetime, bookmaker_keys: set | None = None) -> tuple:
     """Convert API events to odds_log rows: per-selection median + best price.
-    Returns (rows, status_lines). Unmatched team names are REPORTED, not guessed."""
+    Returns (rows, status_lines). Unmatched team names are REPORTED, not guessed.
+    ``bookmaker_keys`` (e.g. {"draftkings"}) restricts logging to those books even
+    if the API returns more — a client-side guarantee of single-source odds on top
+    of the request-side 'bookmakers' filter."""
     rows, lines = [], []
     stamp = now.isoformat(timespec="seconds")
     for ev in events:
@@ -784,8 +844,15 @@ def snapshot_from_api(events: list, fixture_rows: list, phase: str,
         mid = fr["match_id"]
         home_is_a = pr._canon(ev["home_team"]) == fr["team_a"]
 
+        books = [bk for bk in ev.get("bookmakers", [])
+                 if bookmaker_keys is None or bk.get("key") in bookmaker_keys]
+        if not books:
+            want = "/".join(sorted(bookmaker_keys)) if bookmaker_keys else "any book"
+            lines.append(f"{mid}: no {want} odds in this event — skipped")
+            continue
+
         prices = {}   # (market, selection, line) -> [(odds, book), ...]
-        for bk in ev.get("bookmakers", []):
+        for bk in books:
             for mkt in bk.get("markets", []):
                 if mkt["key"] == "h2h":
                     for oc in mkt.get("outcomes", []):
@@ -817,7 +884,7 @@ def snapshot_from_api(events: list, fixture_rows: list, phase: str,
                             continue
                         prices.setdefault(("spreads", sel, _fmt_line(oc.get("point", "")))
                                           , []).append((float(oc["price"]), bk["key"]))
-        n_books = len(ev.get("bookmakers", []))
+        n_books = len(books)
         for (market, sel, line), plist in prices.items():
             med = statistics.median(p for p, _ in plist)
             best_odds, best_book = max(plist, key=lambda x: x[0])
@@ -906,8 +973,10 @@ def cmd_evaluate(target: date, fixtures: Path, threshold: float,
         ev = evaluate_match(mid, odds_rows, ledger_rows, pred)
         picks, flags = best_bets(ev)
         bp = _best_prices(odds_rows, mid)
+        src = snapshot_source_label(odds_rows, mid)
         print(f"\n### {mid} {fr['team_a']} vs {fr['team_b']}\n")
-        print(render_odds_section(mid, ev, picks, flags, bp, threshold))
+        print(render_odds_section(mid, ev, picks, flags, bp, threshold,
+                                  source_label=src))
         for pick in picks if record else []:
             passed = now >= lg.kickoff_dt(fr)
             age = _snapshot_age_hours(odds_rows, mid, now, market=pick["market"])
@@ -941,6 +1010,10 @@ def main(argv: list | None = None) -> int:
     p_fetch = sub.add_parser("fetch", help="snapshot odds from the odds API")
     p_fetch.add_argument("--phase", choices=["snapshot", "closing"], default="snapshot")
     p_fetch.add_argument("--sport", default=SPORT_KEY)
+    p_fetch.add_argument("--bookmaker", default=DEFAULT_BOOKMAKER,
+                         help="single bookmaker key to source (default "
+                              f"{DEFAULT_BOOKMAKER!r}); pass 'all' for the full "
+                              "multi-book US region")
 
     p_enter = sub.add_parser("enter", help="manually enter odds")
     p_enter.add_argument("match_id")
@@ -984,10 +1057,12 @@ def main(argv: list | None = None) -> int:
             print("error: no API key. Set ODDS_API_KEY or write data/.odds_api_key "
                   "(git-ignored). Sign up free at the-odds-api.com.", file=sys.stderr)
             return 1
+        source = _odds_query_params(args.bookmaker)
         try:
             events, remaining = _api_get(f"/sports/{args.sport}/odds", key,
-                                         regions="us", markets="h2h,spreads,totals",
-                                         oddsFormat="decimal", dateFormat="iso")
+                                         markets="h2h,spreads,totals",
+                                         oddsFormat="decimal", dateFormat="iso",
+                                         **source)
         except urllib.error.HTTPError as e:
             if e.code == 404:
                 print(f"error: sport key {args.sport!r} not found — run with "
@@ -1001,11 +1076,16 @@ def main(argv: list | None = None) -> int:
             print(f"error: {e}", file=sys.stderr)
             return 1
         rows = be.read_rows(args.fixtures)
-        odds_rows, lines = snapshot_from_api(events, rows, args.phase, lg.now_et())
+        book_filter = ({args.bookmaker.strip().lower()}
+                       if "bookmakers" in source else None)
+        odds_rows, lines = snapshot_from_api(events, rows, args.phase, lg.now_et(),
+                                             bookmaker_keys=book_filter)
         append_odds(odds_rows)
         for line in lines:
             print(line)
-        print(f"logged {len(odds_rows)} odds rows ({args.phase}); "
+        src_desc = (f"{_book_display(next(iter(book_filter)))} only"
+                    if book_filter else "US region (all books)")
+        print(f"logged {len(odds_rows)} odds rows ({args.phase}, {src_desc}); "
               f"API requests remaining this month: {remaining}")
         return 0
 
