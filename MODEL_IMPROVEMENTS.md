@@ -390,6 +390,28 @@ context for these parameters (unlike ρ, which is fit broad).
 
 ### 3.1 Goals total vs strength gap — REVISED; the earlier patch idea was wrong
 
+> **RESULT (2026-06-14): backtested — the gap is a MEAN error; "(a) leave as-is" is
+> rejected, "(b) Maher-form" is warranted, "(c) NB" is secondary.**
+> `scripts/backtest_totals.py` built a forward Elo over **10,495 competitive
+> internationals (2010+)**, binned them by the favourite's pre-match expected points,
+> and compared actual totals to the model's on that common axis. As dominance rises
+> from even to lopsided, the **actual total climbs +1.32 goals (2.40 → 3.72)** while
+> the **model stays flat (+0.05, 2.62 → 2.67)**; in the lopsided bin the favourite
+> really scores **3.35** vs the model's **2.48**, and **48%** of games clear 3.5 goals
+> vs the model's **28%**. So the symmetric-texture total mis-prices the **slope** —
+> slightly over-pricing even games (2.62 vs 2.40) and badly under-pricing mismatches.
+> Overdispersion is real but secondary: variance/mean is **1.43** in the lopsided bin
+> (Poisson assumes 1.0), so NB helps the tails but cannot close a 1-goal *mean* gap.
+> **Decision:** prototype option (b) — a Maher-form per-side λ — behind an **inert**
+> `Config.maher_w` blend (default 0.0 ⇒ current output, regression-guarded). It lifts
+> the *total* via the convex per-side att×def form while keeping the Elo-supremacy
+> *share* (so §3.1's "don't lose the Elo split" concern is respected). **Activate only
+> from a fitted weight in `calibration.json` that (i) fixes the backtest slope and
+> (ii) does NOT degrade W/D/L on the historical holdout** (the model's primary,
+> validated output). The `κ·|sup|` mean-bump stays rejected — the lift must come from
+> the canonical att×def form, not an ad-hoc supremacy term. NB (c) is a separate tail
+> follow-up.
+
 **Correction to a prior suggestion.** An earlier draft proposed coupling the goals
 total to the supremacy gap via a `(1 + κ·|sup|)` term. **The literature does not
 support this as a fix, and it should not be implemented as a mechanical patch.**
