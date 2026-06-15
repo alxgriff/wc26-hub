@@ -1,0 +1,6 @@
+[project]
+name = "wc26-hub"
+version = "0.1.0"
+description = "2026 World Cup daily hub — group-stage predictor and edition builder"
+requires-python = ">=3.12"
+dependencies = []

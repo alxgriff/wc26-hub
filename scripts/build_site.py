@@ -733,7 +733,7 @@ _OUTCOME_GRID_JS = """\
   }
   function rColor(i,j){return i>j?'98,185,126':i===j?'217,169,72':'232,118,90';}
   var mx=document.getElementById('og-matrix');
-  var html='<div class="og-corner">A \\\\ B</div>';
+  var html='<div class="og-corner">goals</div>';
   for(j=0;j<SHOW;j++)html+='<div class="og-ax-top">'+j+'</div>';
   for(i=0;i<SHOW;i++){
     html+='<div class="og-ax-side">'+i+'</div>';
@@ -751,8 +751,6 @@ _OUTCOME_GRID_JS = """\
   var cells=[].slice.call(mx.querySelectorAll('.og-cell'));
   var tail=0;
   for(i=0;i<=N;i++)for(j=0;j<=N;j++){if(i>=SHOW||j>=SHOW)tail+=M[i][j];}
-  document.getElementById('og-tail').textContent=
-    'Showing 0–5 each side. Scores beyond: '+(tail*100).toFixed(1)+'% — still counted.';
   var LABELS={
     awin:['__TEAM_A__ win','98,185,126'],
     draw:['Draw','217,169,72'],
@@ -801,9 +799,6 @@ def render_outcome_grid(info: dict | None, team_a: str, team_b: str) -> str:
         f'<details class="outcome-grid-wrap">\n'
         f'<summary class="outcome-grid-toggle">Show score grid</summary>\n'
         f'<div class="outcome-grid-inner">\n'
-        f'<p class="og-lede">Each cell is one exact scoreline. '
-        f'Greener = {a_esc} win, gold = draw, red = {b_esc} win; '
-        f'brighter = more likely. Press a button to highlight cells that count toward that outcome.</p>\n'
         f'<div class="og-qbar" id="og-qbar">\n'
         f'  <button class="og-q awin" data-q="awin" aria-pressed="false">{a_esc} win</button>\n'
         f'  <button class="og-q draw" data-q="draw" aria-pressed="false">Draw</button>\n'
@@ -812,12 +807,13 @@ def render_outcome_grid(info: dict | None, team_a: str, team_b: str) -> str:
         f'  <button class="og-q btts" data-q="btts" aria-pressed="false">Both score</button>\n'
         f'</div>\n'
         f'<div class="og-readout" id="og-readout"></div>\n'
-        f'<div class="og-matrix" id="og-matrix"></div>\n'
-        f'<div class="og-axhint">'
-        f'<span>← {b_esc} goals (top)</span>'
-        f'<span>{a_esc} goals (side) ↓</span>'
+        f'<div class="og-outer">\n'
+        f'  <div class="og-team-side">{a_esc}</div>\n'
+        f'  <div class="og-inner">\n'
+        f'    <div class="og-team-top">{b_esc}</div>\n'
+        f'    <div class="og-matrix" id="og-matrix"></div>\n'
+        f'  </div>\n'
         f'</div>\n'
-        f'<p class="og-tail" id="og-tail"></p>\n'
         f'</div>\n'
         f'</details>\n'
         f'<script>\n{js}\n</script>'
@@ -1573,7 +1569,8 @@ def render_match_page(row: dict, s: "st.Standings",
                       scenario_html: str = "",
                       wire_html: str = "",
                       sweat_info: dict | None = None,
-                      kicked_off: bool = False) -> str:
+                      kicked_off: bool = False,
+                      grid_info: dict | None = None) -> str:
     mid, g = row["match_id"].strip(), row["group"].strip()
     team_a, team_b = row["team_a"].strip(), row["team_b"].strip()
     played = (row.get("status") or "").strip().lower() == "played"
@@ -1643,7 +1640,7 @@ def render_match_page(row: dict, s: "st.Standings",
         card_html=render_card_sections(sections),
         wire_html=wire_html,
         odds_html=render_market(odds_info, team_a, team_b, odds_note, played=played),
-        outcome_grid_html=render_outcome_grid(info, team_a, team_b),
+        outcome_grid_html=render_outcome_grid(grid_info or info, team_a, team_b),
         repo_url=REPO_URL,
     )
 
@@ -1975,12 +1972,15 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         if int(row["match_id"][1]) >= 5 and row["group"] in md3_reports:
             scenario_html = render_scenario_block(
                 md3_reports[row["group"]], row["team_a"], row["team_b"])
+        grid_info = (_safe_predict(predictor, row, [])
+                     if predictor is not None and (played or kicked_off) else None)
         page = render_match_page(row, s, forms, cards_dir, info, css,
                                  template_dir, warnings, odds_info=odds_info,
                                  scenario_html=scenario_html,
                                  wire_html=render_wire(wire.get(row["match_id"])),
                                  sweat_info=sweat_info,
-                                 kicked_off=kicked_off)
+                                 kicked_off=kicked_off,
+                                 grid_info=grid_info)
         (out_dir / "matches" / f"{row['match_id']}.html").write_text(
             page, encoding="utf-8")
     if predictor is not None and scheduled and predictions == 0:
