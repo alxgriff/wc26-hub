@@ -494,7 +494,6 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 details[open] .outcome-grid-toggle::before{content:"▾ "}
 .outcome-grid-toggle:hover{color:var(--ink);border-color:var(--ink-soft)}
 .outcome-grid-inner{margin-top:.9rem}
-.og-lede{font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:.4rem 0 .85rem;line-height:1.55}
 .og-qbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .og-q{font-family:var(--mono);font-size:.7rem;letter-spacing:.02em;padding:6px 10px;
   border-radius:999px;border:1px solid var(--hairline);background:transparent;
@@ -514,14 +513,15 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 .og-cell{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;
   font-family:var(--mono);font-size:.62rem;font-weight:500;color:var(--ink);
   background:var(--paper-2);transition:opacity .15s,box-shadow .15s;position:relative}
-.og-cell.og-modal::after{content:"modal";position:absolute;bottom:1px;left:0;right:0;
-  font-size:.4rem;letter-spacing:.07em;text-transform:uppercase;
-  color:var(--ink);opacity:.65;text-align:center}
 .og-cell.og-dim{opacity:.12}
 .og-cell.og-hot{box-shadow:inset 0 0 0 2px var(--ink)}
-.og-axhint{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);
-  display:flex;justify-content:space-between;margin-top:6px;max-width:360px}
-.og-tail{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);margin-top:5px}
+.og-outer{display:flex;align-items:center;gap:5px}
+.og-inner{flex:1;min-width:0}
+.og-team-side{writing-mode:vertical-lr;transform:rotate(180deg);font-family:var(--mono);
+  font-size:.55rem;color:var(--ink-soft);white-space:nowrap;align-self:stretch;
+  display:flex;align-items:center;justify-content:center}
+.og-team-top{font-family:var(--mono);font-size:.55rem;color:var(--ink-soft);
+  text-align:center;margin-bottom:3px;max-width:360px}
 @media(prefers-reduced-motion:reduce){.og-cell{transition:none}}
 
 </style>
@@ -685,7 +685,89 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 <p class="verify-flag">spreads away 0.5: model-priced edge +11.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 12, 7:00 PM ET · median across 9 books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 2 can push (P 26%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> market snapshot (1X2 / draw no bet / total), model-vs-market edge check, best bet with logged odds — or "no bet" if no edge clears the threshold. Markets to watch per the lean above: the under and Paraguay draw-no-bet, where public money on the co-hosts may inflate the US price.</p></blockquote></div>
-
+<details class="outcome-grid-wrap">
+<summary class="outcome-grid-toggle">Show score grid</summary>
+<div class="outcome-grid-inner">
+<div class="og-qbar" id="og-qbar">
+  <button class="og-q awin" data-q="awin" aria-pressed="false">United States win</button>
+  <button class="og-q draw" data-q="draw" aria-pressed="false">Draw</button>
+  <button class="og-q bwin" data-q="bwin" aria-pressed="false">Paraguay win</button>
+  <button class="og-q over" data-q="over" aria-pressed="false">Over 2.5</button>
+  <button class="og-q btts" data-q="btts" aria-pressed="false">Both score</button>
+</div>
+<div class="og-readout" id="og-readout"></div>
+<div class="og-outer">
+  <div class="og-team-side">United States</div>
+  <div class="og-inner">
+    <div class="og-team-top">Paraguay</div>
+    <div class="og-matrix" id="og-matrix"></div>
+  </div>
+</div>
+</div>
+</details>
+<script>
+(function(){
+  var la=1.1633,lb=1.2055,N=8,SHOW=6,i,j;
+  function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
+  var pa=[],pb=[];
+  for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
+  var M=[],z=0;
+  for(i=0;i<=N;i++){M[i]=[];for(j=0;j<=N;j++){M[i][j]=pa[i]*pb[j];z+=M[i][j];}}
+  for(i=0;i<=N;i++)for(j=0;j<=N;j++)M[i][j]/=z;
+  var maxp=0,mi=0,mj=0;
+  for(i=0;i<=N;i++)for(j=0;j<=N;j++){if(M[i][j]>maxp){maxp=M[i][j];mi=i;mj=j;}}
+  function region(i,j,q){
+    if(q==='awin')return i>j; if(q==='draw')return i===j; if(q==='bwin')return i<j;
+    if(q==='over')return(i+j)>2.5; if(q==='btts')return i>=1&&j>=1; return true;
+  }
+  function rColor(i,j){return i>j?'98,185,126':i===j?'217,169,72':'232,118,90';}
+  var mx=document.getElementById('og-matrix');
+  var html='<div class="og-corner">goals</div>';
+  for(j=0;j<SHOW;j++)html+='<div class="og-ax-top">'+j+'</div>';
+  for(i=0;i<SHOW;i++){
+    html+='<div class="og-ax-side">'+i+'</div>';
+    for(j=0;j<SHOW;j++){
+      var p=M[i][j]*100;
+      var alpha=Math.pow(M[i][j]/maxp,0.55)*0.92+0.05;
+      var cls='og-cell'+(i===mi&&j===mj?' og-modal':'');
+      html+='<div class="'+cls+'" data-i="'+i+'" data-j="'+j+'" '
+        +'style="background:rgba('+rColor(i,j)+','+alpha.toFixed(3)+')" '
+        +'aria-label="'+i+'-'+j+', '+p.toFixed(1)+'%">'
+        +'<span>'+(p>=0.5?Math.round(p):'·')+'</span></div>';
+    }
+  }
+  mx.innerHTML=html;
+  var cells=[].slice.call(mx.querySelectorAll('.og-cell'));
+  var tail=0;
+  for(i=0;i<=N;i++)for(j=0;j<=N;j++){if(i>=SHOW||j>=SHOW)tail+=M[i][j];}
+  var LABELS={
+    awin:['United States win','98,185,126'],
+    draw:['Draw','217,169,72'],
+    bwin:['Paraguay win','232,118,90'],
+    over:['Over 2.5 goals','236,229,210'],
+    btts:['Both teams score','236,229,210']
+  };
+  var readout=document.getElementById('og-readout'),active=null;
+  function apply(q){
+    if(!q){cells.forEach(function(c){c.classList.remove('og-dim','og-hot');});readout.innerHTML='';return;}
+    cells.forEach(function(c){
+      var hit=region(+c.dataset.i,+c.dataset.j,q);
+      c.classList.toggle('og-dim',!hit);c.classList.toggle('og-hot',hit);
+    });
+    var sum=0;
+    for(i=0;i<=N;i++)for(j=0;j<=N;j++){if(region(i,j,q))sum+=M[i][j];}
+    var L=LABELS[q];
+    readout.innerHTML='<b>'+L[0]+'</b> = <span class="og-big">'+Math.round(sum*100)+'%</span>';
+  }
+  document.getElementById('og-qbar').addEventListener('click',function(e){
+    var btn=e.target.closest('.og-q');if(!btn)return;
+    var q=btn.dataset.q,on=(active!==q);
+    [].forEach.call(this.querySelectorAll('.og-q'),function(b){b.setAttribute('aria-pressed','false');});
+    if(on){btn.setAttribute('aria-pressed','true');active=q;apply(q);}
+    else{active=null;apply(null);}
+  });
+})();
+</script>
 </section>
 
 <section aria-labelledby="teams-h">

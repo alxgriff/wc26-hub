@@ -494,7 +494,6 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 details[open] .outcome-grid-toggle::before{content:"▾ "}
 .outcome-grid-toggle:hover{color:var(--ink);border-color:var(--ink-soft)}
 .outcome-grid-inner{margin-top:.9rem}
-.og-lede{font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:.4rem 0 .85rem;line-height:1.55}
 .og-qbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .og-q{font-family:var(--mono);font-size:.7rem;letter-spacing:.02em;padding:6px 10px;
   border-radius:999px;border:1px solid var(--hairline);background:transparent;
@@ -514,14 +513,15 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 .og-cell{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;
   font-family:var(--mono);font-size:.62rem;font-weight:500;color:var(--ink);
   background:var(--paper-2);transition:opacity .15s,box-shadow .15s;position:relative}
-.og-cell.og-modal::after{content:"modal";position:absolute;bottom:1px;left:0;right:0;
-  font-size:.4rem;letter-spacing:.07em;text-transform:uppercase;
-  color:var(--ink);opacity:.65;text-align:center}
 .og-cell.og-dim{opacity:.12}
 .og-cell.og-hot{box-shadow:inset 0 0 0 2px var(--ink)}
-.og-axhint{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);
-  display:flex;justify-content:space-between;margin-top:6px;max-width:360px}
-.og-tail{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);margin-top:5px}
+.og-outer{display:flex;align-items:center;gap:5px}
+.og-inner{flex:1;min-width:0}
+.og-team-side{writing-mode:vertical-lr;transform:rotate(180deg);font-family:var(--mono);
+  font-size:.55rem;color:var(--ink-soft);white-space:nowrap;align-self:stretch;
+  display:flex;align-items:center;justify-content:center}
+.og-team-top{font-family:var(--mono);font-size:.55rem;color:var(--ink-soft);
+  text-align:center;margin-bottom:3px;max-width:360px}
 @media(prefers-reduced-motion:reduce){.og-cell{transition:none}}
 
 </style>
@@ -835,7 +835,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 
 <footer>
   <p class="colophon">
-    Generated 2026-06-15 01:36 · calls graded from data/predictions_log.csv (logged
+    Generated 2026-06-14 21:27 · calls graded from data/predictions_log.csv (logged
     pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
     at fresh prices, revisions explicit, settled rows immutable) · Brier: 0 best ·
     0.667 coin-flip · 2 worst · CLV = closing implied minus our implied at record ·
