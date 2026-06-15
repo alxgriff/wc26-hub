@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 12,
+ "played": 14,
  "total": 72,
  "groups": {
   "A": {
@@ -390,28 +390,28 @@
      "pos": 1,
      "team": "Belgium",
      "group": "G",
-     "p": 0,
+     "p": 1,
      "w": 0,
-     "d": 0,
+     "d": 1,
      "l": 0,
-     "gf": 0,
-     "ga": 0,
+     "gf": 1,
+     "ga": 1,
      "gd": 0,
-     "pts": 0,
+     "pts": 1,
      "fate": null
     },
     {
      "pos": 2,
      "team": "Egypt",
      "group": "G",
-     "p": 0,
+     "p": 1,
      "w": 0,
-     "d": 0,
+     "d": 1,
      "l": 0,
-     "gf": 0,
-     "ga": 0,
+     "gf": 1,
+     "ga": 1,
      "gd": 0,
-     "pts": 0,
+     "pts": 1,
      "fate": null
     },
     {
@@ -443,7 +443,9 @@
      "fate": null
     }
    ],
-   "notes": []
+   "notes": [
+    "⚠️ Group G: Belgium / Egypt level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
+   ]
   },
   "H": {
    "rows": [
@@ -451,33 +453,33 @@
      "pos": 1,
      "team": "Cape Verde",
      "group": "H",
-     "p": 0,
+     "p": 1,
      "w": 0,
-     "d": 0,
+     "d": 1,
      "l": 0,
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0,
+     "pts": 1,
      "fate": null
     },
     {
      "pos": 2,
-     "team": "Saudi Arabia",
+     "team": "Spain",
      "group": "H",
-     "p": 0,
+     "p": 1,
      "w": 0,
-     "d": 0,
+     "d": 1,
      "l": 0,
      "gf": 0,
      "ga": 0,
      "gd": 0,
-     "pts": 0,
+     "pts": 1,
      "fate": null
     },
     {
      "pos": 3,
-     "team": "Spain",
+     "team": "Saudi Arabia",
      "group": "H",
      "p": 0,
      "w": 0,
@@ -504,7 +506,9 @@
      "fate": null
     }
    ],
-   "notes": []
+   "notes": [
+    "⚠️ Group H: Cape Verde / Spain level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
+   ]
   },
   "I": {
    "rows": [
@@ -875,7 +879,7 @@
    },
    {
     "pos": 9,
-    "team": "Spain",
+    "team": "Saudi Arabia",
     "group": "H",
     "p": 0,
     "w": 0,
@@ -939,11 +943,11 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-15 17:19",
+ "generated_at": "2026-06-15 23:09",
  "slate_date": "2026-06-15",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 12,
+  "as_of_matches_played": 14,
   "fully_projectable": false,
   "thirds_resolved": false,
   "r32": {
@@ -1030,7 +1034,7 @@
    },
    "82": {
     "match": 82,
-    "home": null,
+    "home": "Belgium",
     "home_label": "Winner G",
     "away": null,
     "away_label": "Best 3rd of A/E/H/I/J",
@@ -1048,7 +1052,7 @@
    },
    "84": {
     "match": 84,
-    "home": null,
+    "home": "Cape Verde",
     "home_label": "Winner H",
     "away": null,
     "away_label": "Runner-up J",
@@ -1068,7 +1072,7 @@
     "match": 86,
     "home": null,
     "home_label": "Winner J",
-    "away": null,
+    "away": "Spain",
     "away_label": "Runner-up H",
     "provisional": true,
     "half": "bottom"
@@ -1086,7 +1090,7 @@
     "match": 88,
     "home": "Australia",
     "home_label": "Runner-up D",
-    "away": null,
+    "away": "Egypt",
     "away_label": "Runner-up G",
     "provisional": true,
     "half": "bottom"
@@ -1175,6 +1179,12 @@
     "p": 0.7338756258969825,
     "source": "model"
    },
+   "88": {
+    "team": "Australia",
+    "loser": "Egypt",
+    "p": 0.5943477860809318,
+    "source": "model"
+   },
    "90": {
     "team": "Brazil",
     "loser": "Canada",
@@ -1194,6 +1204,10 @@
    "76": [
     "Scotland",
     "Japan"
+   ],
+   "88": [
+    "Australia",
+    "Egypt"
    ],
    "90": [
     "Canada",
