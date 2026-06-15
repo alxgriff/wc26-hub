@@ -1,3 +1,3 @@
 ﻿match_id,market,selection,line,odds,book,edge_pp,our_p,implied_p,stake,timestamp,status,units,clv_pp
-E2,spreads,away,-0.25,2.13,bovada,22.8,0.6776,0.4496,0,2026-06-14T13:40:40-04:00,open,,
-E2,h2h,away,,2.65,mybookieag,20.9,0.5835,0.3740,0,2026-06-14T13:40:40-04:00,open,,
+E2,spreads,away,-0.25,2.13,bovada,22.8,0.6776,0.4496,0,2026-06-14T13:40:40-04:00,lost,-1.00,
+E2,h2h,away,,2.65,mybookieag,20.9,0.5835,0.3740,0,2026-06-14T13:40:40-04:00,lost,-1.00,+0.3

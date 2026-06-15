@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 10,
+ "played": 11,
  "total": 72,
  "groups": {
   "A": {
@@ -277,27 +277,27 @@
      "pos": 2,
      "team": "Côte d'Ivoire",
      "group": "E",
-     "p": 0,
-     "w": 0,
+     "p": 1,
+     "w": 1,
      "d": 0,
      "l": 0,
-     "gf": 0,
+     "gf": 1,
      "ga": 0,
-     "gd": 0,
-     "pts": 0,
+     "gd": 1,
+     "pts": 3,
      "fate": null
     },
     {
      "pos": 3,
      "team": "Ecuador",
      "group": "E",
-     "p": 0,
+     "p": 1,
      "w": 0,
      "d": 0,
-     "l": 0,
+     "l": 1,
      "gf": 0,
-     "ga": 0,
-     "gd": 0,
+     "ga": 1,
+     "gd": -1,
      "pts": 0,
      "fate": null
     },
@@ -317,7 +317,8 @@
     }
    ],
    "notes": [
-    "Group E: overall goal difference/goals separate Curaçao / Côte d'Ivoire / Ecuador (level on points and head-to-head)."
+    "Group E: overall goal difference/goals separate Côte d'Ivoire / Germany (level on points and head-to-head).",
+    "Group E: overall goal difference/goals separate Curaçao / Ecuador (level on points and head-to-head)."
    ]
   },
   "F": {
@@ -799,21 +800,6 @@
    },
    {
     "pos": 4,
-    "team": "Ecuador",
-    "group": "E",
-    "p": 0,
-    "w": 0,
-    "d": 0,
-    "l": 0,
-    "gf": 0,
-    "ga": 0,
-    "gd": 0,
-    "pts": 0,
-    "qualifying": true,
-    "fate": null
-   },
-   {
-    "pos": 5,
     "team": "Ghana",
     "group": "L",
     "p": 0,
@@ -828,7 +814,7 @@
     "fate": null
    },
    {
-    "pos": 6,
+    "pos": 5,
     "team": "Iran",
     "group": "G",
     "p": 0,
@@ -843,7 +829,7 @@
     "fate": null
    },
    {
-    "pos": 7,
+    "pos": 6,
     "team": "Norway",
     "group": "I",
     "p": 0,
@@ -858,7 +844,7 @@
     "fate": null
    },
    {
-    "pos": 8,
+    "pos": 7,
     "team": "Portugal",
     "group": "K",
     "p": 0,
@@ -873,7 +859,7 @@
     "fate": null
    },
    {
-    "pos": 9,
+    "pos": 8,
     "team": "Spain",
     "group": "H",
     "p": 0,
@@ -884,11 +870,11 @@
     "ga": 0,
     "gd": 0,
     "pts": 0,
-    "qualifying": false,
+    "qualifying": true,
     "fate": null
    },
    {
-    "pos": 10,
+    "pos": 9,
     "team": "Sweden",
     "group": "F",
     "p": 0,
@@ -903,7 +889,7 @@
     "fate": null
    },
    {
-    "pos": 11,
+    "pos": 10,
     "team": "Czechia",
     "group": "A",
     "p": 1,
@@ -912,6 +898,21 @@
     "l": 1,
     "gf": 1,
     "ga": 2,
+    "gd": -1,
+    "pts": 0,
+    "qualifying": false,
+    "fate": null
+   },
+   {
+    "pos": 11,
+    "team": "Ecuador",
+    "group": "E",
+    "p": 1,
+    "w": 0,
+    "d": 0,
+    "l": 1,
+    "gf": 0,
+    "ga": 1,
     "gd": -1,
     "pts": 0,
     "qualifying": false,
@@ -938,11 +939,11 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-14 22:53",
+ "generated_at": "2026-06-15 01:36",
  "slate_date": "2026-06-14",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 10,
+  "as_of_matches_played": 11,
   "fully_projectable": false,
   "thirds_resolved": false,
   "r32": {
