@@ -568,7 +568,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Brier</span>
     <h2 id="calls-h">The Calls</h2>
   </div>
-  <p class="standfirst">Ledger to date: 12 graded predictions, 4 correct calls, cumulative Brier 0.881 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max)</p>
+  <p class="standfirst">Ledger to date: 13 graded predictions, 4 correct calls, cumulative Brier 0.900 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max)</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">Every logged call graded: probabilities, result, hit or miss, Brier score</caption>
@@ -658,6 +658,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td class="pts">1.083</td>
       </tr>
       <tr>
+        <td class="lbl"><a href="matches/G2.html">Iran v New Zealand</a></td>
+        <td>69%/21%/10% (1-0)</td>
+        <td>2–2</td>
+        <td>draw</td>
+        <td><span class="hit hit-n" aria-hidden="true">✗</span><span class="sr-only">missed</span></td>
+        <td class="pts">1.119</td>
+      </tr>
+      <tr>
         <td class="lbl"><a href="matches/H1.html">Spain v Cape Verde</a></td>
         <td>94%/5%/1% (3-0)</td>
         <td>0–0</td>
@@ -673,7 +681,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td><span class="hit hit-n" aria-hidden="true">✗</span><span class="sr-only">missed</span></td>
         <td class="pts">1.238</td>
       </tr>
-      <tr class="subtotal"><td colspan="4">June 15 — 3 graded</td><td>0/3</td><td>1.369</td></tr>
+      <tr class="subtotal"><td colspan="4">June 15 — 4 graded</td><td>0/4</td><td>1.306</td></tr>
     </tbody>
   </table>
 </div>
@@ -865,7 +873,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Risky · model vs market</span>
     <h2 id="shadow-h">The Shadow Book</h2>
   </div>
-  <p class="standfirst">2 settled, 0W-2L, -2.00u paper (flat 1u, not staked); 1X2 0W-1L -1.00u; model-priced 0W-1L -1.00u 1 awaiting result.</p>
+  <p class="standfirst">3 settled, 0W-3L, -3.00u paper (flat 1u, not staked); 1X2 0W-2L -2.00u; model-priced 0W-1L -1.00u</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">The shadow book: risky calls above the sanity ceiling (severe model–market disagreement), tracked on paper but too risky to stake, with hypothetical flat-1u units</caption>
@@ -898,8 +906,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td>-120</td>
         <td>16.7pp</td>
         <td>69%</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
+        <td class="lbl status-lost">lost</td>
+        <td class="pts">-1.00</td>
       </tr>
     </tbody>
   </table>
@@ -911,7 +919,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 
 <footer>
   <p class="colophon">
-    Generated 2026-06-16 01:36 · calls graded from data/predictions_log.csv (logged
+    Generated 2026-06-16 05:18 · calls graded from data/predictions_log.csv (logged
     pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
     at fresh prices, revisions explicit, settled rows immutable) · Brier: 0 best ·
     0.667 coin-flip · 2 worst · CLV = closing implied minus our implied at record ·

@@ -36,7 +36,7 @@ F4,F,2,2026-06-21,00:00,12:00 AM,Tunisia,Japan,Estadio BBVA,Monterrey,Mexico,FS1
 F5,F,3,2026-06-25,19:00,7:00 PM,Japan,Sweden,AT&T Stadium,Arlington,USA,FS1,,,scheduled,"Simultaneous with F6 (matchday 3 rule)"
 F6,F,3,2026-06-25,19:00,7:00 PM,Tunisia,Netherlands,Arrowhead Stadium,Kansas City,USA,Fox,,,scheduled,"Simultaneous with F5 (matchday 3 rule)"
 G1,G,1,2026-06-15,15:00,3:00 PM,Belgium,Egypt,Lumen Field,Seattle,USA,Fox,1,1,played,
-G2,G,1,2026-06-15,21:00,9:00 PM,Iran,New Zealand,SoFi Stadium,Inglewood,USA,FS1,,,scheduled,
+G2,G,1,2026-06-15,21:00,9:00 PM,Iran,New Zealand,SoFi Stadium,Inglewood,USA,FS1,2,2,played,
 G3,G,2,2026-06-21,15:00,3:00 PM,Belgium,Iran,SoFi Stadium,Inglewood,USA,FS1,,,scheduled,
 G4,G,2,2026-06-21,21:00,9:00 PM,New Zealand,Egypt,BC Place,Vancouver,Canada,FS1,,,scheduled,
 G5,G,3,2026-06-26,23:00,11:00 PM,Egypt,Iran,Lumen Field,Seattle,USA,FS1,,,scheduled,"Simultaneous with G6 (matchday 3 rule)"
