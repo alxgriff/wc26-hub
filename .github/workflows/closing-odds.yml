@@ -1,9 +1,13 @@
 name: closing-odds
 
 # Evening / intra-day pipeline. Originally just closing-line snapshots (feeding
-# the CLV calc). Now it ALSO enters results, settles finished picks, and rebuilds
-# the site between game blocks — so scores and the record update SAME-DAY instead
-# of waiting for the 7 AM daily-build. Four ET capture points:
+# the CLV calc). Now each run ALSO: re-snapshots odds (one fetch, tagged BOTH
+# snapshot+closing), enters results, settles finished picks, RECORDS late-posted
+# edges, and rebuilds — so scores AND the record update SAME-DAY instead of waiting
+# for the 7 AM daily-build. (Single-book DraftKings posts the moneyline early but
+# totals/spreads later; the 7 AM run's stale-line picks get refused by the 12h
+# freshness gate, so this re-record catches them once the line is fresh.)
+# Four ET capture points:
 #   15:30 UTC = 11:30 AM ET  (before the noon kickoffs — no results yet)
 #   22:30 UTC =  6:30 PM ET  (after the afternoon games)
 #   00:30 UTC =  8:30 PM ET prev ET day  (after the ~6-7 PM games)
@@ -61,10 +65,13 @@ jobs:
           echo "date=$DATE" >> "$GITHUB_OUTPUT"
           echo "Editorial date: $DATE" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Closing snapshot
+      # ONE API call, tagged BOTH snapshot (feeds intra-day recording below) and
+      # closing (feeds CLV). Single-book DraftKings posts the moneyline early but
+      # totals/spreads later, so this re-snapshot is what makes them recordable.
+      - name: Snapshot + closing line (one fetch, both phases)
         id: snapshot
         continue-on-error: true
-        run: python scripts/odds.py fetch --phase closing | tee -a "$GITHUB_STEP_SUMMARY"
+        run: python scripts/odds.py fetch --phase both | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Enter results so far (The Odds API — completed games only)
         id: results
@@ -75,6 +82,14 @@ jobs:
         id: settle
         continue-on-error: true
         run: python scripts/odds.py settle | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Record picks whose fresh line only posted AFTER the 7 AM build (e.g. DK's
+      # totals/spreads). Day-of + pre-kickoff + <12h-snapshot gates still apply, and
+      # already-recorded picks are left untouched — so this only ADDS late-posted edges.
+      - name: Record late-posted edges (day-of, pre-kickoff, fresh only)
+        id: evaluate
+        continue-on-error: true
+        run: python scripts/odds.py evaluate "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
 
       # HARD gate — a broken build blocks the push rather than deploying a corrupt page.
       - name: Build site
@@ -114,6 +129,7 @@ jobs:
           [ "${{ steps.snapshot.outcome }}" = "failure" ] && failed="$failed snapshot"
           [ "${{ steps.results.outcome }}"  = "failure" ] && failed="$failed results"
           [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"
+          [ "${{ steps.evaluate.outcome }}" = "failure" ] && failed="$failed evaluate"
           [ "${{ steps.edition.outcome }}"  = "failure" ] && failed="$failed edition"
           if [ -n "$failed" ]; then
             echo "::error::Degraded data steps:$failed"

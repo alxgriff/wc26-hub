@@ -323,6 +323,21 @@ class OddsWiringTests(unittest.TestCase):
         self.assertIn("market snapshot", out)
         self.assertIn("one informational note", out)
 
+    def test_stale_line_demotes_best_bet_to_lean(self):
+        # a best bet whose market line is too stale to record shows as a "Model lean",
+        # not a live "Best bet" — keeps the card consistent with the picks ledger.
+        info = self.synthetic_info()
+        info["stale_markets"] = {"totals"}    # the pick's market is stale
+        info["max_age_h"] = 12
+        out = bs.render_market(info, "Brazil", "Morocco", None)
+        self.assertIn("Model lean", out)
+        self.assertNotIn('class="tag">Best bet', out)
+        self.assertIn("not recorded", out)
+        self.assertNotIn("NO BET", out)       # a stale lean is not a no-bet
+        fresh = self.synthetic_info()
+        fresh["stale_markets"] = set()         # control: fresh line -> real Best bet
+        self.assertIn("Best bet", bs.render_market(fresh, "Brazil", "Morocco", None))
+
     def test_no_bet_is_a_normal_result(self):
         out = bs.render_market(self.synthetic_info(pick=False), "A", "B", None)
         self.assertIn("NO BET", out)

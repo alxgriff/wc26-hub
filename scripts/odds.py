@@ -1123,7 +1123,11 @@ def main(argv: list | None = None) -> int:
     sub = ap.add_subparsers(dest="command", required=True)
 
     p_fetch = sub.add_parser("fetch", help="snapshot odds from the odds API")
-    p_fetch.add_argument("--phase", choices=["snapshot", "closing"], default="snapshot")
+    p_fetch.add_argument("--phase", choices=["snapshot", "closing", "both"],
+                         default="snapshot",
+                         help="'both' writes the fetched odds under snapshot AND closing "
+                              "tags from ONE API call — so an intra-day run feeds both "
+                              "recording (snapshot) and CLV (closing) without a 2nd call")
     p_fetch.add_argument("--sport", default=SPORT_KEY)
     p_fetch.add_argument("--bookmaker", default=DEFAULT_BOOKMAKER,
                          help="single bookmaker key to source (default "
@@ -1193,8 +1197,13 @@ def main(argv: list | None = None) -> int:
         rows = be.read_rows(args.fixtures)
         book_filter = ({args.bookmaker.strip().lower()}
                        if "bookmakers" in source else None)
-        odds_rows, lines = snapshot_from_api(events, rows, args.phase, lg.now_et(),
-                                             bookmaker_keys=book_filter)
+        now = lg.now_et()
+        phases = ["snapshot", "closing"] if args.phase == "both" else [args.phase]
+        odds_rows, lines = [], []
+        for ph in phases:                       # one API call, tagged under each phase
+            rws, lns = snapshot_from_api(events, rows, ph, now, bookmaker_keys=book_filter)
+            odds_rows += rws
+            lines = lines or lns                # status lines are identical per phase
         append_odds(odds_rows)
         for line in lines:
             print(line)

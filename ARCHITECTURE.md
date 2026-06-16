@@ -116,11 +116,15 @@ Committed unless noted. CSVs carry a UTF-8 BOM (use `utf-8-sig`).
   redden them.
 - **`.github/workflows/`:** `ci.yml` (per-push: tests + smoke build) · `daily-build.yml`
   (07:00 ET cron `0 11 12-28 6 *` + dispatch — the morning publish) · `closing-odds.yml`
-  (4×/day, 11:30 AM / 6:30 / 8:30 / 11:30 PM ET — closing lines for CLV **and** intra-day
-  results + settle + rebuild between game blocks, so scores/record update same-day; no
-  pre-mutation test gate there, since mid-day played-game data would false-red the
-  point-in-time tests — the build is the gate). `daily-build` + `closing-odds` share
-  concurrency group `wc26-publish` (queue, never cancel).
+  (4×/day, 11:30 AM / 6:30 / 8:30 / 11:30 PM ET — one fetch tagged BOTH snapshot+closing
+  (`fetch --phase both`) for CLV **and** to re-record edges DraftKings posts after the
+  7 AM run; plus intra-day results + settle + rebuild between game blocks, so scores/
+  record update same-day; no pre-mutation test gate there, since mid-day played-game data
+  would false-red the point-in-time tests — the build is the gate). `daily-build` +
+  `closing-odds` share concurrency group `wc26-publish` (queue, never cancel).
+- **Card freshness:** a best bet whose market line is older than the 12h recording gate is
+  shown as a "Model lean · stale line" (not "Best bet"), so the card never recommends a
+  bet the ledger won't record (`load_odds_engine` flags stale markets; `render_market` demotes).
 - **Daily publish order:** test gate (hard, **pre-mutation**) → log slate → fetch
   results → settle picks → snapshot odds → evaluate/record → weather → stakes blurb →
   build site (hard) + edition → smoke-check (hard) → commit `data/ docs/ editions/` →

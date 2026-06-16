@@ -688,6 +688,40 @@ class ModelPricedSanityTests(unittest.TestCase):
         self.assertTrue(any("uncorroborated" in f for f in flags))
 
 
+class FetchPhaseBothTests(unittest.TestCase):
+    """--phase both writes snapshot AND closing rows from ONE API call (so an
+    intra-day run feeds both recording and CLV without a 2nd fetch)."""
+
+    def test_both_phases_from_single_call(self):
+        ev = {"home_team": "Korea Republic", "away_team": "Mexico",
+              "commence_time": "2026-06-13T20:00:00Z",   # future vs NOW (10:00 ET)
+              "bookmakers": [{"key": "fanduel", "markets": [
+                  {"key": "h2h", "outcomes": [
+                      {"name": "Korea Republic", "price": 3.1},
+                      {"name": "Draw", "price": 3.2},
+                      {"name": "Mexico", "price": 2.3}]}]}]}
+        fixtures = [{"match_id": "A4", "team_a": "Mexico", "team_b": "South Korea"}]
+        calls = {"n": 0}
+        captured = []
+
+        def fake_get(*a, **k):
+            calls["n"] += 1
+            return [ev], "999"
+
+        # mock append_odds (not ODDS_LOG: its default path is bound at def time) so the
+        # test captures rows without touching the real log
+        with mock.patch.object(od, "_read_key", return_value="K"), \
+             mock.patch.object(od, "_api_get", side_effect=fake_get), \
+             mock.patch.object(od.lg, "now_et", return_value=NOW), \
+             mock.patch.object(od.be, "read_rows", return_value=fixtures), \
+             mock.patch.object(od, "append_odds",
+                               side_effect=lambda r, *a, **k: captured.extend(r)):
+            rc = od.main(["fetch", "--phase", "both", "--bookmaker", "all"])
+        self.assertEqual(rc, 0)
+        self.assertEqual(calls["n"], 1)                       # ONE API call...
+        self.assertEqual({r["phase"] for r in captured}, {"snapshot", "closing"})  # ...both phases
+
+
 class ShadowTrackTests(unittest.TestCase):
     """The shadow ledger: the model's sanity-suppressed convictions, tracked-never-bet."""
 

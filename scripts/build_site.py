@@ -468,11 +468,13 @@ def render_call(info: dict | None, team_a: str, team_b: str,
 
 # ---------------------------------------------------------------- the market
 
-def load_odds_engine():
+def load_odds_engine(now=None):
     """Defensive adapter around odds.py + ledger.py (Phase 5, owned by another
     stream). Returns (callable, ledger_line, None) or (None, None, reason).
     The callable maps a fixtures row -> dict for render_market(); returns None
-    for matches with no snapshot (placeholder state, per contract)."""
+    for matches with no snapshot (placeholder state, per contract). ``now`` pins the
+    clock for the per-market freshness check (so the card demotes a best bet whose
+    line is too stale to record — same 12h gate as recording)."""
     try:
         import odds as od
         import ledger as lg
@@ -483,6 +485,7 @@ def load_odds_engine():
         ledger_rows = lg.load_ledger()
         picks = od.load_picks()
         model = pr.load_ratings()
+        _now = now or lg.now_et()
         # read here (not via getattr inside the swallowing closure) so a rename of
         # RECORD_THRESHOLD fails loudly as a clear "engine unavailable" reason rather
         # than silently desyncing the displayed bar to 0.05 in every pick callout
@@ -505,10 +508,18 @@ def load_odds_engine():
             if not any(ev.get(m) for m in ("h2h", "totals", "spreads", "btts")):
                 return None
             match_picks, flags = od.best_bets(ev)
+            # a best bet whose market line is older than the recording freshness gate
+            # can't be recorded — flag it so the card shows it as a stale lean, not a
+            # live "Best bet" (keeps the card consistent with the picks ledger).
+            stale = {m for m in {p["market"] for p in match_picks}
+                     if (age := od._snapshot_age_hours(odds_rows, mid, _now, m)) is None
+                     or age > od.MAX_SNAPSHOT_AGE_HOURS}
             return {
                 "evaluation": ev, "picks": match_picks,
                 "pick": match_picks[0] if match_picks else None,  # back-compat
                 "flags": flags,
+                "stale_markets": stale,
+                "max_age_h": od.MAX_SNAPSHOT_AGE_HOURS,
                 "best_prices": od._best_prices(odds_rows, mid),
                 "recorded": [p for p in picks if p["match_id"] == mid],
                 "threshold": od.EDGE_THRESHOLD,
@@ -908,27 +919,50 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
             '<th scope="col">Edge</th></tr></thead>\n    <tbody>\n'
             + "\n".join(rows_html) + "\n    </tbody>\n  </table>\n</div>")
 
-    if picks:
+    # A best bet whose line is too stale to record (DraftKings often posts the
+    # moneyline early but totals/spreads late) is demoted from "Best bet" to a
+    # clearly-labelled stale lean — so the card never recommends a bet the ledger
+    # won't record. An intra-day run promotes it once the price refreshes.
+    stale_markets = odds_info.get("stale_markets", set())
+    max_age = odds_info.get("max_age_h", 12)
+    fresh = [pk for pk in (picks or []) if pk["market"] not in stale_markets]
+    stale = [pk for pk in (picks or []) if pk["market"] in stale_markets]
+
+    if fresh:
         pick_lines = []
-        for i, pk in enumerate(picks, 1):
+        for i, pk in enumerate(fresh, 1):
             bp = odds_info["best_prices"].get(
                 (pk["market"], pk["selection"], str(pk["line"])))
             price = f' — best price {_american_odds(bp[0])} ({_esc(bp[1])})' if bp else ""
-            num = f'{i}. ' if len(picks) > 1 else ""
+            num = f'{i}. ' if len(fresh) > 1 else ""
             pick_lines.append(
                 f'<p>{num}<strong>{_esc(_sel_label(pk["market"], pk["selection"], pk["line"], team_a, team_b))}'
                 f'</strong> ({_MARKET_LABELS[pk["market"]]}) @ {_american_odds(pk["odds"])}, '
                 f'edge <strong>{pk["edge"]:+.1%}</strong>{price}. Flat 1u, paper record.</p>')
         corr = ('<p class="odds-note">same-match picks are correlated — they tend '
                 'to win and lose together; the units record swings accordingly.</p>'
-                if len(picks) > 1 else "")
-        tag = "Best bet" if len(picks) == 1 else f"Best bets — top {len(picks)}, ≥{record_threshold:.0%} edge"
+                if len(fresh) > 1 else "")
+        tag = "Best bet" if len(fresh) == 1 else f"Best bets — top {len(fresh)}, ≥{record_threshold:.0%} edge"
         parts.append(f'<div class="bet-callout"><span class="tag">{_esc(tag)}</span>'
                      + "".join(pick_lines) + corr + '</div>')
-    elif rows_html:
+    elif rows_html and not stale:
         parts.append(f'<p class="no-bet"><b>NO BET</b> — no edge clears the '
                      f'{record_threshold:.0%} recording bar (a normal, expected '
                      'result).</p>')
+
+    if stale:
+        lean_lines = "".join(
+            f'<p><strong>{_esc(_sel_label(pk["market"], pk["selection"], pk["line"], team_a, team_b))}'
+            f'</strong> ({_MARKET_LABELS[pk["market"]]}), model edge <strong>{pk["edge"]:+.1%}</strong></p>'
+            for pk in stale)
+        these = "these" if len(stale) > 1 else "this"
+        parts.append(
+            '<div class="bet-callout stale"><span class="tag">Model lean · stale line</span>'
+            + lean_lines
+            + f'<p class="odds-note">the model likes {these}, but the line is over '
+              f'{max_age:g}h old (the book hasn\'t reposted), so {"they are" if len(stale) > 1 else "it is"} '
+              '<strong>not recorded</strong> until the price refreshes — an intra-day run logs '
+              'it once it does.</p></div>')
 
     for rec in odds_info.get("recorded", []):
         status = rec.get("status", "open")
@@ -1854,7 +1888,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
             warnings.append(f"The Call renders as placeholder: {why}")
 
     if odds_engine == "auto":
-        odds_call, ledger_line, odds_why = load_odds_engine()
+        odds_call, ledger_line, odds_why = load_odds_engine(now=now)
         if odds_why:
             warnings.append(f"Odds sections render as placeholder: {odds_why}")
     else:
