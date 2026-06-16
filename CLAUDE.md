@@ -88,12 +88,16 @@ specifies weights. Probabilities must sum to 1.0 ± 0.001 per match.
   source, phase, timestamp. The 1X2 edge is vs the published consensus;
   totals/handicap/BTTS are model-priced from the score matrix (the overlay
   covers W/D/L only). Draw-no-bet is computed but not yet snapshotted/recorded.
-- **Odds source: a single book — DraftKings by default** (`odds.py fetch
-  --bookmaker`, user-set June 14), the book actually bet at, so the de-vigged
-  implied is the line you can really take rather than a cross-market consensus
-  you can't. `--bookmaker all` restores the multi-book US region. The median/best
-  log rows are retained (identical under one book); provenance is labelled
-  honestly (`snapshot_source_label`) — never claim a market median over one book.
+- **Odds source: prefer DraftKings, fall back to other US books** (`odds.py fetch
+  --bookmaker`, user-set June 14 as single-book, revised June 16 to prefer-else-
+  fallback). The fetch pulls the WHOLE US region (same quota — one region) and, per
+  selection, logs DraftKings alone when it quotes the line (so the de-vigged implied
+  is the line you can really take), else the median/best of the books that do. This
+  is because DraftKings supplies h2h via the API but NOT totals/spreads — so h2h is
+  DK while totals/spreads fall back to the other US books (betmgm/bovada/…), keeping
+  them covered. `--bookmaker all` = no preference (best of all). Provenance is
+  labelled honestly (`snapshot_source_label`): "DraftKings where quoted, else best of
+  N US books" for the mix; never claim a sourcing the log lacks.
 - De-vig the 1X2: implied_i = (1/odds_i) / Σ(1/odds_j) (multiplicative
   method; power or Shin method optional upgrade later).
 - Edge_i = model_p_i − implied_i. Display threshold 3 percentage points;

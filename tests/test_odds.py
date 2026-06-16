@@ -426,28 +426,24 @@ class ApiMappingTests(unittest.TestCase):
         self.assertEqual(rows, [])                       # never logged on unknown time
         self.assertTrue(any("fail-closed" in l for l in lines))
 
-    def test_single_bookmaker_filter_logs_only_that_book(self):
-        # the event carries fanduel + betmgm; a {"fanduel"} filter logs ONLY
-        # fanduel and the median collapses to that one book's price.
+    def test_prefer_book_used_when_it_quotes(self):
+        # the event carries fanduel (h2h + totals) + betmgm (h2h only); preferring
+        # fanduel — which quotes everything — logs ONLY fanduel.
         rows, _ = od.snapshot_from_api([self._event()], self.FIXTURE_ROWS,
-                                       "snapshot", NOW, bookmaker_keys={"fanduel"})
+                                       "snapshot", NOW, prefer_book="fanduel")
         best_books = {r["source"] for r in rows if r["source"].startswith("best:")}
         self.assertEqual(best_books, {"best:fanduel"})
-        med = {(r["market"], r["selection"], r["line"]): r["odds"]
-               for r in rows if r["source"].startswith("median")}
-        best = {(r["market"], r["selection"], r["line"]): r["odds"]
-                for r in rows if r["source"].startswith("best:")}
-        self.assertEqual(med, best)                       # median of one book = that book
-        self.assertTrue(all("betmgm" not in r["source"] for r in rows))
+        self.assertTrue(all("betmgm" not in r["source"] for r in rows))  # fanduel preferred
 
-    def test_filter_with_no_matching_book_skips_and_reports(self):
-        # the user's book quotes nothing on this event: report it, log nothing
-        # (never fall back to other books behind the single-source contract).
-        rows, lines = od.snapshot_from_api([self._event()], self.FIXTURE_ROWS,
-                                           "snapshot", NOW,
-                                           bookmaker_keys={"draftkings"})
-        self.assertEqual(rows, [])
-        self.assertTrue(any("no draftkings odds" in l for l in lines))
+    def test_prefer_book_falls_back_where_it_does_not_quote(self):
+        # betmgm quotes h2h only; preferring it -> h2h from betmgm, totals FALL BACK
+        # to fanduel (the get-DK-else-others logic that keeps totals/spreads covered).
+        rows, _ = od.snapshot_from_api([self._event()], self.FIXTURE_ROWS,
+                                       "snapshot", NOW, prefer_book="betmgm")
+        best = {(r["market"], r["selection"]): r["source"].split("best:", 1)[1]
+                for r in rows if r["source"].startswith("best:")}
+        self.assertEqual(best[("h2h", "home")], "betmgm")     # preferred + quoted
+        self.assertEqual(best[("totals", "over")], "fanduel")  # fallback (betmgm has no totals)
 
 
 class ApiErrorTests(unittest.TestCase):
@@ -608,23 +604,32 @@ class RenderTests(unittest.TestCase):
         self.assertIn("display threshold", out)   # 3pp marker is wired, not inert
 
 
-class FetchParamTests(unittest.TestCase):
-    """--bookmaker -> the-odds-api source selector (single book vs full region)."""
+class FetchSourcingTests(unittest.TestCase):
+    """fetch pulls the WHOLE US region (so fallback is possible) and prefers a book
+    per selection — it must NOT send a single-book 'bookmakers' request anymore."""
 
-    def test_single_bookmaker_uses_bookmakers_param(self):
-        self.assertEqual(od._odds_query_params("draftkings"),
-                         {"bookmakers": "draftkings"})
-        self.assertEqual(od._odds_query_params(" DraftKings "),
-                         {"bookmakers": "draftkings"})   # trimmed + lowercased
-
-    def test_all_or_empty_falls_back_to_us_region(self):
-        for val in ("all", "ALL", "", None):
-            self.assertEqual(od._odds_query_params(val), {"regions": "us"})
-
-    def test_default_is_draftkings(self):
+    def test_default_preferred_book_is_draftkings(self):
         self.assertEqual(od.DEFAULT_BOOKMAKER, "draftkings")
-        self.assertEqual(od._odds_query_params(od.DEFAULT_BOOKMAKER),
-                         {"bookmakers": "draftkings"})
+
+    def test_fetch_requests_us_region_not_single_book(self):
+        ev = {"home_team": "Korea Republic", "away_team": "Mexico",
+              "commence_time": "2026-06-13T20:00:00Z", "bookmakers": []}
+        seen = {}
+
+        def fake_get(path, key, **params):
+            seen.update(params)
+            return [ev], "9"
+
+        with mock.patch.object(od, "_read_key", return_value="K"), \
+             mock.patch.object(od, "_api_get", side_effect=fake_get), \
+             mock.patch.object(od.lg, "now_et", return_value=NOW), \
+             mock.patch.object(od.be, "read_rows",
+                               return_value=[{"match_id": "A4", "team_a": "Mexico",
+                                              "team_b": "South Korea"}]), \
+             mock.patch.object(od, "append_odds", side_effect=lambda *a, **k: None):
+            od.main(["fetch"])                       # default --bookmaker draftkings
+        self.assertEqual(seen.get("regions"), "us")  # whole region, enables fallback
+        self.assertNotIn("bookmakers", seen)         # NOT a single-book request
 
 
 class SourceLabelTests(unittest.TestCase):
@@ -638,6 +643,15 @@ class SourceLabelTests(unittest.TestCase):
     def test_multi_book_reports_count(self):
         rows = h2h_rows("D3", 2.5, 3.3, 3.1, source="median/7books")
         self.assertEqual(od.snapshot_source_label(rows, "D3"), "median across 7 books")
+
+    def test_mixed_dk_h2h_and_multibook_totals(self):
+        # the prefer-else-fallback common case: DK h2h + multi-book totals
+        rows = (h2h_rows("D3", 2.5, 3.3, 3.1, source="median/1books")
+                + h2h_rows("D3", 2.5, 3.3, 3.1, source="best:draftkings")
+                + [odds_row("D3", "totals", "over", 1.9, line="2.5", source="median/6books"),
+                   odds_row("D3", "totals", "over", 1.95, line="2.5", source="best:bovada")])
+        self.assertEqual(od.snapshot_source_label(rows, "D3"),
+                         "DraftKings where quoted, else best of 6 US books")
 
     def test_no_snapshot_is_blank(self):
         self.assertEqual(od.snapshot_source_label([], "D3"), "")
