@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 16,
+ "played": 17,
  "total": 72,
  "groups": {
   "A": {
@@ -520,14 +520,14 @@
      "pos": 1,
      "team": "France",
      "group": "I",
-     "p": 0,
-     "w": 0,
+     "p": 1,
+     "w": 1,
      "d": 0,
      "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
-     "pts": 0,
+     "gf": 3,
+     "ga": 1,
+     "gd": 2,
+     "pts": 3,
      "fate": null
     },
     {
@@ -562,18 +562,20 @@
      "pos": 4,
      "team": "Senegal",
      "group": "I",
-     "p": 0,
+     "p": 1,
      "w": 0,
      "d": 0,
-     "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
+     "l": 1,
+     "gf": 1,
+     "ga": 3,
+     "gd": -2,
      "pts": 0,
      "fate": null
     }
    ],
-   "notes": []
+   "notes": [
+    "Group I: overall goal difference/goals separate Iraq / Norway / Senegal (level on points and head-to-head)."
+   ]
   },
   "J": {
    "rows": [
@@ -947,11 +949,11 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-16 17:17",
+ "generated_at": "2026-06-16 23:03",
  "slate_date": "2026-06-16",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 16,
+  "as_of_matches_played": 17,
   "fully_projectable": false,
   "thirds_resolved": false,
   "r32": {
@@ -993,7 +995,7 @@
    },
    "77": {
     "match": 77,
-    "home": null,
+    "home": "France",
     "home_label": "Winner I",
     "away": null,
     "away_label": "Best 3rd of C/D/F/G/H",
@@ -1004,7 +1006,7 @@
     "match": 78,
     "home": "Côte d'Ivoire",
     "home_label": "Runner-up E",
-    "away": null,
+    "away": "Iraq",
     "away_label": "Runner-up I",
     "provisional": true,
     "half": "bottom"
@@ -1183,6 +1185,12 @@
     "p": 0.7338756258969825,
     "source": "model"
    },
+   "78": {
+    "team": "Côte d'Ivoire",
+    "loser": "Iraq",
+    "p": 0.6978972951697542,
+    "source": "model"
+   },
    "88": {
     "team": "Australia",
     "loser": "New Zealand",
@@ -1193,6 +1201,12 @@
     "team": "Brazil",
     "loser": "Canada",
     "p": 0.8741441143367906,
+    "source": "model"
+   },
+   "91": {
+    "team": "Japan",
+    "loser": "Côte d'Ivoire",
+    "p": 0.7556690314650506,
     "source": "model"
    }
   },
@@ -1209,6 +1223,10 @@
     "Scotland",
     "Japan"
    ],
+   "78": [
+    "Côte d'Ivoire",
+    "Iraq"
+   ],
    "88": [
     "Australia",
     "New Zealand"
@@ -1216,6 +1234,10 @@
    "90": [
     "Canada",
     "Brazil"
+   ],
+   "91": [
+    "Japan",
+    "Côte d'Ivoire"
    ]
   },
   "champion": null
