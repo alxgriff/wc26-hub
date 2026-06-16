@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 14,
+ "played": 15,
  "total": 72,
  "groups": {
   "A": {
@@ -451,6 +451,34 @@
    "rows": [
     {
      "pos": 1,
+     "team": "Saudi Arabia",
+     "group": "H",
+     "p": 1,
+     "w": 0,
+     "d": 1,
+     "l": 0,
+     "gf": 1,
+     "ga": 1,
+     "gd": 0,
+     "pts": 1,
+     "fate": null
+    },
+    {
+     "pos": 2,
+     "team": "Uruguay",
+     "group": "H",
+     "p": 1,
+     "w": 0,
+     "d": 1,
+     "l": 0,
+     "gf": 1,
+     "ga": 1,
+     "gd": 0,
+     "pts": 1,
+     "fate": null
+    },
+    {
+     "pos": 3,
      "team": "Cape Verde",
      "group": "H",
      "p": 1,
@@ -464,7 +492,7 @@
      "fate": null
     },
     {
-     "pos": 2,
+     "pos": 4,
      "team": "Spain",
      "group": "H",
      "p": 1,
@@ -476,37 +504,11 @@
      "gd": 0,
      "pts": 1,
      "fate": null
-    },
-    {
-     "pos": 3,
-     "team": "Saudi Arabia",
-     "group": "H",
-     "p": 0,
-     "w": 0,
-     "d": 0,
-     "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
-     "pts": 0,
-     "fate": null
-    },
-    {
-     "pos": 4,
-     "team": "Uruguay",
-     "group": "H",
-     "p": 0,
-     "w": 0,
-     "d": 0,
-     "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
-     "pts": 0,
-     "fate": null
     }
    ],
    "notes": [
+    "Group H: head-to-head (its points, then goal difference, then goals) separates Cape Verde / Saudi Arabia / Spain / Uruguay (level on points).",
+    "⚠️ Group H: Saudi Arabia / Uruguay level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.",
     "⚠️ Group H: Cape Verde / Spain level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
    ]
   },
@@ -804,6 +806,21 @@
    },
    {
     "pos": 4,
+    "team": "Cape Verde",
+    "group": "H",
+    "p": 1,
+    "w": 0,
+    "d": 1,
+    "l": 0,
+    "gf": 0,
+    "ga": 0,
+    "gd": 0,
+    "pts": 1,
+    "qualifying": true,
+    "fate": null
+   },
+   {
+    "pos": 5,
     "team": "Austria",
     "group": "J",
     "p": 0,
@@ -818,7 +835,7 @@
     "fate": null
    },
    {
-    "pos": 5,
+    "pos": 6,
     "team": "Ghana",
     "group": "L",
     "p": 0,
@@ -833,7 +850,7 @@
     "fate": null
    },
    {
-    "pos": 6,
+    "pos": 7,
     "team": "Iran",
     "group": "G",
     "p": 0,
@@ -848,7 +865,7 @@
     "fate": null
    },
    {
-    "pos": 7,
+    "pos": 8,
     "team": "Norway",
     "group": "I",
     "p": 0,
@@ -863,24 +880,9 @@
     "fate": null
    },
    {
-    "pos": 8,
+    "pos": 9,
     "team": "Portugal",
     "group": "K",
-    "p": 0,
-    "w": 0,
-    "d": 0,
-    "l": 0,
-    "gf": 0,
-    "ga": 0,
-    "gd": 0,
-    "pts": 0,
-    "qualifying": true,
-    "fate": null
-   },
-   {
-    "pos": 9,
-    "team": "Saudi Arabia",
-    "group": "H",
     "p": 0,
     "w": 0,
     "d": 0,
@@ -943,11 +945,11 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-15 23:09",
+ "generated_at": "2026-06-16 01:36",
  "slate_date": "2026-06-15",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 14,
+  "as_of_matches_played": 15,
   "fully_projectable": false,
   "thirds_resolved": false,
   "r32": {
@@ -1052,7 +1054,7 @@
    },
    "84": {
     "match": 84,
-    "home": "Cape Verde",
+    "home": "Saudi Arabia",
     "home_label": "Winner H",
     "away": null,
     "away_label": "Runner-up J",
@@ -1072,7 +1074,7 @@
     "match": 86,
     "home": null,
     "home_label": "Winner J",
-    "away": "Spain",
+    "away": "Uruguay",
     "away_label": "Runner-up H",
     "provisional": true,
     "half": "bottom"
