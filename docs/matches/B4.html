@@ -113,12 +113,18 @@ section{margin-top:46px}
    lone card from stretching). Each card is a symmetrical matchup: the two sides
    flank a vermillion "v" disc that becomes the scoreline once the game is played. */
 .slate{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px;align-items:start}
-.slate .card{border:1px solid var(--ink);background:var(--paper-2);box-shadow:3px 3px 0 var(--hairline);padding:13px 14px 12px;text-align:center}
+.slate .card{position:relative;border:1px solid var(--ink);background:var(--paper-2);box-shadow:3px 3px 0 var(--hairline);padding:13px 14px 12px;text-align:center}
 @media (hover:hover){.slate .card{transition:transform .18s ease,box-shadow .18s ease}.slate .card:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--hairline)}}
 .slate .kick{font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
 .slate .kick .moon{color:var(--amber)}
 .slate .kick .ftbadge{color:var(--verm)}
 .slate .matchup{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin:11px 0 9px;text-decoration:none;color:inherit}
+/* stretched link: the lone <a> in each card covers the whole box, so a click
+   anywhere (kickoff, meta, "preview →", padding) opens the preview. Keeps one
+   link per card — valid HTML + a single screen-reader target. Don't add a 2nd
+   interactive element inside .card without giving it position+z-index above this. */
+.slate .card{cursor:pointer}
+.slate .matchup::after{content:"";position:absolute;inset:0;z-index:1}
 .slate .team{font-family:var(--serif);font-weight:900;font-size:1.05rem;line-height:1.1;letter-spacing:-.01em}
 .slate .matchup:hover .team,.slate .matchup:focus-visible .team{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
 .slate .ta{text-align:right}
