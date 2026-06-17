@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 19,
+ "played": 20,
  "total": 72,
  "groups": {
   "A": {
@@ -598,27 +598,27 @@
      "pos": 2,
      "team": "Austria",
      "group": "J",
-     "p": 0,
-     "w": 0,
+     "p": 1,
+     "w": 1,
      "d": 0,
      "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
-     "pts": 0,
+     "gf": 3,
+     "ga": 1,
+     "gd": 2,
+     "pts": 3,
      "fate": null
     },
     {
      "pos": 3,
      "team": "Jordan",
      "group": "J",
-     "p": 0,
+     "p": 1,
      "w": 0,
      "d": 0,
-     "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
+     "l": 1,
+     "gf": 1,
+     "ga": 3,
+     "gd": -2,
      "pts": 0,
      "fate": null
     },
@@ -638,7 +638,8 @@
     }
    ],
    "notes": [
-    "Group J: overall goal difference/goals separate Algeria / Austria / Jordan (level on points and head-to-head)."
+    "Group J: overall goal difference/goals separate Argentina / Austria (level on points and head-to-head).",
+    "Group J: overall goal difference/goals separate Algeria / Jordan (level on points and head-to-head)."
    ]
   },
   "K": {
@@ -858,21 +859,6 @@
    },
    {
     "pos": 7,
-    "team": "Jordan",
-    "group": "J",
-    "p": 0,
-    "w": 0,
-    "d": 0,
-    "l": 0,
-    "gf": 0,
-    "ga": 0,
-    "gd": 0,
-    "pts": 0,
-    "qualifying": true,
-    "fate": null
-   },
-   {
-    "pos": 8,
     "team": "Portugal",
     "group": "K",
     "p": 0,
@@ -887,7 +873,7 @@
     "fate": null
    },
    {
-    "pos": 9,
+    "pos": 8,
     "team": "Czechia",
     "group": "A",
     "p": 1,
@@ -898,11 +884,11 @@
     "ga": 2,
     "gd": -1,
     "pts": 0,
-    "qualifying": false,
+    "qualifying": true,
     "fate": null
    },
    {
-    "pos": 10,
+    "pos": 9,
     "team": "Ecuador",
     "group": "E",
     "p": 1,
@@ -912,6 +898,21 @@
     "gf": 0,
     "ga": 1,
     "gd": -1,
+    "pts": 0,
+    "qualifying": false,
+    "fate": null
+   },
+   {
+    "pos": 10,
+    "team": "Jordan",
+    "group": "J",
+    "p": 1,
+    "w": 0,
+    "d": 0,
+    "l": 1,
+    "gf": 1,
+    "ga": 3,
+    "gd": -2,
     "pts": 0,
     "qualifying": false,
     "fate": null
@@ -948,15 +949,16 @@
    }
   ],
   "notes": [
-   "⚠️ Third-place ranking: Belgium / Morocco / Qatar level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
+   "⚠️ Third-place ranking: Belgium / Morocco / Qatar level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.",
+   "⚠️ Third-place ranking: Jordan / Senegal level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-17 05:14",
+ "generated_at": "2026-06-17 12:34",
  "slate_date": "2026-06-17",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 19,
+  "as_of_matches_played": 20,
   "fully_projectable": false,
   "thirds_resolved": false,
   "r32": {

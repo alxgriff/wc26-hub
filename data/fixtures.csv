@@ -54,7 +54,7 @@ I4,I,2,2026-06-22,20:00,8:00 PM,Norway,Senegal,MetLife Stadium,East Rutherford,U
 I5,I,3,2026-06-26,15:00,3:00 PM,Norway,France,Gillette Stadium,Foxborough,USA,Fox,,,scheduled,"Simultaneous with I6 (matchday 3 rule)"
 I6,I,3,2026-06-26,15:00,3:00 PM,Senegal,Iraq,BMO Field,Toronto,Canada,FS1,,,scheduled,"Simultaneous with I5 (matchday 3 rule)"
 J1,J,1,2026-06-16,21:00,9:00 PM,Argentina,Algeria,Arrowhead Stadium,Kansas City,USA,Fox,3,0,played,
-J2,J,1,2026-06-17,00:00,12:00 AM,Austria,Jordan,Levi's Stadium,Santa Clara,USA,FS1,,,scheduled,"Kicks off 9:00 PM June 16 local (Pacific); belongs to the June 16 evening slate"
+J2,J,1,2026-06-17,00:00,12:00 AM,Austria,Jordan,Levi's Stadium,Santa Clara,USA,FS1,3,1,played,Kicks off 9:00 PM June 16 local (Pacific); belongs to the June 16 evening slate
 J3,J,2,2026-06-22,13:00,1:00 PM,Argentina,Austria,AT&T Stadium,Arlington,USA,Fox,,,scheduled,
 J4,J,2,2026-06-22,23:00,11:00 PM,Jordan,Algeria,Levi's Stadium,Santa Clara,USA,FS1,,,scheduled,
 J5,J,3,2026-06-27,22:00,10:00 PM,Jordan,Argentina,AT&T Stadium,Arlington,USA,Fox,,,scheduled,"Simultaneous with J6 (matchday 3 rule)"
