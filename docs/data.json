@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 17,
+ "played": 18,
  "total": 72,
  "groups": {
   "A": {
@@ -518,6 +518,20 @@
    "rows": [
     {
      "pos": 1,
+     "team": "Norway",
+     "group": "I",
+     "p": 1,
+     "w": 1,
+     "d": 0,
+     "l": 0,
+     "gf": 4,
+     "ga": 1,
+     "gd": 3,
+     "pts": 3,
+     "fate": null
+    },
+    {
+     "pos": 2,
      "team": "France",
      "group": "I",
      "p": 1,
@@ -531,35 +545,7 @@
      "fate": null
     },
     {
-     "pos": 2,
-     "team": "Iraq",
-     "group": "I",
-     "p": 0,
-     "w": 0,
-     "d": 0,
-     "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
-     "pts": 0,
-     "fate": null
-    },
-    {
      "pos": 3,
-     "team": "Norway",
-     "group": "I",
-     "p": 0,
-     "w": 0,
-     "d": 0,
-     "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
-     "pts": 0,
-     "fate": null
-    },
-    {
-     "pos": 4,
      "team": "Senegal",
      "group": "I",
      "p": 1,
@@ -571,10 +557,25 @@
      "gd": -2,
      "pts": 0,
      "fate": null
+    },
+    {
+     "pos": 4,
+     "team": "Iraq",
+     "group": "I",
+     "p": 1,
+     "w": 0,
+     "d": 0,
+     "l": 1,
+     "gf": 1,
+     "ga": 4,
+     "gd": -3,
+     "pts": 0,
+     "fate": null
     }
    ],
    "notes": [
-    "Group I: overall goal difference/goals separate Iraq / Norway / Senegal (level on points and head-to-head)."
+    "Group I: overall goal difference/goals separate France / Norway (level on points and head-to-head).",
+    "Group I: overall goal difference/goals separate Iraq / Senegal (level on points and head-to-head)."
    ]
   },
   "J": {
@@ -870,8 +871,8 @@
    },
    {
     "pos": 8,
-    "team": "Norway",
-    "group": "I",
+    "team": "Portugal",
+    "group": "K",
     "p": 0,
     "w": 0,
     "d": 0,
@@ -885,21 +886,6 @@
    },
    {
     "pos": 9,
-    "team": "Portugal",
-    "group": "K",
-    "p": 0,
-    "w": 0,
-    "d": 0,
-    "l": 0,
-    "gf": 0,
-    "ga": 0,
-    "gd": 0,
-    "pts": 0,
-    "qualifying": false,
-    "fate": null
-   },
-   {
-    "pos": 10,
     "team": "Czechia",
     "group": "A",
     "p": 1,
@@ -914,7 +900,7 @@
     "fate": null
    },
    {
-    "pos": 11,
+    "pos": 10,
     "team": "Ecuador",
     "group": "E",
     "p": 1,
@@ -924,6 +910,21 @@
     "gf": 0,
     "ga": 1,
     "gd": -1,
+    "pts": 0,
+    "qualifying": false,
+    "fate": null
+   },
+   {
+    "pos": 11,
+    "team": "Senegal",
+    "group": "I",
+    "p": 1,
+    "w": 0,
+    "d": 0,
+    "l": 1,
+    "gf": 1,
+    "ga": 3,
+    "gd": -2,
     "pts": 0,
     "qualifying": false,
     "fate": null
@@ -949,11 +950,11 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-16 23:03",
+ "generated_at": "2026-06-17 01:35",
  "slate_date": "2026-06-16",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 17,
+  "as_of_matches_played": 18,
   "fully_projectable": false,
   "thirds_resolved": false,
   "r32": {
@@ -995,7 +996,7 @@
    },
    "77": {
     "match": 77,
-    "home": "France",
+    "home": "Norway",
     "home_label": "Winner I",
     "away": null,
     "away_label": "Best 3rd of C/D/F/G/H",
@@ -1006,7 +1007,7 @@
     "match": 78,
     "home": "Côte d'Ivoire",
     "home_label": "Runner-up E",
-    "away": "Iraq",
+    "away": "France",
     "away_label": "Runner-up I",
     "provisional": true,
     "half": "bottom"
@@ -1186,9 +1187,9 @@
     "source": "model"
    },
    "78": {
-    "team": "Côte d'Ivoire",
-    "loser": "Iraq",
-    "p": 0.6978972951697542,
+    "team": "France",
+    "loser": "Côte d'Ivoire",
+    "p": 0.8897656117471984,
     "source": "model"
    },
    "88": {
@@ -1204,9 +1205,9 @@
     "source": "model"
    },
    "91": {
-    "team": "Japan",
-    "loser": "Côte d'Ivoire",
-    "p": 0.7556690314650506,
+    "team": "France",
+    "loser": "Japan",
+    "p": 0.7275216107490159,
     "source": "model"
    }
   },
@@ -1225,7 +1226,7 @@
    ],
    "78": [
     "Côte d'Ivoire",
-    "Iraq"
+    "France"
    ],
    "88": [
     "Australia",
@@ -1237,7 +1238,7 @@
    ],
    "91": [
     "Japan",
-    "Côte d'Ivoire"
+    "France"
    ]
   },
   "champion": null
