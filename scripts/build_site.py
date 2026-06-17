@@ -322,6 +322,16 @@ def load_predictor(fixtures: Path | None = None):
         overlay = pr.load_match_overlay()
     except Exception as e:                      # broad on purpose: never break the build
         return None, f"prediction model unavailable ({e.__class__.__name__}: {e})"
+    # ML overlays — inert when artifacts absent (auto-detect via the loaders).
+    # Per-overlay try/except so a busted one doesn't disable the other or the build.
+    try:
+        import hybrid as hyb_mod
+    except Exception:
+        hyb_mod = None
+    try:
+        import reference_overlay as ref_mod
+    except Exception:
+        ref_mod = None
 
     def call(row: dict) -> dict | None:
         try:
@@ -331,7 +341,7 @@ def load_predictor(fixtures: Path | None = None):
             p = pr.predict_match(model, a, b, hfa_team=hfa)
             o = overlay.get(row["match_id"])
             pa, pd_, pb = pr.blend_wdl(p, o) if o else (p.p_a, p.p_draw, p.p_b)
-            return {
+            info = {
                 "p_a": pa, "p_draw": pd_, "p_b": pb,
                 "modal_score": p.modal_score, "total": p.total,
                 "over25": p.over.get(2.5), "btts": p.btts,
@@ -339,6 +349,25 @@ def load_predictor(fixtures: Path | None = None):
                 "source": (o or {}).get("source", ""),
                 "lambda_a": p.lambda_a, "lambda_b": p.lambda_b,
             }
+            # ML overlays: appended only when the layer is live (artifact + deps present)
+            if hyb_mod is not None:
+                try:
+                    hp = hyb_mod.hybrid_predict(model, a, b, hfa_team=hfa)
+                    if hp is not None:
+                        info["hybrid"] = {"p_a": hp.p_a, "p_draw": hp.p_draw,
+                                          "p_b": hp.p_b, "source": hp.source}
+                except Exception:
+                    pass
+            if ref_mod is not None:
+                try:
+                    rp = ref_mod.reference_predict(model, a, b, hfa_team=hfa,
+                                                    match_date=row.get("date_et"))
+                    if rp is not None:
+                        info["reference"] = {"p_a": rp.p_a, "p_draw": rp.p_draw,
+                                             "p_b": rp.p_b, "source": rp.source}
+                except Exception:
+                    pass
+            return info
         except Exception:
             return None
 
@@ -419,6 +448,34 @@ def render_call(info: dict | None, team_a: str, team_b: str,
         # in-bar labels are dropped under 6% (they would clip); the scale row
         # below always carries all three numbers
         la, ld, lb = (f"{w}%" if w >= 6 else "" for w in (wa, wd, wb))
+        # Classic ML (XGBoost) overlay — only for scheduled matches (same
+        # honesty rule as the main bar: no retroactive overlay grading).
+        # Rendered as a sibling probbar beneath the structural one so the
+        # disagreement is visually obvious. Hybrid is not rendered (its
+        # numbers were a stretch goal that didn't pan out — keeping the
+        # loader for testability but suppressing display).
+        overlay_html = ""
+        if not logged and info.get("reference"):
+            ov = info["reference"]
+            ha, hd, hb = (max(round(ov[k] * 100), 1)
+                          for k in ("p_a", "p_draw", "p_b"))
+            la2, ld2, lb2 = (f"{w}%" if w >= 6 else "" for w in (ha, hd, hb))
+            overlay_html = (
+                '\n  <div class="overlay-section">\n'
+                '    <p class="overlay-bar-label">Classic ML (XGBoost)</p>\n'
+                f'    <p class="sr-only">Classic ML model says {_esc(team_a)} '
+                f'win {ha} percent, draw {hd} percent, {_esc(team_b)} win '
+                f'{hb} percent.</p>\n'
+                f'    <div class="probbar overlay-probbar" aria-hidden="true">'
+                f'<span class="pa" style="flex:{ha}">{la2}</span>'
+                f'<span class="pd" style="flex:{hd}">{ld2}</span>'
+                f'<span class="pb" style="flex:{hb}">{lb2}</span></div>\n'
+                f'    <div class="scale" aria-hidden="true">'
+                f'<span>{_esc(team_a)} {ha}%</span>'
+                f'<span>draw {hd}%</span>'
+                f'<span>{_esc(team_b)} {hb}%</span></div>\n'
+                '  </div>'
+            )
         parts.append(
             '<div class="probs">\n'
             f'  <p class="sr-only">{_esc(team_a)} win {wa} percent, draw {wd} percent, '
@@ -429,7 +486,8 @@ def render_call(info: dict | None, team_a: str, team_b: str,
             f'<span class="pb" style="flex:{wb}">{lb}</span></div>\n'
             f'  <div class="scale" aria-hidden="true"><span>{_esc(team_a)} {wa}%</span>'
             f'<span>draw {wd}%</span><span>{_esc(team_b)} {wb}%</span></div>\n'
-            f'  <p class="factline">{" · ".join(facts)}<br>{srcline}{hfa}{graded}</p>\n'
+            f'  <p class="factline">{" · ".join(facts)}<br>{srcline}{hfa}{graded}</p>'
+            f'{overlay_html}\n'
             '</div>')
     if prebaked_lean:
         parts.append('<div class="prose"><blockquote><p><strong>Pre-baked lean '

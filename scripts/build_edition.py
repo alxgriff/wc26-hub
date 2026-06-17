@@ -696,6 +696,18 @@ def main(argv: list[str] | None = None) -> int:
         cumulative = lg.cumulative_line(matches, ledger_rows)
         model = pr.load_ratings(fixtures=args.fixtures)
         overlay = pr.load_match_overlay()
+        # ML overlays — auto-detect via artifact presence (data/calibration/).
+        # Both modules are inert without their artifact, so importing here is safe
+        # whether or not the user has fitted them. Failure to import (xgboost
+        # missing, etc.) leaves the overlays silently absent — never breaks the build.
+        try:
+            import hybrid as hyb_mod
+        except Exception:
+            hyb_mod = None
+        try:
+            import reference_overlay as ref_mod
+        except Exception:
+            ref_mod = None
         for r in select_matches(rows, target):
             mid = r["match_id"]
             host = pr.HOST_BY_COUNTRY.get((r.get("country") or "").strip())
@@ -712,11 +724,31 @@ def main(argv: list[str] | None = None) -> int:
                 pa, pd_, pb = pred.p_a, pred.p_draw, pred.p_b
                 srcs = "our model (no second source for this match yet)"
             mi, mj = pred.modal_score
+            # Classic ML (XGBoost) overlay — appended only when the artifact
+            # is present and the layer is healthy. Hybrid loader is kept around
+            # (and may stash a prediction in the ledger for grading) but is
+            # NOT rendered: that experiment didn't beat the structural model.
+            overlay_bullets = []
+            if ref_mod is not None:
+                try:
+                    refp = ref_mod.reference_predict(model, r["team_a"], r["team_b"],
+                                                     hfa_team=hfa,
+                                                     match_date=r.get("date_et"))
+                    if refp is not None:
+                        overlay_bullets.append(
+                            f"  - **Classic ML (XGBoost):** "
+                            f"{r['team_a']} {refp.p_a:.0%} · Draw {refp.p_draw:.0%} · "
+                            f"{r['team_b']} {refp.p_b:.0%}")
+                except Exception as e:
+                    print(f"warning: Classic ML overlay failed for {mid} ({e}) — "
+                          "skipped for this match", file=sys.stderr)
+            overlay_text = ("\n" + "\n".join(overlay_bullets)) if overlay_bullets else ""
             calls[mid] = (
                 f"**{r['team_a']} {pa:.0%} · Draw {pd_:.0%} · {r['team_b']} {pb:.0%}** — "
                 f"{srcs}. Predicted score **{mi}–{mj}** "
                 f"(xG {pred.lambda_a:.2f}–{pred.lambda_b:.2f}); "
-                f"Over 2.5 {pred.over[2.5]:.0%}, BTTS {pred.btts:.0%}.")
+                f"Over 2.5 {pred.over[2.5]:.0%}, BTTS {pred.btts:.0%}."
+                f"{overlay_text}")
     except Exception as e:  # missing ratings, canon mismatch, ledger guard, ...
         print(f"warning: predictions unavailable ({e}) — The Call slots left "
               "in placeholder state", file=sys.stderr)

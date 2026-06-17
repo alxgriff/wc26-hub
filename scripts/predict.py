@@ -511,7 +511,13 @@ def _disagreement(model: RatingModel, t: TeamRating) -> str | None:
 
 
 def render_prediction(model: RatingModel, p: Prediction,
-                      overlay_row: Mapping | None = None) -> str:
+                      overlay_row: Mapping | None = None,
+                      hybrid=None, reference=None) -> str:
+    """``hybrid`` is a duck-typed HybridPrediction (from scripts/hybrid.py);
+    ``reference`` is a duck-typed ReferencePrediction (from
+    scripts/reference_overlay.py). When BOTH are None — the default — the
+    rendered output is bit-for-bit identical to the pre-overlay behaviour.
+    That inertness is the load-bearing contract."""
     a, b = model.teams[p.team_a], model.teams[p.team_b]
     # headline probabilities: consensus when a second source is present
     if overlay_row:
@@ -541,10 +547,26 @@ def render_prediction(model: RatingModel, p: Prediction,
             f"  - {src}: {_pct(overlay_row['p_home'])} / {_pct(overlay_row['p_draw'])} / "
             f"{_pct(overlay_row['p_away'])} (asof {overlay_row['asof']})",
         ]
-    lines += [
+    lines.append(
         f"- **Model:** {p.team_a} {_pct(p.p_a)} · Draw {_pct(p.p_draw)} · {p.team_b} {_pct(p.p_b)}"
         if not overlay_row else
-        f"- **Score model:** expected goals below are from our model (the overlay is W/D/L only)",
+        f"- **Score model:** expected goals below are from our model (the overlay is W/D/L only)"
+    )
+    if hybrid is not None:
+        src = hybrid.source or "ML overlay"
+        asof = f" _(asof {hybrid.asof})_" if hybrid.asof else ""
+        lines.append(
+            f"- **ML overlay ({src}):** {hybrid.team_a} {_pct(hybrid.p_a)} · "
+            f"Draw {_pct(hybrid.p_draw)} · {hybrid.team_b} {_pct(hybrid.p_b)}{asof}"
+        )
+    if reference is not None:
+        src = reference.source or "reference XGB"
+        asof = f" _(asof {reference.asof})_" if reference.asof else ""
+        lines.append(
+            f"- **Reference ({src}):** {reference.team_a} {_pct(reference.p_a)} · "
+            f"Draw {_pct(reference.p_draw)} · {reference.team_b} {_pct(reference.p_b)}{asof}"
+        )
+    lines += [
         f"- **Expected goals:** {p.team_a} {p.lambda_a:.2f} – {p.lambda_b:.2f} {p.team_b} "
         f"(most likely {mi}–{mj})",
         f"- **Total:** {p.total:.2f} · Over 2.5 {_pct(p.over[2.5])} · BTTS {_pct(p.btts)} "
@@ -605,15 +627,18 @@ def write_team_strength_csv(model: RatingModel, path: str | Path) -> None:
 # ---------------------------------------------------------------- CLI helpers
 
 def _fixture_lookup(match_id: str, fixtures: str | Path = FIXTURES):
-    """Return (team_a, team_b, hfa_team) for a match_id, with HFA assigned to a
-    host nation playing in its own country."""
+    """Return (team_a, team_b, hfa_team, date_et) for a match_id, with HFA
+    assigned to a host nation playing in its own country. ``date_et`` is the
+    kickoff date; consumers that need an as-of timestamp (e.g. the reference
+    overlay's form/rest features) use it."""
     with Path(fixtures).open(encoding="utf-8-sig", newline="") as f:
         for row in csv.DictReader(f):
             if (row.get("match_id") or "").strip() == match_id:
                 a, b = row["team_a"].strip(), row["team_b"].strip()
                 host = HOST_BY_COUNTRY.get((row.get("country") or "").strip())
                 hfa = host if host in (a, b) else None
-                return a, b, hfa
+                date_et = (row.get("date_et") or "").strip() or None
+                return a, b, hfa, date_et
     raise ValueError(f"match_id {match_id!r} not found in {fixtures}")
 
 
@@ -623,6 +648,11 @@ def main(argv: list | None = None) -> int:
     ap.add_argument("--home", help="team name to receive home advantage (by-name mode)")
     ap.add_argument("--build-ratings", action="store_true",
                     help="write data/ratings.csv and data/team_strength.csv, then exit")
+    ap.add_argument("--hybrid", action="store_true",
+                    help="show ML overlay alongside (no-op if not fitted / xgboost absent)")
+    ap.add_argument("--reference", action="store_true",
+                    help="show reference-XGBoost overlay alongside "
+                         "(no-op if not fitted / deps absent / repo not on disk)")
     ap.add_argument("--ratings-dir", type=Path, default=RATINGS_DIR)
     ap.add_argument("--fixtures", type=Path, default=FIXTURES)
     args = ap.parse_args(argv)
@@ -646,10 +676,11 @@ def main(argv: list | None = None) -> int:
         return 0
 
     overlay_row = None
+    match_date = None
     if len(args.teams) == 1:
         mid = args.teams[0].strip().upper()
         try:
-            a, b, hfa = _fixture_lookup(mid, args.fixtures)
+            a, b, hfa, match_date = _fixture_lookup(mid, args.fixtures)
             overlay_row = load_match_overlay(args.ratings_dir / OPTA_MATCH_FILE).get(mid)
         except ValueError as e:
             print(f"error: {e}", file=sys.stderr)
@@ -666,7 +697,23 @@ def main(argv: list | None = None) -> int:
     except ValueError as e:
         print(f"error: {e}", file=sys.stderr)
         return 1
-    print(render_prediction(model, pred, overlay_row=overlay_row))
+    hyb = None
+    if args.hybrid:
+        import hybrid as hyb_mod    # lazy: keeps stdlib-only daily-build path unchanged
+        hyb = hyb_mod.hybrid_predict(model, a, b, hfa_team=hfa)
+        if hyb is None:
+            print("note: ML overlay unavailable (no data/calibration/hybrid.ubj or "
+                  "xgboost not installed) — showing structural only.", file=sys.stderr)
+    ref = None
+    if args.reference:
+        import reference_overlay as ref_mod   # lazy: ditto
+        ref = ref_mod.reference_predict(model, a, b, hfa_team=hfa,
+                                         match_date=match_date)
+        if ref is None:
+            print("note: reference overlay unavailable (no data/calibration/reference.ubj, "
+                  "deps missing, or reference repo not at WC26_REFERENCE_REPO) — "
+                  "showing structural only.", file=sys.stderr)
+    print(render_prediction(model, pred, overlay_row=overlay_row, hybrid=hyb, reference=ref))
     return 0
 
 

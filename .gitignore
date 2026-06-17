@@ -4,3 +4,18 @@ data/.odds_api_key
 # Large historical corpus for rho fitting — re-fetch via the curl in
 # data/History/DATA_QUALITY.md (public CC0); keep the repo lean.
 data/History/*.csv
+
+# Hybrid overlay artifacts — fitted by scripts/fit_hybrid.py, reproducible.
+# Same discipline as data/calibration.json (rho): not committed; activate by
+# refitting locally.
+data/calibration/hybrid.ubj
+data/calibration/hybrid.meta.json
+
+# Reference overlay artifacts — fitted by scripts/fit_reference.py, reproducible.
+# Mirrors the hybrid artifact discipline: not committed; activate by refitting
+# locally. Requires the world_cup_predictions repo (set WC26_REFERENCE_REPO).
+data/calibration/reference.ubj
+data/calibration/reference.meta.json
+
+# Local-only fit experiments — comparison artifacts + fit logs. Delete before PR.
+experiments/
