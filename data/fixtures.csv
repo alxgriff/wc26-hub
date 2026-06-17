@@ -59,13 +59,13 @@ J3,J,2,2026-06-22,13:00,1:00 PM,Argentina,Austria,AT&T Stadium,Arlington,USA,Fox
 J4,J,2,2026-06-22,23:00,11:00 PM,Jordan,Algeria,Levi's Stadium,Santa Clara,USA,FS1,,,scheduled,
 J5,J,3,2026-06-27,22:00,10:00 PM,Jordan,Argentina,AT&T Stadium,Arlington,USA,Fox,,,scheduled,"Simultaneous with J6 (matchday 3 rule)"
 J6,J,3,2026-06-27,22:00,10:00 PM,Algeria,Austria,Arrowhead Stadium,Kansas City,USA,FS1,,,scheduled,"Simultaneous with J5 (matchday 3 rule)"
-K1,K,1,2026-06-17,13:00,1:00 PM,Portugal,DR Congo,NRG Stadium,Houston,USA,Fox,,,scheduled,
+K1,K,1,2026-06-17,13:00,1:00 PM,Portugal,DR Congo,NRG Stadium,Houston,USA,Fox,1,1,played,
 K2,K,1,2026-06-17,22:00,10:00 PM,Uzbekistan,Colombia,Estadio Azteca,Mexico City,Mexico,FS1,,,scheduled,
 K3,K,2,2026-06-23,13:00,1:00 PM,Portugal,Uzbekistan,NRG Stadium,Houston,USA,Fox,,,scheduled,
 K4,K,2,2026-06-23,22:00,10:00 PM,Colombia,DR Congo,Estadio Akron,Guadalajara,Mexico,FS1,,,scheduled,
 K5,K,3,2026-06-27,19:30,7:30 PM,Colombia,Portugal,Hard Rock Stadium,Miami Gardens,USA,Fox,,,scheduled,"Simultaneous with K6 (matchday 3 rule)"
 K6,K,3,2026-06-27,19:30,7:30 PM,DR Congo,Uzbekistan,Mercedes-Benz Stadium,Atlanta,USA,FS1,,,scheduled,"Simultaneous with K5 (matchday 3 rule)"
-L1,L,1,2026-06-17,16:00,4:00 PM,England,Croatia,AT&T Stadium,Arlington,USA,Fox,,,scheduled,
+L1,L,1,2026-06-17,16:00,4:00 PM,England,Croatia,AT&T Stadium,Arlington,USA,Fox,4,2,played,
 L2,L,1,2026-06-17,19:00,7:00 PM,Ghana,Panama,BMO Field,Toronto,Canada,FS1,,,scheduled,
 L3,L,2,2026-06-23,16:00,4:00 PM,England,Ghana,Gillette Stadium,Foxborough,USA,Fox,,,scheduled,
 L4,L,2,2026-06-23,19:00,7:00 PM,Panama,Croatia,BMO Field,Toronto,Canada,Fox,,,scheduled,
