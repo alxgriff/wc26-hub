@@ -8,9 +8,14 @@ call); defaults confirmed: 3pp edge threshold, flat 1u stakes, 1X2 + totals
 markets, >15pp sanity flag; paper units only for now.
 
 Methodology (per CLAUDE.md, with reviewed extensions):
-  * Snapshot the market at publish time to ``data/odds_log.csv``. We log the
-    per-selection MEDIAN across books (fair-value reference, robust to one
-    stale book) and the BEST available price (what a bet would settle at).
+  * Snapshot odds at publish time to ``data/odds_log.csv``. We fetch the whole US
+    region and PREFER one book per selection (DraftKings, ``--bookmaker``, the book
+    actually bet at): if DK quotes the line we log only DK (so the de-vigged implied
+    is the line you can really take); if it doesn't (DK supplies h2h but not totals/
+    spreads via the API), we fall back to the median/best of the books that do — so
+    totals/spreads stay covered. Same API quota as a single-book request (one region).
+    ``--bookmaker all`` = no preference (best of all books). Each selection logs a
+    MEDIAN row (fair-value reference) and the BEST price (what a bet settles at).
   * De-vig multiplicatively: implied_i = (1/odds_i) / Σ(1/odds_j). (Shin is
     the documented upgrade for longshot bias — later.)
   * Edge_i = our_p_i − implied_i, where our_p is the ledger's consensus W/D/L
@@ -35,7 +40,8 @@ Schemas (CLAUDE.md base + documented extensions ``line``/``phase``/pick fields):
                  our_p, implied_p, stake, timestamp, status, units, clv_pp
 
 CLI:
-    python scripts/odds.py fetch [--phase snapshot|closing]   # odds API (key req.)
+    python scripts/odds.py fetch [--phase snapshot|closing] [--bookmaker draftkings]
+                                                              # odds API (key req.)
     python scripts/odds.py enter D3 h2h 2.45,3.20,3.10 --source betmgm
     python scripts/odds.py enter D3 totals 2.5 1.95,1.87 --source betmgm
     python scripts/odds.py evaluate 2026-06-13                # edges + best bets
@@ -69,6 +75,12 @@ import predict as pr        # noqa: E402  (totals model, name canon)
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ODDS_LOG = REPO_ROOT / "data" / "odds_log.csv"
 PICKS_LOG = REPO_ROOT / "data" / "picks_log.csv"
+SHADOW_PICKS_LOG = REPO_ROOT / "data" / "shadow_picks_log.csv"   # RISKY calls — a
+                            # SEVERE model<->market disagreement (edge above the sanity
+                            # ceiling). Tracked + settled like real picks at stake 0
+                            # (paper, too risky to bet) to learn whether the model's
+                            # strong convictions land. Kept strictly OUT of the
+                            # accountable units/CLV record (units_summary).
 KEY_FILE = REPO_ROOT / "data" / ".odds_api_key"
 API_BASE = "https://api.the-odds-api.com/v4"
 SPORT_KEY = "soccer_fifa_world_cup"
@@ -80,8 +92,43 @@ PICK_COLUMNS = ["match_id", "market", "selection", "line", "odds", "book",
                 "status", "units", "clv_pp"]
 
 EDGE_THRESHOLD = 0.03      # user-tunable via --threshold
-SANITY_EDGE = 0.15         # above this: flag, never auto-pick
+SANITY_EDGE = 0.15         # corroborated 1X2 (vs consensus): flag above this
+# Model-priced markets (totals/spreads/BTTS) are priced from the SAME score matrix
+# that generates the edge — there is no independent consensus cross-check (1X2 has
+# one; see the module docstring) — so a large edge is far more likely model error
+# than market error. They clear a STRICTER sanity ceiling (user-set June 14):
+# flagged above MODEL_PRICED_SANITY, recordable only in [RECORD_THRESHOLD, this).
+MODEL_PRICED_MARKETS = ("totals", "spreads", "btts")
+MODEL_PRICED_SANITY = 0.08
 H2H_SELECTIONS = ("home", "draw", "away")
+
+# Prefer-book sourcing (June 14 single-book → June 16 prefer-else-fallback): fetch the
+# whole US region and PREFER this book per selection (the one the user bets) so the
+# de-vigged implied is the line they can take; fall back to the other US books where it
+# doesn't quote (DK supplies h2h but not totals/spreads via the API). --bookmaker
+# overrides; --bookmaker all = no preference (best of all books).
+DEFAULT_BOOKMAKER = "draftkings"
+BOOK_DISPLAY = {"draftkings": "DraftKings", "fanduel": "FanDuel", "betmgm": "BetMGM",
+                "caesars": "Caesars", "pointsbetus": "PointsBet",
+                "betrivers": "BetRivers"}
+
+
+def _book_display(key: str) -> str:
+    """Pretty book name for provenance notes; unknown keys pass through as-is."""
+    return BOOK_DISPLAY.get(key, key)
+
+
+def american_odds(decimal: float) -> str:
+    """Decimal odds -> American moneyline string (the intuitive US form):
+    2.50 -> '+150', 1.50 -> '-200', 2.00 -> '+100'. Both sides always carry a
+    sign so '+120' / '-200' read unambiguously. Decimal <= 1.0 cannot occur
+    (devig rejects it) but degrades to 'n/a' rather than dividing by zero.
+    Display only — odds_log/picks_log stay decimal, the canonical math form."""
+    if decimal <= 1.0:
+        return "n/a"
+    if decimal >= 2.0:
+        return f"+{round((decimal - 1) * 100)}"
+    return f"-{round(100 / (decimal - 1))}"
 
 
 class OddsError(ValueError):
@@ -275,6 +322,36 @@ def latest_market(odds_rows: list, match_id: str, market: str,
     return out
 
 
+def snapshot_source_label(odds_rows: list, match_id: str,
+                          phase: str = "snapshot") -> str:
+    """Human provenance for a match's snapshot, for the edition/site note. Reflects
+    the prefer-book-else-fall-back sourcing: pure DraftKings reads "DraftKings line";
+    pure multi-book reads "median across N books"; the common MIX (DK h2h + multi-book
+    totals/spreads) reads "DraftKings where quoted, else best of N US books". "" when
+    there is no snapshot. The label must never describe a sourcing the log lacks."""
+    rows = [r for r in odds_rows
+            if r["match_id"] == match_id and r["phase"] == phase]
+    if not rows:
+        return ""
+    last_ts = max(r["timestamp"] for r in rows)
+    latest = [r for r in rows if r["timestamp"] == last_ts]
+    has_dk = any(r["source"] == "best:draftkings" for r in latest)
+    multi_n = max((int(m.group(1)) for r in latest
+                   if (m := re.search(r"/(\d+)books", r["source"])) and int(m.group(1)) > 1),
+                  default=0)
+    if has_dk and multi_n:
+        return f"DraftKings where quoted, else best of {multi_n} US books"
+    if has_dk:
+        return "DraftKings line"
+    if multi_n:
+        return f"median across {multi_n} books"
+    books = {r["source"].split("best:", 1)[1] for r in latest
+             if r["source"].startswith("best:")}
+    if len(books) == 1:
+        return f"{_book_display(next(iter(books)))} line"
+    return "single book"
+
+
 def _latest_phase_ts(odds_rows: list, match_id: str, market: str, phase: str,
                      source_prefix: str = "median") -> str | None:
     """Timestamp string of the most recent rows latest_market() would use for a
@@ -428,27 +505,47 @@ def evaluate_match(match_id: str, odds_rows: list, ledger_rows: list,
     return out
 
 
-RECORD_THRESHOLD = 0.05    # picks must clear a higher bar than table display
+RECORD_THRESHOLD = 0.04    # picks must clear a higher bar than table display.
+                           # Lowered 0.05->0.04 (user, June 14) to gather more model-
+                           # performance data once the Maher fix left the model well-
+                           # calibrated — a measured experiment: watch the [4,5)pp band's
+                           # CLV and revert if it's negative. Still ~4x the de-vig noise.
 MAX_PICKS_PER_MATCH = 3    # top edges across DISTINCT markets
 
 
+def _market_sanity(market: str, sanity: float, model_sanity: float) -> float:
+    """Flag ceiling for a market. Model-priced markets (no independent
+    corroboration) clear a stricter bar than consensus-checked 1X2."""
+    return model_sanity if market in MODEL_PRICED_MARKETS else sanity
+
+
 def best_bets(evaluation: dict, threshold: float = RECORD_THRESHOLD,
-              sanity: float = SANITY_EDGE,
+              sanity: float = SANITY_EDGE, model_sanity: float = MODEL_PRICED_SANITY,
               limit: int = MAX_PICKS_PER_MATCH) -> tuple:
     """(picks, flags): the best selection per market with edge ≥ threshold
-    and ≤ sanity, ranked by edge, capped at ``limit``. One pick per market by
-    construction — ladder lines within a market are mutually exclusive
-    alternatives, and same-match picks are correlated enough already (they
-    tend to win and lose together; the units record swings accordingly).
-    Edges above the sanity ceiling become flags, never picks."""
+    and < the market's sanity ceiling, ranked by edge, capped at ``limit``. One
+    pick per market by construction — ladder lines within a market are mutually
+    exclusive alternatives, and same-match picks are correlated enough already
+    (they tend to win and lose together; the units record swings accordingly).
+    Edges at/above the ceiling become flags, never picks. The ceiling is market-
+    aware: consensus-checked 1X2 uses ``sanity`` (15pp); model-priced totals/
+    spreads/BTTS use the stricter ``model_sanity`` (8pp) because a large edge on a
+    self-priced market is far more likely our miscalibration than market error."""
     flags = []
     per_market: dict = {}
     for market in ("h2h", "totals", "spreads", "btts"):
+        ceiling = _market_sanity(market, sanity, model_sanity)
         for sel, line, odds, implied, our_p, edge in evaluation.get(market, []):
-            if edge >= sanity:   # inclusive: an edge AT the ceiling is the case the rule targets
-                flags.append(f"{market} {sel}{f' {line}' if line else ''}: edge "
-                             f"{edge:+.1%} implausibly large — verify odds freshness "
-                             "and team news before trusting")
+            if edge >= ceiling:   # inclusive: an edge AT the ceiling is the case the rule targets
+                tag = f"{market} {sel}{f' {line}' if line else ''}"
+                if market in MODEL_PRICED_MARKETS:
+                    flags.append(f"{tag}: model-priced edge {edge:+.1%} exceeds the "
+                                 f"{ceiling:.0%} cap for uncorroborated markets (priced "
+                                 "from our own score matrix, no consensus cross-check) "
+                                 "— not recorded")
+                else:
+                    flags.append(f"{tag}: edge {edge:+.1%} implausibly large — verify "
+                                 "odds freshness and team news before trusting")
             elif edge >= threshold:
                 cand = {"market": market, "selection": sel, "line": line,
                         "odds": odds, "implied_p": implied,
@@ -461,19 +558,41 @@ def best_bets(evaluation: dict, threshold: float = RECORD_THRESHOLD,
 
 
 def best_bet(evaluation: dict, threshold: float = EDGE_THRESHOLD,
-             sanity: float = SANITY_EDGE) -> tuple:
+             sanity: float = SANITY_EDGE,
+             model_sanity: float = MODEL_PRICED_SANITY) -> tuple:
     """(pick | None, flags): the single largest qualifying edge at the
     display threshold. Kept for compatibility; recording uses best_bets."""
     picks, flags = best_bets(evaluation, threshold=threshold, sanity=sanity,
-                             limit=1)
+                             model_sanity=model_sanity, limit=1)
     return (picks[0] if picks else None), flags
+
+
+def flagged_bets(evaluation: dict, sanity: float = SANITY_EDGE,
+                 model_sanity: float = MODEL_PRICED_SANITY,
+                 limit: int = MAX_PICKS_PER_MATCH) -> list:
+    """The model's extreme convictions the sanity ceiling SUPPRESSES — the best
+    selection per market whose edge is AT/ABOVE the ceiling (the ones best_bets turns
+    into flags, never picks). Returned as pick dicts for the SHADOW ledger: tracked and
+    settled like real picks but never bet, so we can learn whether the model's
+    over-confident calls actually win without staking the blind spot."""
+    per_market: dict = {}
+    for market in ("h2h", "totals", "spreads", "btts"):
+        ceiling = _market_sanity(market, sanity, model_sanity)
+        for sel, line, odds, implied, our_p, edge in evaluation.get(market, []):
+            if edge >= ceiling:
+                cand = {"market": market, "selection": sel, "line": line,
+                        "odds": odds, "implied_p": implied, "our_p": our_p, "edge": edge}
+                cur = per_market.get(market)
+                if cur is None or cand["edge"] > cur["edge"]:
+                    per_market[market] = cand
+    return sorted(per_market.values(), key=lambda c: -c["edge"])[:limit]
 
 
 # ---------------------------------------------------------------- picks ledger
 
 def record_pick(match_id: str, pick: dict, best_price: tuple, now: datetime,
                 kickoff_passed: bool, picks_path: Path = PICKS_LOG,
-                allow_revise: bool = False) -> str:
+                allow_revise: bool = False, stake: str = "1") -> str:
     """Append/refresh the pick for (match_id, market). Best_price = (odds, book)
     actually loggable; refuses post-kickoff and never touches settled rows.
 
@@ -492,7 +611,7 @@ def record_pick(match_id: str, pick: dict, best_price: tuple, now: datetime,
     row = {"match_id": match_id, "market": pick["market"], "selection": pick["selection"],
            "line": _fmt_line(pick["line"]), "odds": f"{odds:.2f}", "book": book,
            "edge_pp": f"{pick['edge'] * 100:.1f}", "our_p": f"{pick['our_p']:.4f}",
-           "implied_p": f"{pick['implied_p']:.4f}", "stake": "1",
+           "implied_p": f"{pick['implied_p']:.4f}", "stake": stake,
            "timestamp": now.isoformat(timespec="seconds"),
            "status": "open", "units": "", "clv_pp": ""}
     if existing:
@@ -636,13 +755,46 @@ def units_summary(picks: list) -> str | None:
     return out
 
 
+def load_shadow_picks(path: Path = SHADOW_PICKS_LOG) -> list:
+    return load_picks(path)
+
+
+def _wlu(ps: list) -> tuple:
+    """(n, wins, losses, hypothetical units) for a settled-pick subset."""
+    w = sum(1 for p in ps if p["status"] in ("won", "half-won"))
+    l = sum(1 for p in ps if p["status"] in ("lost", "half-lost"))
+    u = sum(float(p["units"]) for p in ps if p["units"])
+    return len(ps), w, l, u
+
+
+def shadow_summary(picks: list) -> str | None:
+    """One line on the SHADOW track — the RISKY calls (severe model<->market
+    disagreement): hit rate + HYPOTHETICAL flat-1u units, sliced 1X2 (ratings calls) vs
+    model-priced. On paper, not staked — the figure says only whether these convictions
+    land (would they have won), never that we bet them."""
+    settled = [p for p in picks if p["status"] not in ("", "open")]
+    if not settled:
+        return None
+    n, w, l, u = _wlu(settled)
+    parts = [f"{n} settled, {w}W-{l}L, {u:+.2f}u paper (flat 1u, not staked)"]
+    for label, ms in (("1X2", ("h2h",)), ("model-priced", ("totals", "spreads", "btts"))):
+        sub = [p for p in settled if p["market"] in ms]
+        if sub:
+            sn, sw, sl, su = _wlu(sub)
+            parts.append(f"{label} {sw}W-{sl}L {su:+.2f}u")
+    return "; ".join(parts)
+
+
 # ---------------------------------------------------------------- rendering
 
 def render_odds_section(match_id: str, evaluation: dict, pick,
                         flags: list, best_prices: dict,
-                        threshold: float = EDGE_THRESHOLD) -> str:
+                        threshold: float = EDGE_THRESHOLD,
+                        source_label: str = "") -> str:
     """Markdown body for a card's Odds & Best Bet slot. ``pick`` accepts a
-    single pick dict (legacy) or the ranked list from best_bets."""
+    single pick dict (legacy) or the ranked list from best_bets. ``source_label``
+    (from snapshot_source_label) names where the odds came from — provenance the
+    note must state honestly rather than assuming a market median."""
     picks = pick if isinstance(pick, list) else ([pick] if pick else [])
     lines = []
     labelled = ([("1X2", r) for r in evaluation["h2h"]]
@@ -651,13 +803,13 @@ def render_odds_section(match_id: str, evaluation: dict, pick,
                 + [("BTTS", r) for r in evaluation.get("btts", [])])
     rows = [r for _, r in labelled]
     if rows:
-        lines += ["| Market | Sel | Odds (median) | Implied | Ours | Edge |",
+        lines += ["| Market | Sel | Odds | Implied | Ours | Edge |",
                   "|:--|:--|--:|--:|--:|--:|"]
         actionable = 0
         for mk, (sel, line, odds, implied, our_p, edge) in labelled:
             clears = edge >= threshold
             actionable += int(clears)
-            lines.append(f"| {mk} | {sel} | {odds:.2f} | {implied:.0%} | "
+            lines.append(f"| {mk} | {sel} | {american_odds(odds)} | {implied:.0%} | "
                          f"{our_p:.0%} | {edge:+.1%}{' ✓' if clears else ''} |")
         if actionable:
             lines.append("")
@@ -666,16 +818,21 @@ def render_odds_section(match_id: str, evaluation: dict, pick,
         if evaluation.get("spreads") or evaluation.get("btts") or evaluation["totals"]:
             lines.append("")
             lines.append("_Totals/AH/BTTS are model-priced from the score matrix "
-                         "(the Opta overlay covers W/D/L only)._")
+                         "(the Opta overlay covers W/D/L only) — no independent "
+                         f"consensus check, so they clear a stricter {MODEL_PRICED_SANITY:.0%} "
+                         f"edge ceiling vs {SANITY_EDGE:.0%} for 1X2._")
+        if source_label:
+            lines.append("")
+            lines.append(f"_Odds source: {source_label}, de-vigged multiplicatively._")
         lines.append("")
     if picks:
         for i, pk in enumerate(picks, 1):
             bp = best_prices.get((pk["market"], pk["selection"], str(pk["line"])))
-            price = f" — best price {bp[0]:.2f} ({bp[1]})" if bp else ""
+            price = f" — best price {american_odds(bp[0])} ({bp[1]})" if bp else ""
             ln = f" {pk['line']}" if pk["line"] else ""
             label = "Best bet" if len(picks) == 1 else f"Pick {i}"
             lines.append(f"**{label}: {pk['selection']}{ln} ({pk['market']}) "
-                         f"@ {pk['odds']:.2f}, edge {pk['edge']:+.1%}**{price}. "
+                         f"@ {american_odds(pk['odds'])}, edge {pk['edge']:+.1%}**{price}. "
                          "Flat 1u (paper).")
         if len(picks) > 1:
             lines.append("_Same-match picks are correlated — they tend to win "
@@ -754,9 +911,15 @@ def _match_event(event: dict, fixture_rows: list) -> dict | None:
 
 
 def snapshot_from_api(events: list, fixture_rows: list, phase: str,
-                      now: datetime) -> tuple:
+                      now: datetime, prefer_book: str | None = None) -> tuple:
     """Convert API events to odds_log rows: per-selection median + best price.
-    Returns (rows, status_lines). Unmatched team names are REPORTED, not guessed."""
+    Returns (rows, status_lines). Unmatched team names are REPORTED, not guessed.
+    ``prefer_book`` (e.g. "draftkings") implements GET-THE-PREFERRED-BOOK-ELSE-FALL-BACK:
+    for each selection, if the preferred book quoted it we log ONLY that book's price
+    (so you bet the line you can take); otherwise we fall back to the median/best across
+    all the books that did quote it. The fetch pulls the whole US region (same quota as
+    a single-book request), so DraftKings drives h2h while totals/spreads — which DK
+    doesn't supply via the API — fall back to the other US books."""
     rows, lines = [], []
     stamp = now.isoformat(timespec="seconds")
     for ev in events:
@@ -784,8 +947,13 @@ def snapshot_from_api(events: list, fixture_rows: list, phase: str,
         mid = fr["match_id"]
         home_is_a = pr._canon(ev["home_team"]) == fr["team_a"]
 
+        books = ev.get("bookmakers", [])     # ALL US books; prefer_book chosen per selection
+        if not books:
+            lines.append(f"{mid}: no odds in this event — skipped")
+            continue
+
         prices = {}   # (market, selection, line) -> [(odds, book), ...]
-        for bk in ev.get("bookmakers", []):
+        for bk in books:
             for mkt in bk.get("markets", []):
                 if mkt["key"] == "h2h":
                     for oc in mkt.get("outcomes", []):
@@ -817,20 +985,28 @@ def snapshot_from_api(events: list, fixture_rows: list, phase: str,
                             continue
                         prices.setdefault(("spreads", sel, _fmt_line(oc.get("point", "")))
                                           , []).append((float(oc["price"]), bk["key"]))
-        n_books = len(ev.get("bookmakers", []))
+        n_books = len(books)
+        pref_hits = 0
         for (market, sel, line), plist in prices.items():
-            med = statistics.median(p for p, _ in plist)
-            best_odds, best_book = max(plist, key=lambda x: x[0])
+            # prefer the chosen book's own price when it quoted this selection;
+            # otherwise fall back to the median/best across all books that did
+            use = [(p, b) for p, b in plist if prefer_book and b == prefer_book] or plist
+            if use is not plist:
+                pref_hits += 1
+            med = statistics.median(p for p, _ in use)
+            best_odds, best_book = max(use, key=lambda x: x[0])
             rows.append({"match_id": mid, "market": market, "selection": sel,
                          "line": line, "odds": f"{med:.3f}",
-                         "source": f"median/{len(plist)}books", "phase": phase,
+                         "source": f"median/{len(use)}books", "phase": phase,
                          "timestamp": stamp})
             rows.append({"match_id": mid, "market": market, "selection": sel,
                          "line": line, "odds": f"{best_odds:.3f}",
                          "source": f"best:{best_book}", "phase": phase,
                          "timestamp": stamp})
+        pref_note = (f", {prefer_book} on {pref_hits}/{len(prices)} selections"
+                     if prefer_book else "")
         lines.append(f"{mid}: snapshot from {n_books} books "
-                     f"({len(prices)} selections)")
+                     f"({len(prices)} selections{pref_note})")
     return rows, lines
 
 
@@ -906,8 +1082,10 @@ def cmd_evaluate(target: date, fixtures: Path, threshold: float,
         ev = evaluate_match(mid, odds_rows, ledger_rows, pred)
         picks, flags = best_bets(ev)
         bp = _best_prices(odds_rows, mid)
+        src = snapshot_source_label(odds_rows, mid)
         print(f"\n### {mid} {fr['team_a']} vs {fr['team_b']}\n")
-        print(render_odds_section(mid, ev, picks, flags, bp, threshold))
+        print(render_odds_section(mid, ev, picks, flags, bp, threshold,
+                                  source_label=src))
         for pick in picks if record else []:
             passed = now >= lg.kickoff_dt(fr)
             age = _snapshot_age_hours(odds_rows, mid, now, market=pick["market"])
@@ -923,6 +1101,21 @@ def cmd_evaluate(target: date, fixtures: Path, threshold: float,
                                              allow_revise=revise))
                 except OddsError as e:
                     print(f"→ NOT recorded: {e}")
+        # SHADOW track: the risky calls (severe model-vs-market gap), logged on paper
+        # (too risky to bet) so we can later learn whether they land. Same freshness gate.
+        for fp in flagged_bets(ev) if record else []:
+            passed = now >= lg.kickoff_dt(fr)
+            age = _snapshot_age_hours(odds_rows, mid, now, market=fp["market"])
+            if age is None or age > max_snapshot_age:
+                continue
+            price = bp.get((fp["market"], fp["selection"], str(fp["line"])),
+                           (fp["odds"], "median"))
+            try:
+                print("→ [shadow] " + record_pick(mid, fp, price, now, passed,
+                                                  picks_path=SHADOW_PICKS_LOG,
+                                                  allow_revise=revise, stake="0"))
+            except OddsError:
+                pass   # already logged / post-kickoff: the first conviction stands
         if picks and (day_best is None or picks[0]["edge"] > day_best[1]["edge"]):
             day_best = (mid, picks[0])
     if day_best:
@@ -939,8 +1132,17 @@ def main(argv: list | None = None) -> int:
     sub = ap.add_subparsers(dest="command", required=True)
 
     p_fetch = sub.add_parser("fetch", help="snapshot odds from the odds API")
-    p_fetch.add_argument("--phase", choices=["snapshot", "closing"], default="snapshot")
+    p_fetch.add_argument("--phase", choices=["snapshot", "closing", "both"],
+                         default="snapshot",
+                         help="'both' writes the fetched odds under snapshot AND closing "
+                              "tags from ONE API call — so an intra-day run feeds both "
+                              "recording (snapshot) and CLV (closing) without a 2nd call")
     p_fetch.add_argument("--sport", default=SPORT_KEY)
+    p_fetch.add_argument("--bookmaker", default=DEFAULT_BOOKMAKER,
+                         help="PREFERRED book (default "
+                              f"{DEFAULT_BOOKMAKER!r}): used per-selection when it quotes "
+                              "the line, else fall back to the best of the US region. "
+                              "Pass 'all' for no preference (best of all books).")
 
     p_enter = sub.add_parser("enter", help="manually enter odds")
     p_enter.add_argument("match_id")
@@ -984,6 +1186,11 @@ def main(argv: list | None = None) -> int:
             print("error: no API key. Set ODDS_API_KEY or write data/.odds_api_key "
                   "(git-ignored). Sign up free at the-odds-api.com.", file=sys.stderr)
             return 1
+        # Pull the WHOLE US region (same quota as a single book), then prefer the
+        # chosen book per selection and fall back to the rest — so DraftKings drives
+        # h2h while totals/spreads (which DK doesn't supply via the API) use other books.
+        prefer = (None if (args.bookmaker or "").strip().lower() in ("", "all")
+                  else args.bookmaker.strip().lower())
         try:
             events, remaining = _api_get(f"/sports/{args.sport}/odds", key,
                                          regions="us", markets="h2h,spreads,totals",
@@ -1001,11 +1208,19 @@ def main(argv: list | None = None) -> int:
             print(f"error: {e}", file=sys.stderr)
             return 1
         rows = be.read_rows(args.fixtures)
-        odds_rows, lines = snapshot_from_api(events, rows, args.phase, lg.now_et())
+        now = lg.now_et()
+        phases = ["snapshot", "closing"] if args.phase == "both" else [args.phase]
+        odds_rows, lines = [], []
+        for ph in phases:                       # one API call, tagged under each phase
+            rws, lns = snapshot_from_api(events, rows, ph, now, prefer_book=prefer)
+            odds_rows += rws
+            lines = lines or lns                # status lines are identical per phase
         append_odds(odds_rows)
         for line in lines:
             print(line)
-        print(f"logged {len(odds_rows)} odds rows ({args.phase}); "
+        src_desc = (f"prefer {_book_display(prefer)}, else best US book"
+                    if prefer else "US region (best of all books)")
+        print(f"logged {len(odds_rows)} odds rows ({args.phase}, {src_desc}); "
               f"API requests remaining this month: {remaining}")
         return 0
 
@@ -1082,12 +1297,20 @@ def main(argv: list | None = None) -> int:
         fixtures_rows = be.read_rows(REPO_ROOT / "data" / "fixtures.csv")
         for line in settle_picks(matches, load_odds(), fixtures_rows=fixtures_rows):
             print(line)
-        summary = units_summary(load_picks())
-        print(summary or "no settled picks yet")
+        # the shadow ledger settles the same way but stays OUT of the units record
+        for line in settle_picks(matches, load_odds(), picks_path=SHADOW_PICKS_LOG,
+                                 fixtures_rows=fixtures_rows):
+            print(f"[shadow] {line}")
+        print(units_summary(load_picks()) or "no settled picks yet")
+        sh = shadow_summary(load_shadow_picks())
+        if sh:
+            print("SHADOW (risky calls — model vs market, paper-only) — " + sh)
         return 0
 
-    summary = units_summary(load_picks())
-    print(summary or "no settled picks yet")
+    print(units_summary(load_picks()) or "no settled picks yet")
+    sh = shadow_summary(load_shadow_picks())
+    if sh:
+        print("SHADOW (tracked, never bet) — " + sh)
     return 0
 
 

@@ -1,20 +1,33 @@
 name: closing-odds
 
-# Two light snapshots per day tagged phase=closing, feeding the odds engine's
-# CLV calculation (closing implied minus snapshot implied on our picks).
-# 15:30 UTC = 11:30 AM ET (before the earliest 12:00 PM kickoffs);
-# 22:30 UTC = 6:30 PM ET (before the evening slate). Imperfect closing
-# lines, honest ones: the engine uses the latest closing row per market.
+# Evening / intra-day pipeline. Originally just closing-line snapshots (feeding
+# the CLV calc). Now each run ALSO: re-snapshots odds (one fetch, tagged BOTH
+# snapshot+closing), enters results, settles finished picks, RECORDS late-posted
+# edges, and rebuilds — so scores AND the record update SAME-DAY instead of waiting
+# for the 7 AM daily-build. (Single-book DraftKings posts the moneyline early but
+# totals/spreads later; the 7 AM run's stale-line picks get refused by the 12h
+# freshness gate, so this re-record catches them once the line is fresh.)
+# Four ET capture points:
+#   15:30 UTC = 11:30 AM ET  (before the noon kickoffs — no results yet)
+#   22:30 UTC =  6:30 PM ET  (after the afternoon games)
+#   00:30 UTC =  8:30 PM ET prev ET day  (after the ~6-7 PM games)
+#   03:30 UTC = 11:30 PM ET prev ET day  (after the ~9-11 PM games)
+# fetch_results enters only COMPLETED games and odds.py settle only settles played
+# picks, so the new steps are harmless no-ops when nothing has finished (incl. the
+# 11:30 AM run). In-play events are skipped by both fetchers — late runs never
+# pollute. Each evening run catches the games finished since the previous one; the
+# 7 AM build remains the backstop that closes out the late-cap (12 AM ET) games.
+#
+# Like daily-build: fail-soft data steps (a dead API never blocks the publish);
+# build_site is the HARD gate. NO pre-mutation test gate here on purpose — by the
+# evening the committed data has played games, and several point-in-time site/honesty
+# tests would false-red on it (which is exactly why the morning build runs tests
+# pre-its-own-mutation). A successful build is the gate.
 
 on:
   schedule:
-    # June only — no closing lines needed after the last group game (Jun 27).
-    # Four ET capture points bracket the kickoff spread (12 PM - 12 AM ET):
-    #   15:30 UTC = 11:30 AM ET  (before the noon kickoffs)
-    #   22:30 UTC =  6:30 PM ET  (before the evening slate)
-    #   00:30 UTC =  8:30 PM ET prev. ET day (before the 9-11 PM games)
-    #   03:30 UTC = 11:30 PM ET prev. ET day (before the midnight late-caps)
-    # In-play events are skipped by the fetcher, so late runs never pollute.
+    # June only — no closing lines / intra-day settle needed after the last group
+    # game (Jun 27); the late-UTC crons run 13-28 to cover prev-ET-day evenings.
     - cron: "30 15 12-27 6 *"
     - cron: "30 22 12-27 6 *"
     - cron: "30 0 13-28 6 *"
@@ -24,9 +37,8 @@ on:
 permissions:
   contents: write
 
-# Same group as daily-build: serializes every workflow that pushes to main.
-# Explicit cancel-in-progress:false (matches daily-build) — queue, never cancel
-# an in-flight publish mid-push.
+# Same group as daily-build: serializes every workflow that pushes to main, so an
+# intra-day run never races the morning build or another closing run mid-push.
 concurrency:
   group: wc26-publish
   cancel-in-progress: false
@@ -45,17 +57,83 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Closing snapshot
-        run: python scripts/odds.py fetch --phase closing | tee -a "$GITHUB_STEP_SUMMARY"
-      - name: Commit & push
+
+      - name: Editorial date (ET)
+        id: ed
+        run: |
+          DATE="$(TZ=America/New_York date +%F)"
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          echo "Editorial date: $DATE" >> "$GITHUB_STEP_SUMMARY"
+
+      # ONE API call, tagged BOTH snapshot (feeds intra-day recording below) and
+      # closing (feeds CLV). Single-book DraftKings posts the moneyline early but
+      # totals/spreads later, so this re-snapshot is what makes them recordable.
+      - name: Snapshot + closing line (one fetch, both phases)
+        id: snapshot
+        continue-on-error: true
+        run: python scripts/odds.py fetch --phase both | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Enter results so far (The Odds API — completed games only)
+        id: results
+        continue-on-error: true
+        run: python scripts/fetch_results.py | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Settle finished picks (units + CLV, incl. the shadow book)
+        id: settle
+        continue-on-error: true
+        run: python scripts/odds.py settle | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Record picks whose fresh line only posted AFTER the 7 AM build (e.g. DK's
+      # totals/spreads). Day-of + pre-kickoff + <12h-snapshot gates still apply, and
+      # already-recorded picks are left untouched — so this only ADDS late-posted edges.
+      - name: Record late-posted edges (day-of, pre-kickoff, fresh only)
+        id: evaluate
+        continue-on-error: true
+        run: python scripts/odds.py evaluate "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # HARD gate — a broken build blocks the push rather than deploying a corrupt page.
+      - name: Build site
+        run: python scripts/build_site.py --date "${{ steps.ed.outputs.date }}"
+
+      - name: Build edition (recap reflects the new results)
+        id: edition
+        continue-on-error: true
+        run: python scripts/build_edition.py "${{ steps.ed.outputs.date }}"
+
+      - name: Smoke-check built output
+        run: |
+          test -s docs/index.html \
+            || { echo "::error::docs/index.html missing/empty after build"; exit 1; }
+
+      - name: Commit & push (push = deploy)
         run: |
           git config user.name "wc26-daily-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/odds_log.csv
+          # explicit allowlist: only the artifacts this job owns
+          git add data docs editions
           if git diff --cached --quiet; then
-            echo "No new closing rows." >> "$GITHUB_STEP_SUMMARY"
+            echo "No changes." >> "$GITHUB_STEP_SUMMARY"
           else
-            git commit -m "Closing odds snapshot [automated]"
+            git commit -m "Intra-day update ${{ steps.ed.outputs.date }} [automated]"
             git pull --rebase origin main
             git push
+            echo "Published." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      # Runs AFTER publishing so a degraded-but-buildable run still ships, then turns
+      # silent degradation into a red run (= notification email).
+      - name: Health gate — fail loudly if a data step failed
+        if: ${{ !cancelled() }}
+        run: |
+          failed=""
+          [ "${{ steps.snapshot.outcome }}" = "failure" ] && failed="$failed snapshot"
+          [ "${{ steps.results.outcome }}"  = "failure" ] && failed="$failed results"
+          [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"
+          [ "${{ steps.evaluate.outcome }}" = "failure" ] && failed="$failed evaluate"
+          [ "${{ steps.edition.outcome }}"  = "failure" ] && failed="$failed edition"
+          if [ -n "$failed" ]; then
+            echo "::error::Degraded data steps:$failed"
+            echo "DEGRADED:$failed" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "All data steps healthy." >> "$GITHUB_STEP_SUMMARY"

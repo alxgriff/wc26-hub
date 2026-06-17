@@ -59,9 +59,8 @@ body{
 a{color:inherit}
 main{display:block}
 a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--verm);outline-offset:2px}
-.slate-scroll,.thirds-wrap,.bracket-wrap{scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
-.slate-scroll::-webkit-scrollbar,.thirds-wrap::-webkit-scrollbar,.bracket-wrap::-webkit-scrollbar{height:8px}
-.slate-scroll::-webkit-scrollbar-thumb{background:var(--hairline)}
+.thirds-wrap,.bracket-wrap{scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
+.thirds-wrap::-webkit-scrollbar,.bracket-wrap::-webkit-scrollbar{height:8px}
 .thirds-wrap::-webkit-scrollbar-thumb,.bracket-wrap::-webkit-scrollbar-thumb{background:var(--hairline)}
 .skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:var(--paper);padding:8px 14px;font-family:var(--mono);font-size:.8rem;z-index:9}
 .skip:focus{left:8px;top:8px}
@@ -109,19 +108,33 @@ section{margin-top:46px}
 .sec-head .kicker{font-family:var(--mono);font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:var(--verm);font-weight:700;white-space:nowrap}
 .standfirst{font-style:italic;color:var(--ink-soft);font-size:.95rem;margin:-8px 0 18px}
 
-/* ---------- today's slate ---------- */
-.slate-scroll{overflow-x:auto;padding-bottom:8px;scroll-snap-type:x proximity}
-.slate{list-style:none;display:flex;gap:10px}
-.slate li{
-  scroll-snap-align:start;flex:0 0 auto;min-width:218px;
-  border:1px solid var(--ink);background:var(--paper-2);
-  padding:10px 13px 11px;box-shadow:3px 3px 0 var(--hairline);
-}
-.slate .t{font-family:var(--mono);font-weight:700;font-size:.8rem}
-.slate .t .moon{color:var(--amber)}
-.slate .teams{display:block;font-weight:700;font-size:1.02rem;line-height:1.25;margin:3px 0 4px}
-.slate .meta{font-family:var(--mono);font-size:.68rem;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase}
-.slate li.empty{font-style:italic;color:var(--ink-soft);border-style:dashed;box-shadow:none}
+/* ---------- today's slate (fixture-board cards in a responsive grid) ----------
+   1 column on phones -> 2 on tablets -> up to 3 on wide screens (auto-fill keeps a
+   lone card from stretching). Each card is a symmetrical matchup: the two sides
+   flank a vermillion "v" disc that becomes the scoreline once the game is played. */
+.slate{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px;align-items:start}
+.slate .card{position:relative;border:1px solid var(--ink);background:var(--paper-2);box-shadow:3px 3px 0 var(--hairline);padding:13px 14px 12px;text-align:center}
+@media (hover:hover){.slate .card{transition:transform .18s ease,box-shadow .18s ease}.slate .card:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--hairline)}}
+.slate .kick{font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.slate .kick .moon{color:var(--amber)}
+.slate .kick .ftbadge{color:var(--verm)}
+.slate .matchup{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin:11px 0 9px;text-decoration:none;color:inherit}
+/* stretched link: the lone <a> in each card covers the whole box, so a click
+   anywhere (kickoff, meta, "preview →", padding) opens the preview. Keeps one
+   link per card — valid HTML + a single screen-reader target. Don't add a 2nd
+   interactive element inside .card without giving it position+z-index above this. */
+.slate .card{cursor:pointer}
+.slate .matchup::after{content:"";position:absolute;inset:0;z-index:1}
+.slate .team{font-family:var(--serif);font-weight:900;font-size:1.05rem;line-height:1.1;letter-spacing:-.01em}
+.slate .matchup:hover .team,.slate .matchup:focus-visible .team{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
+.slate .ta{text-align:right}
+.slate .tb{text-align:left}
+.slate .v{width:30px;height:30px;border-radius:50%;background:var(--verm);color:var(--paper);display:grid;place-items:center;font-family:var(--serif);font-style:italic;font-weight:700;font-size:.92rem;margin:0 auto}
+.slate .sc{min-width:46px;font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.slate .meta{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;border-top:1px solid var(--hairline);padding-top:8px}
+.slate .pv{color:var(--verm);font-weight:700}
+.slate .pickline{margin-top:8px;display:inline-block;font-family:var(--mono);font-size:.66rem;color:var(--green);background:var(--green-soft);font-weight:700;padding:2px 8px;letter-spacing:.02em}
+.slate .empty{grid-column:1/-1;font-style:italic;color:var(--ink-soft);border:1px dashed var(--hairline);padding:14px;text-align:center}
 
 /* ---------- group cards ---------- */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(310px,100%),1fr));gap:20px}
@@ -231,9 +244,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
 @media (max-width:480px){
-  .slate-scroll{overflow-x:visible}
-  .slate{flex-direction:column}
-  .slate li{min-width:0}
   th,td{padding:7px 3px}
   .card{padding:11px 10px 9px}
 }
@@ -307,8 +317,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .callout ul{margin:2px 0 0 1.1em;font-size:.92rem;line-height:1.55}
 .callout li{margin-bottom:.35em}
 tbody th.team a{text-decoration:none}
-tbody th.team a:hover,.slate .teams a:hover{text-decoration:underline;text-decoration-color:var(--verm)}
-.slate .teams a{text-decoration:none}
+tbody th.team a:hover{text-decoration:underline;text-decoration-color:var(--verm)}
 
 /* ---------- odds & best bet ---------- */
 .edge-wrap{max-width:680px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
@@ -333,8 +342,6 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
 .blurb{max-width:72ch;margin:-4px 0 20px;font-size:1.04rem;line-height:1.6}
 .blurb p{margin:0 0 .7em}
 .blurb .blurb-tag{font-family:var(--mono);font-size:.64rem;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase;margin:0}
-
-.slate .pickline{display:block;font-family:var(--mono);font-size:.68rem;font-weight:700;color:var(--verm);margin-top:5px;letter-spacing:.03em}
 
 /* ---------- overnight + the record ---------- */
 .overnight{list-style:none;max-width:72ch}
@@ -444,10 +451,15 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bround[data-r="4"] ul{padding-top:calc(7.5*var(--bu))}
 .btie{position:relative;height:var(--bmh);display:flex;align-items:center}
 .bpair{display:flex;flex-direction:column;justify-content:center;gap:3px;width:100%;min-width:0}
-.bslot{display:block;font-size:.8rem;line-height:1.35;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bslot{display:flex;align-items:baseline;gap:5px;font-size:.8rem;line-height:1.35;font-weight:700}
+.bn{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bp{flex:0 0 auto;font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);letter-spacing:.02em}
 .bslot a{text-decoration:none}
 .bslot a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
 .bslot.tbd{font-weight:500;font-style:italic;color:var(--ink-soft)}
+/* projected advancer (bracket.feed): the winning slot in green; the other reads muted */
+.bslot.win .bn{color:var(--green)}
+.btie:has(.win) .bslot:not(.win) .bn{color:var(--ink-soft);font-weight:500}
 /* R32 cards are boxed (they carry names); downstream cards are open fill-in lines */
 .bround[data-r="0"] .btie{border:1px solid var(--ink);background:var(--paper-2);box-shadow:2px 2px 0 var(--hairline);padding:3px 8px}
 .bround:not([data-r="0"]) .bslot{min-height:1.15em;border-bottom:1px dotted var(--hairline)}
@@ -468,6 +480,10 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bnotes{list-style:none;margin:14px 0 0;font-family:var(--mono);font-size:.72rem;color:var(--amber);line-height:1.6}
 .bnotes li{padding-left:1.1em;text-indent:-1.1em}
 .bnotes li::before{content:"⚠ "}
+/* projected champion banner (only once the whole bracket resolves) */
+.bchamp{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:2px solid var(--green);background:var(--green-soft);padding:12px 18px;margin:18px 0 0}
+.bchamp .lbl{font-family:var(--mono);font-size:.64rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--green)}
+.bchamp strong{font-size:1.5rem;font-weight:900;letter-spacing:-.01em}
 @media (max-width:640px){.bracket-wrap{--bmh:38px;--bgap:10px;--bgut:22px}.bround{width:124px}.bslot{font-size:.74rem}}
 
 /* ---------- outcome grid (score matrix toggle) ---------- */
@@ -484,7 +500,6 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 details[open] .outcome-grid-toggle::before{content:"▾ "}
 .outcome-grid-toggle:hover{color:var(--ink);border-color:var(--ink-soft)}
 .outcome-grid-inner{margin-top:.9rem}
-.og-lede{font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:.4rem 0 .85rem;line-height:1.55}
 .og-qbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .og-q{font-family:var(--mono);font-size:.7rem;letter-spacing:.02em;padding:6px 10px;
   border-radius:999px;border:1px solid var(--hairline);background:transparent;
@@ -504,14 +519,15 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 .og-cell{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;
   font-family:var(--mono);font-size:.62rem;font-weight:500;color:var(--ink);
   background:var(--paper-2);transition:opacity .15s,box-shadow .15s;position:relative}
-.og-cell.og-modal::after{content:"modal";position:absolute;bottom:1px;left:0;right:0;
-  font-size:.4rem;letter-spacing:.07em;text-transform:uppercase;
-  color:var(--ink);opacity:.65;text-align:center}
 .og-cell.og-dim{opacity:.12}
 .og-cell.og-hot{box-shadow:inset 0 0 0 2px var(--ink)}
-.og-axhint{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);
-  display:flex;justify-content:space-between;margin-top:6px;max-width:360px}
-.og-tail{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);margin-top:5px}
+.og-outer{display:flex;align-items:center;gap:5px}
+.og-inner{flex:1;min-width:0}
+.og-team-side{writing-mode:vertical-lr;transform:rotate(180deg);font-family:var(--mono);
+  font-size:.55rem;color:var(--ink-soft);white-space:nowrap;align-self:stretch;
+  display:flex;align-items:center;justify-content:center}
+.og-team-top{font-family:var(--mono);font-size:.55rem;color:var(--ink-soft);
+  text-align:center;margin-bottom:3px;max-width:360px}
 @media(prefers-reduced-motion:reduce){.og-cell{transition:none}}
 
 </style>
@@ -526,7 +542,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   </nav>
   <p class="eyebrow">WC26 Daily Hub · Matchup Preview · Pre-baked June 11, verified day-of</p>
   <h1><a href="../teams/sweden.html">Sweden</a><span class="vs">v</span><a href="../teams/tunisia.html">Tunisia</a></h1>
-  
+  <p class="scoreline">5–1<span class="sr-only"> — final score: Sweden 5, Tunisia 1</span></p>
   <div class="metaline">
     <span class="stamp">F2</span>
     <span>Group F · Matchday 1</span>
@@ -544,10 +560,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Sweden win 47 percent, draw 25 percent, Tunisia win 27 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:47">47%</span><span class="pd" style="flex:25">25%</span><span class="pb" style="flex:27">27%</span></div>
-  <div class="scale" aria-hidden="true"><span>Sweden 47%</span><span>draw 25%</span><span>Tunisia 27%</span></div>
-  <p class="factline">most likely score <b>1–1</b> · expected goals <b>2.67</b> · over 2.5 <b>50%</b> · both score <b>53%</b><br>single source: rating model (Elo+Futi)</p>
+  <p class="sr-only">Sweden win 47 percent, draw 26 percent, Tunisia win 27 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:47">47%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:27">27%</span></div>
+  <div class="scale" aria-hidden="true"><span>Sweden 47%</span><span>draw 26%</span><span>Tunisia 27%</span></div>
+  <p class="factline">predicted score <b>1-1</b><br>published consensus — logged Jun 14, 6:44 PM ET, pre-kickoff<br><b>Graded:</b> final 5–1 (Sweden win) · the logged call had it at <b>47%</b> · Brier <b>0.426</b> (0 best · 0.667 coin-flip · 2 worst)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> strongest under profile of MD1; Sweden narrowly or 0-0.</p></blockquote></div>
 </section>
@@ -557,49 +573,52 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Stakes</span>
     <h2 id="stakes-h">The table as it stands</h2>
   </div>
-  <p class="standfirst">Group F opens with this matchday — all four teams start on 0 points.</p>
+  <p class="standfirst">After 2 matches in Group F: Sweden 1st on 3 pts (1-0-0, +4 GD), Tunisia 4th on 0 pts (0-0-1, -4 GD). Sweden lead the group on 3 pts; Sweden hold a top-two spot; Tunisia 1 pt back of the cutline.</p>
 
   <div class="mini-table">
 <article class="card" id="group-f" style="--i:0" aria-labelledby="gh-f">
-  <h3 id="gh-f"><span class="stamp" aria-hidden="true">F</span>Group F<span class="played-tag">0/6 played</span></h3>
+  <h3 id="gh-f"><span class="stamp" aria-hidden="true">F</span>Group F<span class="played-tag">2/6 played</span></h3>
   <table>
-    <caption class="sr-only">Group F standings after 0 of 6 matches</caption>
+    <caption class="sr-only">Group F standings after 2 of 6 matches</caption>
     <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Japan"><a href="../teams/japan.html">Japan</a></th>
-        <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
-        <td>0</td>
-        <td>0</td>
-        <td class="pts">0</td>
+        <th class="team" scope="row" title="Sweden"><a href="../teams/sweden.html">Sweden</a></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, not yet played, not yet played</span></td>
+        <td>5</td>
+        <td>+4</td>
+        <td class="pts">3</td>
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="Netherlands"><a href="../teams/netherlands.html">Netherlands</a></th>
-        <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
+        <th class="team" scope="row" title="Japan"><a href="../teams/japan.html">Japan</a><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, not yet played, not yet played</span></td>
+        <td>2</td>
         <td>0</td>
-        <td>0</td>
-        <td class="pts">0</td>
+        <td class="pts">1</td>
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Sweden"><a href="../teams/sweden.html">Sweden</a></th>
-        <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
+        <th class="team" scope="row" title="Netherlands"><a href="../teams/netherlands.html">Netherlands</a><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, not yet played, not yet played</span></td>
+        <td>2</td>
         <td>0</td>
-        <td>0</td>
-        <td class="pts">0</td>
+        <td class="pts">1</td>
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
         <th class="team" scope="row" title="Tunisia"><a href="../teams/tunisia.html">Tunisia</a></th>
-        <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
-        <td>0</td>
-        <td>0</td>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">lost, not yet played, not yet played</span></td>
+        <td>1</td>
+        <td>-4</td>
         <td class="pts">0</td>
       </tr>
     </tbody>
   </table>
+  <ul class="notes">
+    <li class="warn"><span class="dag">†</span> Japan / Netherlands level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.</li>
+  </ul>
 </article>
   </div>
 </section>
@@ -609,7 +628,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Sweat Factor</span>
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
-<div class="placeholder-slot">Sweat Factor forecast pending — this match is not yet within the 16-day Open-Meteo forecast window. The section fills automatically once available; no data is invented.</div>
+<div class="conditions">
+  <span class="cond-stamp">Actual · as of 2026-06-17 08:26 ET</span>
+  <p class="cond-stats">~78°F · humid (85% RH) · WBGT 84.7°F</p>
+  <div class="cond-track" aria-label="Match heat index: Severe (80/100)"><div class="cond-fill" style="width:80%"></div></div>
+  <p class="cond-sev cond-sev-severe">Severe</p>
+  <p class="cond-blurb">Severe heat, and Sweden carry the bigger burden: +19°F above their home baseline vs +4°F for Tunisia.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Sweden</span><div class="cond-dis-track" aria-label="Heat disadvantage 100/100"><div class="cond-dis-fill cond-dis-hot" style="width:100%"></div></div><span class="cond-delta">+18.7°F vs home</span></div><div class="cond-team"><span class="cond-tname">Tunisia</span><div class="cond-dis-track" aria-label="Heat disadvantage 21/100"><div class="cond-dis-fill" style="width:21%"></div></div><span class="cond-delta">+3.7°F vs home</span></div></div>
+</div>
 </section>
 
 <section aria-labelledby="card-h" class="read-grid">
@@ -630,35 +656,51 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 <p class="verify-flag">Selection notes were pre-baked June 11 and are verified day-of in the edition, not here — anything marked “verify” must be confirmed before it is load-bearing.</p>
 </section>
 
-
+<section aria-labelledby="wire-h">
+  <div class="sec-head">
+    <span class="kicker">The Wire</span>
+    <h2 id="wire-h">What's being reported</h2>
+  </div>
+  <div class="wire">
+    <p class="wire-tag">Auto-gathered 2026-06-14 · every claim carries its source · relayed as reporting, not verified by the hub — click through before it bears weight.</p>
+<ul><li>Sweden manager Graham Potter is waiting to learn whether <strong>Gabriel Gudmundsson</strong> will be available. The Leeds United full-back has been <strong>laid low by an illness</strong> over the past few days — an untimely concern given his natural fit in Potter's 3-4-1-2 shape. (source: <a href="https://www.sportsmole.co.uk/football/sweden/world-cup-2026/predicted-lineups/the-sickness-bug-strikes-predicted-sweden-xi-vs-tunisia_599046.html" rel="nofollow">https://www.sportsmole.co.uk/football/sweden/world-cup-2026/predicted-lineups/the-sickness-bug-strikes-predicted-sweden-xi-vs-tunisia_599046.html</a>)</li></ul>
+<ul><li>If Gudmundsson is unavailable, <strong>Daniel Svensson or Elliot Stroud</strong> will fill in out wide. <strong>Victor Lindelöf, Anthony Elanga, Benjamin Nygren, and Alexander Bernhardsson</strong> have all made full recoveries from minor afflictions. (source: <a href="https://www.sportsmole.co.uk/football/sweden/world-cup-2026/preview/sweden-vs-tunisia-prediction-team-news-lineups_599031.html" rel="nofollow">https://www.sportsmole.co.uk/football/sweden/world-cup-2026/preview/sweden-vs-tunisia-prediction-team-news-lineups_599031.html</a>)</li></ul>
+<ul><li>Tunisia playmaker <strong>Hannibal Mejbri</strong> is expected to <strong>return to the starting lineup</strong>. The Burnley midfielder was an unused substitute when Tunisia lost 5-0 to Belgium in their final warm-up friendly. (source: <a href="https://www.sportsmole.co.uk/football/tunisia/world-cup-2026/predicted-lineups/hope-for-hannibal-predicted-tunisia-xi-vs-sweden_599050.html" rel="nofollow">https://www.sportsmole.co.uk/football/tunisia/world-cup-2026/predicted-lineups/hope-for-hannibal-predicted-tunisia-xi-vs-sweden_599050.html</a>)</li></ul>
+<ul><li>There are <strong>no injury or suspension concerns</strong> reported for Tunisia ahead of this Group F fixture. (source: <a href="https://thehardtackle.com/round-up/2026/06/13/sweden-vs-tunisia-preview-and-prediction/" rel="nofollow">https://thehardtackle.com/round-up/2026/06/13/sweden-vs-tunisia-preview-and-prediction/</a>)</li></ul>
+  </div>
+</section>
 
 <section aria-labelledby="odds-h">
   <div class="sec-head">
     <span class="kicker">The Market</span>
     <h2 id="odds-h">Odds &amp; best bet</h2>
   </div>
-<p class="odds-note">model projection: <b>2.67</b> total goals · over 1.5 <b>75%</b> · over 2.5 <b>50%</b> · over 3.5 <b>28%</b></p>
+<p class="odds-note">model projection: <b>2.56</b> total goals · over 1.5 <b>73%</b> · over 2.5 <b>47%</b> · over 3.5 <b>26%</b></p>
 <div class="edge-wrap">
   <table>
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td>1.71</td><td>57%</td><td>66%</td><td class="edge-pos">+9.6%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td>2.24</td><td>43%</td><td>34%</td><td class="edge-neg">-9.6%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td>2.20</td><td>43%</td><td>50%</td><td class="edge-pos">+6.5%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td>1.69</td><td>57%</td><td>50%</td><td class="edge-neg">-6.5%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Sweden -0.5</td><td>1.88</td><td>51%</td><td>47%</td><td class="edge-neg">-3.9%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Tunisia +0.5</td><td>1.97</td><td>49%</td><td>53%</td><td class="edge-pos">+3.9%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Sweden</td><td title="1.95 decimal">-105</td><td>49%</td><td>47%</td><td class="edge-neg">-2.3%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="3.45 decimal">+245</td><td>28%</td><td>26%</td><td class="edge-neg">-1.8%</td></tr>
+      <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">Tunisia</td><td title="4.10 decimal">+310</td><td>23%</td><td>27%</td><td class="edge-pos">+4.0%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td title="1.65 decimal">-154</td><td>59%</td><td>63%</td><td class="edge-pos">+4.4%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td title="2.36 decimal">+136</td><td>41%</td><td>37%</td><td class="edge-neg">-4.4%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.18 decimal">+118</td><td>44%</td><td>47%</td><td class="edge-pos">+3.4%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.70 decimal">-143</td><td>56%</td><td>53%</td><td class="edge-neg">-3.4%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Sweden -0.5</td><td title="1.96 decimal">-104</td><td>49%</td><td>47%</td><td class="edge-neg">-2.4%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Tunisia +0.5</td><td title="1.89 decimal">-112</td><td>51%</td><td>53%</td><td class="">+2.4%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2</strong> (Total goals) @ 1.71, edge <strong>+9.6%</strong>. Flat 1u, paper record.</p></div>
-<p class="odds-note">market snapshot Jun 13, 9:59 AM ET · median odds across books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only · no logged consensus prediction — 1X2 edge not computed · O/U 2 can push (P 25%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Over 2</strong> (Total goals), model edge <strong>+4.4%</strong></p><p><strong>Tunisia</strong> (1X2), model edge <strong>+4.0%</strong></p><p class="odds-note">the model likes these, but the line is over 12h old (the book hasn't reposted), so they are <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
+<p class="odds-note">Logged pick: Over 2 @ -154 (betonlineag), edge 4.4pp · settled <b>won</b> for +0.65u.</p>
+<p class="odds-note">Logged pick: Tunisia @ +335 (betonlineag), edge 4.0pp · settled <b>lost</b> for -1.00u · CLV -3.7pp.</p>
+<p class="odds-note">market snapshot Jun 14, 7:42 AM ET · median across 9 books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 2 can push (P 25%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> under 2.0; 0-0/1-0 correct score basket.</p></blockquote></div>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
-<p class="og-lede">Each cell is one exact scoreline. Greener = Sweden win, gold = draw, red = Tunisia win; brighter = more likely. Press a button to highlight cells that count toward that outcome.</p>
 <div class="og-qbar" id="og-qbar">
   <button class="og-q awin" data-q="awin" aria-pressed="false">Sweden win</button>
   <button class="og-q draw" data-q="draw" aria-pressed="false">Draw</button>
@@ -667,14 +709,18 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <button class="og-q btts" data-q="btts" aria-pressed="false">Both score</button>
 </div>
 <div class="og-readout" id="og-readout"></div>
-<div class="og-matrix" id="og-matrix"></div>
-<div class="og-axhint"><span>← Tunisia goals (top)</span><span>Sweden goals (side) ↓</span></div>
-<p class="og-tail" id="og-tail"></p>
+<div class="og-outer">
+  <div class="og-team-side">Sweden</div>
+  <div class="og-inner">
+    <div class="og-team-top">Tunisia</div>
+    <div class="og-matrix" id="og-matrix"></div>
+  </div>
+</div>
 </div>
 </details>
 <script>
 (function(){
-  var la=1.5519,lb=1.1203,N=8,SHOW=6,i,j;
+  var la=1.4883,lb=1.0744,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
@@ -689,7 +735,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   }
   function rColor(i,j){return i>j?'98,185,126':i===j?'217,169,72':'232,118,90';}
   var mx=document.getElementById('og-matrix');
-  var html='<div class="og-corner">A \\ B</div>';
+  var html='<div class="og-corner">goals</div>';
   for(j=0;j<SHOW;j++)html+='<div class="og-ax-top">'+j+'</div>';
   for(i=0;i<SHOW;i++){
     html+='<div class="og-ax-side">'+i+'</div>';
@@ -707,8 +753,6 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   var cells=[].slice.call(mx.querySelectorAll('.og-cell'));
   var tail=0;
   for(i=0;i<=N;i++)for(j=0;j<=N;j++){if(i>=SHOW||j>=SHOW)tail+=M[i][j];}
-  document.getElementById('og-tail').textContent=
-    'Showing 0–5 each side. Scores beyond: '+(tail*100).toFixed(1)+'% — still counted.';
   var LABELS={
     awin:['Sweden win','98,185,126'],
     draw:['Draw','217,169,72'],

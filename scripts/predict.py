@@ -138,6 +138,14 @@ class Config:
     # and negative — typically about -0.13 to -0.18 (allow down to ~-0.20). Never
     # hand-pick it (the project's fit-don't-invent rule).
     rho: float = 0.0
+    # Maher-form total blend (Tier 3.1; backtest_totals.py, 2026-06-14). 0.0 = INERT:
+    # the current symmetric-texture total, byte-identical output, regression-locked.
+    # >0 blends the total toward the convex per-side att×def (Maher) form so mismatch
+    # totals rise to match reality (actual +1.32 goals even→lopsided vs the model's
+    # +0.05), WHILE keeping the Elo-supremacy share intact. Activate only from a fitted
+    # weight in calibration.json that (i) fixes the backtest_totals slope and (ii) does
+    # NOT degrade W/D/L on the holdout. Never hand-pick (fit-don't-invent rule).
+    maher_w: float = 0.0
     # Knockout resolution — used only by resolve_knockout(); predict_match (group
     # play) is unaffected. et_caution<1 reflects more cautious extra time;
     # shootout_home is a flat coin-flip — do NOT tilt by strength as a default
@@ -248,6 +256,11 @@ def load_ratings(ratings_dir: str | Path = RATINGS_DIR,
         cal = _load_calibration()          # activate fitted knobs if any were persisted
         if cal and cal.get("rho") is not None:
             config.rho = float(cal["rho"])
+        # Tier 3.1 total-goals knobs, activated only from a fitted+validated
+        # calibration.json (fit_maher.py); absent => the inert defaults above.
+        for _k in ("maher_w", "alpha", "mu0"):
+            if cal and cal.get(_k) is not None:
+                setattr(config, _k, float(cal[_k]))
         if cal and cal.get("hfa") is not None:
             config.hfa = float(cal["hfa"])
         if cal and cal.get("hfa_by_host"):
@@ -385,9 +398,16 @@ def predict_match(model: RatingModel, team_a: str, team_b: str,
     bonus_b = host_hfa if hfa_team == team_b else 0.0
 
     sup = (a.strength + bonus_a - b.strength - bonus_b) / cfg.theta
-    texture = ((a.z_att - b.z_def) + (b.z_att - a.z_def)) / 2
+    # Maher half-terms: each side's attack vs the other's defense. Their symmetric
+    # average is the current total driver; the per-side CONVEX form (exp(h_a)+exp(h_b)
+    # > 2·exp(mean) unless h_a==h_b) is what lifts the total in mismatches.
+    h_a, h_b = a.z_att - b.z_def, b.z_att - a.z_def
+    texture = (h_a + h_b) / 2
     total = cfg.mu0 * math.exp(cfg.alpha * texture)
-    share = 1.0 / (1.0 + math.exp(-sup))
+    if cfg.maher_w:                                   # Tier 3.1 blend — inert at 0.0
+        total_maher = 0.5 * cfg.mu0 * (math.exp(cfg.alpha * h_a) + math.exp(cfg.alpha * h_b))
+        total = (1 - cfg.maher_w) * total + cfg.maher_w * total_maher
+    share = 1.0 / (1.0 + math.exp(-sup))             # split stays Elo-supremacy (preserved)
     lam_a, lam_b = total * share, total * (1 - share)
 
     N = cfg.max_goals

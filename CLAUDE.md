@@ -1,7 +1,14 @@
 # WC26 Daily Hub
 
-**Roadmap:** see PLAN.md for the phased implementation plan, per-script specs,
-and the daily ops checklist.
+**Project docs** (read in this order for a fast start):
+- [ARCHITECTURE.md](ARCHITECTURE.md) — what lives where: modules, data flow, files, CI/deploy.
+- [STATUS.md](STATUS.md) — what's shipped and what's still open.
+- [DECISIONS.md](DECISIONS.md) — the load-bearing choices and why.
+- [PLAN.md](PLAN.md) — original phased plan (all phases shipped) + the daily ops checklist.
+- [MODEL_IMPROVEMENTS.md](MODEL_IMPROVEMENTS.md) — the detailed predictor roadmap.
+- [TOTALS_FIX_EXPLAINER.md](TOTALS_FIX_EXPLAINER.md) — plain-English explainer of the June 14 Maher-form totals fix (for non-specialists).
+
+This file (CLAUDE.md) holds the **data contracts and rules** — they override everything else.
 
 Daily 2026 World Cup group-stage guide + game predictor. One edition per ET
 date (June 11–27), built from pre-baked match cards + computed standings +
@@ -81,12 +88,31 @@ specifies weights. Probabilities must sum to 1.0 ± 0.001 per match.
   source, phase, timestamp. The 1X2 edge is vs the published consensus;
   totals/handicap/BTTS are model-priced from the score matrix (the overlay
   covers W/D/L only). Draw-no-bet is computed but not yet snapshotted/recorded.
+- **Odds source: prefer DraftKings, fall back to other US books** (`odds.py fetch
+  --bookmaker`, user-set June 14 as single-book, revised June 16 to prefer-else-
+  fallback). The fetch pulls the WHOLE US region (same quota — one region) and, per
+  selection, logs DraftKings alone when it quotes the line (so the de-vigged implied
+  is the line you can really take), else the median/best of the books that do. This
+  is because DraftKings supplies h2h via the API but NOT totals/spreads — so h2h is
+  DK while totals/spreads fall back to the other US books (betmgm/bovada/…), keeping
+  them covered. `--bookmaker all` = no preference (best of all). Provenance is
+  labelled honestly (`snapshot_source_label`): "DraftKings where quoted, else best of
+  N US books" for the mix; never claim a sourcing the log lacks.
 - De-vig the 1X2: implied_i = (1/odds_i) / Σ(1/odds_j) (multiplicative
   method; power or Shin method optional upgrade later).
 - Edge_i = model_p_i − implied_i. Display threshold 3 percentage points;
   **recorded picks**: up to 3 per match, the best selection per distinct
-  market, each clearing a 5-point recording bar (user-set June 12) and the
-  15-point sanity ceiling. Same-match picks are correlated — disclose it
+  market, each clearing a **4-point recording bar** (user-set June 12 at 5pp,
+  lowered to 4pp June 14 to gather more model-performance data once the Maher
+  totals fix left the model well-calibrated — a measured experiment, revert if
+  the [4,5)pp band shows negative CLV) and a sanity
+  ceiling. The sanity ceiling is **market-aware** (user-set June 14): 1X2 is
+  checked against the published consensus, so it keeps the 15-point ceiling;
+  totals/spreads/BTTS are model-priced from the same score matrix that makes the
+  edge (no independent cross-check), so they clear a **stricter 8-point ceiling**
+  — a large self-priced edge is far more likely our miscalibration than market
+  error (see the Germany–Curaçao total-goals saturation case). Same-match picks
+  are correlated — disclose it
   wherever they're shown. Otherwise output "No bet" — a legitimate,
   expected result.
 - Track closing line value: log closing odds for every pick; CLV = closing

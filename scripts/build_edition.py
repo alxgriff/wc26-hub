@@ -781,7 +781,9 @@ def main(argv: list[str] | None = None) -> int:
                 # Rendering only: `odds.py evaluate --record` is the single
                 # canonical recorder (it owns the day-of and snapshot-freshness
                 # gates) — building an edition must never place a bet.
-                odds_bodies[mid] = od.render_odds_section(mid, ev, picks, flags, bp)
+                src = od.snapshot_source_label(odds_rows, mid)
+                odds_bodies[mid] = od.render_odds_section(mid, ev, picks, flags, bp,
+                                                          source_label=src)
             units = od.units_summary(od.load_picks())
             if units:
                 cumulative = (cumulative + "\n" + units) if cumulative else units

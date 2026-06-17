@@ -19,3 +19,6 @@ data/calibration/reference.meta.json
 
 # Local-only fit experiments — comparison artifacts + fit logs. Delete before PR.
 experiments/
+
+# Playwright MCP scratch artifacts
+.playwright-mcp/

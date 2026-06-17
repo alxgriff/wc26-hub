@@ -260,7 +260,7 @@ def render_slate(today: list[dict], root: str = "",
     if not today:
         return '    <li class="empty">No matches on this editorial date.</li>'
     picks = picks or {}
-    chips = []
+    cards = []
     for r in today:
         mid = r["match_id"]
         moon = '<span class="moon" aria-label="midnight kickoff, this slate"> ☾</span>' \
@@ -271,21 +271,25 @@ def render_slate(today: list[dict], root: str = "",
         href = f'{root}matches/{_esc(mid)}.html'
         played = (r.get("status") or "").strip().lower() == "played"
         if played:
-            label = (f'{_esc(r["team_a"])} {_esc(str(r["score_a"]))}–'
-                     f'{_esc(str(r["score_b"]))} {_esc(r["team_b"])}')
-            time_bit = "FT"
+            kick = '<p class="kick"><span class="ftbadge">Full time</span></p>'
+            centre = (f'<span class="sc">{_esc(str(r["score_a"]))}–'
+                      f'{_esc(str(r["score_b"]))}</span>')
         else:
-            label = f'{_esc(r["team_a"])} v {_esc(r["team_b"])}'
-            time_bit = _esc((r.get("kickoff_et") or "").strip()) + " ET"
+            kick = (f'<p class="kick">{_esc((r.get("kickoff_et") or "").strip())} ET'
+                    f'{moon}</p>')
+            centre = '<span class="v">v</span>'
+        # the whole matchup is one link to the preview (a large, single target)
+        matchup = (f'<a class="matchup" href="{href}">'
+                   f'<span class="team ta">{_esc(r["team_a"])}</span>{centre}'
+                   f'<span class="team tb">{_esc(r["team_b"])}</span></a>')
         pick_html = ""
         if mid in picks:
-            pick_html = f'<span class="pickline">▸ best bet: {_esc(picks[mid])}</span>'
-        chips.append(
-            f'    <li><span class="t">{time_bit}{moon}</span>'
-            f'<span class="teams"><a href="{href}">{label}</a></span>'
-            f'<span class="meta">{_esc(mid)} · {_esc(tv)} · {_esc(venue)} · preview →</span>'
-            f'{pick_html}</li>')
-    return "\n".join(chips)
+            pick_html = f'<p class="pickline">▸ best bet: {_esc(picks[mid])}</p>'
+        cards.append(
+            f'    <li class="card">{kick}{matchup}'
+            f'<p class="meta">{_esc(mid)} · {_esc(tv)} · {_esc(venue)} · '
+            f'<span class="pv">preview →</span></p>{pick_html}</li>')
+    return "\n".join(cards)
 
 
 def _group_nav(groups: "dict[str, st.GroupTable]") -> str:
@@ -372,6 +376,31 @@ def load_predictor(fixtures: Path | None = None):
             return None
 
     return call, None
+
+
+def load_knockout_resolver():
+    """Defensive adapter for projecting knockout ties (companion to load_predictor).
+    Returns resolver(team_a, team_b) -> {"winner","loser","p"} | None, or None if
+    predict.py is unavailable — in which case the bracket stays structural (blank
+    downstream). Neutral venue: host HFA is NOT applied, because knockout venues
+    aren't modelled in-repo. ``p`` is the winner's probability of advancing (90' +
+    extra time + shootout, per predict.resolve_knockout)."""
+    try:
+        import predict as pr
+        model = pr.load_ratings()
+    except Exception:
+        return None
+
+    def resolve(a: str, b: str):
+        try:
+            kp = pr.resolve_knockout(model, a, b)        # neutral (no hfa_team)
+            if kp.p_advance_a >= kp.p_advance_b:
+                return {"winner": a, "loser": b, "p": kp.p_advance_a}
+            return {"winner": b, "loser": a, "p": kp.p_advance_b}
+        except Exception:
+            return None
+
+    return resolve
 
 
 def render_call(info: dict | None, team_a: str, team_b: str,
@@ -497,11 +526,13 @@ def render_call(info: dict | None, team_a: str, team_b: str,
 
 # ---------------------------------------------------------------- the market
 
-def load_odds_engine():
+def load_odds_engine(now=None):
     """Defensive adapter around odds.py + ledger.py (Phase 5, owned by another
     stream). Returns (callable, ledger_line, None) or (None, None, reason).
     The callable maps a fixtures row -> dict for render_market(); returns None
-    for matches with no snapshot (placeholder state, per contract)."""
+    for matches with no snapshot (placeholder state, per contract). ``now`` pins the
+    clock for the per-market freshness check (so the card demotes a best bet whose
+    line is too stale to record — same 12h gate as recording)."""
     try:
         import odds as od
         import ledger as lg
@@ -512,6 +543,7 @@ def load_odds_engine():
         ledger_rows = lg.load_ledger()
         picks = od.load_picks()
         model = pr.load_ratings()
+        _now = now or lg.now_et()
         # read here (not via getattr inside the swallowing closure) so a rename of
         # RECORD_THRESHOLD fails loudly as a clear "engine unavailable" reason rather
         # than silently desyncing the displayed bar to 0.05 in every pick callout
@@ -534,14 +566,25 @@ def load_odds_engine():
             if not any(ev.get(m) for m in ("h2h", "totals", "spreads", "btts")):
                 return None
             match_picks, flags = od.best_bets(ev)
+            # a best bet whose market line is older than the recording freshness gate
+            # can't be recorded — flag it so the card shows it as a stale lean, not a
+            # live "Best bet" (keeps the card consistent with the picks ledger).
+            stale = {m for m in {p["market"] for p in match_picks}
+                     if (age := od._snapshot_age_hours(odds_rows, mid, _now, m)) is None
+                     or age > od.MAX_SNAPSHOT_AGE_HOURS}
             return {
                 "evaluation": ev, "picks": match_picks,
                 "pick": match_picks[0] if match_picks else None,  # back-compat
                 "flags": flags,
+                "stale_markets": stale,
+                "max_age_h": od.MAX_SNAPSHOT_AGE_HOURS,
                 "best_prices": od._best_prices(odds_rows, mid),
                 "recorded": [p for p in picks if p["match_id"] == mid],
                 "threshold": od.EDGE_THRESHOLD,
                 "record_threshold": record_threshold,
+                "model_sanity": od.MODEL_PRICED_SANITY,
+                "sanity": od.SANITY_EDGE,
+                "source_label": od.snapshot_source_label(odds_rows, mid),
                 "snapshot_ts": max(r["timestamp"] for r in match_rows),
                 "projection": {"total": pred.total,
                                "over": {f"{k:g}": v for k, v in pred.over.items()}},
@@ -639,41 +682,44 @@ def _sweat_blurb(info: dict, team_a: str, team_b: str) -> str:
         mismatch = False
 
     def _sign(d: float) -> str:
-        return f"+{round(d)}" if d > 0 else str(round(d))
+        d_f = d * 9 / 5
+        return f"+{round(d_f)}" if d_f > 0 else str(round(d_f))
+
+    wbgt_f = wbgt * 9 / 5 + 32
 
     if sf < 25:
         if mismatch and harder and hard_delta is not None:
-            return (f"{harder} step into conditions {_sign(hard_delta)}°C from their home baseline, "
+            return (f"{harder} step into conditions {_sign(hard_delta)}°F from their home baseline, "
                     f"but the overall heat is low — unlikely to matter much.")
         return "Comfortable conditions — heat is a non-factor for both sides."
 
     if sf < 50:
         if mismatch and harder and hard_delta is not None:
             adapted = f"{easier} are the better-acclimated side" if (easy_delta or 0) < 3 else f"{easier} face a smaller adjustment"
-            return (f"Warm out; {harder} are {_sign(hard_delta)}°C outside their comfort zone "
+            return (f"Warm out; {harder} are {_sign(hard_delta)}°F outside their comfort zone "
                     f"while {adapted}.")
-        return f"Warm conditions ({wbgt:.0f}°C WBGT) — a moderate physical test for both squads."
+        return f"Warm conditions ({wbgt_f:.0f}°F WBGT) — a moderate physical test for both squads."
 
     if sf < 75:
         if mismatch and harder and hard_delta is not None:
             if (easy_delta or 0) <= 0:
                 return (f"Hot match-up, and a real edge for {easier}: "
-                        f"{harder} are {_sign(hard_delta)}°C above their home climate "
+                        f"{harder} are {_sign(hard_delta)}°F above their home climate "
                         f"while {easier} are well-adapted to this heat.")
             return (f"Significant heat; {harder} face the steeper climb "
-                    f"({_sign(hard_delta)}°C vs home) compared to {easier}.")
-        return f"Hot conditions ({wbgt:.0f}°C WBGT) — both sides will feel the physical load."
+                    f"({_sign(hard_delta)}°F vs home) compared to {easier}.")
+        return f"Hot conditions ({wbgt_f:.0f}°F WBGT) — both sides will feel the physical load."
 
     # Severe
     if mismatch and harder and hard_delta is not None:
         if (easy_delta or 0) <= 0:
             return (f"Brutal heat — and {easier} hold a major acclimatization edge: "
-                    f"{harder} are {_sign(hard_delta)}°C above their home baseline "
+                    f"{harder} are {_sign(hard_delta)}°F above their home baseline "
                     f"while {easier} are stepping into their climate.")
         return (f"Severe heat, and {harder} carry the bigger burden: "
-                f"{_sign(hard_delta)}°C above their home baseline vs "
-                f"{_sign(easy_delta)}°C for {easier}.")
-    return f"Severe conditions ({wbgt:.0f}°C WBGT) — this is a demanding physical environment for both teams."
+                f"{_sign(hard_delta)}°F above their home baseline vs "
+                f"{_sign(easy_delta)}°F for {easier}.")
+    return f"Severe conditions ({wbgt_f:.0f}°F WBGT) — this is a demanding physical environment for both teams."
 
 
 def render_sweat(info: dict | None, team_a: str, team_b: str) -> str:
@@ -687,9 +733,9 @@ def render_sweat(info: dict | None, team_a: str, team_b: str) -> str:
     if info.get("climate_controlled"):
         return '<p class="cond-ac">Indoors — climate-controlled. Heat not a factor.</p>'
 
-    temp = _esc(f"~{float(info['temp_c']):.0f}")
+    temp = _esc(f"~{float(info['temp_c']) * 9 / 5 + 32:.0f}")
     rh = _esc(f"{float(info['rh_pct']):.0f}")
-    wbgt = _esc(f"{float(info['wbgt_est']):.1f}")
+    wbgt = _esc(f"{float(info['wbgt_est']) * 9 / 5 + 32:.1f}")
     hum = _esc(info.get("hum_desc") or "")
     source = (info.get("source") or "forecast").capitalize()
     as_of = _esc(info.get("as_of") or "")
@@ -702,14 +748,15 @@ def render_sweat(info: dict | None, team_a: str, team_b: str) -> str:
     def team_row(team: str, dis, delta) -> str:
         if delta is None:
             return ""
-        sign = "+" if delta > 0 else ""
+        delta_f = delta * 9 / 5
+        sign = "+" if delta_f > 0 else ""
         fill_cls = "cond-dis-fill cond-dis-hot" if delta >= 5 else "cond-dis-fill"
         return (
             f'<div class="cond-team">'
             f'<span class="cond-tname">{_esc(team)}</span>'
             f'<div class="cond-dis-track" aria-label="Heat disadvantage {dis}/100">'
             f'<div class="{fill_cls}" style="width:{dis}%"></div></div>'
-            f'<span class="cond-delta">{sign}{delta:.1f}°C vs home</span>'
+            f'<span class="cond-delta">{sign}{delta_f:.1f}°F vs home</span>'
             f'</div>'
         )
 
@@ -721,7 +768,7 @@ def render_sweat(info: dict | None, team_a: str, team_b: str) -> str:
     return (
         f'<div class="conditions">\n'
         f'  <span class="cond-stamp">{stamp}</span>\n'
-        f'  <p class="cond-stats">{temp}°C · {hum} ({rh}% RH) · WBGT {wbgt}</p>\n'
+        f'  <p class="cond-stats">{temp}°F · {hum} ({rh}% RH) · WBGT {wbgt}°F</p>\n'
         f'  <div class="cond-track" aria-label="Match heat index: {severity} ({mhi}/100)">'
         f'<div class="cond-fill" style="width:{mhi}%"></div></div>\n'
         f'  <p class="cond-sev cond-sev-{_esc(sev_cls)}">{severity}</p>\n'
@@ -755,7 +802,7 @@ _OUTCOME_GRID_JS = """\
   }
   function rColor(i,j){return i>j?'98,185,126':i===j?'217,169,72':'232,118,90';}
   var mx=document.getElementById('og-matrix');
-  var html='<div class="og-corner">A \\\\ B</div>';
+  var html='<div class="og-corner">goals</div>';
   for(j=0;j<SHOW;j++)html+='<div class="og-ax-top">'+j+'</div>';
   for(i=0;i<SHOW;i++){
     html+='<div class="og-ax-side">'+i+'</div>';
@@ -773,8 +820,6 @@ _OUTCOME_GRID_JS = """\
   var cells=[].slice.call(mx.querySelectorAll('.og-cell'));
   var tail=0;
   for(i=0;i<=N;i++)for(j=0;j<=N;j++){if(i>=SHOW||j>=SHOW)tail+=M[i][j];}
-  document.getElementById('og-tail').textContent=
-    'Showing 0–5 each side. Scores beyond: '+(tail*100).toFixed(1)+'% — still counted.';
   var LABELS={
     awin:['__TEAM_A__ win','98,185,126'],
     draw:['Draw','217,169,72'],
@@ -823,9 +868,6 @@ def render_outcome_grid(info: dict | None, team_a: str, team_b: str) -> str:
         f'<details class="outcome-grid-wrap">\n'
         f'<summary class="outcome-grid-toggle">Show score grid</summary>\n'
         f'<div class="outcome-grid-inner">\n'
-        f'<p class="og-lede">Each cell is one exact scoreline. '
-        f'Greener = {a_esc} win, gold = draw, red = {b_esc} win; '
-        f'brighter = more likely. Press a button to highlight cells that count toward that outcome.</p>\n'
         f'<div class="og-qbar" id="og-qbar">\n'
         f'  <button class="og-q awin" data-q="awin" aria-pressed="false">{a_esc} win</button>\n'
         f'  <button class="og-q draw" data-q="draw" aria-pressed="false">Draw</button>\n'
@@ -834,12 +876,13 @@ def render_outcome_grid(info: dict | None, team_a: str, team_b: str) -> str:
         f'  <button class="og-q btts" data-q="btts" aria-pressed="false">Both score</button>\n'
         f'</div>\n'
         f'<div class="og-readout" id="og-readout"></div>\n'
-        f'<div class="og-matrix" id="og-matrix"></div>\n'
-        f'<div class="og-axhint">'
-        f'<span>← {b_esc} goals (top)</span>'
-        f'<span>{a_esc} goals (side) ↓</span>'
+        f'<div class="og-outer">\n'
+        f'  <div class="og-team-side">{a_esc}</div>\n'
+        f'  <div class="og-inner">\n'
+        f'    <div class="og-team-top">{b_esc}</div>\n'
+        f'    <div class="og-matrix" id="og-matrix"></div>\n'
+        f'  </div>\n'
         f'</div>\n'
-        f'<p class="og-tail" id="og-tail"></p>\n'
         f'</div>\n'
         f'</details>\n'
         f'<script>\n{js}\n</script>'
@@ -873,6 +916,17 @@ def _fmt_snapshot_ts(ts: str) -> str:
         return f"{d:%b} {d.day}, {d:%I:%M %p} ET".replace(" 0", " ")
     except ValueError:
         return ts
+
+
+def _american_odds(decimal: float) -> str:
+    """Decimal -> American moneyline ('+150' / '-200'). Local mirror of
+    odds.american_odds — the HTML layer keeps its own formatters (like
+    _sel_label / _fmt_snapshot_ts) and a test asserts the two stay in lockstep."""
+    if decimal <= 1.0:
+        return "n/a"
+    if decimal >= 2.0:
+        return f"+{round((decimal - 1) * 100)}"
+    return f"-{round(100 / (decimal - 1))}"
 
 
 def render_market(odds_info: dict | None, team_a: str, team_b: str,
@@ -909,7 +963,8 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
             rows_html.append(
                 f'      <tr{cls}><td class="lbl">{_esc(_MARKET_LABELS[market])}</td>'
                 f'<td class="lbl">{_esc(_sel_label(market, sel, line, team_a, team_b))}</td>'
-                f'<td>{odds_v:.2f}</td><td>{implied:.0%}</td><td>{our_p:.0%}</td>'
+                f'<td title="{odds_v:.2f} decimal">{_american_odds(odds_v)}</td>'
+                f'<td>{implied:.0%}</td><td>{our_p:.0%}</td>'
                 f'<td class="{edge_cls}">{edge:+.1%}</td></tr>')
     if rows_html:
         parts.append(
@@ -922,32 +977,59 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
             '<th scope="col">Edge</th></tr></thead>\n    <tbody>\n'
             + "\n".join(rows_html) + "\n    </tbody>\n  </table>\n</div>")
 
-    if picks:
+    # A best bet whose line is too stale to record (DraftKings often posts the
+    # moneyline early but totals/spreads late) is demoted from "Best bet" to a
+    # clearly-labelled stale lean — so the card never recommends a bet the ledger
+    # won't record. An intra-day run promotes it once the price refreshes.
+    stale_markets = odds_info.get("stale_markets", set())
+    max_age = odds_info.get("max_age_h", 12)
+    fresh = [pk for pk in (picks or []) if pk["market"] not in stale_markets]
+    stale = [pk for pk in (picks or []) if pk["market"] in stale_markets]
+
+    if fresh:
         pick_lines = []
-        for i, pk in enumerate(picks, 1):
+        for i, pk in enumerate(fresh, 1):
             bp = odds_info["best_prices"].get(
                 (pk["market"], pk["selection"], str(pk["line"])))
-            price = f' — best price {bp[0]:.2f} ({_esc(bp[1])})' if bp else ""
-            num = f'{i}. ' if len(picks) > 1 else ""
+            price = f' — best price {_american_odds(bp[0])} ({_esc(bp[1])})' if bp else ""
+            num = f'{i}. ' if len(fresh) > 1 else ""
             pick_lines.append(
                 f'<p>{num}<strong>{_esc(_sel_label(pk["market"], pk["selection"], pk["line"], team_a, team_b))}'
-                f'</strong> ({_MARKET_LABELS[pk["market"]]}) @ {pk["odds"]:.2f}, '
+                f'</strong> ({_MARKET_LABELS[pk["market"]]}) @ {_american_odds(pk["odds"])}, '
                 f'edge <strong>{pk["edge"]:+.1%}</strong>{price}. Flat 1u, paper record.</p>')
         corr = ('<p class="odds-note">same-match picks are correlated — they tend '
                 'to win and lose together; the units record swings accordingly.</p>'
-                if len(picks) > 1 else "")
-        tag = "Best bet" if len(picks) == 1 else f"Best bets — top {len(picks)}, ≥{record_threshold:.0%} edge"
+                if len(fresh) > 1 else "")
+        tag = "Best bet" if len(fresh) == 1 else f"Best bets — top {len(fresh)}, ≥{record_threshold:.0%} edge"
         parts.append(f'<div class="bet-callout"><span class="tag">{_esc(tag)}</span>'
                      + "".join(pick_lines) + corr + '</div>')
-    elif rows_html:
+    elif rows_html and not stale:
         parts.append(f'<p class="no-bet"><b>NO BET</b> — no edge clears the '
                      f'{record_threshold:.0%} recording bar (a normal, expected '
                      'result).</p>')
 
+    if stale:
+        lean_lines = "".join(
+            f'<p><strong>{_esc(_sel_label(pk["market"], pk["selection"], pk["line"], team_a, team_b))}'
+            f'</strong> ({_MARKET_LABELS[pk["market"]]}), model edge <strong>{pk["edge"]:+.1%}</strong></p>'
+            for pk in stale)
+        these = "these" if len(stale) > 1 else "this"
+        parts.append(
+            '<div class="bet-callout stale"><span class="tag">Model lean · stale line</span>'
+            + lean_lines
+            + f'<p class="odds-note">the model likes {these}, but the line is over '
+              f'{max_age:g}h old (the book hasn\'t reposted), so {"they are" if len(stale) > 1 else "it is"} '
+              '<strong>not recorded</strong> until the price refreshes — an intra-day run logs '
+              'it once it does.</p></div>')
+
     for rec in odds_info.get("recorded", []):
         status = rec.get("status", "open")
+        try:
+            rec_odds = _american_odds(float(rec["odds"]))
+        except (TypeError, ValueError, KeyError):   # never break the build on a bad log row
+            rec_odds = _esc(str(rec.get("odds", "")))
         line_bits = [f'Logged pick: {_esc(_sel_label(rec["market"], rec["selection"], rec["line"], team_a, team_b))} '
-                     f'@ {_esc(rec["odds"])} ({_esc(rec["book"])}), edge {_esc(rec["edge_pp"])}pp']
+                     f'@ {rec_odds} ({_esc(rec["book"])}), edge {_esc(rec["edge_pp"])}pp']
         if status != "open":
             line_bits.append(f'settled <b>{_esc(status)}</b> for {_esc(rec["units"])}u')
             if rec.get("clv_pp"):
@@ -959,11 +1041,16 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
     for fl in odds_info.get("flags", []):
         parts.append(f'<p class="verify-flag">{_esc(fl)}</p>')
 
+    src = odds_info.get("source_label") or "market snapshot"
     notes = [f'market snapshot {_esc(_fmt_snapshot_ts(odds_info["snapshot_ts"]))} · '
-             'median odds across books, de-vigged multiplicatively']
+             f'{src}, de-vigged multiplicatively']
     if ev.get("totals") or ev.get("spreads") or ev.get("btts"):
+        ms = odds_info.get("model_sanity", 0.08)
+        sn = odds_info.get("sanity", 0.15)
         notes.append("totals / handicap / BTTS are model-priced from the score "
-                     "matrix — the Opta overlay covers W/D/L only")
+                     "matrix — the Opta overlay covers W/D/L only, and with no "
+                     f"independent consensus check they clear a stricter {ms:.0%} "
+                     f"edge ceiling vs {sn:.0%} for 1X2")
     notes.extend(ev.get("missing", []))
     parts.append('<p class="odds-note">' + " · ".join(_esc(n) for n in notes) + ".</p>")
 
@@ -1209,13 +1296,17 @@ def render_record_bets(rows: list[dict], root: str = "",
         status = p.get("status") or "open"
         units_cell = p.get("units") or ("—" if status == "open" else "")
         clv_cell = f'{p["clv_pp"]}pp' if p.get("clv_pp") else "—"
+        try:
+            odds_cell = f'<td title="{float(p["odds"]):.2f} decimal">{_american_odds(float(p["odds"]))}</td>'
+        except (ValueError, KeyError):
+            odds_cell = f'<td>{_esc(str(p.get("odds", "")))}</td>'
         body.append(
             f'      <tr>\n'
             f'        <td class="lbl">{_esc(when)}</td>\n'
             f'        <td class="lbl"><a href="{root}matches/{_esc(mid)}.html">'
             f'{_esc(a)} v {_esc(b)}</a></td>\n'
             f'        <td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}</td>\n'
-            f'        <td>{_esc(p["odds"])}</td>\n'
+            f'        {odds_cell}\n'
             f'        <td class="lbl">{_esc(p.get("book") or "")}</td>\n'
             f'        <td>{_esc(p.get("edge_pp") or "")}pp</td>\n'
             f'        <td class="lbl status-{_esc(status)}">{_esc(status)}</td>\n'
@@ -1233,6 +1324,70 @@ def render_record_bets(rows: list[dict], root: str = "",
         '<th scope="col">Units</th><th scope="col">CLV</th></tr></thead>\n'
         '    <tbody>\n' + "\n".join(body) + "\n    </tbody>\n  </table>\n</div>")
     return table, units_line
+
+
+def render_record_shadow(rows: list[dict], root: str = "",
+                         shadow_log: Path | None = None) -> tuple[str, str]:
+    """(shadow_table_html, summary_line) for the record page's Shadow Book — the RISKY
+    calls where the model and market severely disagree (edges above the sanity ceiling).
+    Tracked but too risky to stake; walled off from the units/CLV record; the units
+    shown are HYPOTHETICAL flat-1u, on paper, never staked."""
+    try:
+        import odds as od
+        picks = od.load_shadow_picks(shadow_log) if shadow_log else od.load_shadow_picks()
+        summary = od.shadow_summary(picks)
+    except Exception:
+        return "", "Shadow book unavailable."
+    if not picks:
+        return ('<p class="standfirst">Nothing in the shadow book yet — it fills as the '
+                'model flags edges above the sanity ceiling (the risky calls where model '
+                'and market severely disagree).</p>',
+                "Nothing tracked yet — the first risky call lands here.")
+    teams = {r["match_id"]: (r["team_a"], r["team_b"]) for r in rows}
+    editorial = {r["match_id"]: r.get("_editorial") for r in rows}
+    open_n = sum(1 for p in picks if p.get("status") == "open")
+    summary_line = (summary or "Nothing settled yet.") + (
+        f" {open_n} awaiting result." if open_n else "")
+    body = []
+    for p in sorted(picks, key=lambda p: (editorial.get(p["match_id"]) or date.min,
+                                          p["match_id"])):
+        mid = p["match_id"]
+        a, b = teams.get(mid, (mid, ""))
+        ed = editorial.get(mid)
+        when = f"{ed:%b} {ed.day}" if ed else ""
+        status = p.get("status") or "open"
+        units_cell = p.get("units") or ("—" if status == "open" else "")
+        try:
+            odds_cell = _american_odds(float(p["odds"]))
+            modp = f'{float(p["our_p"]) * 100:.0f}%'
+        except (ValueError, KeyError):
+            odds_cell, modp = _esc(str(p.get("odds", ""))), "—"
+        body.append(
+            f'      <tr>\n'
+            f'        <td class="lbl">{_esc(when)}</td>\n'
+            f'        <td class="lbl"><a href="{root}matches/{_esc(mid)}.html">'
+            f'{_esc(a)} v {_esc(b)}</a></td>\n'
+            f'        <td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}</td>\n'
+            f'        <td>{odds_cell}</td>\n'
+            f'        <td>{_esc(p.get("edge_pp") or "")}pp</td>\n'
+            f'        <td>{modp}</td>\n'
+            f'        <td class="lbl status-{_esc(status)}">{_esc(status)}</td>\n'
+            f'        <td class="pts">{_esc(units_cell)}</td>\n'
+            f'      </tr>')
+    table = (
+        '<div class="record-wrap">\n  <table>\n'
+        '    <caption class="sr-only">The shadow book: risky calls above the sanity '
+        'ceiling (severe model–market disagreement), tracked on paper but too risky to '
+        'stake, with hypothetical flat-1u units</caption>\n'
+        '    <thead><tr><th class="lbl" scope="col">Day</th>'
+        '<th class="lbl" scope="col">Match</th><th class="lbl" scope="col">Conviction</th>'
+        '<th scope="col">Odds</th><th scope="col">Edge</th>'
+        '<th scope="col">Model</th><th class="lbl" scope="col">Result</th>'
+        '<th scope="col">Units*</th></tr></thead>\n'
+        '    <tbody>\n' + "\n".join(body) + "\n    </tbody>\n  </table>\n</div>\n"
+        '<p class="odds-note">*hypothetical flat-1u, on paper — these are risky calls '
+        '(severe model–market gap), tracked to test the model, not staked.</p>')
+    return table, summary_line
 
 
 _ROUND_TITLES = ("Round of 32", "Round of 16", "Quarter-finals",
@@ -1272,22 +1427,42 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
     R32 cards on the left, each later round's matches centred between their two
     feeders, connector lines implying where a winner advances (so no match numbers
     are needed). R32 slots resolve to linked team names where the group has played
-    and abstract 'Winner E' / 'Best 3rd of …' labels where gated; downstream slots
-    are blank fill-in lines — winners aren't projected yet (that is follow-up work).
-    Presentation only; the projection itself is computed in bracket.py."""
+    and abstract 'Winner E' / 'Best 3rd of …' labels where gated. If bracket.feed
+    has run (``winners``/``participants`` present), downstream slots fill with the
+    model's projected advancer — green, with its chance to advance — and the loser
+    reads muted; otherwise downstream slots stay blank fill-in lines. The cascade
+    only extends as far as both sides of a tie are concretely known.
+    Presentation only; the projection + propagation are computed in bracket.py."""
     r32 = {int(k): v for k, v in proj["r32"].items()}
     rounds = _bracket_ordered_rounds()
+    winners = {int(k): v for k, v in proj.get("winners", {}).items()}
+    parts = {int(k): tuple(v) for k, v in proj.get("participants", {}).items()}
 
-    def slot(team=None, label=None):
+    def slot(team=None, label=None, *, win=False, p=None):
         if team:
-            return (f'<span class="bslot" title="{_esc(team)}">'
-                    f'<a href="{_team_link(team, root)}">{_esc(team)}</a></span>')
-        if label:
-            return f'<span class="bslot tbd" title="{_esc(label)}">{_esc(label)}</span>'
-        return '<span class="bslot tbd"></span>'      # blank — filled by position
+            name = f'<a href="{_team_link(team, root)}">{_esc(team)}</a>'
+            cls, title = "bslot", team
+        elif label:
+            name, cls, title = _esc(label), "bslot tbd", label
+        else:
+            name, cls, title = "", "bslot tbd", ""
+        if win:
+            cls += " win"
+        pct = (f'<span class="bp">{round(p * 100)}%</span>'
+               if win and p is not None else "")
+        ttl = f' title="{_esc(title)}"' if title else ""
+        return f'<span class="{cls}"{ttl}><span class="bn">{name}</span>{pct}</span>'
 
-    def card(m, a, b):
-        return f'<li class="btie" id="m{m}"><div class="bpair">{a}{b}</div></li>'
+    def card(m, a_team, a_label, b_team, b_label):
+        w = winners.get(m, {})
+        wt, p = w.get("team"), w.get("p")
+        sa = slot(team=a_team, label=a_label, win=a_team is not None and a_team == wt, p=p)
+        sb = slot(team=b_team, label=b_label, win=b_team is not None and b_team == wt, p=p)
+        return f'<li class="btie" id="m{m}"><div class="bpair">{sa}{sb}</div></li>'
+
+    def downstream_card(m):
+        a, b = parts.get(m, (None, None))
+        return card(m, a, None, b, None)
 
     cols = []
     for r, nums in enumerate(rounds):
@@ -1295,16 +1470,15 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
         for m in nums:
             if r == 0:
                 e = r32[m]
-                items.append(card(m, slot(team=e["home"], label=e["home_label"]),
-                                  slot(team=e["away"], label=e["away_label"])))
+                items.append(card(m, e["home"], e["home_label"], e["away"], e["away_label"]))
             else:
-                items.append(card(m, slot(), slot()))
+                items.append(downstream_card(m))
         cols.append(f'<li class="bround" data-r="{r}"><h3>{_esc(_ROUND_TITLES[r])}</h3>'
                     f'<ul>{"".join(items)}</ul></li>')
 
     third = (f'<div class="bracket-third"><h3>Third-place play-off</h3>'
              f'<p class="bthird-sub">The two semi-final losers</p>'
-             f'<ul>{card(proj["third_place_match"], slot(), slot())}</ul></div>')
+             f'<ul>{downstream_card(proj["third_place_match"])}</ul></div>')
     return f'<ol class="bracket">{"".join(cols)}</ol>{third}'
 
 
@@ -1318,12 +1492,16 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
                 "third-place cutline is settled.")
     notes_html = "".join(f'<li>{_esc(w)}</li>' for w in proj["warnings"])
     notes_html = f'<ul class="bnotes">{notes_html}</ul>' if notes_html else ""
+    champ = proj.get("champion")
+    champion_html = (f'<p class="bchamp"><span class="lbl">Projected to lift the '
+                     f'trophy</span><strong>{_esc(champ)}</strong></p>' if champ else "")
     tpl = Template((template_dir / "bracket.html").read_text(encoding="utf-8"))
     return tpl.safe_substitute(
         site_css=css,
         bracket_html=render_bracket_html(proj, root=""),
         played=n, total=72, progress_pct=round(n / 72 * 100),
         resolved_note=_esc(resolved),
+        champion_html=champion_html,
         notes_html=notes_html,
         generated_at=_esc(generated_at),
         repo_url=REPO_URL,
@@ -1333,9 +1511,11 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
 def render_record_page(matches: "list[st.Match]", rows: list[dict],
                        ledger: dict | None, css: str, generated_at: str,
                        template_dir: Path = TEMPLATE_DIR,
-                       picks_log: Path | None = None) -> str:
+                       picks_log: Path | None = None,
+                       shadow_log: Path | None = None) -> str:
     calls_html, cumulative = render_record_calls(matches, rows, ledger)
     bets_html, units_line = render_record_bets(rows, picks_log=picks_log)
+    shadow_html, shadow_line = render_record_shadow(rows, shadow_log=shadow_log)
     tpl = Template((template_dir / "record.html").read_text(encoding="utf-8"))
     return tpl.safe_substitute(
         site_css=css,
@@ -1343,6 +1523,8 @@ def render_record_page(matches: "list[st.Match]", rows: list[dict],
         cumulative_line=_esc(cumulative),
         bets_html=bets_html,
         units_line=_esc(units_line),
+        shadow_html=shadow_html,
+        shadow_line=_esc(shadow_line),
         generated_at=_esc(generated_at),
         repo_url=REPO_URL,
     )
@@ -1479,7 +1661,8 @@ def render_match_page(row: dict, s: "st.Standings",
                       scenario_html: str = "",
                       wire_html: str = "",
                       sweat_info: dict | None = None,
-                      kicked_off: bool = False) -> str:
+                      kicked_off: bool = False,
+                      grid_info: dict | None = None) -> str:
     mid, g = row["match_id"].strip(), row["group"].strip()
     team_a, team_b = row["team_a"].strip(), row["team_b"].strip()
     played = (row.get("status") or "").strip().lower() == "played"
@@ -1549,7 +1732,7 @@ def render_match_page(row: dict, s: "st.Standings",
         card_html=render_card_sections(sections),
         wire_html=wire_html,
         odds_html=render_market(odds_info, team_a, team_b, odds_note, played=played),
-        outcome_grid_html=render_outcome_grid(info, team_a, team_b),
+        outcome_grid_html=render_outcome_grid(grid_info or info, team_a, team_b),
         repo_url=REPO_URL,
     )
 
@@ -1719,9 +1902,10 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                news_dir: Path = NEWS_DIR,
                predictions_log: Path | None = None,
                picks_log: Path | None = None,
+               shadow_log: Path | None = None,
                now=None,
                predictor="auto", odds_engine="auto",
-               weather_engine="auto") -> list[str]:
+               weather_engine="auto", knockout_resolver="auto") -> list[str]:
     """Render the whole site (index + team cards + match previews + data.json)
     into out_dir. Returns warnings. ``predictor`` and ``odds_engine`` are
     "auto" (load the real modules defensively), None (placeholder state), or
@@ -1762,7 +1946,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
             warnings.append(f"The Call renders as placeholder: {why}")
 
     if odds_engine == "auto":
-        odds_call, ledger_line, odds_why = load_odds_engine()
+        odds_call, ledger_line, odds_why = load_odds_engine(now=now)
         if odds_why:
             warnings.append(f"Odds sections render as placeholder: {odds_why}")
     else:
@@ -1802,6 +1986,15 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         bracket_proj = bk.project(s)
     except (FileNotFoundError, ValueError) as e:
         warnings.append(f"Bracket page skipped: {e}")
+    if bracket_proj is not None:
+        if knockout_resolver == "auto":
+            knockout_resolver = load_knockout_resolver()
+            if knockout_resolver is None:
+                warnings.append("Bracket winners not projected: prediction model unavailable")
+        if knockout_resolver:
+            # results=None: no knockout has been played yet (group stage only);
+            # actual results will override the model here once those fixtures exist
+            bracket_proj = bk.feed(bracket_proj, knockout_resolver)
 
     index, data = build_page(matches, rows, target, generated_at,
                              template_path=template_dir / "page.html",
@@ -1824,7 +2017,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
 
     (out_dir / "record.html").write_text(
         render_record_page(matches, rows, ledger, css, generated_at, template_dir,
-                           picks_log=picks_log),
+                           picks_log=picks_log, shadow_log=shadow_log),
         encoding="utf-8")
     if bracket_proj is not None:
         (out_dir / "bracket.html").write_text(
@@ -1871,12 +2064,15 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         if int(row["match_id"][1]) >= 5 and row["group"] in md3_reports:
             scenario_html = render_scenario_block(
                 md3_reports[row["group"]], row["team_a"], row["team_b"])
+        grid_info = (_safe_predict(predictor, row, [])
+                     if predictor is not None and (played or kicked_off) else None)
         page = render_match_page(row, s, forms, cards_dir, info, css,
                                  template_dir, warnings, odds_info=odds_info,
                                  scenario_html=scenario_html,
                                  wire_html=render_wire(wire.get(row["match_id"])),
                                  sweat_info=sweat_info,
-                                 kicked_off=kicked_off)
+                                 kicked_off=kicked_off,
+                                 grid_info=grid_info)
         (out_dir / "matches" / f"{row['match_id']}.html").write_text(
             page, encoding="utf-8")
     if predictor is not None and scheduled and predictions == 0:

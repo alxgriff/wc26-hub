@@ -426,6 +426,25 @@ class ApiMappingTests(unittest.TestCase):
         self.assertEqual(rows, [])                       # never logged on unknown time
         self.assertTrue(any("fail-closed" in l for l in lines))
 
+    def test_prefer_book_used_when_it_quotes(self):
+        # the event carries fanduel (h2h + totals) + betmgm (h2h only); preferring
+        # fanduel — which quotes everything — logs ONLY fanduel.
+        rows, _ = od.snapshot_from_api([self._event()], self.FIXTURE_ROWS,
+                                       "snapshot", NOW, prefer_book="fanduel")
+        best_books = {r["source"] for r in rows if r["source"].startswith("best:")}
+        self.assertEqual(best_books, {"best:fanduel"})
+        self.assertTrue(all("betmgm" not in r["source"] for r in rows))  # fanduel preferred
+
+    def test_prefer_book_falls_back_where_it_does_not_quote(self):
+        # betmgm quotes h2h only; preferring it -> h2h from betmgm, totals FALL BACK
+        # to fanduel (the get-DK-else-others logic that keeps totals/spreads covered).
+        rows, _ = od.snapshot_from_api([self._event()], self.FIXTURE_ROWS,
+                                       "snapshot", NOW, prefer_book="betmgm")
+        best = {(r["market"], r["selection"]): r["source"].split("best:", 1)[1]
+                for r in rows if r["source"].startswith("best:")}
+        self.assertEqual(best[("h2h", "home")], "betmgm")     # preferred + quoted
+        self.assertEqual(best[("totals", "over")], "fanduel")  # fallback (betmgm has no totals)
+
 
 class ApiErrorTests(unittest.TestCase):
     def test_urlerror_becomes_keyless_oddserror(self):
@@ -544,7 +563,9 @@ class BttsAndSpreadsEvalTests(unittest.TestCase):
         sel, line, o, imp, our_p, edge = ev["spreads"][0]
         self.assertEqual((sel, line), ("home", "-0.5"))
         self.assertAlmostEqual(our_p, od.ah_prob(od.margin_dist(2.0, 1.0), -0.5), places=9)
-        pick, _ = od.best_bet(ev, threshold=0.001)
+        # cap off (model_sanity high): this asserts spreads are WIRED into best_bet,
+        # not the Option-2 policy (which a large spread edge would otherwise trip)
+        pick, _ = od.best_bet(ev, threshold=0.001, model_sanity=0.5)
         self.assertIsNotNone(pick)
 
     def test_btts_evaluated_from_model(self):
@@ -577,9 +598,221 @@ class RenderTests(unittest.TestCase):
         out = od.render_odds_section("D3", ev, pick, [],
                                      {("h2h", "home", ""): (2.55, "fanduel")})
         self.assertIn("Best bet: home", out)
-        self.assertIn("best price 2.55 (fanduel)", out)
+        self.assertIn("@ +150,", out)                     # 2.50 decimal -> American
+        self.assertIn("best price +155 (fanduel)", out)   # 2.55 decimal -> American
         self.assertIn("Flat 1u (paper)", out)
         self.assertIn("display threshold", out)   # 3pp marker is wired, not inert
+
+
+class FetchSourcingTests(unittest.TestCase):
+    """fetch pulls the WHOLE US region (so fallback is possible) and prefers a book
+    per selection — it must NOT send a single-book 'bookmakers' request anymore."""
+
+    def test_default_preferred_book_is_draftkings(self):
+        self.assertEqual(od.DEFAULT_BOOKMAKER, "draftkings")
+
+    def test_fetch_requests_us_region_not_single_book(self):
+        ev = {"home_team": "Korea Republic", "away_team": "Mexico",
+              "commence_time": "2026-06-13T20:00:00Z", "bookmakers": []}
+        seen = {}
+
+        def fake_get(path, key, **params):
+            seen.update(params)
+            return [ev], "9"
+
+        with mock.patch.object(od, "_read_key", return_value="K"), \
+             mock.patch.object(od, "_api_get", side_effect=fake_get), \
+             mock.patch.object(od.lg, "now_et", return_value=NOW), \
+             mock.patch.object(od.be, "read_rows",
+                               return_value=[{"match_id": "A4", "team_a": "Mexico",
+                                              "team_b": "South Korea"}]), \
+             mock.patch.object(od, "append_odds", side_effect=lambda *a, **k: None):
+            od.main(["fetch"])                       # default --bookmaker draftkings
+        self.assertEqual(seen.get("regions"), "us")  # whole region, enables fallback
+        self.assertNotIn("bookmakers", seen)         # NOT a single-book request
+
+
+class SourceLabelTests(unittest.TestCase):
+    """snapshot_source_label — honest provenance for the edition/site note."""
+
+    def test_single_book_named_from_best_row(self):
+        rows = (h2h_rows("D3", 2.5, 3.3, 3.1, source="median/1books")
+                + h2h_rows("D3", 2.5, 3.3, 3.1, source="best:draftkings"))
+        self.assertEqual(od.snapshot_source_label(rows, "D3"), "DraftKings line")
+
+    def test_multi_book_reports_count(self):
+        rows = h2h_rows("D3", 2.5, 3.3, 3.1, source="median/7books")
+        self.assertEqual(od.snapshot_source_label(rows, "D3"), "median across 7 books")
+
+    def test_mixed_dk_h2h_and_multibook_totals(self):
+        # the prefer-else-fallback common case: DK h2h + multi-book totals
+        rows = (h2h_rows("D3", 2.5, 3.3, 3.1, source="median/1books")
+                + h2h_rows("D3", 2.5, 3.3, 3.1, source="best:draftkings")
+                + [odds_row("D3", "totals", "over", 1.9, line="2.5", source="median/6books"),
+                   odds_row("D3", "totals", "over", 1.95, line="2.5", source="best:bovada")])
+        self.assertEqual(od.snapshot_source_label(rows, "D3"),
+                         "DraftKings where quoted, else best of 6 US books")
+
+    def test_no_snapshot_is_blank(self):
+        self.assertEqual(od.snapshot_source_label([], "D3"), "")
+
+    def test_only_latest_timestamp_counts(self):
+        # a stale 9-book snapshot must not mislabel today's single-book one
+        old = h2h_rows("D3", 2.0, 3.0, 4.0, source="median/9books",
+                       ts="2026-06-13T08:00:00-04:00")
+        new = (h2h_rows("D3", 2.5, 3.3, 3.1, source="median/1books",
+                        ts="2026-06-13T10:00:00-04:00")
+               + h2h_rows("D3", 2.5, 3.3, 3.1, source="best:draftkings",
+                          ts="2026-06-13T10:00:00-04:00"))
+        self.assertEqual(od.snapshot_source_label(old + new, "D3"), "DraftKings line")
+
+
+class ModelPricedSanityTests(unittest.TestCase):
+    """Option 2 (June 14): model-priced markets (no consensus cross-check) clear a
+    stricter sanity ceiling than corroborated 1X2."""
+
+    def _ev(self, market, edge):
+        sel = {"h2h": "home", "totals": "over", "spreads": "home", "btts": "yes"}[market]
+        line = {"h2h": "", "totals": "2.5", "spreads": "-0.5", "btts": ""}[market]
+        base = {"h2h": [], "totals": [], "spreads": [], "btts": [], "missing": []}
+        base[market] = [(sel, line, 2.0, 0.50, 0.50 + edge, edge)]
+        return base
+
+    def test_model_priced_edge_above_cap_is_flagged_not_recorded(self):
+        for market in ("totals", "spreads", "btts"):
+            picks, flags = od.best_bets(self._ev(market, 0.10))   # 10pp > 8pp cap
+            self.assertEqual(picks, [], market)
+            self.assertTrue(any("uncorroborated" in f for f in flags), market)
+
+    def test_same_edge_on_consensus_1x2_is_recorded(self):
+        # 10pp on 1X2 is corroborated (vs consensus) and well under its 15pp ceiling
+        picks, flags = od.best_bets(self._ev("h2h", 0.10))
+        self.assertEqual(len(picks), 1)
+        self.assertEqual(picks[0]["market"], "h2h")
+        self.assertEqual(flags, [])
+
+    def test_model_priced_edge_below_cap_still_records(self):
+        picks, flags = od.best_bets(self._ev("totals", 0.06))    # 6pp in [5pp, 8pp)
+        self.assertEqual(len(picks), 1)
+        self.assertEqual(flags, [])
+
+    def test_cap_is_inclusive_at_eight_points(self):
+        picks, flags = od.best_bets(self._ev("spreads", 0.08))   # AT the ceiling -> flagged
+        self.assertEqual(picks, [])
+        self.assertTrue(any("uncorroborated" in f for f in flags))
+
+
+class FetchPhaseBothTests(unittest.TestCase):
+    """--phase both writes snapshot AND closing rows from ONE API call (so an
+    intra-day run feeds both recording and CLV without a 2nd fetch)."""
+
+    def test_both_phases_from_single_call(self):
+        ev = {"home_team": "Korea Republic", "away_team": "Mexico",
+              "commence_time": "2026-06-13T20:00:00Z",   # future vs NOW (10:00 ET)
+              "bookmakers": [{"key": "fanduel", "markets": [
+                  {"key": "h2h", "outcomes": [
+                      {"name": "Korea Republic", "price": 3.1},
+                      {"name": "Draw", "price": 3.2},
+                      {"name": "Mexico", "price": 2.3}]}]}]}
+        fixtures = [{"match_id": "A4", "team_a": "Mexico", "team_b": "South Korea"}]
+        calls = {"n": 0}
+        captured = []
+
+        def fake_get(*a, **k):
+            calls["n"] += 1
+            return [ev], "999"
+
+        # mock append_odds (not ODDS_LOG: its default path is bound at def time) so the
+        # test captures rows without touching the real log
+        with mock.patch.object(od, "_read_key", return_value="K"), \
+             mock.patch.object(od, "_api_get", side_effect=fake_get), \
+             mock.patch.object(od.lg, "now_et", return_value=NOW), \
+             mock.patch.object(od.be, "read_rows", return_value=fixtures), \
+             mock.patch.object(od, "append_odds",
+                               side_effect=lambda r, *a, **k: captured.extend(r)):
+            rc = od.main(["fetch", "--phase", "both", "--bookmaker", "all"])
+        self.assertEqual(rc, 0)
+        self.assertEqual(calls["n"], 1)                       # ONE API call...
+        self.assertEqual({r["phase"] for r in captured}, {"snapshot", "closing"})  # ...both phases
+
+
+class ShadowTrackTests(unittest.TestCase):
+    """The shadow ledger: the model's sanity-suppressed convictions, tracked-never-bet."""
+
+    def _ev(self, h2h_edge, totals_edge):
+        return {"h2h": [("away", "", 2.5, 0.40, 0.40 + h2h_edge, h2h_edge)],
+                "totals": [("over", "2.5", 1.9, 0.50, 0.50 + totals_edge, totals_edge)],
+                "spreads": [], "btts": [], "missing": []}
+
+    def test_flagged_bets_captures_suppressed_only(self):
+        # h2h 20pp > 15pp ceiling AND totals 12pp > 8pp ceiling -> both suppressed
+        ev = self._ev(0.20, 0.12)
+        self.assertEqual({p["market"] for p in od.flagged_bets(ev)}, {"h2h", "totals"})
+        self.assertEqual(od.best_bets(ev)[0], [])          # best_bets records NEITHER
+
+    def test_flagged_bets_excludes_recordable_edges(self):
+        # totals 6pp is a recordable pick (< 8pp cap), so NOT in the shadow set
+        ev = self._ev(0.20, 0.06)
+        self.assertEqual({p["market"] for p in od.flagged_bets(ev)}, {"h2h"})
+        self.assertEqual([p["market"] for p in od.best_bets(ev)[0]], ["totals"])
+
+    def test_record_pick_logs_zero_stake(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "shadow.csv"
+            pick = {"market": "h2h", "selection": "away", "line": "", "odds": 2.5,
+                    "implied_p": 0.37, "our_p": 0.58, "edge": 0.21}
+            od.record_pick("E2", pick, (2.55, "fanduel"), NOW, False,
+                           picks_path=path, stake="0")
+            self.assertEqual(od.load_picks(path)[0]["stake"], "0")
+
+    def test_shadow_summary_slices_and_marks_hypothetical(self):
+        picks = [{"market": "h2h", "status": "lost", "units": "-1.00"},
+                 {"market": "totals", "status": "won", "units": "+0.90"}]
+        s = od.shadow_summary(picks)
+        self.assertIn("not staked", s)
+        self.assertIn("1X2 0W-1L", s)
+        self.assertIn("model-priced 1W-0L", s)
+
+    def test_render_record_shadow_walls_off_and_frames(self):
+        import build_site as bs
+        rows = [{"match_id": "E2", "team_a": "Côte d'Ivoire", "team_b": "Ecuador",
+                 "_editorial": None}]
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "shadow.csv"
+            pick = {"market": "h2h", "selection": "away", "line": "", "odds": 2.5,
+                    "implied_p": 0.37, "our_p": 0.58, "edge": 0.21}
+            od.record_pick("E2", pick, (2.55, "fanduel"), NOW, False,
+                           picks_path=path, stake="0")
+            html, summary = bs.render_record_shadow(rows, shadow_log=path)
+        self.assertIn("Ecuador", html)
+        self.assertIn("risky", html.lower())              # reframed: severe disagreement
+        self.assertIn("paper", html.lower())              # honesty guardrail kept
+        self.assertIn("awaiting", summary.lower())        # the open conviction
+
+
+class AmericanOddsTests(unittest.TestCase):
+    """Decimal -> American moneyline display (odds.american_odds)."""
+
+    CASES = [(2.50, "+150"), (1.50, "-200"), (2.00, "+100"), (1.04, "-2500"),
+             (36.0, "+3500"), (1.91, "-110"), (3.40, "+240")]
+
+    def test_decimal_to_american(self):
+        for dec, want in self.CASES:
+            self.assertEqual(od.american_odds(dec), want, f"decimal {dec}")
+
+    def test_underdog_positive_favorite_negative(self):
+        self.assertTrue(od.american_odds(2.20).startswith("+"))
+        self.assertTrue(od.american_odds(1.80).startswith("-"))
+        self.assertEqual(od.american_odds(2.00), "+100")   # even money
+
+    def test_degenerate_odds_safe(self):
+        self.assertEqual(od.american_odds(1.0), "n/a")     # devig forbids it; no zero-div
+
+    def test_build_site_mirror_stays_in_lockstep(self):
+        # build_site keeps its own _american_odds; guard against drift
+        import build_site as bs
+        for dec, _ in self.CASES + [(1.33, ""), (5.0, ""), (1.0, "")]:
+            self.assertEqual(bs._american_odds(dec), od.american_odds(dec), f"decimal {dec}")
 
 
 if __name__ == "__main__":

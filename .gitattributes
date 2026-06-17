@@ -3,4 +3,5 @@
 # kills a publish run.
 data/odds_log.csv merge=union
 data/picks_log.csv merge=union
+data/shadow_picks_log.csv merge=union
 data/predictions_log.csv merge=union
