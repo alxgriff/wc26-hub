@@ -708,6 +708,10 @@ def main(argv: list[str] | None = None) -> int:
             import reference_overlay as ref_mod
         except Exception:
             ref_mod = None
+        try:
+            import struct_variant as sv_mod
+        except Exception:
+            sv_mod = None
         for r in select_matches(rows, target):
             mid = r["match_id"]
             host = pr.HOST_BY_COUNTRY.get((r.get("country") or "").strip())
@@ -741,6 +745,19 @@ def main(argv: list[str] | None = None) -> int:
                             f"{r['team_b']} {refp.p_b:.0%}")
                 except Exception as e:
                     print(f"warning: Classic ML overlay failed for {mid} ({e}) — "
+                          "skipped for this match", file=sys.stderr)
+            if sv_mod is not None:
+                try:
+                    svp_list = sv_mod.tuned_predict(model, r["team_a"], r["team_b"],
+                                                    hfa_team=hfa)
+                    if svp_list:
+                        for svp in svp_list:
+                            overlay_bullets.append(
+                                f"  - **{svp.source}:** "
+                                f"{r['team_a']} {svp.p_a:.0%} · Draw {svp.p_draw:.0%} · "
+                                f"{r['team_b']} {svp.p_b:.0%}")
+                except Exception as e:
+                    print(f"warning: structural-variant overlay failed for {mid} ({e}) — "
                           "skipped for this match", file=sys.stderr)
             overlay_text = ("\n" + "\n".join(overlay_bullets)) if overlay_bullets else ""
             calls[mid] = (

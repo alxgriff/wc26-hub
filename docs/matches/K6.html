@@ -302,6 +302,11 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -564,6 +569,24 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:31">31%</span><span class="pd" style="flex:31">31%</span><span class="pb" style="flex:37">37%</span></div>
   <div class="scale" aria-hidden="true"><span>DR Congo 31%</span><span>draw 31%</span><span>Uzbekistan 37%</span></div>
   <p class="factline">most likely score <b>0–1</b> · expected goals <b>1.94</b> · over 2.5 <b>31%</b> · both score <b>39%</b><br>single source: rating model (Elo+Futi)</p>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Classic ML (XGBoost)</p>
+    <p class="sr-only">Classic ML model says DR Congo win 30 percent, draw 26 percent, Uzbekistan win 43 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:30">30%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:43">43%</span></div>
+    <div class="scale" aria-hidden="true"><span>DR Congo 30%</span><span>draw 26%</span><span>Uzbekistan 43%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (conf-tuned)</p>
+    <p class="sr-only">Structural (conf-tuned) says DR Congo win 34 percent, draw 31 percent, Uzbekistan win 35 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:34">34%</span><span class="pd" style="flex:31">31%</span><span class="pb" style="flex:35">35%</span></div>
+    <div class="scale" aria-hidden="true"><span>DR Congo 34%</span><span>draw 31%</span><span>Uzbekistan 35%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (no Elo)</p>
+    <p class="sr-only">100% Futi (no Elo) says DR Congo win 36 percent, draw 31 percent, Uzbekistan win 33 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:36">36%</span><span class="pd" style="flex:31">31%</span><span class="pb" style="flex:33">33%</span></div>
+    <div class="scale" aria-hidden="true"><span>DR Congo 36%</span><span>draw 31%</span><span>Uzbekistan 33%</span></div>
+  </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> tight and tense; draw/under profile.</p></blockquote></div>
 </section>
@@ -573,34 +596,34 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Stakes</span>
     <h2 id="stakes-h">The table as it stands</h2>
   </div>
-  <p class="standfirst">Group K hasn&#x27;t kicked off yet — all four teams on 0 points, with this matchday-3 meeting still ahead.</p>
+  <p class="standfirst">After 1 match in Group K: DR Congo 1st on 1 pt (0-1-0, 0 GD), Uzbekistan 4th on 0 pts (0-0-0, 0 GD). DR Congo and Portugal share the lead on 1 pt; DR Congo hold a top-two spot; Uzbekistan 1 pt back of the cutline.</p>
 
   <div class="mini-table">
 <article class="card" id="group-k" style="--i:0" aria-labelledby="gh-k">
-  <h3 id="gh-k"><span class="stamp" aria-hidden="true">K</span>Group K<span class="played-tag">0/6 played</span></h3>
+  <h3 id="gh-k"><span class="stamp" aria-hidden="true">K</span>Group K<span class="played-tag">1/6 played</span></h3>
   <table>
-    <caption class="sr-only">Group K standings after 0 of 6 matches</caption>
+    <caption class="sr-only">Group K standings after 1 of 6 matches</caption>
     <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Colombia"><a href="../teams/colombia.html">Colombia</a></th>
-        <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
+        <th class="team" scope="row" title="DR Congo"><a href="../teams/dr-congo.html">DR Congo</a><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, not yet played, not yet played</span></td>
+        <td>1</td>
         <td>0</td>
-        <td>0</td>
-        <td class="pts">0</td>
+        <td class="pts">1</td>
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="DR Congo"><a href="../teams/dr-congo.html">DR Congo</a></th>
-        <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
+        <th class="team" scope="row" title="Portugal"><a href="../teams/portugal.html">Portugal</a><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, not yet played, not yet played</span></td>
+        <td>1</td>
         <td>0</td>
-        <td>0</td>
-        <td class="pts">0</td>
+        <td class="pts">1</td>
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Portugal"><a href="../teams/portugal.html">Portugal</a></th>
+        <th class="team" scope="row" title="Colombia"><a href="../teams/colombia.html">Colombia</a></th>
         <td class="form"><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">not yet played, not yet played, not yet played</span></td>
         <td>0</td>
         <td>0</td>
@@ -616,6 +639,9 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       </tr>
     </tbody>
   </table>
+  <ul class="notes">
+    <li class="warn"><span class="dag">†</span> DR Congo / Portugal level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.</li>
+  </ul>
 </article>
   </div>
 </section>

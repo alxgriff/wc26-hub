@@ -302,6 +302,11 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -564,6 +569,24 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:1"></span><span class="pd" style="flex:7">7%</span><span class="pb" style="flex:92">92%</span></div>
   <div class="scale" aria-hidden="true"><span>Jordan 1%</span><span>draw 7%</span><span>Argentina 92%</span></div>
   <p class="factline">most likely score <b>0–3</b> · expected goals <b>3.33</b> · over 2.5 <b>65%</b> · both score <b>21%</b><br>single source: rating model (Elo+Futi)</p>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Classic ML (XGBoost)</p>
+    <p class="sr-only">Classic ML model says Jordan win 6 percent, draw 8 percent, Argentina win 85 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:6">6%</span><span class="pd" style="flex:8">8%</span><span class="pb" style="flex:85">85%</span></div>
+    <div class="scale" aria-hidden="true"><span>Jordan 6%</span><span>draw 8%</span><span>Argentina 85%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (conf-tuned)</p>
+    <p class="sr-only">Structural (conf-tuned) says Jordan win 2 percent, draw 8 percent, Argentina win 90 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:2"></span><span class="pd" style="flex:8">8%</span><span class="pb" style="flex:90">90%</span></div>
+    <div class="scale" aria-hidden="true"><span>Jordan 2%</span><span>draw 8%</span><span>Argentina 90%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (no Elo)</p>
+    <p class="sr-only">100% Futi (no Elo) says Jordan win 1 percent, draw 6 percent, Argentina win 93 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:1"></span><span class="pd" style="flex:6">6%</span><span class="pb" style="flex:93">93%</span></div>
+    <div class="scale" aria-hidden="true"><span>Jordan 1%</span><span>draw 6%</span><span>Argentina 93%</span></div>
+  </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Argentina; rotation discount is the only market question.</p></blockquote></div>
 </section>
@@ -669,7 +692,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 3</strong> (Total goals) @ +102, edge <strong>+7.3%</strong> — best price +104 (betonlineag). Flat 1u, paper record.</p></div>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Over 3</strong> (Total goals), model edge <strong>+7.3%</strong></p><p class="odds-note">the model likes this, but the line is over 12h old (the book hasn't reposted), so it is <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
 <p class="verify-flag">spreads away -2: model-priced edge +23.1% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 17, 8:26 AM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <details class="outcome-grid-wrap">

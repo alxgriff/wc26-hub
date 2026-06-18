@@ -302,6 +302,11 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -546,6 +551,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span>Every call logged before kickoff, graded after</span>
     <span>Every pick on paper at flat 1u</span>
   </div>
+  <a class="lab-nav-btn" href="model-lab.html">🧪 Model Lab</a>
 </header>
 
 <main>
@@ -574,7 +580,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Brier</span>
     <h2 id="calls-h">The Calls</h2>
   </div>
-  <p class="standfirst">Ledger to date: 17 graded predictions, 8 correct calls, cumulative Brier 0.715 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max)</p>
+  <p class="standfirst">Ledger to date: 20 graded predictions, 9 correct calls, cumulative Brier 0.737 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max)</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">Every logged call graded: probabilities, result, hit or miss, Brier score</caption>
@@ -721,6 +727,31 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td class="pts">0.130</td>
       </tr>
       <tr class="subtotal"><td colspan="4">June 16 — 4 graded</td><td>4/4</td><td>0.116</td></tr>
+      <tr>
+        <td class="lbl"><a href="matches/K1.html">Portugal v DR Congo</a></td>
+        <td>80%/15%/5% (2-0)</td>
+        <td>1–1</td>
+        <td>draw</td>
+        <td><span class="hit hit-n" aria-hidden="true">✗</span><span class="sr-only">missed</span></td>
+        <td class="pts">1.367</td>
+      </tr>
+      <tr>
+        <td class="lbl"><a href="matches/L1.html">England v Croatia</a></td>
+        <td>58%/25%/18% (1-0)</td>
+        <td>4–2</td>
+        <td>home</td>
+        <td><span class="hit hit-y" aria-hidden="true">✓</span><span class="sr-only">correct call</span></td>
+        <td class="pts">0.272</td>
+      </tr>
+      <tr>
+        <td class="lbl"><a href="matches/L2.html">Ghana v Panama</a></td>
+        <td>23%/25%/53% (0-1)</td>
+        <td>1–0</td>
+        <td>home</td>
+        <td><span class="hit hit-n" aria-hidden="true">✗</span><span class="sr-only">missed</span></td>
+        <td class="pts">0.936</td>
+      </tr>
+      <tr class="subtotal"><td colspan="4">June 17 — 3 graded</td><td>1/3</td><td>0.858</td></tr>
     </tbody>
   </table>
 </div>
@@ -1138,13 +1169,13 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 
 <footer>
   <p class="colophon">
-    Generated 2026-06-17 12:34 · calls graded from data/predictions_log.csv (logged
+    Generated 2026-06-17 22:31 · calls graded from data/predictions_log.csv (logged
     pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
     at fresh prices, revisions explicit, settled rows immutable) · Brier: 0 best ·
     0.667 coin-flip · 2 worst · CLV = closing implied minus our implied at record ·
     shadow book from data/shadow_picks_log.csv (severe model–market disagreements,
     too risky to bet, paper-only, excluded from the units record) ·
-    <a href="index.html">all standings</a> · <a href="https://github.com/alxgriff/wc26-hub">source &amp; data</a>
+    <a href="index.html">all standings</a> · <a href="model-lab.html">🧪 Model Lab</a> · <a href="https://github.com/alxgriff/wc26-hub">source &amp; data</a>
   </p>
 </footer>
 

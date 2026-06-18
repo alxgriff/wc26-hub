@@ -302,6 +302,11 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -564,6 +569,24 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:33">33%</span><span class="pd" style="flex:29">29%</span><span class="pb" style="flex:38">38%</span></div>
   <div class="scale" aria-hidden="true"><span>Cape Verde 33%</span><span>draw 29%</span><span>Saudi Arabia 38%</span></div>
   <p class="factline">most likely score <b>1–1</b> · expected goals <b>2.24</b> · over 2.5 <b>39%</b> · both score <b>45%</b><br>single source: rating model (Elo+Futi)</p>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Classic ML (XGBoost)</p>
+    <p class="sr-only">Classic ML model says Cape Verde win 33 percent, draw 28 percent, Saudi Arabia win 39 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:33">33%</span><span class="pd" style="flex:28">28%</span><span class="pb" style="flex:39">39%</span></div>
+    <div class="scale" aria-hidden="true"><span>Cape Verde 33%</span><span>draw 28%</span><span>Saudi Arabia 39%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (conf-tuned)</p>
+    <p class="sr-only">Structural (conf-tuned) says Cape Verde win 36 percent, draw 29 percent, Saudi Arabia win 35 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:36">36%</span><span class="pd" style="flex:29">29%</span><span class="pb" style="flex:35">35%</span></div>
+    <div class="scale" aria-hidden="true"><span>Cape Verde 36%</span><span>draw 29%</span><span>Saudi Arabia 35%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (no Elo)</p>
+    <p class="sr-only">100% Futi (no Elo) says Cape Verde win 30 percent, draw 29 percent, Saudi Arabia win 42 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:30">30%</span><span class="pd" style="flex:29">29%</span><span class="pb" style="flex:42">42%</span></div>
+    <div class="scale" aria-hidden="true"><span>Cape Verde 30%</span><span>draw 29%</span><span>Saudi Arabia 42%</span></div>
+  </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> near coin flip; Cape Verde's counter geometry mildly favored.</p></blockquote></div>
 </section>
@@ -671,7 +694,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Under 2.5</strong> (Total goals) @ -145, edge <strong>+6.5%</strong> — best price -137 (betrivers). Flat 1u, paper record.</p></div>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Under 2.5</strong> (Total goals), model edge <strong>+6.5%</strong></p><p class="odds-note">the model likes this, but the line is over 12h old (the book hasn't reposted), so it is <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
 <p class="verify-flag">totals under 2.25: model-priced edge +12.6% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 17, 8:26 AM ET · DraftKings where quoted, else best of 3 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
 <details class="outcome-grid-wrap">

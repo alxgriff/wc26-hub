@@ -302,6 +302,11 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -564,6 +569,24 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:7">7%</span><span class="pd" style="flex:14">14%</span><span class="pb" style="flex:79">79%</span></div>
   <div class="scale" aria-hidden="true"><span>Scotland 7%</span><span>draw 14%</span><span>Brazil 79%</span></div>
   <p class="factline">most likely score <b>0–2</b> · expected goals <b>3.17</b> · over 2.5 <b>61%</b> · both score <b>42%</b><br>single source: rating model (Elo+Futi)</p>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Classic ML (XGBoost)</p>
+    <p class="sr-only">Classic ML model says Scotland win 10 percent, draw 21 percent, Brazil win 69 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:10">10%</span><span class="pd" style="flex:21">21%</span><span class="pb" style="flex:69">69%</span></div>
+    <div class="scale" aria-hidden="true"><span>Scotland 10%</span><span>draw 21%</span><span>Brazil 69%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (conf-tuned)</p>
+    <p class="sr-only">Structural (conf-tuned) says Scotland win 9 percent, draw 16 percent, Brazil win 75 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:9">9%</span><span class="pd" style="flex:16">16%</span><span class="pb" style="flex:75">75%</span></div>
+    <div class="scale" aria-hidden="true"><span>Scotland 9%</span><span>draw 16%</span><span>Brazil 75%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (no Elo)</p>
+    <p class="sr-only">100% Futi (no Elo) says Scotland win 4 percent, draw 11 percent, Brazil win 84 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:4"></span><span class="pd" style="flex:11">11%</span><span class="pb" style="flex:84">84%</span></div>
+    <div class="scale" aria-hidden="true"><span>Scotland 4%</span><span>draw 11%</span><span>Brazil 84%</span></div>
+  </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Brazil, but rotation + motivation asymmetry is the classic MD3 value spot.</p></blockquote></div>
 </section>
