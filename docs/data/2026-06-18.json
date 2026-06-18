@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 24,
+ "played": 26,
  "total": 72,
  "groups": {
   "A": {
@@ -37,28 +37,28 @@
      "pos": 3,
      "team": "Czechia",
      "group": "A",
-     "p": 1,
+     "p": 2,
      "w": 0,
-     "d": 0,
+     "d": 1,
      "l": 1,
-     "gf": 1,
-     "ga": 2,
+     "gf": 2,
+     "ga": 3,
      "gd": -1,
-     "pts": 0,
+     "pts": 1,
      "fate": null
     },
     {
      "pos": 4,
      "team": "South Africa",
      "group": "A",
-     "p": 1,
+     "p": 2,
      "w": 0,
-     "d": 0,
+     "d": 1,
      "l": 1,
-     "gf": 0,
-     "ga": 2,
+     "gf": 1,
+     "ga": 3,
      "gd": -2,
-     "pts": 0,
+     "pts": 1,
      "fate": null
     }
    ],
@@ -71,16 +71,16 @@
    "rows": [
     {
      "pos": 1,
-     "team": "Bosnia and Herzegovina",
+     "team": "Switzerland",
      "group": "B",
-     "p": 1,
-     "w": 0,
+     "p": 2,
+     "w": 1,
      "d": 1,
      "l": 0,
-     "gf": 1,
-     "ga": 1,
-     "gd": 0,
-     "pts": 1,
+     "gf": 5,
+     "ga": 2,
+     "gd": 3,
+     "pts": 4,
      "fate": null
     },
     {
@@ -99,21 +99,21 @@
     },
     {
      "pos": 3,
-     "team": "Qatar",
+     "team": "Bosnia and Herzegovina",
      "group": "B",
-     "p": 1,
+     "p": 2,
      "w": 0,
      "d": 1,
-     "l": 0,
-     "gf": 1,
-     "ga": 1,
-     "gd": 0,
+     "l": 1,
+     "gf": 2,
+     "ga": 5,
+     "gd": -3,
      "pts": 1,
      "fate": null
     },
     {
      "pos": 4,
-     "team": "Switzerland",
+     "team": "Qatar",
      "group": "B",
      "p": 1,
      "w": 0,
@@ -127,7 +127,8 @@
     }
    ],
    "notes": [
-    "⚠️ Group B: Bosnia and Herzegovina / Canada / Qatar / Switzerland level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
+    "Group B: head-to-head (its points, then goal difference, then goals) separates Bosnia and Herzegovina / Canada / Qatar (level on points).",
+    "Group B: overall goal difference/goals separate Bosnia and Herzegovina / Canada (level on points and head-to-head)."
    ]
   },
   "C": {
@@ -834,21 +835,6 @@
    },
    {
     "pos": 5,
-    "team": "Qatar",
-    "group": "B",
-    "p": 1,
-    "w": 0,
-    "d": 1,
-    "l": 0,
-    "gf": 1,
-    "ga": 1,
-    "gd": 0,
-    "pts": 1,
-    "qualifying": true,
-    "fate": null
-   },
-   {
-    "pos": 6,
     "team": "Cape Verde",
     "group": "H",
     "p": 1,
@@ -863,17 +849,32 @@
     "fate": null
    },
    {
-    "pos": 7,
+    "pos": 6,
     "team": "Czechia",
     "group": "A",
-    "p": 1,
+    "p": 2,
     "w": 0,
-    "d": 0,
+    "d": 1,
     "l": 1,
-    "gf": 1,
-    "ga": 2,
+    "gf": 2,
+    "ga": 3,
     "gd": -1,
-    "pts": 0,
+    "pts": 1,
+    "qualifying": true,
+    "fate": null
+   },
+   {
+    "pos": 7,
+    "team": "Bosnia and Herzegovina",
+    "group": "B",
+    "p": 2,
+    "w": 0,
+    "d": 1,
+    "l": 1,
+    "gf": 2,
+    "ga": 5,
+    "gd": -3,
+    "pts": 1,
     "qualifying": true,
     "fate": null
    },
@@ -954,17 +955,17 @@
    }
   ],
   "notes": [
-   "⚠️ Third-place ranking: Belgium / Morocco / Portugal / Qatar level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.",
+   "⚠️ Third-place ranking: Belgium / Morocco / Portugal level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.",
    "⚠️ Third-place ranking: Ecuador / Panama level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.",
    "⚠️ Third-place ranking: Jordan / Senegal level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-18 16:42",
+ "generated_at": "2026-06-18 23:09",
  "slate_date": "2026-06-18",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 24,
+  "as_of_matches_played": 26,
   "fully_projectable": false,
   "thirds_resolved": false,
   "r32": {
@@ -1078,7 +1079,7 @@
    },
    "85": {
     "match": 85,
-    "home": "Bosnia and Herzegovina",
+    "home": "Switzerland",
     "home_label": "Winner B",
     "away": null,
     "away_label": "Best 3rd of E/F/G/I/J",
