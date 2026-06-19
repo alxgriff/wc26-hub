@@ -34,6 +34,17 @@ you make a non-obvious call, add it here.*
 
 ## Prediction model (`predict.py`)
 
+- **538-style margin-of-victory multiplier TESTED, NOT adopted (2026-06-19).** Asked whether
+  FiveThirtyEight's winner-corrected MoV weight — `ln(GD+1) × 2.2/((winner−loser)·0.001+2.2)`,
+  which dampens a favourite's blowout and amplifies an underdog's upset — beats our eloratings
+  step function (winner-agnostic 1/1.5/1.75/+⅛). `scripts/backtest_mov.py`: online, leak-free
+  predict-then-update roll, per-scheme-calibrated Poisson, paired bootstrap, over 11k–20k
+  internationals (3 windows) AND 27k club matches. The asymmetry is real (a 3-0 *underdog* upset
+  ×2.03 vs a *favourite*'s ×1.54), but it does **not** reliably improve forecasts: every effect
+  size is ~0.001 Brier and the occasional "separable" subset flips sign across windows/datasets
+  (the pure-dampening variant even HURTS on club data). So it's multiple-testing noise, not signal.
+  Keep the simple step multiplier — same validate-don't-assume discipline as ρ (fit, rejected) and
+  per-host HFA (built, not adopted). *`scripts/backtest_mov.py`.*
 - **Elo auto-rolls forward through WC results each nightly build (2026-06-19).** Previously the
   Elo file was frozen at the pre-tournament 6/11 snapshot while Futi had been refreshed to 6/18 —
   an incoherent post-MD1-Futi / pre-MD1-Elo blend. `scripts/update_elo.py` now rolls the VERIFIED
