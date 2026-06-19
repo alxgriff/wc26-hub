@@ -8,7 +8,7 @@ before use in the predictor (`scripts/predict.py`).
 
 | Source | Status | Use it for |
 |---|---|---|
-| **Elo** | ⚠️ original corrupted — **use `Elo_Ratings_World_Cup_2026_VERIFIED.csv`** | match-strength backbone |
+| **Elo** | ⚠️ original corrupted — **VERIFIED is the anchor; `..._CURRENT.csv` (rolled, gitignored) is preferred live** | match-strength backbone |
 | **Futi** (`World_Cup_2026_Futi_6_18.csv`, active) | ✅ reliable, post-MD1 refresh | match-strength (1.5× weight) + Attack/Defense goals model |
 | **Opta** (`Opta_Predictions...`) | ✅ reputable, but tournament-level | context overlay only (advance %, win %) |
 | **Market** (`Market_Outrights_VERIFIED.csv`) | ✅ real market, de-vigged | public-sentiment context + divergence flags |
@@ -23,6 +23,12 @@ before use in the predictor (`scripts/predict.py`).
   (source: international-football.net, asof 2026-06-11, canon team names). The
   replacement validates: Elo-vs-Futi rank correlation rises 0.73 → 0.94. The
   original is kept only for provenance — **do not use it.**
+- **Elo auto-rolls forward (2026-06-19).** `scripts/update_elo.py` rolls VERIFIED (the committed
+  6/11 anchor) through played WC results (K=60, goal-diff multiplier, host +100) into
+  `Elo_Ratings_World_Cup_2026_CURRENT.csv` — **gitignored, regenerated each nightly build**, and
+  preferred by the model when present. Deterministic from VERIFIED + fixtures.csv, so it's a
+  reproducible artifact (run the script), not a new source of truth; VERIFIED stays the leak-free
+  anchor (and the exact-value regression baseline pins to it via `elo_current=False`).
 - **Futi is the most trustworthy** — it independently rated Morocco a top-8 side,
   catching the Elo error.
 - **Futi = futi.live** (Imburgio/Muller, ex-American Soccer Analysis): an Expected

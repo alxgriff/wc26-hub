@@ -78,6 +78,13 @@ jobs:
         continue-on-error: true
         run: python scripts/fetch_results.py | tee -a "$GITHUB_STEP_SUMMARY"
 
+      # Roll Elo forward through the results just entered, so this run's re-recorded edges
+      # and rebuilt previews use current Elo. Fail-soft (model falls back to VERIFIED).
+      - name: Update Elo (roll verified baseline through WC results)
+        id: elo
+        continue-on-error: true
+        run: python scripts/update_elo.py | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Settle finished picks (units + CLV, incl. the shadow book)
         id: settle
         continue-on-error: true
@@ -139,6 +146,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           failed=""
+          [ "${{ steps.elo.outcome }}"      = "failure" ] && failed="$failed elo"
           [ "${{ steps.snapshot.outcome }}" = "failure" ] && failed="$failed snapshot"
           [ "${{ steps.results.outcome }}"  = "failure" ] && failed="$failed results"
           [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"

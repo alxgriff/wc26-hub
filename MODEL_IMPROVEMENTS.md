@@ -453,7 +453,15 @@ What the audit found:
 Raise this as an investigation backed by the backtest; change nothing in
 `predict_match`'s total/`texture` logic without backtest evidence.
 
-### 3.2 Within-tournament Elo updating — low priority
+### 3.2 Within-tournament Elo updating — ✅ SHIPPED 2026-06-19 (`scripts/update_elo.py`)
+
+> **Done.** Rather than consume an external daily-snapshot feed (the Kaggle option below — a
+> network/license dependency), we **roll our own** from the committed VERIFIED 6/11 anchor through
+> played WC results: K=60, goal-diff multiplier, host +100, kickoff order. Deterministic from
+> committed inputs, gitignored CURRENT, regenerated each nightly build (daily-build + closing-odds),
+> forward-only/leak-free. Prompted by the USA–Australia case (frozen Elo had USA 31st) — though the
+> roll showed the host gap is **structural, not staleness** (post-roll USA still rk24 < AUS rk21,
+> since both won MD1 and Australia beat higher-rated Türkiye). See DECISIONS.md (2026-06-19).
 
 - The K-factor the model cites is correct: **K = 60 for World Cup finals**
   (World Football Elo Ratings), with the standard goal-difference multiplier.

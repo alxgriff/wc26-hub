@@ -11,7 +11,9 @@ import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import predict as P  # noqa: E402
 
-MODEL = P.load_ratings()                       # default Config (rho=0.0)
+MODEL = P.load_ratings(elo_current=False)      # default Config (rho=0.0); pin to the
+#  VERIFIED Elo anchor so the locked baseline below can't drift when update_elo.py rolls
+#  CURRENT forward nightly (CURRENT is gitignored, so CI never sees it — this is belt+braces).
 N = MODEL.config.max_goals
 
 

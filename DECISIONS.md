@@ -34,6 +34,19 @@ you make a non-obvious call, add it here.*
 
 ## Prediction model (`predict.py`)
 
+- **Elo auto-rolls forward through WC results each nightly build (2026-06-19).** Previously the
+  Elo file was frozen at the pre-tournament 6/11 snapshot while Futi had been refreshed to 6/18 —
+  an incoherent post-MD1-Futi / pre-MD1-Elo blend. `scripts/update_elo.py` now rolls the VERIFIED
+  6/11 anchor through played games (World Football Elo: K=60, goal-diff multiplier, host +100) into
+  a **gitignored** `..._CURRENT.csv` the model prefers (`load_ratings(elo_current=...)`). Forward-
+  only/leak-free (played games only, in kickoff order; logged calls graded from the immutable
+  ledger), deterministic from committed inputs (anchor + fixtures), regenerated each run in
+  daily-build + closing-odds — so it never destabilises the exact-value regression baseline (pinned
+  to the anchor via `elo_current=False`). **Notable finding: this does NOT fix the USA-under-Australia
+  disagreement.** Both won MD1 and Australia beat higher-rated Türkiye, so Australia gained *more*
+  (USA 1726→1780 rk24; AUS 1777→1839 rk21) — the model still has it ~37/27/36 vs the market's
+  ~59/23/18. The host-USA gap is **structural (host effect), not staleness**, as the negative CLV on
+  an Australia bet confirmed. *`scripts/update_elo.py`; `predict.py` (`ELO_CURRENT`, `elo_current`).*
 - **Modest fixed Futi tilt (Elo:Futi = 1 : 1.5) + post-MD1 6/18 futi ratings, forward-only (2026-06-18).**
   A colleague claimed a Futi-only model beats our equal-weight hybrid. Independent backtest
   (`scripts/eval_blend.py`) on 558–999 recent WC-team internationals + the 16 tournament

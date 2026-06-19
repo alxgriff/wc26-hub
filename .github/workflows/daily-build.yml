@@ -80,6 +80,16 @@ jobs:
       - name: Tests (hard gate — red suite publishes nothing)
         run: python -m unittest discover -s tests
 
+      # Roll Elo forward through played WC results (after the pre-mutation test gate, before
+      # we log today's slate, so the day's predictions use current Elo). Reads committed
+      # fixtures (results land via the overnight closing-odds runs); writes the gitignored
+      # CURRENT file the model prefers. Fail-soft: if it errors, the model falls back to the
+      # VERIFIED anchor. Leak-free — rolls PLAYED games only; today's games are unplayed.
+      - name: Update Elo (roll verified baseline through WC results)
+        id: elo
+        continue-on-error: true
+        run: python scripts/update_elo.py | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Install Anthropic SDK (blurb + news)
         id: sdk
         continue-on-error: true
@@ -173,6 +183,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           failed=""
+          [ "${{ steps.elo.outcome }}"      = "failure" ] && failed="$failed elo"
           [ "${{ steps.sdk.outcome }}"      = "failure" ] && failed="$failed sdk"
           [ "${{ steps.results.outcome }}"  = "failure" ] && failed="$failed results"
           [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"
