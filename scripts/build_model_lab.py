@@ -66,6 +66,8 @@ def main():
         for r in csv.DictReader(f):
             if r.get("status", "").strip().lower() == "played":
                 rows.append(r)
+    # Sort by matchday so MD1 games all appear before MD2 games, etc.
+    rows.sort(key=lambda r: (int(r.get("matchday", 1)), r.get("match_id", "")))
 
     # ---- struct_variant list ----
     sv_variants = sv_mod._load_config() or []
