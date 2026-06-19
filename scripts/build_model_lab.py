@@ -200,7 +200,18 @@ def main():
 
     # Match bars
     match_html = []
+    current_matchday = None
     for mi, row in enumerate(rows):
+        matchday = int(row.get("matchday", 1))
+        if current_matchday is not None and matchday != current_matchday:
+            match_html.append(
+                f'<div class="section-sep" style="margin:22px 0 14px">'
+                f'<span class="section-sep-line"></span>'
+                f'<span class="section-sep-label">Matchday {matchday}</span>'
+                f'<span class="section-sep-line"></span>'
+                f'</div>'
+            )
+        current_matchday = matchday
         a, b = _esc(row["team_a"]), _esc(row["team_b"])
         sa, sb = int(row["score_a"]), int(row["score_b"])
         oi = _outcome(sa, sb)
