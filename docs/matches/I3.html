@@ -302,11 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -569,24 +564,6 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:88">88%</span><span class="pd" style="flex:9">9%</span><span class="pb" style="flex:2"></span></div>
   <div class="scale" aria-hidden="true"><span>France 88%</span><span>draw 9%</span><span>Iraq 2%</span></div>
   <p class="factline">most likely score <b>2–0</b> · expected goals <b>2.98</b> · over 2.5 <b>57%</b> · both score <b>22%</b><br>single source: rating model (Elo+Futi)</p>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Classic ML (XGBoost)</p>
-    <p class="sr-only">Classic ML model says France win 79 percent, draw 14 percent, Iraq win 7 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:79">79%</span><span class="pd" style="flex:14">14%</span><span class="pb" style="flex:7">7%</span></div>
-    <div class="scale" aria-hidden="true"><span>France 79%</span><span>draw 14%</span><span>Iraq 7%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (conf-tuned)</p>
-    <p class="sr-only">Structural (conf-tuned) says France win 88 percent, draw 10 percent, Iraq win 2 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:88">88%</span><span class="pd" style="flex:10">10%</span><span class="pb" style="flex:2"></span></div>
-    <div class="scale" aria-hidden="true"><span>France 88%</span><span>draw 10%</span><span>Iraq 2%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (no Elo)</p>
-    <p class="sr-only">100% Futi (no Elo) says France win 88 percent, draw 10 percent, Iraq win 2 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:88">88%</span><span class="pd" style="flex:10">10%</span><span class="pb" style="flex:2"></span></div>
-    <div class="scale" aria-hidden="true"><span>France 88%</span><span>draw 10%</span><span>Iraq 2%</span></div>
-  </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> France to grind it open; margin via late goals.</p></blockquote></div>
 </section>
@@ -685,19 +662,16 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td title="1.68 decimal">-147</td><td>58%</td><td>45%</td><td class="edge-neg">-13.0%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td title="2.31 decimal">+131</td><td>42%</td><td>55%</td><td class="edge-pos">+13.0%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="1.95 decimal">-105</td><td>49%</td><td>35%</td><td class="edge-neg">-13.9%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="1.85 decimal">-118</td><td>51%</td><td>65%</td><td class="edge-pos">+13.9%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">France -2.5</td><td title="1.84 decimal">-119</td><td>52%</td><td>45%</td><td class="edge-neg">-6.5%</td></tr>
-      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Iraq +2.5</td><td title="1.98 decimal">-102</td><td>48%</td><td>55%</td><td class="edge-pos">+6.5%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="1.96 decimal">-104</td><td>49%</td><td>35%</td><td class="edge-neg">-14.0%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="1.87 decimal">-115</td><td>51%</td><td>65%</td><td class="edge-pos">+14.0%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">France -2.5</td><td title="1.83 decimal">-120</td><td>52%</td><td>45%</td><td class="edge-neg">-6.6%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Iraq +2.5</td><td title="1.98 decimal">-102</td><td>48%</td><td>55%</td><td class="edge-pos">+6.6%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Iraq +2.5</strong> (Asian handicap), model edge <strong>+6.5%</strong></p><p class="odds-note">the model likes this, but the line is over 12h old (the book hasn't reposted), so it is <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
-<p class="verify-flag">totals under 3: model-priced edge +13.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">totals under 3.5: model-priced edge +13.9% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 17, 8:26 AM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Iraq +2.5</strong> (Asian handicap) @ -102, edge <strong>+6.6%</strong> — best price +102 (bovada). Flat 1u, paper record.</p></div>
+<p class="verify-flag">totals under 3.5: model-priced edge +14.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 18, 7:08 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> France −1.5; second-half team goals.</p></blockquote></div>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>

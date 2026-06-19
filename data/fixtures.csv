@@ -1,13 +1,13 @@
 ﻿match_id,group,matchday,date_et,kickoff_et_24h,kickoff_et,team_a,team_b,stadium,city,country,tv_us,score_a,score_b,status,notes
 A1,A,1,2026-06-11,15:00,3:00 PM,Mexico,South Africa,Estadio Azteca,Mexico City,Mexico,,2,0,played,"Tournament opener; Julián Quiñones scored the World Cup's first goal"
 A2,A,1,2026-06-11,22:00,10:00 PM,South Korea,Czechia,Estadio Akron,Guadalajara,Mexico,FS1,2,1,played,
-A3,A,2,2026-06-18,12:00,12:00 PM,Czechia,South Africa,Mercedes-Benz Stadium,Atlanta,USA,Fox,,,scheduled,
+A3,A,2,2026-06-18,12:00,12:00 PM,Czechia,South Africa,Mercedes-Benz Stadium,Atlanta,USA,Fox,1,1,played,
 A4,A,2,2026-06-18,21:00,9:00 PM,Mexico,South Korea,Estadio Akron,Guadalajara,Mexico,Fox,,,scheduled,
 A5,A,3,2026-06-24,21:00,9:00 PM,Czechia,Mexico,Estadio Azteca,Mexico City,Mexico,Fox,,,scheduled,"Simultaneous with A6 (matchday 3 rule)"
 A6,A,3,2026-06-24,21:00,9:00 PM,South Africa,South Korea,Estadio BBVA,Monterrey,Mexico,FS1,,,scheduled,"Simultaneous with A5 (matchday 3 rule)"
 B1,B,1,2026-06-12,15:00,3:00 PM,Canada,Bosnia and Herzegovina,BMO Field,Toronto,Canada,Fox,1,1,played,
 B2,B,1,2026-06-13,15:00,3:00 PM,Qatar,Switzerland,Levi's Stadium,Santa Clara,USA,Fox,1,1,played,
-B3,B,2,2026-06-18,15:00,3:00 PM,Switzerland,Bosnia and Herzegovina,SoFi Stadium,Inglewood,USA,Fox,,,scheduled,
+B3,B,2,2026-06-18,15:00,3:00 PM,Switzerland,Bosnia and Herzegovina,SoFi Stadium,Inglewood,USA,Fox,4,1,played,
 B4,B,2,2026-06-18,18:00,6:00 PM,Canada,Qatar,BC Place,Vancouver,Canada,FS1,,,scheduled,
 B5,B,3,2026-06-24,15:00,3:00 PM,Switzerland,Canada,BC Place,Vancouver,Canada,Fox,,,scheduled,"Simultaneous with B6 (matchday 3 rule)"
 B6,B,3,2026-06-24,15:00,3:00 PM,Bosnia and Herzegovina,Qatar,Lumen Field,Seattle,USA,FS1,,,scheduled,"Simultaneous with B5 (matchday 3 rule)"
@@ -60,7 +60,7 @@ J4,J,2,2026-06-22,23:00,11:00 PM,Jordan,Algeria,Levi's Stadium,Santa Clara,USA,F
 J5,J,3,2026-06-27,22:00,10:00 PM,Jordan,Argentina,AT&T Stadium,Arlington,USA,Fox,,,scheduled,"Simultaneous with J6 (matchday 3 rule)"
 J6,J,3,2026-06-27,22:00,10:00 PM,Algeria,Austria,Arrowhead Stadium,Kansas City,USA,FS1,,,scheduled,"Simultaneous with J5 (matchday 3 rule)"
 K1,K,1,2026-06-17,13:00,1:00 PM,Portugal,DR Congo,NRG Stadium,Houston,USA,Fox,1,1,played,
-K2,K,1,2026-06-17,22:00,10:00 PM,Uzbekistan,Colombia,Estadio Azteca,Mexico City,Mexico,FS1,,,scheduled,
+K2,K,1,2026-06-17,22:00,10:00 PM,Uzbekistan,Colombia,Estadio Azteca,Mexico City,Mexico,FS1,1,3,played,
 K3,K,2,2026-06-23,13:00,1:00 PM,Portugal,Uzbekistan,NRG Stadium,Houston,USA,Fox,,,scheduled,
 K4,K,2,2026-06-23,22:00,10:00 PM,Colombia,DR Congo,Estadio Akron,Guadalajara,Mexico,FS1,,,scheduled,
 K5,K,3,2026-06-27,19:30,7:30 PM,Colombia,Portugal,Hard Rock Stadium,Miami Gardens,USA,Fox,,,scheduled,"Simultaneous with K6 (matchday 3 rule)"

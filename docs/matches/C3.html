@@ -302,11 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -569,24 +564,6 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:18">18%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:55">55%</span></div>
   <div class="scale" aria-hidden="true"><span>Scotland 18%</span><span>draw 27%</span><span>Morocco 55%</span></div>
   <p class="factline">most likely score <b>0–1</b> · expected goals <b>2.13</b> · over 2.5 <b>36%</b> · both score <b>38%</b><br>single source: rating model (Elo+Futi)</p>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Classic ML (XGBoost)</p>
-    <p class="sr-only">Classic ML model says Scotland win 15 percent, draw 24 percent, Morocco win 61 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:15">15%</span><span class="pd" style="flex:24">24%</span><span class="pb" style="flex:61">61%</span></div>
-    <div class="scale" aria-hidden="true"><span>Scotland 15%</span><span>draw 24%</span><span>Morocco 61%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (conf-tuned)</p>
-    <p class="sr-only">Structural (conf-tuned) says Scotland win 14 percent, draw 25 percent, Morocco win 60 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:14">14%</span><span class="pd" style="flex:25">25%</span><span class="pb" style="flex:60">60%</span></div>
-    <div class="scale" aria-hidden="true"><span>Scotland 14%</span><span>draw 25%</span><span>Morocco 60%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (no Elo)</p>
-    <p class="sr-only">100% Futi (no Elo) says Scotland win 10 percent, draw 23 percent, Morocco win 67 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:10">10%</span><span class="pd" style="flex:23">23%</span><span class="pb" style="flex:67">67%</span></div>
-    <div class="scale" aria-hidden="true"><span>Scotland 10%</span><span>draw 23%</span><span>Morocco 67%</span></div>
-  </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Morocco's midfield numbers should tell; Scotland's path is dead balls and McTominay.</p></blockquote></div>
 </section>
@@ -684,21 +661,20 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td title="1.68 decimal">-147</td><td>58%</td><td>49%</td><td class="edge-neg">-8.4%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td title="2.28 decimal">+128</td><td>42%</td><td>51%</td><td class="edge-pos">+8.4%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td title="1.72 decimal">-140</td><td>56%</td><td>49%</td><td class="edge-neg">-7.2%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td title="2.22 decimal">+122</td><td>44%</td><td>51%</td><td class="edge-pos">+7.2%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.25</td><td title="2.00 decimal">+100</td><td>48%</td><td>36%</td><td class="edge-neg">-11.8%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.25</td><td title="1.83 decimal">-120</td><td>52%</td><td>64%</td><td class="edge-pos">+11.8%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.23 decimal">+123</td><td>43%</td><td>36%</td><td class="edge-neg">-6.7%</td></tr>
-      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.66 decimal">-153</td><td>57%</td><td>64%</td><td class="edge-pos">+6.7%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Scotland +0.5</td><td title="2.19 decimal">+119</td><td>44%</td><td>45%</td><td class="">+0.9%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Morocco -0.5</td><td title="1.71 decimal">-141</td><td>56%</td><td>55%</td><td class="edge-neg">-0.9%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.21 decimal">+121</td><td>42%</td><td>36%</td><td class="edge-neg">-6.5%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.64 decimal">-157</td><td>58%</td><td>64%</td><td class="edge-pos">+6.5%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Scotland +0.5</td><td title="2.19 decimal">+119</td><td>44%</td><td>45%</td><td class="">+0.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Morocco -0.5</td><td title="1.73 decimal">-137</td><td>56%</td><td>55%</td><td class="edge-neg">-0.6%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Under 2.5</strong> (Total goals), model edge <strong>+6.7%</strong></p><p class="odds-note">the model likes this, but the line is over 12h old (the book hasn't reposted), so it is <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
-<p class="verify-flag">totals under 2: model-priced edge +8.4% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Under 2</strong> (Total goals) @ +122, edge <strong>+7.2%</strong> — best price +125 (betus). Flat 1u, paper record.</p></div>
 <p class="verify-flag">totals under 2.25: model-priced edge +11.8% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 17, 8:26 AM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 2 can push (P 27%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
+<p class="odds-note">market snapshot Jun 18, 7:08 PM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 2 can push (P 27%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> Morocco −1; McTominay/set-piece props.</p></blockquote></div>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
