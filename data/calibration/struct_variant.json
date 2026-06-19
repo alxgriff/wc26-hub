@@ -9,7 +9,7 @@
       "CONMEBOL": -40,
       "AFC": 20
     },
-    "_note": "PROVISIONAL — keeps Elo at full weight (50/50 Futi/Elo), nudges under-connected confederations up and the over-connected one down, per the struct_variants bake-off (champion among defensible variants, RPS -6.8% on the n=23 MD1 slice). Magnitude is NOT trustworthy yet (MD1-only, monotonic-to-100/0 Futi curve = overfit signature). Retune after MD2.",
+    "_note": "PROVISIONAL \u2014 keeps Elo at full weight (50/50 Futi/Elo), nudges under-connected confederations up and the over-connected one down, per the struct_variants bake-off (champion among defensible variants, RPS -6.8% on the n=23 MD1 slice). Magnitude is NOT trustworthy yet (MD1-only, monotonic-to-100/0 Futi curve = overfit signature). Retune after MD2.",
     "_fit_slice": "23 played wc26 matches, MD1-heavy",
     "asof": "2026-06-17"
   },
@@ -19,30 +19,38 @@
     "w_elo": 0.0,
     "w_market": 0.0,
     "conf_offset": {},
-    "_note": "Futi-only — hits RPS 0.1916 (13/23) on the MD1 slice. Frozen June-11 ratings. Shown for direct comparison only.",
+    "_note": "Futi-only \u2014 hits RPS 0.1916 (13/23) on the MD1 slice. Frozen June-11 ratings. Shown for direct comparison only.",
     "_fit_slice": "23 played wc26 matches, MD1-heavy",
     "asof": "2026-06-17"
   },
   {
-    "label": "Structural (post-MD1)",
-    "w_futi": 1.0,
-    "w_elo": 1.0,
+    "label": "Structural (post-MD1 fitted)",
+    "w_futi": 0.75,
+    "w_elo": 0.25,
     "w_market": 0.0,
-    "conf_offset": {},
-    "ratings_dir": "data/ratings/post-md1",
+    "conf_offset": {
+      "CAF": 60,
+      "CONMEBOL": -60,
+      "AFC": 60
+    },
     "group": "post-md1",
-    "_note": "Same 50/50 Elo/Futi structural model, but using ratings updated through MD1 results (Elo from eloratings.net 2026-06-17, Futi from app 2026-06-18). No weight changes — only the input data is fresher.",
-    "asof": "2026-06-18"
+    "_note": "Best structural that retains an Elo signal (elo_ratio\u22650.25), fitted on WC26 in-tournament results \u2014 elo_ratio=0.250, mean RPS=0.1592 (-13.5% vs 50/50 baseline). Unconstrained search collapses to 0% Elo (see 100% Futi post-MD1). Retune as more matches land.",
+    "_fit_slice": "fit_slice: 28 played WC26 matches as of 2026-06-19",
+    "asof": "2026-06-19"
   },
   {
-    "label": "100% Futi (post-MD1)",
+    "label": "100% Futi (post-MD1 fitted)",
     "w_futi": 1.0,
     "w_elo": 0.0,
     "w_market": 0.0,
-    "conf_offset": {},
-    "ratings_dir": "data/ratings/post-md1",
+    "conf_offset": {
+      "CAF": 60,
+      "CONMEBOL": -60,
+      "AFC": 60
+    },
     "group": "post-md1",
-    "_note": "Futi-only model using ratings updated through MD1 results (same source files as Structural post-MD1). Elo completely dropped.",
-    "asof": "2026-06-18"
+    "_note": "Futi-only (w_elo=0) with confederation offsets fitted on WC26 results \u2014 mean RPS=0.1522 (-17.3% vs 50/50 baseline). Retune as more matches land.",
+    "_fit_slice": "fit_slice: 28 played WC26 matches as of 2026-06-19",
+    "asof": "2026-06-19"
   }
 ]
