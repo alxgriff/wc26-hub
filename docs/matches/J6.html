@@ -302,6 +302,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -564,6 +572,31 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:29">29%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:45">45%</span></div>
   <div class="scale" aria-hidden="true"><span>Algeria 29%</span><span>draw 26%</span><span>Austria 45%</span></div>
   <p class="factline">most likely score <b>1–1</b> · expected goals <b>2.67</b> · over 2.5 <b>50%</b> · both score <b>54%</b><br>single source: rating model (Elo+Futi)</p>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (conf-tuned)</p>
+    <p class="sr-only">Structural (conf-tuned) says Algeria win 36 percent, draw 26 percent, Austria win 38 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:36">36%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:38">38%</span></div>
+    <div class="scale" aria-hidden="true"><span>Algeria 36%</span><span>draw 26%</span><span>Austria 38%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (no Elo)</p>
+    <p class="sr-only">100% Futi (no Elo) says Algeria win 33 percent, draw 26 percent, Austria win 41 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:33">33%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:41">41%</span></div>
+    <div class="scale" aria-hidden="true"><span>Algeria 33%</span><span>draw 26%</span><span>Austria 41%</span></div>
+  </div>
+  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (post-MD1)</p>
+    <p class="sr-only">Structural (post-MD1) says Algeria win 27 percent, draw 25 percent, Austria win 48 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:27">27%</span><span class="pd" style="flex:25">25%</span><span class="pb" style="flex:48">48%</span></div>
+    <div class="scale" aria-hidden="true"><span>Algeria 27%</span><span>draw 25%</span><span>Austria 48%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (post-MD1)</p>
+    <p class="sr-only">100% Futi (post-MD1) says Algeria win 31 percent, draw 26 percent, Austria win 43 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:31">31%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:43">43%</span></div>
+    <div class="scale" aria-hidden="true"><span>Algeria 31%</span><span>draw 26%</span><span>Austria 43%</span></div>
+  </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> over; this profiles as MD3's track meet.</p></blockquote></div>
 </section>

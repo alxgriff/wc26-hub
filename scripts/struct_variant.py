@@ -65,6 +65,7 @@ class TunedPrediction:
     p_draw: float
     p_b: float
     source: str
+    group: str | None = None
 
 
 def _load_config(path: "Path | None" = None) -> "list[dict] | None":
@@ -127,6 +128,19 @@ def _build_tuned(model: pr.RatingModel, cfg: dict) -> pr.RatingModel:
     return dataclasses.replace(model, teams=tuned)
 
 
+def _base_model_for(model: pr.RatingModel, cfg: dict) -> pr.RatingModel:
+    """Return the base RatingModel for this variant.
+    If cfg has a 'ratings_dir' key, load a fresh model from that directory
+    (relative to the repo root) instead of using the production model."""
+    rdir = cfg.get("ratings_dir")
+    if not rdir:
+        return model
+    try:
+        return pr.load_ratings(ratings_dir=REPO_ROOT / rdir)
+    except Exception as e:
+        raise RuntimeError(f"struct_variant: failed to load ratings from '{rdir}': {e}") from e
+
+
 def _get_tuned_list(model: pr.RatingModel, variants: "list[dict]",
                     cfg_path: "Path | None" = None) -> "list[tuple[dict, pr.RatingModel]]":
     """Returns list of (cfg, tuned_model) for all variants; cached per mtime."""
@@ -138,7 +152,7 @@ def _get_tuned_list(model: pr.RatingModel, variants: "list[dict]",
     key = (id(model), mtime)
     cached = _CACHE.get(key)
     if cached is None:
-        cached = [(cfg, _build_tuned(model, cfg)) for cfg in variants]
+        cached = [(cfg, _build_tuned(_base_model_for(model, cfg), cfg)) for cfg in variants]
         _CACHE.clear()              # only ever need the current build's tuned copies
         _CACHE[key] = cached
     return cached
@@ -158,5 +172,6 @@ def tuned_predict(model: pr.RatingModel, team_a: str, team_b: str, *,
         p = pr.predict_match(tuned, team_a, team_b, hfa_team=hfa_team)
         results.append(TunedPrediction(team_a=team_a, team_b=team_b,
                                        p_a=p.p_a, p_draw=p.p_draw, p_b=p.p_b,
-                                       source=str(cfg.get("label", "Structural (tuned)"))))
+                                       source=str(cfg.get("label", "Structural (tuned)")),
+                                       group=cfg.get("group") or None))
     return results

@@ -307,6 +307,9 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
 .probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
 .probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -570,12 +573,6 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <div class="scale" aria-hidden="true"><span>Panama 3%</span><span>draw 10%</span><span>England 88%</span></div>
   <p class="factline">most likely score <b>0–2</b> · expected goals <b>3.17</b> · over 2.5 <b>61%</b> · both score <b>28%</b><br>single source: rating model (Elo+Futi)</p>
   <div class="overlay-section">
-    <p class="overlay-bar-label">Classic ML (XGBoost)</p>
-    <p class="sr-only">Classic ML model says Panama win 7 percent, draw 16 percent, England win 77 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:7">7%</span><span class="pd" style="flex:16">16%</span><span class="pb" style="flex:77">77%</span></div>
-    <div class="scale" aria-hidden="true"><span>Panama 7%</span><span>draw 16%</span><span>England 77%</span></div>
-  </div>
-  <div class="overlay-section">
     <p class="overlay-bar-label">Structural (conf-tuned)</p>
     <p class="sr-only">Structural (conf-tuned) says Panama win 3 percent, draw 10 percent, England win 88 percent.</p>
     <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:3"></span><span class="pd" style="flex:10">10%</span><span class="pb" style="flex:88">88%</span></div>
@@ -586,6 +583,19 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <p class="sr-only">100% Futi (no Elo) says Panama win 1 percent, draw 7 percent, England win 91 percent.</p>
     <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:1"></span><span class="pd" style="flex:7">7%</span><span class="pb" style="flex:91">91%</span></div>
     <div class="scale" aria-hidden="true"><span>Panama 1%</span><span>draw 7%</span><span>England 91%</span></div>
+  </div>
+  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (post-MD1)</p>
+    <p class="sr-only">Structural (post-MD1) says Panama win 2 percent, draw 9 percent, England win 89 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:2"></span><span class="pd" style="flex:9">9%</span><span class="pb" style="flex:89">89%</span></div>
+    <div class="scale" aria-hidden="true"><span>Panama 2%</span><span>draw 9%</span><span>England 89%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (post-MD1)</p>
+    <p class="sr-only">100% Futi (post-MD1) says Panama win 2 percent, draw 8 percent, England win 91 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:2"></span><span class="pd" style="flex:8">8%</span><span class="pb" style="flex:91">91%</span></div>
+    <div class="scale" aria-hidden="true"><span>Panama 2%</span><span>draw 8%</span><span>England 91%</span></div>
   </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> England comfortably; margin market is the story.</p></blockquote></div>

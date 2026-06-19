@@ -1,0 +1,48 @@
+[
+  {
+    "label": "Structural (conf-tuned)",
+    "w_futi": 1.0,
+    "w_elo": 1.0,
+    "w_market": 0.0,
+    "conf_offset": {
+      "CAF": 40,
+      "CONMEBOL": -40,
+      "AFC": 20
+    },
+    "_note": "PROVISIONAL — keeps Elo at full weight (50/50 Futi/Elo), nudges under-connected confederations up and the over-connected one down, per the struct_variants bake-off (champion among defensible variants, RPS -6.8% on the n=23 MD1 slice). Magnitude is NOT trustworthy yet (MD1-only, monotonic-to-100/0 Futi curve = overfit signature). Retune after MD2.",
+    "_fit_slice": "23 played wc26 matches, MD1-heavy",
+    "asof": "2026-06-17"
+  },
+  {
+    "label": "100% Futi (no Elo)",
+    "w_futi": 1.0,
+    "w_elo": 0.0,
+    "w_market": 0.0,
+    "conf_offset": {},
+    "_note": "Futi-only — hits RPS 0.1916 (13/23) on the MD1 slice. Frozen June-11 ratings. Shown for direct comparison only.",
+    "_fit_slice": "23 played wc26 matches, MD1-heavy",
+    "asof": "2026-06-17"
+  },
+  {
+    "label": "Structural (post-MD1)",
+    "w_futi": 1.0,
+    "w_elo": 1.0,
+    "w_market": 0.0,
+    "conf_offset": {},
+    "ratings_dir": "data/ratings/post-md1",
+    "group": "post-md1",
+    "_note": "Same 50/50 Elo/Futi structural model, but using ratings updated through MD1 results (Elo from eloratings.net 2026-06-17, Futi from app 2026-06-18). No weight changes — only the input data is fresher.",
+    "asof": "2026-06-18"
+  },
+  {
+    "label": "100% Futi (post-MD1)",
+    "w_futi": 1.0,
+    "w_elo": 0.0,
+    "w_market": 0.0,
+    "conf_offset": {},
+    "ratings_dir": "data/ratings/post-md1",
+    "group": "post-md1",
+    "_note": "Futi-only model using ratings updated through MD1 results (same source files as Structural post-MD1). Elo completely dropped.",
+    "asof": "2026-06-18"
+  }
+]

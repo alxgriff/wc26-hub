@@ -307,6 +307,9 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
 .probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
 .probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -570,12 +573,6 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <div class="scale" aria-hidden="true"><span>Türkiye 44%</span><span>draw 26%</span><span>Paraguay 30%</span></div>
   <p class="factline">most likely score <b>1–1</b> · expected goals <b>2.59</b> · over 2.5 <b>48%</b> · both score <b>52%</b><br>single source: rating model (Elo+Futi)</p>
   <div class="overlay-section">
-    <p class="overlay-bar-label">Classic ML (XGBoost)</p>
-    <p class="sr-only">Classic ML model says Türkiye win 45 percent, draw 26 percent, Paraguay win 29 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:45">45%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:29">29%</span></div>
-    <div class="scale" aria-hidden="true"><span>Türkiye 45%</span><span>draw 26%</span><span>Paraguay 29%</span></div>
-  </div>
-  <div class="overlay-section">
     <p class="overlay-bar-label">Structural (conf-tuned)</p>
     <p class="sr-only">Structural (conf-tuned) says Türkiye win 51 percent, draw 25 percent, Paraguay win 24 percent.</p>
     <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:51">51%</span><span class="pd" style="flex:25">25%</span><span class="pb" style="flex:24">24%</span></div>
@@ -586,6 +583,19 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <p class="sr-only">100% Futi (no Elo) says Türkiye win 39 percent, draw 26 percent, Paraguay win 35 percent.</p>
     <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:39">39%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:35">35%</span></div>
     <div class="scale" aria-hidden="true"><span>Türkiye 39%</span><span>draw 26%</span><span>Paraguay 35%</span></div>
+  </div>
+  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (post-MD1)</p>
+    <p class="sr-only">Structural (post-MD1) says Türkiye win 46 percent, draw 26 percent, Paraguay win 28 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:46">46%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:28">28%</span></div>
+    <div class="scale" aria-hidden="true"><span>Türkiye 46%</span><span>draw 26%</span><span>Paraguay 28%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (post-MD1)</p>
+    <p class="sr-only">100% Futi (post-MD1) says Türkiye win 43 percent, draw 26 percent, Paraguay win 31 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:43">43%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:31">31%</span></div>
+    <div class="scale" aria-hidden="true"><span>Türkiye 43%</span><span>draw 26%</span><span>Paraguay 31%</span></div>
   </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> under, Türkiye narrowly on talent; Paraguay's block has beaten better.</p></blockquote></div>

@@ -17,9 +17,6 @@ data/calibration/hybrid.meta.json
 data/calibration/reference.ubj
 data/calibration/reference.meta.json
 
-# Structural-variant overlay (confederation-tuned) — local-only activation +
-# tunable params; not committed. Absent => the overlay is inert.
-data/calibration/struct_variant.json
 
 # Local-only fit experiments — comparison artifacts + fit logs. Delete before PR.
 experiments/

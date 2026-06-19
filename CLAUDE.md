@@ -14,6 +14,14 @@ Daily 2026 World Cup group-stage guide + game predictor. One edition per ET
 date (June 11–27), built from pre-baked match cards + computed standings +
 model predictions. Group stage only; knockout stage is a later project.
 
+## Git conventions
+
+- **Worktrees must be nested inside the repo**, not alongside it. Always create them with:
+  ```
+  git worktree add .worktrees/<branch-slug>
+  ```
+  Never use `../sibling-dir` paths. This keeps all working trees obviously co-located with the repo root.
+
 ## Data contracts (do not violate)
 
 ### data/fixtures.csv — single source of truth for matches

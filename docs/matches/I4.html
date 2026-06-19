@@ -307,6 +307,9 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
 .probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
 .probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -570,12 +573,6 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <div class="scale" aria-hidden="true"><span>Norway 43%</span><span>draw 26%</span><span>Senegal 31%</span></div>
   <p class="factline">most likely score <b>1–1</b> · expected goals <b>2.57</b> · over 2.5 <b>47%</b> · both score <b>52%</b><br>single source: rating model (Elo+Futi)</p>
   <div class="overlay-section">
-    <p class="overlay-bar-label">Classic ML (XGBoost)</p>
-    <p class="sr-only">Classic ML model says Norway win 40 percent, draw 27 percent, Senegal win 33 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:40">40%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:33">33%</span></div>
-    <div class="scale" aria-hidden="true"><span>Norway 40%</span><span>draw 27%</span><span>Senegal 33%</span></div>
-  </div>
-  <div class="overlay-section">
     <p class="overlay-bar-label">Structural (conf-tuned)</p>
     <p class="sr-only">Structural (conf-tuned) says Norway win 36 percent, draw 27 percent, Senegal win 37 percent.</p>
     <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:36">36%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:37">37%</span></div>
@@ -586,6 +583,19 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <p class="sr-only">100% Futi (no Elo) says Norway win 41 percent, draw 26 percent, Senegal win 33 percent.</p>
     <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:41">41%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:33">33%</span></div>
     <div class="scale" aria-hidden="true"><span>Norway 41%</span><span>draw 26%</span><span>Senegal 33%</span></div>
+  </div>
+  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (post-MD1)</p>
+    <p class="sr-only">Structural (post-MD1) says Norway win 47 percent, draw 26 percent, Senegal win 27 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:47">47%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:27">27%</span></div>
+    <div class="scale" aria-hidden="true"><span>Norway 47%</span><span>draw 26%</span><span>Senegal 27%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (post-MD1)</p>
+    <p class="sr-only">100% Futi (post-MD1) says Norway win 43 percent, draw 26 percent, Senegal win 31 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:43">43%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:31">31%</span></div>
+    <div class="scale" aria-hidden="true"><span>Norway 43%</span><span>draw 26%</span><span>Senegal 31%</span></div>
   </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> true coin flip; lean BTTS in an athletic war.</p></blockquote></div>

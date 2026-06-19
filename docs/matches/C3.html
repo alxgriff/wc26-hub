@@ -302,6 +302,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -564,6 +572,31 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:18">18%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:55">55%</span></div>
   <div class="scale" aria-hidden="true"><span>Scotland 18%</span><span>draw 27%</span><span>Morocco 55%</span></div>
   <p class="factline">most likely score <b>0–1</b> · expected goals <b>2.13</b> · over 2.5 <b>36%</b> · both score <b>38%</b><br>single source: rating model (Elo+Futi)</p>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (conf-tuned)</p>
+    <p class="sr-only">Structural (conf-tuned) says Scotland win 14 percent, draw 25 percent, Morocco win 60 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:14">14%</span><span class="pd" style="flex:25">25%</span><span class="pb" style="flex:60">60%</span></div>
+    <div class="scale" aria-hidden="true"><span>Scotland 14%</span><span>draw 25%</span><span>Morocco 60%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (no Elo)</p>
+    <p class="sr-only">100% Futi (no Elo) says Scotland win 10 percent, draw 23 percent, Morocco win 67 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:10">10%</span><span class="pd" style="flex:23">23%</span><span class="pb" style="flex:67">67%</span></div>
+    <div class="scale" aria-hidden="true"><span>Scotland 10%</span><span>draw 23%</span><span>Morocco 67%</span></div>
+  </div>
+  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (post-MD1)</p>
+    <p class="sr-only">Structural (post-MD1) says Scotland win 18 percent, draw 27 percent, Morocco win 55 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:18">18%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:55">55%</span></div>
+    <div class="scale" aria-hidden="true"><span>Scotland 18%</span><span>draw 27%</span><span>Morocco 55%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (post-MD1)</p>
+    <p class="sr-only">100% Futi (post-MD1) says Scotland win 10 percent, draw 23 percent, Morocco win 66 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:10">10%</span><span class="pd" style="flex:23">23%</span><span class="pb" style="flex:66">66%</span></div>
+    <div class="scale" aria-hidden="true"><span>Scotland 10%</span><span>draw 23%</span><span>Morocco 66%</span></div>
+  </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Morocco's midfield numbers should tell; Scotland's path is dead balls and McTominay.</p></blockquote></div>
 </section>

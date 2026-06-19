@@ -6,9 +6,7 @@ with RPS scorecards and per-match probability bars.
 
 Models included (each inert when its artifact is absent):
   #1  Structural           — production model (Elo + Futi, Poisson matrix)
-  #2  Classic ML (XGBoost) — reference overlay (reference_overlay.py)
-  #3  Hybrid ML            — our own XGBoost fit (hybrid.py), if artifact present
-  #4+ Structural variants  — all entries in data/calibration/struct_variant.json
+  #2+ Structural variants  — all entries in data/calibration/struct_variant.json
 
 Usage:
     python3 scripts/build_model_lab.py [--out docs/model-lab.html]
@@ -28,16 +26,6 @@ sys.path.insert(0, str(REPO / "scripts"))
 
 import predict as pr                    # noqa: E402
 import struct_variant as sv_mod         # noqa: E402
-
-try:
-    import reference_overlay as ref_mod
-except Exception:
-    ref_mod = None
-
-try:
-    import hybrid as hyb_mod
-except Exception:
-    hyb_mod = None
 
 
 def _esc(s: str) -> str:
@@ -94,75 +82,35 @@ def main():
         p = pr.predict_match(model, a, b, hfa_team=hfa)
         return (p.p_a, p.p_draw, p.p_b)
 
-    def _reference(row):
-        if ref_mod is None:
-            return None
-        a, b = row["team_a"].strip(), row["team_b"].strip()
-        host = pr.HOST_BY_COUNTRY.get((row.get("country") or "").strip())
-        hfa = host if host in (a, b) else None
-        rp = ref_mod.reference_predict(model, a, b, hfa_team=hfa,
-                                       match_date=row.get("date_et"))
-        if rp is None:
-            return None
-        return (rp.p_a, rp.p_draw, rp.p_b)
-
-    def _hybrid(row):
-        if hyb_mod is None:
-            return None
-        a, b = row["team_a"].strip(), row["team_b"].strip()
-        host = pr.HOST_BY_COUNTRY.get((row.get("country") or "").strip())
-        hfa = host if host in (a, b) else None
-        hp = hyb_mod.hybrid_predict(model, a, b, hfa_team=hfa)
-        if hp is None:
-            return None
-        return (hp.p_a, hp.p_draw, hp.p_b)
-
-    forecasters = [("Structural", _struct)]
-
-    # Check reference availability
-    ref_available = ref_mod is not None
-    if ref_available:
-        # Quick probe to confirm artifact loaded
-        try:
-            test = _reference(rows[0]) if rows else None
-            if test is None:
-                ref_available = False
-        except Exception:
-            ref_available = False
-    if ref_available:
-        forecasters.append(("Classic ML (XGBoost)", _reference))
-
-    # Check hybrid availability
-    hyb_available = hyb_mod is not None
-    if hyb_available:
-        try:
-            test = _hybrid(rows[0]) if rows else None
-            if test is None:
-                hyb_available = False
-        except Exception:
-            hyb_available = False
-    if hyb_available:
-        forecasters.append(("Hybrid ML", _hybrid))
+    # forecasters: list of (label, fn, group)
+    # group=None for pre-tournament models; "post-md1" for in-tournament fitted ones.
+    forecasters = [("Structural", _struct, None)]
 
     # Structural variants
     for cfg, tuned in sv_tuned_list:
         label = str(cfg.get("label", "Structural (tuned)"))
+        group = cfg.get("group") or None
         def _sv_fn(row, _tuned=tuned):
             host = pr.HOST_BY_COUNTRY.get((row.get("country") or "").strip())
             a, b = row["team_a"].strip(), row["team_b"].strip()
             hfa = host if host in (a, b) else None
             p = pr.predict_match(_tuned, a, b, hfa_team=hfa)
             return (p.p_a, p.p_draw, p.p_b)
-        forecasters.append((label, _sv_fn))
+        forecasters.append((label, _sv_fn, group))
 
     # ---- compute results ----
     # match_results[row_i] = [(probs, rps_val) | None, ...]  indexed by forecaster
+    # post-md1 models are suppressed for MD1 matches (their ratings were fitted on that data)
     match_results: list[list[tuple | None]] = []
     for row in rows:
         sa, sb = int(row["score_a"]), int(row["score_b"])
         oi = _outcome(sa, sb)
+        matchday = int(row.get("matchday", 1))
         per_fc = []
-        for label, fn in forecasters:
+        for label, fn, group in forecasters:
+            if group == "post-md1" and matchday == 1:
+                per_fc.append(None)   # poisoned — ratings trained on this data
+                continue
             try:
                 probs = fn(row)
                 if probs is None:
@@ -175,9 +123,9 @@ def main():
 
     # ---- scoreboard stats ----
     n_matches = len(rows)
-    stats = []  # [(label, mean_rps, hits, n_valid)]
+    stats = []  # [(label, mean_rps, hits, n_valid, group)]
     struct_rps = None
-    for fc_i, (label, _) in enumerate(forecasters):
+    for fc_i, (label, _, group) in enumerate(forecasters):
         rps_vals = [match_results[mi][fc_i][1]
                     for mi in range(n_matches)
                     if match_results[mi][fc_i] is not None]
@@ -198,7 +146,7 @@ def main():
             if probs.index(max(probs)) == oi:
                 hit += 1
 
-        stats.append((label, mean, hit, n_valid))
+        stats.append((label, mean, hit, n_valid, group))
         if fc_i == 0:
             struct_rps = mean
 
@@ -208,18 +156,30 @@ def main():
     # Short label for match bars (keep width manageable)
     _short = {
         "Structural": "struct",
-        "Classic ML (XGBoost)": "classic",
-        "Hybrid ML": "hybrid",
         "Structural (conf-tuned)": "conf-tuned",
         "100% Futi (no Elo)": "futi-only",
+        "Structural (post-MD1 fitted)": "post·struct",
+        "100% Futi (post-MD1 fitted)": "post·futi",
     }
 
     def short(label):
         return _short.get(label, label[:9].lower())
 
+    POST_MD1_SECTION_HTML = (
+        '<div class="section-sep">'
+        '<span class="section-sep-line"></span>'
+        '<span class="section-sep-label">Post-MD1 Fitted</span>'
+        '<span class="section-sep-line"></span>'
+        '</div>'
+    )
+
     # Scoreboard cards
     card_html = []
-    for fc_i, (label, mean_rps, hits, n_valid) in enumerate(stats):
+    sep_inserted = False
+    for fc_i, (label, mean_rps, hits, n_valid, group) in enumerate(stats):
+        if group == "post-md1" and not sep_inserted:
+            card_html.append(POST_MD1_SECTION_HTML)
+            sep_inserted = True
         if mean_rps is None:
             continue
         is_best = (mean_rps == best_rps)
@@ -250,7 +210,11 @@ def main():
         home_icon = "🏠 " if hfa_team == row["team_a"].strip() else ""
 
         bars = []
-        for fc_i, (label, _) in enumerate(forecasters):
+        bar_sep_inserted = False
+        for fc_i, (label, _, group) in enumerate(forecasters):
+            if group == "post-md1" and not bar_sep_inserted:
+                bars.append('<div class="bar-sep"></div>')
+                bar_sep_inserted = True
             fc_data = match_results[mi][fc_i]
             if fc_data is None:
                 continue
@@ -279,10 +243,16 @@ def main():
             + f'</div>')
 
     n_fc = len(forecasters)
-    lede = (f'{n_fc} forecaster{"s" if n_fc != 1 else ""} on the same '
-            f'{n_matches} played WC26 match{"es" if n_matches != 1 else ""}. '
+    n_post = sum(1 for _, _, g in forecasters if g == "post-md1")
+    n_md1 = sum(1 for r in rows if int(r.get("matchday", 1)) == 1)
+    n_md2plus = n_matches - n_md1
+    lede = (f'{n_fc} forecaster{"s" if n_fc != 1 else ""} '
+            f'({n_fc - n_post} pre-tournament · {n_post} post-MD1) '
+            f'on {n_matches} played WC26 matches. '
             f'Lower RPS = sharper. '
-            f'All models use ratings frozen at 2026-06-11 — no in-tournament leakage.')
+            f'Pre-tournament models scored on all {n_matches} matches. '
+            f'Post-MD1 models scored on MD2+ only ({n_md2plus} match{"es" if n_md2plus != 1 else ""}) '
+            f'— their ratings incorporate MD1 results so MD1 comparisons would be poisoned.')
 
     now = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M")
 
@@ -329,6 +299,10 @@ box-shadow:4px 4px 0 var(--hairline);padding:12px 14px}}
 .bar .pd{{background:var(--draw-soft);border-right:1px solid var(--ink)}}
 .bar .pb{{background:var(--verm-soft)}}
 .scale{{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.6rem;color:var(--ink-soft);margin:3px 0 0 82px}}
+.section-sep{{display:flex;align-items:center;gap:10px;margin:18px 0 10px;width:100%}}
+.section-sep-line{{flex:1;border-top:2px solid var(--ink);}}
+.section-sep-label{{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 4px}}
+.bar-sep{{height:0;border-top:2px solid var(--ink);margin:8px 0 5px 82px}}
 footer{{margin-top:40px;border-top:1px solid var(--hairline);padding-top:12px;
 font-family:var(--mono);font-size:.68rem;color:var(--ink-soft)}}
 </style></head><body><div class=wrap>
@@ -348,9 +322,10 @@ font-family:var(--mono);font-size:.68rem;color:var(--ink-soft)}}
 
     Path(args.out).write_text(out, encoding="utf-8")
     print(args.out)
-    for fc_i, (label, mean_rps, hits, n_valid) in enumerate(stats):
+    for fc_i, (label, mean_rps, hits, n_valid, group) in enumerate(stats):
         if mean_rps is not None:
-            print(f"  #{fc_i+1} {label}: RPS {mean_rps:.4f}, hits {hits}/{n_valid}")
+            tag = " [post-MD1]" if group == "post-md1" else ""
+            print(f"  #{fc_i+1} {label}{tag}: RPS {mean_rps:.4f}, hits {hits}/{n_valid}")
 
 
 if __name__ == "__main__":
