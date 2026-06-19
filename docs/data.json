@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 28,
+ "played": 29,
  "total": 72,
  "groups": {
   "A": {
@@ -199,27 +199,27 @@
      "pos": 1,
      "team": "United States",
      "group": "D",
-     "p": 1,
-     "w": 1,
+     "p": 2,
+     "w": 2,
      "d": 0,
      "l": 0,
-     "gf": 4,
+     "gf": 6,
      "ga": 1,
-     "gd": 3,
-     "pts": 3,
+     "gd": 5,
+     "pts": 6,
      "fate": null
     },
     {
      "pos": 2,
      "team": "Australia",
      "group": "D",
-     "p": 1,
+     "p": 2,
      "w": 1,
      "d": 0,
-     "l": 0,
+     "l": 1,
      "gf": 2,
-     "ga": 0,
-     "gd": 2,
+     "ga": 2,
+     "gd": 0,
      "pts": 3,
      "fate": null
     },
@@ -253,7 +253,6 @@
     }
    ],
    "notes": [
-    "Group D: overall goal difference/goals separate Australia / United States (level on points and head-to-head).",
     "Group D: overall goal difference/goals separate Paraguay / Türkiye (level on points and head-to-head)."
    ]
   },
@@ -960,11 +959,11 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-19 16:24",
+ "generated_at": "2026-06-19 22:48",
  "slate_date": "2026-06-19",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 28,
+  "as_of_matches_played": 29,
   "fully_projectable": false,
   "thirds_resolved": false,
   "r32": {
@@ -1183,73 +1182,73 @@
    "73": {
     "team": "Switzerland",
     "loser": "South Korea",
-    "p": 0.7277998337094367,
+    "p": 0.7139382148425497,
     "source": "model"
    },
    "75": {
     "team": "Brazil",
     "loser": "Sweden",
-    "p": 0.8981184199475927,
+    "p": 0.8791990985828756,
     "source": "model"
    },
    "76": {
     "team": "Japan",
     "loser": "Scotland",
-    "p": 0.7254229021379162,
+    "p": 0.7181771068300361,
     "source": "model"
    },
    "78": {
     "team": "France",
     "loser": "Côte d'Ivoire",
-    "p": 0.8847477558129142,
+    "p": 0.8765992789933088,
     "source": "model"
    },
    "83": {
     "team": "DR Congo",
     "loser": "Ghana",
-    "p": 0.6544295297961386,
+    "p": 0.6390201825382763,
     "source": "model"
    },
    "84": {
     "team": "Austria",
     "loser": "Saudi Arabia",
-    "p": 0.8493698246459547,
+    "p": 0.8487561266409068,
     "source": "model"
    },
    "86": {
     "team": "Argentina",
     "loser": "Uruguay",
-    "p": 0.7756329438165969,
+    "p": 0.7862818523668107,
     "source": "model"
    },
    "88": {
     "team": "Australia",
     "loser": "New Zealand",
-    "p": 0.826824442861061,
+    "p": 0.8263894851434548,
     "source": "model"
    },
    "90": {
     "team": "Brazil",
     "loser": "Switzerland",
-    "p": 0.7599746624456551,
+    "p": 0.7533268201130817,
     "source": "model"
    },
    "91": {
     "team": "France",
     "loser": "Japan",
-    "p": 0.7456651264084555,
+    "p": 0.7534990906585933,
     "source": "model"
    },
    "93": {
     "team": "Austria",
     "loser": "DR Congo",
-    "p": 0.7621359496923451,
+    "p": 0.7620822196253046,
     "source": "model"
    },
    "95": {
     "team": "Argentina",
     "loser": "Australia",
-    "p": 0.8837441548956477,
+    "p": 0.879658390210162,
     "source": "model"
    }
   },
