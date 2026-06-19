@@ -25,6 +25,13 @@ Cloudflare Pages on push.
 ## Open items
 
 ### Model (`predict.py` / MODEL_IMPROVEMENTS.md)
+- **DONE 2026-06-18 — Futi tilt + 6/18 ratings.** Investigation of "Futi-only vs hybrid"
+  (`scripts/eval_blend.py`) → fixed Futi tilt `w_futi 1.0→1.5` (f=0.60) + ingest the
+  post-MD1 6/18 futi.live ratings, forward-only (no MD1 leakage). See DECISIONS.md.
+- **NEXT (scoped, follow-up) — market consensus as a 3rd source** (`MODEL_IMPROVEMENTS.md`
+  §3.3). On 24 played games market-only Brier 0.60 beats model-only 0.67; integrate as a
+  market-tilted W/D/L overlay (fixed weight, not fit). Blocked on a historical-odds dataset
+  for a proper backtest (corpus has no odds) — design before code.
 - **Fit the inert levers against live results.** ρ, per-host HFA (`Config.hfa_by_host`),
   and the knockout `c`/reach-shootout calibration (Tier 2.5) all ship dormant pending a
   fit — re-run `fit_rho.py`/`fit_hfa.py` if a fuller λ model (Maher MLE) or accumulated
