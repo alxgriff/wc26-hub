@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 16,
+ "played": 27,
  "total": 72,
  "groups": {
   "A": {
@@ -37,28 +37,28 @@
      "pos": 3,
      "team": "Czechia",
      "group": "A",
-     "p": 1,
+     "p": 2,
      "w": 0,
-     "d": 0,
+     "d": 1,
      "l": 1,
-     "gf": 1,
-     "ga": 2,
+     "gf": 2,
+     "ga": 3,
      "gd": -1,
-     "pts": 0,
+     "pts": 1,
      "fate": null
     },
     {
      "pos": 4,
      "team": "South Africa",
      "group": "A",
-     "p": 1,
+     "p": 2,
      "w": 0,
-     "d": 0,
+     "d": 1,
      "l": 1,
-     "gf": 0,
-     "ga": 2,
+     "gf": 1,
+     "ga": 3,
      "gd": -2,
-     "pts": 0,
+     "pts": 1,
      "fate": null
     }
    ],
@@ -71,63 +71,64 @@
    "rows": [
     {
      "pos": 1,
-     "team": "Bosnia and Herzegovina",
+     "team": "Canada",
      "group": "B",
-     "p": 1,
-     "w": 0,
+     "p": 2,
+     "w": 1,
      "d": 1,
      "l": 0,
-     "gf": 1,
+     "gf": 7,
      "ga": 1,
-     "gd": 0,
-     "pts": 1,
+     "gd": 6,
+     "pts": 4,
      "fate": null
     },
     {
      "pos": 2,
-     "team": "Canada",
+     "team": "Switzerland",
      "group": "B",
-     "p": 1,
-     "w": 0,
+     "p": 2,
+     "w": 1,
      "d": 1,
      "l": 0,
-     "gf": 1,
-     "ga": 1,
-     "gd": 0,
-     "pts": 1,
+     "gf": 5,
+     "ga": 2,
+     "gd": 3,
+     "pts": 4,
      "fate": null
     },
     {
      "pos": 3,
-     "team": "Qatar",
+     "team": "Bosnia and Herzegovina",
      "group": "B",
-     "p": 1,
+     "p": 2,
      "w": 0,
      "d": 1,
-     "l": 0,
-     "gf": 1,
-     "ga": 1,
-     "gd": 0,
+     "l": 1,
+     "gf": 2,
+     "ga": 5,
+     "gd": -3,
      "pts": 1,
      "fate": null
     },
     {
      "pos": 4,
-     "team": "Switzerland",
+     "team": "Qatar",
      "group": "B",
-     "p": 1,
+     "p": 2,
      "w": 0,
      "d": 1,
-     "l": 0,
+     "l": 1,
      "gf": 1,
-     "ga": 1,
-     "gd": 0,
+     "ga": 7,
+     "gd": -6,
      "pts": 1,
      "fate": null
     }
    ],
    "notes": [
-    "⚠️ Group B: Bosnia and Herzegovina / Canada / Qatar / Switzerland level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
+    "Group B: overall goal difference/goals separate Canada / Switzerland (level on points and head-to-head).",
+    "Group B: overall goal difference/goals separate Bosnia and Herzegovina / Qatar (level on points and head-to-head)."
    ]
   },
   "C": {
@@ -518,123 +519,129 @@
    "rows": [
     {
      "pos": 1,
-     "team": "France",
+     "team": "Norway",
      "group": "I",
-     "p": 0,
-     "w": 0,
+     "p": 1,
+     "w": 1,
      "d": 0,
      "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
-     "pts": 0,
+     "gf": 4,
+     "ga": 1,
+     "gd": 3,
+     "pts": 3,
      "fate": null
     },
     {
      "pos": 2,
-     "team": "Iraq",
+     "team": "France",
      "group": "I",
-     "p": 0,
-     "w": 0,
+     "p": 1,
+     "w": 1,
      "d": 0,
      "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
-     "pts": 0,
+     "gf": 3,
+     "ga": 1,
+     "gd": 2,
+     "pts": 3,
      "fate": null
     },
     {
      "pos": 3,
-     "team": "Norway",
+     "team": "Senegal",
      "group": "I",
-     "p": 0,
+     "p": 1,
      "w": 0,
      "d": 0,
-     "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
+     "l": 1,
+     "gf": 1,
+     "ga": 3,
+     "gd": -2,
      "pts": 0,
      "fate": null
     },
     {
      "pos": 4,
-     "team": "Senegal",
+     "team": "Iraq",
      "group": "I",
-     "p": 0,
+     "p": 1,
      "w": 0,
      "d": 0,
-     "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
+     "l": 1,
+     "gf": 1,
+     "ga": 4,
+     "gd": -3,
      "pts": 0,
      "fate": null
     }
    ],
-   "notes": []
+   "notes": [
+    "Group I: overall goal difference/goals separate France / Norway (level on points and head-to-head).",
+    "Group I: overall goal difference/goals separate Iraq / Senegal (level on points and head-to-head)."
+   ]
   },
   "J": {
    "rows": [
     {
      "pos": 1,
-     "team": "Algeria",
+     "team": "Argentina",
      "group": "J",
-     "p": 0,
-     "w": 0,
+     "p": 1,
+     "w": 1,
      "d": 0,
      "l": 0,
-     "gf": 0,
+     "gf": 3,
      "ga": 0,
-     "gd": 0,
-     "pts": 0,
+     "gd": 3,
+     "pts": 3,
      "fate": null
     },
     {
      "pos": 2,
-     "team": "Argentina",
+     "team": "Austria",
      "group": "J",
-     "p": 0,
-     "w": 0,
+     "p": 1,
+     "w": 1,
      "d": 0,
      "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
-     "pts": 0,
+     "gf": 3,
+     "ga": 1,
+     "gd": 2,
+     "pts": 3,
      "fate": null
     },
     {
      "pos": 3,
-     "team": "Austria",
+     "team": "Jordan",
      "group": "J",
-     "p": 0,
+     "p": 1,
      "w": 0,
      "d": 0,
-     "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
+     "l": 1,
+     "gf": 1,
+     "ga": 3,
+     "gd": -2,
      "pts": 0,
      "fate": null
     },
     {
      "pos": 4,
-     "team": "Jordan",
+     "team": "Algeria",
      "group": "J",
-     "p": 0,
+     "p": 1,
      "w": 0,
      "d": 0,
-     "l": 0,
+     "l": 1,
      "gf": 0,
-     "ga": 0,
-     "gd": 0,
+     "ga": 3,
+     "gd": -3,
      "pts": 0,
      "fate": null
     }
    ],
-   "notes": []
+   "notes": [
+    "Group J: overall goal difference/goals separate Argentina / Austria (level on points and head-to-head).",
+    "Group J: overall goal difference/goals separate Algeria / Jordan (level on points and head-to-head)."
+   ]
   },
   "K": {
    "rows": [
@@ -642,121 +649,126 @@
      "pos": 1,
      "team": "Colombia",
      "group": "K",
-     "p": 0,
-     "w": 0,
+     "p": 1,
+     "w": 1,
      "d": 0,
      "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
-     "pts": 0,
+     "gf": 3,
+     "ga": 1,
+     "gd": 2,
+     "pts": 3,
      "fate": null
     },
     {
      "pos": 2,
      "team": "DR Congo",
      "group": "K",
-     "p": 0,
+     "p": 1,
      "w": 0,
-     "d": 0,
+     "d": 1,
      "l": 0,
-     "gf": 0,
-     "ga": 0,
+     "gf": 1,
+     "ga": 1,
      "gd": 0,
-     "pts": 0,
+     "pts": 1,
      "fate": null
     },
     {
      "pos": 3,
      "team": "Portugal",
      "group": "K",
-     "p": 0,
+     "p": 1,
      "w": 0,
-     "d": 0,
+     "d": 1,
      "l": 0,
-     "gf": 0,
-     "ga": 0,
+     "gf": 1,
+     "ga": 1,
      "gd": 0,
-     "pts": 0,
+     "pts": 1,
      "fate": null
     },
     {
      "pos": 4,
      "team": "Uzbekistan",
      "group": "K",
-     "p": 0,
+     "p": 1,
      "w": 0,
      "d": 0,
-     "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
+     "l": 1,
+     "gf": 1,
+     "ga": 3,
+     "gd": -2,
      "pts": 0,
      "fate": null
     }
    ],
-   "notes": []
+   "notes": [
+    "⚠️ Group K: DR Congo / Portugal level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
+   ]
   },
   "L": {
    "rows": [
     {
      "pos": 1,
-     "team": "Croatia",
+     "team": "England",
      "group": "L",
-     "p": 0,
-     "w": 0,
+     "p": 1,
+     "w": 1,
      "d": 0,
      "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
-     "pts": 0,
+     "gf": 4,
+     "ga": 2,
+     "gd": 2,
+     "pts": 3,
      "fate": null
     },
     {
      "pos": 2,
-     "team": "England",
+     "team": "Ghana",
      "group": "L",
-     "p": 0,
-     "w": 0,
+     "p": 1,
+     "w": 1,
      "d": 0,
      "l": 0,
-     "gf": 0,
+     "gf": 1,
      "ga": 0,
-     "gd": 0,
-     "pts": 0,
+     "gd": 1,
+     "pts": 3,
      "fate": null
     },
     {
      "pos": 3,
-     "team": "Ghana",
+     "team": "Panama",
      "group": "L",
-     "p": 0,
+     "p": 1,
      "w": 0,
      "d": 0,
-     "l": 0,
+     "l": 1,
      "gf": 0,
-     "ga": 0,
-     "gd": 0,
+     "ga": 1,
+     "gd": -1,
      "pts": 0,
      "fate": null
     },
     {
      "pos": 4,
-     "team": "Panama",
+     "team": "Croatia",
      "group": "L",
-     "p": 0,
+     "p": 1,
      "w": 0,
      "d": 0,
-     "l": 0,
-     "gf": 0,
-     "ga": 0,
-     "gd": 0,
+     "l": 1,
+     "gf": 2,
+     "ga": 4,
+     "gd": -2,
      "pts": 0,
      "fate": null
     }
    ],
-   "notes": []
+   "notes": [
+    "Group L: overall goal difference/goals separate England / Ghana (level on points and head-to-head).",
+    "Group L: overall goal difference/goals separate Croatia / Panama (level on points and head-to-head)."
+   ]
   }
  },
  "third_place": {
@@ -808,8 +820,8 @@
    },
    {
     "pos": 4,
-    "team": "Qatar",
-    "group": "B",
+    "team": "Portugal",
+    "group": "K",
     "p": 1,
     "w": 0,
     "d": 1,
@@ -838,81 +850,36 @@
    },
    {
     "pos": 6,
-    "team": "Austria",
-    "group": "J",
-    "p": 0,
+    "team": "Czechia",
+    "group": "A",
+    "p": 2,
     "w": 0,
-    "d": 0,
-    "l": 0,
-    "gf": 0,
-    "ga": 0,
-    "gd": 0,
-    "pts": 0,
+    "d": 1,
+    "l": 1,
+    "gf": 2,
+    "ga": 3,
+    "gd": -1,
+    "pts": 1,
     "qualifying": true,
     "fate": null
    },
    {
     "pos": 7,
-    "team": "Ghana",
-    "group": "L",
-    "p": 0,
+    "team": "Bosnia and Herzegovina",
+    "group": "B",
+    "p": 2,
     "w": 0,
-    "d": 0,
-    "l": 0,
-    "gf": 0,
-    "ga": 0,
-    "gd": 0,
-    "pts": 0,
+    "d": 1,
+    "l": 1,
+    "gf": 2,
+    "ga": 5,
+    "gd": -3,
+    "pts": 1,
     "qualifying": true,
     "fate": null
    },
    {
     "pos": 8,
-    "team": "Norway",
-    "group": "I",
-    "p": 0,
-    "w": 0,
-    "d": 0,
-    "l": 0,
-    "gf": 0,
-    "ga": 0,
-    "gd": 0,
-    "pts": 0,
-    "qualifying": true,
-    "fate": null
-   },
-   {
-    "pos": 9,
-    "team": "Portugal",
-    "group": "K",
-    "p": 0,
-    "w": 0,
-    "d": 0,
-    "l": 0,
-    "gf": 0,
-    "ga": 0,
-    "gd": 0,
-    "pts": 0,
-    "qualifying": false,
-    "fate": null
-   },
-   {
-    "pos": 10,
-    "team": "Czechia",
-    "group": "A",
-    "p": 1,
-    "w": 0,
-    "d": 0,
-    "l": 1,
-    "gf": 1,
-    "ga": 2,
-    "gd": -1,
-    "pts": 0,
-    "qualifying": false,
-    "fate": null
-   },
-   {
-    "pos": 11,
     "team": "Ecuador",
     "group": "E",
     "p": 1,
@@ -922,6 +889,51 @@
     "gf": 0,
     "ga": 1,
     "gd": -1,
+    "pts": 0,
+    "qualifying": true,
+    "fate": null
+   },
+   {
+    "pos": 9,
+    "team": "Panama",
+    "group": "L",
+    "p": 1,
+    "w": 0,
+    "d": 0,
+    "l": 1,
+    "gf": 0,
+    "ga": 1,
+    "gd": -1,
+    "pts": 0,
+    "qualifying": false,
+    "fate": null
+   },
+   {
+    "pos": 10,
+    "team": "Jordan",
+    "group": "J",
+    "p": 1,
+    "w": 0,
+    "d": 0,
+    "l": 1,
+    "gf": 1,
+    "ga": 3,
+    "gd": -2,
+    "pts": 0,
+    "qualifying": false,
+    "fate": null
+   },
+   {
+    "pos": 11,
+    "team": "Senegal",
+    "group": "I",
+    "p": 1,
+    "w": 0,
+    "d": 0,
+    "l": 1,
+    "gf": 1,
+    "ga": 3,
+    "gd": -2,
     "pts": 0,
     "qualifying": false,
     "fate": null
@@ -943,15 +955,17 @@
    }
   ],
   "notes": [
-   "⚠️ Third-place ranking: Belgium / Morocco / Qatar level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
+   "⚠️ Third-place ranking: Belgium / Morocco / Portugal level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.",
+   "⚠️ Third-place ranking: Ecuador / Panama level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.",
+   "⚠️ Third-place ranking: Jordan / Senegal level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-18 21:37",
+ "generated_at": "2026-06-18 21:42",
  "slate_date": "2026-06-18",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 16,
+  "as_of_matches_played": 27,
   "fully_projectable": false,
   "thirds_resolved": false,
   "r32": {
@@ -959,7 +973,7 @@
     "match": 73,
     "home": "South Korea",
     "home_label": "Runner-up A",
-    "away": "Canada",
+    "away": "Switzerland",
     "away_label": "Runner-up B",
     "provisional": true,
     "half": "top"
@@ -993,7 +1007,7 @@
    },
    "77": {
     "match": 77,
-    "home": null,
+    "home": "Norway",
     "home_label": "Winner I",
     "away": null,
     "away_label": "Best 3rd of C/D/F/G/H",
@@ -1004,7 +1018,7 @@
     "match": 78,
     "home": "Côte d'Ivoire",
     "home_label": "Runner-up E",
-    "away": null,
+    "away": "France",
     "away_label": "Runner-up I",
     "provisional": true,
     "half": "bottom"
@@ -1020,7 +1034,7 @@
    },
    "80": {
     "match": 80,
-    "home": null,
+    "home": "England",
     "home_label": "Winner L",
     "away": null,
     "away_label": "Best 3rd of E/H/I/J/K",
@@ -1047,9 +1061,9 @@
    },
    "83": {
     "match": 83,
-    "home": null,
+    "home": "DR Congo",
     "home_label": "Runner-up K",
-    "away": null,
+    "away": "Ghana",
     "away_label": "Runner-up L",
     "provisional": true,
     "half": "top"
@@ -1058,14 +1072,14 @@
     "match": 84,
     "home": "Saudi Arabia",
     "home_label": "Winner H",
-    "away": null,
+    "away": "Austria",
     "away_label": "Runner-up J",
     "provisional": true,
     "half": "top"
    },
    "85": {
     "match": 85,
-    "home": "Bosnia and Herzegovina",
+    "home": "Canada",
     "home_label": "Winner B",
     "away": null,
     "away_label": "Best 3rd of E/F/G/I/J",
@@ -1074,7 +1088,7 @@
    },
    "86": {
     "match": 86,
-    "home": null,
+    "home": "Argentina",
     "home_label": "Winner J",
     "away": "Uruguay",
     "away_label": "Runner-up H",
@@ -1083,7 +1097,7 @@
    },
    "87": {
     "match": 87,
-    "home": null,
+    "home": "Colombia",
     "home_label": "Winner K",
     "away": null,
     "away_label": "Best 3rd of D/E/I/J/L",
@@ -1163,12 +1177,14 @@
    ]
   },
   "third_place_match": 103,
-  "warnings": [],
+  "warnings": [
+   "Third-place cutline is provisional (teams level on all modelled criteria) — the eight winner-vs-third matches are not resolved."
+  ],
   "winners": {
    "73": {
-    "team": "Canada",
+    "team": "Switzerland",
     "loser": "South Korea",
-    "p": 0.5207138441573352,
+    "p": 0.7277998337094367,
     "source": "model"
    },
    "75": {
@@ -1183,6 +1199,30 @@
     "p": 0.7254229021379162,
     "source": "model"
    },
+   "78": {
+    "team": "France",
+    "loser": "Côte d'Ivoire",
+    "p": 0.8847477558129142,
+    "source": "model"
+   },
+   "83": {
+    "team": "DR Congo",
+    "loser": "Ghana",
+    "p": 0.6544295297961386,
+    "source": "model"
+   },
+   "84": {
+    "team": "Austria",
+    "loser": "Saudi Arabia",
+    "p": 0.8493698246459547,
+    "source": "model"
+   },
+   "86": {
+    "team": "Argentina",
+    "loser": "Uruguay",
+    "p": 0.7756329438165969,
+    "source": "model"
+   },
    "88": {
     "team": "Australia",
     "loser": "New Zealand",
@@ -1191,15 +1231,33 @@
    },
    "90": {
     "team": "Brazil",
-    "loser": "Canada",
-    "p": 0.8769332364359121,
+    "loser": "Switzerland",
+    "p": 0.7599746624456551,
+    "source": "model"
+   },
+   "91": {
+    "team": "France",
+    "loser": "Japan",
+    "p": 0.7456651264084555,
+    "source": "model"
+   },
+   "93": {
+    "team": "Austria",
+    "loser": "DR Congo",
+    "p": 0.7621359496923451,
+    "source": "model"
+   },
+   "95": {
+    "team": "Argentina",
+    "loser": "Australia",
+    "p": 0.8837441548956477,
     "source": "model"
    }
   },
   "participants": {
    "73": [
     "South Korea",
-    "Canada"
+    "Switzerland"
    ],
    "75": [
     "Sweden",
@@ -1209,13 +1267,41 @@
     "Scotland",
     "Japan"
    ],
+   "78": [
+    "Côte d'Ivoire",
+    "France"
+   ],
+   "83": [
+    "DR Congo",
+    "Ghana"
+   ],
+   "84": [
+    "Saudi Arabia",
+    "Austria"
+   ],
+   "86": [
+    "Argentina",
+    "Uruguay"
+   ],
    "88": [
     "Australia",
     "New Zealand"
    ],
    "90": [
-    "Canada",
+    "Switzerland",
     "Brazil"
+   ],
+   "91": [
+    "Japan",
+    "France"
+   ],
+   "93": [
+    "DR Congo",
+    "Austria"
+   ],
+   "95": [
+    "Argentina",
+    "Australia"
    ]
   },
   "champion": null
