@@ -49,7 +49,9 @@ FIXTURES = REPO / "data" / "fixtures.csv"
 DRD_LOG = REPO / "data" / "edge_drd_log.csv"
 TAG = "deserved-result-divergence"
 FUTI_PRE = "World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv"   # 6/12, pre-tournament
-FUTI_NOW = "World_Cup_2026_Futi_6_18.csv"                                        # 6/18, post-MD1
+FUTI_NOW = P.FUTI_FILE   # the production vintage (6/18 today) — follows predict.py so the live
+#                          board/log never go stale when the Futi file is bumped. FUTI_PRE stays
+#                          fixed: it's the pre-tournament file used for leak-free MD1 validation.
 
 LOG_COLS = ["match_id", "side", "team", "as_of", "model_p", "market_p", "drd_edge",
             "process_lean", "market_capture", "price_decimal", "price_american", "book",
@@ -100,9 +102,10 @@ def team_gaps(proc) -> dict:
     return {t: zf[t] - ze[t] for t in proc.teams}
 
 
-def market_wdl(odds_rows: list, mid: str) -> tuple | None:
-    """De-vigged consensus (home, draw, away) from the latest median h2h snapshot."""
-    m = O.latest_market(odds_rows, mid, "h2h", phase="snapshot", source_prefix="median")
+def market_wdl(odds_rows: list, mid: str, phase: str = "snapshot") -> tuple | None:
+    """De-vigged consensus (home, draw, away) from the latest median h2h rows for
+    the given phase (snapshot for the price we took, closing for CLV)."""
+    m = O.latest_market(odds_rows, mid, "h2h", phase=phase, source_prefix="median")
     try:
         h, d, a = m[("home", "")][0], m[("draw", "")][0], m[("away", "")][0]
     except KeyError:
@@ -289,14 +292,20 @@ def cmd_report(args) -> None:
     fx = {r["match_id"]: r for r in fixtures()}
     clvs, wins, n_settled = [], 0, 0
     for r in rows:
-        # CLV from a true closing snapshot, if one exists
-        mkt_close = market_wdl([o for o in odds_rows if o["phase"] == "closing"], r["match_id"]) \
-            if any(o["phase"] == "closing" and o["match_id"] == r["match_id"] for o in odds_rows) else None
-        if mkt_close:
-            idx = {"home": 0, "away": 2}[r["side"]]
-            clv = (mkt_close[idx] - float(r["snapshot_implied"])) * 100
-            r["closing_implied"], r["clv_pp"] = f"{mkt_close[idx]:.4f}", f"{clv:+.1f}"
-            clvs.append(clv)
+        # CLV only against a TRUE closing line (within CLOSING_WINDOW before kickoff) —
+        # reuse odds.py's guard so far-out 'closing'-tagged rows don't fake a ~0 CLV
+        f = fx.get(r["match_id"])
+        try:
+            ko = L.kickoff_dt(f) if f else None
+        except Exception:
+            ko = None
+        if ko is not None and O._closing_is_timely(odds_rows, {"match_id": r["match_id"], "market": "h2h"}, ko):
+            mkt_close = market_wdl(odds_rows, r["match_id"], phase="closing")
+            if mkt_close:
+                idx = {"home": 0, "away": 2}[r["side"]]
+                clv = (mkt_close[idx] - float(r["snapshot_implied"])) * 100
+                r["closing_implied"], r["clv_pp"] = f"{mkt_close[idx]:.4f}", f"{clv:+.1f}"
+                clvs.append(clv)
         # settle result if played
         f = fx.get(r["match_id"])
         if f and (f.get("status") or "").strip().lower() == "played":

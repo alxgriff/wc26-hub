@@ -91,6 +91,19 @@ jobs:
         continue-on-error: true
         run: python scripts/odds.py evaluate "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
 
+      # Experimental edge-hypothesis tracker (deserved-result divergence). Fail-soft and
+      # deliberately NOT in the health gate below — a tracker bug must never block the
+      # publish. `log` appends qualifying upcoming picks priced off the fresh snapshot
+      # market; `report` computes CLV-by-tag against TRUE closing lines and settles
+      # finished picks. Paper only (stake 0); writes data/edge_drd_log.csv (in `git add data`).
+      - name: DRD edge tracker — log qualifying picks (paper)
+        continue-on-error: true
+        run: python scripts/edge_drd.py log | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: DRD edge tracker — settle + CLV-by-tag
+        continue-on-error: true
+        run: python scripts/edge_drd.py report | tee -a "$GITHUB_STEP_SUMMARY"
+
       # HARD gate — a broken build blocks the push rather than deploying a corrupt page.
       - name: Build site
         run: python scripts/build_site.py --date "${{ steps.ed.outputs.date }}"
