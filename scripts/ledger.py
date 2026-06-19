@@ -75,14 +75,17 @@ def brier(p: tuple, outcome: int) -> float:
 
 
 def rps(p: tuple, outcome: int) -> float:
-    """Ranked Probability Score for ORDERED outcomes (home > draw > away — the
-    goal-difference axis). Reported ALONGSIDE Brier, not instead of it (Brier is
-    the CLAUDE.md contract). Unlike Brier, RPS uses the ordering: it penalises a
-    near-miss less — predicting a DRAW when the home side wins costs less than
-    predicting an AWAY win, because draw is adjacent to home on the W-D-L scale.
-    This is why the football-forecasting literature (Constantinou & Fenton 2012)
-    treats RPS as the appropriate metric for 1X2. Range 0 (perfect) to 1 (all mass
-    on the opposite extreme); lower is better. outcome: 0=home, 1=draw, 2=away."""
+    """Ranked Probability Score for ORDERED outcomes. The order is the GOAL-MARGIN
+    axis — team_a win (GD>0) → draw (GD=0) → team_b win (GD<0) — NOT home advantage,
+    so it is fully meaningful for the neutral-venue WC group games: a draw is the
+    middle outcome on margin regardless of venue. ('home/away' here just label
+    team_a/team_b.) Reported ALONGSIDE Brier, not instead of it (Brier is the
+    CLAUDE.md contract). Unlike Brier, RPS uses the ordering: when wrong, missing
+    toward the DRAW (the middle) costs less than flipping to the opposite team's
+    win — which is why the literature (Constantinou & Fenton 2012) prefers it for
+    1X2, and it matters here given the ~25-30% group-stage draw rate. Range 0
+    (perfect) to 1 (all mass on the opposite extreme); lower is better.
+    outcome: 0=team_a win, 1=draw, 2=team_b win."""
     cum_p = (p[0], p[0] + p[1])                       # cumulative predicted (3rd term is 1≡1)
     cum_o = ((1.0, 1.0), (0.0, 1.0), (0.0, 0.0))[outcome]
     return 0.5 * sum((cum_p[i] - cum_o[i]) ** 2 for i in range(2))
