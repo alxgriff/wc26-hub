@@ -302,14 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -571,32 +563,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <p class="sr-only">United States win 38 percent, draw 27 percent, Australia win 35 percent.</p>
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:38">38%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:35">35%</span></div>
   <div class="scale" aria-hidden="true"><span>United States 38%</span><span>draw 27%</span><span>Australia 35%</span></div>
-  <p class="factline">most likely score <b>1–1</b> · expected goals <b>2.56</b> · over 2.5 <b>47%</b> · both score <b>52%</b><br>single source: rating model (Elo+Futi) · home-field bonus: United States</p>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (conf-tuned)</p>
-    <p class="sr-only">Structural (conf-tuned) says United States win 35 percent, draw 27 percent, Australia win 39 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:35">35%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:39">39%</span></div>
-    <div class="scale" aria-hidden="true"><span>United States 35%</span><span>draw 27%</span><span>Australia 39%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (no Elo)</p>
-    <p class="sr-only">100% Futi (no Elo) says United States win 38 percent, draw 27 percent, Australia win 36 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:38">38%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:36">36%</span></div>
-    <div class="scale" aria-hidden="true"><span>United States 38%</span><span>draw 27%</span><span>Australia 36%</span></div>
-  </div>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1)</p>
-    <p class="sr-only">Structural (post-MD1) says United States win 37 percent, draw 27 percent, Australia win 36 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:37">37%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:36">36%</span></div>
-    <div class="scale" aria-hidden="true"><span>United States 37%</span><span>draw 27%</span><span>Australia 36%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1)</p>
-    <p class="sr-only">100% Futi (post-MD1) says United States win 38 percent, draw 27 percent, Australia win 35 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:38">38%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:35">35%</span></div>
-    <div class="scale" aria-hidden="true"><span>United States 38%</span><span>draw 27%</span><span>Australia 35%</span></div>
-  </div>
+  <p class="factline">most likely score <b>1–1</b> · expected goals <b>2.52</b> · over 2.5 <b>46%</b> · both score <b>51%</b><br>single source: rating model (Elo+Futi) · home-field bonus: United States</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> US favored at home; Australia's structure compresses the margin.</p></blockquote></div>
 </section>
@@ -662,7 +629,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Sweat Factor</span>
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
-<div class="placeholder-slot">Sweat Factor forecast pending — this match is not yet within the 16-day Open-Meteo forecast window. The section fills automatically once available; no data is invented.</div>
+<div class="conditions">
+  <span class="cond-stamp">Forecast · as of 2026-06-19 08:21 ET</span>
+  <p class="cond-stats">~75°F · moderate humidity (49% RH) · WBGT 73.6°F</p>
+  <div class="cond-track" aria-label="Match heat index: High (36/100)"><div class="cond-fill" style="width:36%"></div></div>
+  <p class="cond-sev cond-sev-high">High</p>
+  <p class="cond-blurb">Hot match-up, and a real edge for United States: Australia are +15°F above their home climate while United States are well-adapted to this heat.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">United States</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-5.0°F vs home</span></div><div class="cond-team"><span class="cond-tname">Australia</span><div class="cond-dis-track" aria-label="Heat disadvantage 83/100"><div class="cond-dis-fill cond-dis-hot" style="width:83%"></div></div><span class="cond-delta">+14.9°F vs home</span></div></div>
+</div>
 </section>
 
 <section aria-labelledby="card-h" class="read-grid">
@@ -682,29 +656,48 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </div>
 </section>
 
-
+<section aria-labelledby="wire-h">
+  <div class="sec-head">
+    <span class="kicker">The Wire</span>
+    <h2 id="wire-h">What's being reported</h2>
+  </div>
+  <div class="wire">
+    <p class="wire-tag">Auto-gathered 2026-06-19 · every claim carries its source · relayed as reporting, not verified by the hub — click through before it bears weight.</p>
+<ul><li><strong>Christian Pulisic (USA):</strong> Pulisic limped off in the victory over Paraguay, but recent reports indicate that he will be fit to feature in this game. (source: <a href="https://www.espn.com/soccer/story/_/id/49093966/fifa-world-cup-2026-usmnt-vs-australia-channel-how-watch-kickoff-live-stream-referee-predicted-lineups" rel="nofollow">https://www.espn.com/soccer/story/_/id/49093966/fifa-world-cup-2026-usmnt-vs-australia-channel-how-watch-kickoff-live-stream-referee-predicted-lineups</a>)</li></ul>
+<ul><li><strong>Pulisic fitness concern context:</strong> CBS Sports reported that with a spot in the knockout stage on the line, the USMNT may have to face Australia without captain Christian Pulisic due to a calf issue. (source: <a href="https://www.cbssports.com/soccer/news/usmnt-projected-world-cup-lineup-australia-christian-pulisic-injury-usa-soccer/" rel="nofollow">https://www.cbssports.com/soccer/news/usmnt-projected-world-cup-lineup-australia-christian-pulisic-injury-usa-soccer/</a>)</li></ul>
+<ul><li><strong>Injury/suspension list:</strong> No players are currently reported injured or suspended for either USA or Australia according to the World Cup injury tracker. (source: <a href="https://www.sportsgambler.com/injuries/football/fifa-world-cup/" rel="nofollow">https://www.sportsgambler.com/injuries/football/fifa-world-cup/</a>)</li></ul>
+<ul><li><strong>Australia lineup:</strong> Tony Popovic has kept his cards close to his chest. No injuries or suspensions have been confirmed for the Socceroos, and no probable lineup has been released. (source: <a href="https://www.goal.com/en-sa/news/usa-australia-world-cup-preview/blt5390354708818a6c" rel="nofollow">https://www.goal.com/en-sa/news/usa-australia-world-cup-preview/blt5390354708818a6c</a>)</li></ul>
+<ul><li><strong>USA predicted XI (Sports Mole):</strong> Freese; Freeman, Richards, Ream, Robinson; Adams, Tillman; Dest, McKennie, Pulisic; Balogun. (source: <a href="https://www.sportsmole.co.uk/football/usa/world-cup-2026/team-news/usa-vs-australia-injury-suspension-list-predicted-xis_599443.html" rel="nofollow">https://www.sportsmole.co.uk/football/usa/world-cup-2026/team-news/usa-vs-australia-injury-suspension-list-predicted-xis_599443.html</a>)</li></ul>
+  </div>
+</section>
 
 <section aria-labelledby="odds-h">
   <div class="sec-head">
     <span class="kicker">The Market</span>
     <h2 id="odds-h">Odds &amp; best bet</h2>
   </div>
-<p class="odds-note">model projection: <b>2.56</b> total goals · over 1.5 <b>73%</b> · over 2.5 <b>47%</b> · over 3.5 <b>26%</b></p>
+<p class="odds-note">model projection: <b>2.52</b> total goals · over 1.5 <b>72%</b> · over 2.5 <b>46%</b> · over 3.5 <b>25%</b></p>
 <div class="edge-wrap">
   <table>
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.95 decimal">-105</td><td>49%</td><td>47%</td><td class="edge-neg">-1.7%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.87 decimal">-115</td><td>51%</td><td>53%</td><td class="">+1.7%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">United States -1</td><td title="2.08 decimal">+108</td><td>47%</td><td>22%</td><td class="edge-neg">-25.0%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Australia +1</td><td title="1.81 decimal">-123</td><td>53%</td><td>78%</td><td class="edge-pos">+25.0%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">United States</td><td title="1.62 decimal">-161</td><td>59%</td><td>38%</td><td class="edge-neg">-21.5%</td></tr>
+      <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="4.30 decimal">+330</td><td>22%</td><td>27%</td><td class="edge-pos">+4.5%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Australia</td><td title="5.25 decimal">+425</td><td>18%</td><td>35%</td><td class="edge-pos">+17.1%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.87 decimal">-115</td><td>51%</td><td>46%</td><td class="edge-neg">-4.7%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.94 decimal">-106</td><td>49%</td><td>54%</td><td class="edge-pos">+4.7%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">United States -1</td><td title="2.08 decimal">+108</td><td>47%</td><td>21%</td><td class="edge-neg">-25.3%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Australia +1</td><td title="1.81 decimal">-123</td><td>53%</td><td>79%</td><td class="edge-pos">+25.3%</td></tr>
     </tbody>
   </table>
 </div>
-<p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
-<p class="verify-flag">spreads away 1: model-priced edge +25.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 18, 7:08 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<div class="bet-callout"><span class="tag">Best bets — top 2, ≥4% edge</span><p>1. <strong>Under 2.5</strong> (Total goals) @ -106, edge <strong>+4.7%</strong> — best price -102 (bovada). Flat 1u, paper record.</p><p>2. <strong>Draw</strong> (1X2) @ +330, edge <strong>+4.5%</strong> — best price +330 (draftkings). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p></div>
+<p class="odds-note">Logged pick: Under 2.5 @ -102 (bovada), edge 4.7pp · open.</p>
+<p class="odds-note">Logged pick: Draw @ +330 (draftkings), edge 4.5pp · open.</p>
+<p class="verify-flag">h2h away: edge +17.1% implausibly large — verify odds freshness and team news before trusting</p>
+<p class="verify-flag">spreads away 1: model-priced edge +25.3% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 19, 8:21 AM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> under 2.5; US to win to nil.</p></blockquote></div>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
@@ -728,7 +721,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.3088,lb=1.2553,N=8,SHOW=6,i,j;
+  var la=1.2881,lb=1.2365,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

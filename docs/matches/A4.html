@@ -302,14 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -550,7 +542,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   </nav>
   <p class="eyebrow">WC26 Daily Hub · Matchup Preview · Pre-baked June 11, verified day-of</p>
   <h1><a href="../teams/mexico.html">Mexico</a><span class="vs">v</span><a href="../teams/south-korea.html">South Korea</a></h1>
-  
+  <p class="scoreline">1–0<span class="sr-only"> — final score: Mexico 1, South Korea 0</span></p>
   <div class="metaline">
     <span class="stamp">A4</span>
     <span>Group A · Matchday 2</span>
@@ -571,32 +563,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <p class="sr-only">Mexico win 59 percent, draw 24 percent, South Korea win 17 percent.</p>
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:59">59%</span><span class="pd" style="flex:24">24%</span><span class="pb" style="flex:17">17%</span></div>
   <div class="scale" aria-hidden="true"><span>Mexico 59%</span><span>draw 24%</span><span>South Korea 17%</span></div>
-  <p class="factline">most likely score <b>1–0</b> · expected goals <b>2.52</b> · over 2.5 <b>46%</b> · both score <b>45%</b><br>single source: rating model (Elo+Futi) · home-field bonus: Mexico</p>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (conf-tuned)</p>
-    <p class="sr-only">Structural (conf-tuned) says Mexico win 56 percent, draw 24 percent, South Korea win 19 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:56">56%</span><span class="pd" style="flex:24">24%</span><span class="pb" style="flex:19">19%</span></div>
-    <div class="scale" aria-hidden="true"><span>Mexico 56%</span><span>draw 24%</span><span>South Korea 19%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (no Elo)</p>
-    <p class="sr-only">100% Futi (no Elo) says Mexico win 55 percent, draw 25 percent, South Korea win 21 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:55">55%</span><span class="pd" style="flex:25">25%</span><span class="pb" style="flex:21">21%</span></div>
-    <div class="scale" aria-hidden="true"><span>Mexico 55%</span><span>draw 25%</span><span>South Korea 21%</span></div>
-  </div>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1)</p>
-    <p class="sr-only">Structural (post-MD1) says Mexico win 58 percent, draw 24 percent, South Korea win 18 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:58">58%</span><span class="pd" style="flex:24">24%</span><span class="pb" style="flex:18">18%</span></div>
-    <div class="scale" aria-hidden="true"><span>Mexico 58%</span><span>draw 24%</span><span>South Korea 18%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1)</p>
-    <p class="sr-only">100% Futi (post-MD1) says Mexico win 56 percent, draw 24 percent, South Korea win 19 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:56">56%</span><span class="pd" style="flex:24">24%</span><span class="pb" style="flex:19">19%</span></div>
-    <div class="scale" aria-hidden="true"><span>Mexico 56%</span><span>draw 24%</span><span>South Korea 19%</span></div>
-  </div>
+  <p class="factline">predicted score <b>1-0</b><br>published consensus — logged Jun 18, 1:09 AM ET, pre-kickoff<br><b>Graded:</b> final 1–0 (Mexico win) · the logged call had it at <b>59%</b> · Brier <b>0.252</b> (0 best · 0.667 coin-flip · 2 worst)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Mexico at altitude-adjacent home comfort, narrowly.</p></blockquote></div>
 </section>
@@ -606,34 +573,34 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Stakes</span>
     <h2 id="stakes-h">The table as it stands</h2>
   </div>
-  <p class="standfirst">After 3 matches in Group A: Mexico 1st on 3 pts (1-0-0, +2 GD), South Korea 2nd on 3 pts (1-0-0, +1 GD). Mexico and South Korea share the lead on 3 pts; both hold top-two places as it stands.</p>
+  <p class="standfirst">After 4 matches in Group A: Mexico 1st on 6 pts (2-0-0, +3 GD), South Korea 2nd on 3 pts (1-0-1, 0 GD). Mexico lead the group on 6 pts; both hold top-two places as it stands.</p>
 
   <div class="mini-table">
 <article class="card" id="group-a" style="--i:0" aria-labelledby="gh-a">
-  <h3 id="gh-a"><span class="stamp" aria-hidden="true">A</span>Group A<span class="played-tag">3/6 played</span></h3>
+  <h3 id="gh-a"><span class="stamp" aria-hidden="true">A</span>Group A<span class="played-tag">4/6 played</span></h3>
   <table>
-    <caption class="sr-only">Group A standings after 3 of 6 matches</caption>
+    <caption class="sr-only">Group A standings after 4 of 6 matches</caption>
     <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Mexico"><a href="../teams/mexico.html">Mexico</a><span class="dag">†</span></th>
-        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, not yet played, not yet played</span></td>
-        <td>2</td>
-        <td>+2</td>
-        <td class="pts">3</td>
+        <th class="team" scope="row" title="Mexico"><a href="../teams/mexico.html">Mexico</a></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, won, not yet played</span></td>
+        <td>3</td>
+        <td>+3</td>
+        <td class="pts">6</td>
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="South Korea"><a href="../teams/south-korea.html">South Korea</a><span class="dag">†</span></th>
-        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, not yet played, not yet played</span></td>
+        <th class="team" scope="row" title="South Korea"><a href="../teams/south-korea.html">South Korea</a></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, lost, not yet played</span></td>
         <td>2</td>
-        <td>+1</td>
+        <td>0</td>
         <td class="pts">3</td>
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Czechia"><a href="../teams/czechia.html">Czechia</a><span class="dag">‡</span></th>
+        <th class="team" scope="row" title="Czechia"><a href="../teams/czechia.html">Czechia</a><span class="dag">†</span></th>
         <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">lost, drew, not yet played</span></td>
         <td>2</td>
         <td>-1</td>
@@ -641,7 +608,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="South Africa"><a href="../teams/south-africa.html">South Africa</a><span class="dag">‡</span></th>
+        <th class="team" scope="row" title="South Africa"><a href="../teams/south-africa.html">South Africa</a><span class="dag">†</span></th>
         <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">lost, drew, not yet played</span></td>
         <td>1</td>
         <td>-2</td>
@@ -650,8 +617,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     </tbody>
   </table>
   <ul class="notes">
-    <li><span class="dag">†</span> overall goal difference/goals separate Mexico / South Korea (level on points and head-to-head).</li>
-    <li><span class="dag">‡</span> overall goal difference/goals separate Czechia / South Africa (level on points and head-to-head).</li>
+    <li><span class="dag">†</span> overall goal difference/goals separate Czechia / South Africa (level on points and head-to-head).</li>
   </ul>
 </article>
   </div>
@@ -663,12 +629,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
 <div class="conditions">
-  <span class="cond-stamp">Forecast · as of 2026-06-18 08:09 ET</span>
-  <p class="cond-stats">~70°F · moderate humidity (69% RH) · WBGT 72.8°F</p>
-  <div class="cond-track" aria-label="Match heat index: Moderate (33/100)"><div class="cond-fill" style="width:33%"></div></div>
+  <span class="cond-stamp">Actual · as of 2026-06-19 08:21 ET</span>
+  <p class="cond-stats">~70°F · humid (80% RH) · WBGT 74.4°F</p>
+  <div class="cond-track" aria-label="Match heat index: Moderate (40/100)"><div class="cond-fill" style="width:40%"></div></div>
   <p class="cond-sev cond-sev-moderate">Moderate</p>
-  <p class="cond-blurb">Warm out; Mexico are +5°F outside their comfort zone while South Korea are the better-acclimated side.</p>
-  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Mexico</span><div class="cond-dis-track" aria-label="Heat disadvantage 30/100"><div class="cond-dis-fill" style="width:30%"></div></div><span class="cond-delta">+5.3°F vs home</span></div><div class="cond-team"><span class="cond-tname">South Korea</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-7.1°F vs home</span></div></div>
+  <p class="cond-blurb">Warm out; Mexico are +7°F outside their comfort zone while South Korea are the better-acclimated side.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Mexico</span><div class="cond-dis-track" aria-label="Heat disadvantage 38/100"><div class="cond-dis-fill" style="width:38%"></div></div><span class="cond-delta">+6.9°F vs home</span></div><div class="cond-team"><span class="cond-tname">South Korea</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-5.5°F vs home</span></div></div>
 </div>
 </section>
 
@@ -709,7 +675,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">The Market</span>
     <h2 id="odds-h">Odds &amp; best bet</h2>
   </div>
-<p class="odds-note">model projection: <b>2.52</b> total goals · over 1.5 <b>72%</b> · over 2.5 <b>46%</b> · over 3.5 <b>25%</b></p>
+<p class="odds-note">model projection: <b>2.48</b> total goals · over 1.5 <b>71%</b> · over 2.5 <b>45%</b> · over 3.5 <b>24%</b></p>
 <div class="edge-wrap">
   <table>
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
@@ -718,19 +684,19 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">Mexico</td><td title="2.00 decimal">+100</td><td>48%</td><td>59%</td><td class="edge-pos">+11.2%</td></tr>
       <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="3.30 decimal">+230</td><td>29%</td><td>24%</td><td class="edge-neg">-5.5%</td></tr>
       <tr><td class="lbl">1X2</td><td class="lbl">South Korea</td><td title="4.20 decimal">+320</td><td>23%</td><td>17%</td><td class="edge-neg">-5.7%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td title="1.62 decimal">-161</td><td>60%</td><td>62%</td><td class="">+1.9%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td title="2.43 decimal">+143</td><td>40%</td><td>38%</td><td class="edge-neg">-1.9%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.14 decimal">+114</td><td>45%</td><td>46%</td><td class="">+1.2%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.74 decimal">-135</td><td>55%</td><td>54%</td><td class="edge-neg">-1.2%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Mexico -0.5</td><td title="2.04 decimal">+104</td><td>47%</td><td>59%</td><td class="edge-pos">+11.9%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">South Korea +0.5</td><td title="1.83 decimal">-120</td><td>53%</td><td>41%</td><td class="edge-neg">-11.9%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td title="1.62 decimal">-161</td><td>60%</td><td>61%</td><td class="">+0.6%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td title="2.43 decimal">+143</td><td>40%</td><td>39%</td><td class="edge-neg">-0.6%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.14 decimal">+114</td><td>45%</td><td>45%</td><td class="">+0.2%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.74 decimal">-135</td><td>55%</td><td>55%</td><td class="edge-neg">-0.2%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Mexico -0.5</td><td title="2.04 decimal">+104</td><td>47%</td><td>59%</td><td class="edge-pos">+11.8%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">South Korea +0.5</td><td title="1.83 decimal">-120</td><td>53%</td><td>41%</td><td class="edge-neg">-11.8%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Mexico</strong> (1X2) @ +100, edge <strong>+11.2%</strong> — best price +100 (draftkings). Flat 1u, paper record.</p></div>
-<p class="odds-note">Logged pick: Over 2 @ -125 (betus), edge 7.9pp · open.</p>
-<p class="odds-note">Logged pick: Mexico @ +105 (draftkings), edge 12.5pp · open.</p>
-<p class="verify-flag">spreads home -0.5: model-priced edge +11.9% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Mexico</strong> (1X2), model edge <strong>+11.2%</strong></p><p class="odds-note">the model likes this, but the line is over 12h old (the book hasn't reposted), so it is <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
+<p class="odds-note">Logged pick: Over 2 @ -125 (betus), edge 7.9pp · settled <b>lost</b> for -1.00u · CLV +6.1pp.</p>
+<p class="odds-note">Logged pick: Mexico @ +105 (draftkings), edge 12.5pp · settled <b>won</b> for +1.05u · CLV +1.3pp.</p>
+<p class="verify-flag">spreads home -0.5: model-priced edge +11.8% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 18, 7:08 PM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 2 can push (P 26%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> Mexico DNB; under.</p></blockquote></div>
 <details class="outcome-grid-wrap">
@@ -755,7 +721,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.7167,lb=0.8001,N=8,SHOW=6,i,j;
+  var la=1.6934,lb=0.7828,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

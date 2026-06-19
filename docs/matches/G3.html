@@ -302,14 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -568,35 +560,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Belgium win 62 percent, draw 22 percent, Iran win 17 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:62">62%</span><span class="pd" style="flex:22">22%</span><span class="pb" style="flex:17">17%</span></div>
-  <div class="scale" aria-hidden="true"><span>Belgium 62%</span><span>draw 22%</span><span>Iran 17%</span></div>
-  <p class="factline">most likely score <b>1–0</b> · expected goals <b>2.80</b> · over 2.5 <b>53%</b> · both score <b>50%</b><br>single source: rating model (Elo+Futi)</p>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (conf-tuned)</p>
-    <p class="sr-only">Structural (conf-tuned) says Belgium win 59 percent, draw 22 percent, Iran win 19 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:59">59%</span><span class="pd" style="flex:22">22%</span><span class="pb" style="flex:19">19%</span></div>
-    <div class="scale" aria-hidden="true"><span>Belgium 59%</span><span>draw 22%</span><span>Iran 19%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (no Elo)</p>
-    <p class="sr-only">100% Futi (no Elo) says Belgium win 65 percent, draw 21 percent, Iran win 14 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:65">65%</span><span class="pd" style="flex:21">21%</span><span class="pb" style="flex:14">14%</span></div>
-    <div class="scale" aria-hidden="true"><span>Belgium 65%</span><span>draw 21%</span><span>Iran 14%</span></div>
-  </div>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1)</p>
-    <p class="sr-only">Structural (post-MD1) says Belgium win 61 percent, draw 22 percent, Iran win 17 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:61">61%</span><span class="pd" style="flex:22">22%</span><span class="pb" style="flex:17">17%</span></div>
-    <div class="scale" aria-hidden="true"><span>Belgium 61%</span><span>draw 22%</span><span>Iran 17%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1)</p>
-    <p class="sr-only">100% Futi (post-MD1) says Belgium win 65 percent, draw 21 percent, Iran win 15 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:65">65%</span><span class="pd" style="flex:21">21%</span><span class="pb" style="flex:15">15%</span></div>
-    <div class="scale" aria-hidden="true"><span>Belgium 65%</span><span>draw 21%</span><span>Iran 15%</span></div>
-  </div>
+  <p class="sr-only">Belgium win 63 percent, draw 21 percent, Iran win 16 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:63">63%</span><span class="pd" style="flex:21">21%</span><span class="pb" style="flex:16">16%</span></div>
+  <div class="scale" aria-hidden="true"><span>Belgium 63%</span><span>draw 21%</span><span>Iran 16%</span></div>
+  <p class="factline">most likely score <b>1–0</b> · expected goals <b>2.87</b> · over 2.5 <b>55%</b> · both score <b>51%</b><br>single source: rating model (Elo+Futi)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Belgium favored; Iran's counter geometry keeps it nervous.</p></blockquote></div>
 </section>
@@ -690,21 +657,21 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">The Market</span>
     <h2 id="odds-h">Odds &amp; best bet</h2>
   </div>
-<p class="odds-note">model projection: <b>2.80</b> total goals · over 1.5 <b>77%</b> · over 2.5 <b>53%</b> · over 3.5 <b>31%</b></p>
+<p class="odds-note">model projection: <b>2.87</b> total goals · over 1.5 <b>78%</b> · over 2.5 <b>55%</b> · over 3.5 <b>32%</b></p>
 <div class="edge-wrap">
   <table>
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.85 decimal">-118</td><td>52%</td><td>53%</td><td class="">+1.3%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.98 decimal">-102</td><td>48%</td><td>47%</td><td class="edge-neg">-1.3%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Belgium -1</td><td title="1.67 decimal">-150</td><td>57%</td><td>49%</td><td class="edge-neg">-7.8%</td></tr>
-      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Iran +1</td><td title="2.19 decimal">+118</td><td>43%</td><td>51%</td><td class="edge-pos">+7.8%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.82 decimal">-122</td><td>52%</td><td>55%</td><td class="">+2.6%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.98 decimal">-102</td><td>48%</td><td>45%</td><td class="edge-neg">-2.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Belgium -1</td><td title="1.68 decimal">-148</td><td>56%</td><td>51%</td><td class="edge-neg">-5.8%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Iran +1</td><td title="2.17 decimal">+117</td><td>44%</td><td>49%</td><td class="edge-pos">+5.8%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Iran +1</strong> (Asian handicap) @ +118, edge <strong>+7.8%</strong> — best price +125 (betus). Flat 1u, paper record.</p></div>
-<p class="odds-note">market snapshot Jun 18, 7:08 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Iran +1</strong> (Asian handicap) @ +117, edge <strong>+5.8%</strong> — best price +125 (betus). Flat 1u, paper record.</p></div>
+<p class="odds-note">market snapshot Jun 19, 8:21 AM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> under; Iran +1.5.</p></blockquote></div>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
@@ -728,7 +695,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.9149,lb=0.8842,N=8,SHOW=6,i,j;
+  var la=1.9803,lb=0.8903,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

@@ -469,6 +469,97 @@ Raise this as an investigation backed by the backtest; change nothing in
   *derived* Elo is redistributed into `docs/`, the attribution/share-alike terms apply.
   [added 2026-06-13: license caveat the spec omitted — independent review]
 
+### 3.3 Market/bookmaker consensus as a THIRD prediction source — scoped 2026-06-18 (follow-up; design before code)
+
+Spun out of the 2026-06-18 Elo/Futi-blend investigation. The forecasting literature is
+unanimous that the **de-vigged bookmaker consensus is the single strongest tournament
+forecaster** — ahead of FIFA ranking and Elo (Leitner–Zeileis–Hornik 2010), and Elo-style
+ratings *lose* to market odds out of sample (Hvattum–Arntzen 2010). The reliable win is
+**model + odds together**, not the model alone (Egidi–Pauli–Torelli 2018; Groll et al.
+hybrid-RF). We already snapshot per-match odds, so this is the highest-value accuracy
+upgrade left — bigger than any Elo-vs-Futi reweighting.
+
+**Empirical fit on our own data (the part we can measure now).** On the 24 played games that
+have both an immutable pre-kickoff *logged model call* and a pre-kickoff *market snapshot*
+(`scripts/odds.py devig` on the median-of-books h2h), leak-free:
+
+| source | multiclass Brier (n=24) |
+|---|---|
+| our model only | 0.666 |
+| **market consensus only** | **0.602** |
+| equal blend (½ model + ½ market) | 0.630 |
+
+The market is ~10% better, and the blend improves monotonically toward it (best at
+w_market=1.0). **Do NOT read that boundary as "use only the market":** it's the same
+small-sample/forecast-combination trap we just avoided on the Futi weight — 24 games can't
+locate a weight, and going all-market discards our model's *orthogonal* signal (host effect,
+the futi EPV view) that the market underweights in exactly the minority of games where our
+edges live. Treat "market ≥ model on Brier" as robust; treat the exact weight as unfit.
+
+**The blocking data gap.** Unlike Elo/Futi (current snapshots we can replay over
+`data/History/results.csv`), the corpus has **no odds columns**, so the market source
+**cannot be reverse-fit on internationals**. Two responses, both now in hand:
+(a) accumulate the tournament's own per-match odds (24 games now, +~32 per remaining
+matchday) and fit/validate the weight late, with a Diebold-Mariano / e-value test (don't
+tune until ~30+ forecasts clear significance);
+(b) validate the model+market blending *methodology* on a large CLUB dataset with closing
+odds — **`scripts/backtest_market.py`** (football-data.co.uk, 8 leagues × 9 seasons).
+
+**Backtest result — `scripts/backtest_market.py` (26,404 matches, 10,562 out-of-sample, big-5+ leagues).**
+A rolled-Elo→Poisson model built to mirror `predict.py`, fit on 2016–21, tested 2021–25,
+blended with the de-vigged consensus (Avg-of-books; Pinnacle identical):
+
+| w_market | OOS Brier | vs model | vs market |
+|---|---|---|---|
+| 0.0 (model) | 0.589 | — | +0.012 |
+| 0.5 (blend) | 0.581 | −0.0083 ✓sig | +0.0037 |
+| 1.0 (market) | **0.577** | −0.012 ✓sig | — |
+
+Two robust lessons (both bootstrap-significant, hold for Pinnacle too): (1) **the market
+beats a ratings model and the blend is monotonic to the market** — a *bare* Elo adds nothing
+on top of the consensus, because the market already contains the Elo information plus
+form/injuries/sharp money; (2) **the curve is flat near the top** (Brier 0.581→0.577 from
+w=0.5→1.0), so a fixed market-heavy weight is near-optimal and robust — no fitting needed.
+Caveat: club markets are highly efficient; the WC market is thinner/softer (our 24-game gap
+was bigger, −0.064), and our model carries Futi's xG/possession signal a bare Elo lacks — so
+a Futi-augmented model has more room to add orthogonal value than this club Elo did. The
+*digits* are a club number; the *shape* (market dominates, blend flat-and-market-heavy)
+transfers.
+
+**The edge tension this surfaces (decisive for the design).** Because a model adds ~nothing
+over the market on accuracy, folding the consensus into our *published call* would (i) improve
+Brier but (ii) collapse our betting edge — edge = model − market → 0 by construction, leaving
+nothing to bet. The betting product *requires* a model that is independent of the market. So
+the consensus should be reported **side-by-side as the sharp benchmark** (Brian's
+side-by-side hybrid instinct is right), and our model kept as the independent edge engine. If
+we ever do blend the market into the call for accuracy, the edge layer must then measure
+edges against the **raw market**, not the blended call. Our model's real accuracy value lives
+exactly where it carries orthogonal signal (Futi xG, host effect) the market underweights —
+which is also where the bettable edges are.
+
+**Proposed integration (design, not yet built).**
+- Add the de-vigged consensus as a per-match W/D/L overlay source *alongside Opta*, in the
+  same place the model already averages model+Opta (`predict.py blend_wdl` / the
+  `consensus` ledger source) — NOT in the Elo/Futi strength term (the market prices a
+  result, not a team strength, and folds in HFA/path). Pre-tournament, fall back to the
+  outright-implied strength (`Market_Outrights_VERIFIED.csv`) only as context, not a
+  per-match call.
+- **Weight:** a *fixed* market-tilted average (e.g. market : model : Opta ≈ 2 : 1 : 1, or
+  market ½ + model ½) per the combination puzzle — never a weight fit on tournament games.
+  Honor freshness: only blend a market snapshot inside the 12 h recording gate; else
+  model-only, flagged (mirror the odds-card staleness rule).
+- **Leakage rule (hard):** identical to the futi-vintage rule — a game is scored against the
+  call logged *before* its kickoff; never re-blend a played game with post-kickoff odds.
+- **Circularity caveat:** the odds layer already prices the 1X2 *edge* vs this same consensus.
+  If the consensus also drives the published call, an "edge vs consensus" becomes partly
+  "edge vs ourselves" — the §Phase-3 edge math and sanity ceilings must be revisited so we
+  don't double-count (likely: keep the edge measured vs the *raw market*, with the model's
+  market-blended call used only for the published W/D/L, not for the edge denominator).
+
+**Validation gate before it ships:** model+market blend must beat model-only on a held-out
+set (historical via (b), or ≥30 tournament games via (a)) on Brier AND log-loss, survive a
+significance test, and not degrade calibration — same bar as ρ/Maher.
+
 ---
 
 ## Tier 4 — Defer

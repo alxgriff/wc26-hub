@@ -302,14 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -568,35 +560,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Scotland win 18 percent, draw 27 percent, Morocco win 55 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:18">18%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:55">55%</span></div>
-  <div class="scale" aria-hidden="true"><span>Scotland 18%</span><span>draw 27%</span><span>Morocco 55%</span></div>
-  <p class="factline">most likely score <b>0–1</b> · expected goals <b>2.13</b> · over 2.5 <b>36%</b> · both score <b>38%</b><br>single source: rating model (Elo+Futi)</p>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (conf-tuned)</p>
-    <p class="sr-only">Structural (conf-tuned) says Scotland win 14 percent, draw 25 percent, Morocco win 60 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:14">14%</span><span class="pd" style="flex:25">25%</span><span class="pb" style="flex:60">60%</span></div>
-    <div class="scale" aria-hidden="true"><span>Scotland 14%</span><span>draw 25%</span><span>Morocco 60%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (no Elo)</p>
-    <p class="sr-only">100% Futi (no Elo) says Scotland win 10 percent, draw 23 percent, Morocco win 67 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:10">10%</span><span class="pd" style="flex:23">23%</span><span class="pb" style="flex:67">67%</span></div>
-    <div class="scale" aria-hidden="true"><span>Scotland 10%</span><span>draw 23%</span><span>Morocco 67%</span></div>
-  </div>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1)</p>
-    <p class="sr-only">Structural (post-MD1) says Scotland win 18 percent, draw 27 percent, Morocco win 55 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:18">18%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:55">55%</span></div>
-    <div class="scale" aria-hidden="true"><span>Scotland 18%</span><span>draw 27%</span><span>Morocco 55%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1)</p>
-    <p class="sr-only">100% Futi (post-MD1) says Scotland win 10 percent, draw 23 percent, Morocco win 66 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:10">10%</span><span class="pd" style="flex:23">23%</span><span class="pb" style="flex:66">66%</span></div>
-    <div class="scale" aria-hidden="true"><span>Scotland 10%</span><span>draw 23%</span><span>Morocco 66%</span></div>
-  </div>
+  <p class="sr-only">Scotland win 16 percent, draw 27 percent, Morocco win 57 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:16">16%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:57">57%</span></div>
+  <div class="scale" aria-hidden="true"><span>Scotland 16%</span><span>draw 27%</span><span>Morocco 57%</span></div>
+  <p class="factline">most likely score <b>0–1</b> · expected goals <b>2.07</b> · over 2.5 <b>34%</b> · both score <b>35%</b><br>single source: rating model (Elo+Futi)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Morocco's midfield numbers should tell; Scotland's path is dead balls and McTominay.</p></blockquote></div>
 </section>
@@ -661,7 +628,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Sweat Factor</span>
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
-<div class="placeholder-slot">Sweat Factor forecast pending — this match is not yet within the 16-day Open-Meteo forecast window. The section fills automatically once available; no data is invented.</div>
+<div class="conditions">
+  <span class="cond-stamp">Forecast · as of 2026-06-19 08:21 ET</span>
+  <p class="cond-stats">~76°F · dry (38% RH) · WBGT 71.9°F</p>
+  <div class="cond-track" aria-label="Match heat index: Moderate (30/100)"><div class="cond-fill" style="width:30%"></div></div>
+  <p class="cond-sev cond-sev-moderate">Moderate</p>
+  <p class="cond-blurb">Warm out; Scotland are +9°F outside their comfort zone while Morocco are the better-acclimated side.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Scotland</span><div class="cond-dis-track" aria-label="Heat disadvantage 50/100"><div class="cond-dis-fill" style="width:50%"></div></div><span class="cond-delta">+8.9°F vs home</span></div><div class="cond-team"><span class="cond-tname">Morocco</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-5.1°F vs home</span></div></div>
+</div>
 </section>
 
 <section aria-labelledby="card-h" class="read-grid">
@@ -681,33 +655,50 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </div>
 </section>
 
-
+<section aria-labelledby="wire-h">
+  <div class="sec-head">
+    <span class="kicker">The Wire</span>
+    <h2 id="wire-h">What's being reported</h2>
+  </div>
+  <div class="wire">
+    <p class="wire-tag">Auto-gathered 2026-06-19 · every claim carries its source · relayed as reporting, not verified by the hub — click through before it bears weight.</p>
+<ul><li><strong>Scott McKenna (Scotland):</strong> Apart from Scott McKenna, who remains doubtful, there are no other injury concerns for Scotland. (source: <a href="https://khelnow.com/football/world-football-scotland-predicted-lineup-vs-morocco-fifa-world-cup-202606" rel="nofollow">https://khelnow.com/football/world-football-scotland-predicted-lineup-vs-morocco-fifa-world-cup-202606</a>)</li></ul>
+<ul><li><strong>McKenna update:</strong> McKenna has returned to training and could be available after suffering a calf issue in the build-up to the tournament. (source: <a href="https://www.whoscored.com/matches/1953861/preview/international-fifa-world-cup-2026-scotland-morocco" rel="nofollow">https://www.whoscored.com/matches/1953861/preview/international-fifa-world-cup-2026-scotland-morocco</a>)</li></ul>
+<ul><li><strong>Scotland/Morocco confirmed news:</strong> No confirmed injury or suspension information is currently available for either side, and no probable starting lineup has been released at this stage. (source: <a href="https://www.goal.com/en-ae/news/scotland-morocco-world-cup-preview/blt9d44c918a7f9c876" rel="nofollow">https://www.goal.com/en-ae/news/scotland-morocco-world-cup-preview/blt9d44c918a7f9c876</a>)</li></ul>
+<ul><li><strong>Scotland predicted XI (KhelNow):</strong> Angus Gunn; Aaron Hickey, Jack Hendry, Grant Hanley, Andrew Robertson; Ben Doak, Lewis Ferguson, Scott McTominay, John McGinn; Che Adams, Lawrence Shankland. (source: <a href="https://khelnow.com/football/world-football-scotland-predicted-lineup-vs-morocco-fifa-world-cup-202606" rel="nofollow">https://khelnow.com/football/world-football-scotland-predicted-lineup-vs-morocco-fifa-world-cup-202606</a>)</li></ul>
+  </div>
+</section>
 
 <section aria-labelledby="odds-h">
   <div class="sec-head">
     <span class="kicker">The Market</span>
     <h2 id="odds-h">Odds &amp; best bet</h2>
   </div>
-<p class="odds-note">model projection: <b>2.13</b> total goals · over 1.5 <b>63%</b> · over 2.5 <b>36%</b> · over 3.5 <b>17%</b></p>
+<p class="odds-note">model projection: <b>2.07</b> total goals · over 1.5 <b>61%</b> · over 2.5 <b>34%</b> · over 3.5 <b>16%</b></p>
 <div class="edge-wrap">
   <table>
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td title="1.72 decimal">-140</td><td>56%</td><td>49%</td><td class="edge-neg">-7.2%</td></tr>
-      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td title="2.22 decimal">+122</td><td>44%</td><td>51%</td><td class="edge-pos">+7.2%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.25</td><td title="2.00 decimal">+100</td><td>48%</td><td>36%</td><td class="edge-neg">-11.8%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.25</td><td title="1.83 decimal">-120</td><td>52%</td><td>64%</td><td class="edge-pos">+11.8%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.21 decimal">+121</td><td>42%</td><td>36%</td><td class="edge-neg">-6.5%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.64 decimal">-157</td><td>58%</td><td>64%</td><td class="edge-pos">+6.5%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Scotland +0.5</td><td title="2.19 decimal">+119</td><td>44%</td><td>45%</td><td class="">+0.6%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Morocco -0.5</td><td title="1.73 decimal">-137</td><td>56%</td><td>55%</td><td class="edge-neg">-0.6%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Scotland</td><td title="5.75 decimal">+475</td><td>17%</td><td>16%</td><td class="edge-neg">-0.7%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="3.65 decimal">+265</td><td>26%</td><td>27%</td><td class="">+0.5%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Morocco</td><td title="1.69 decimal">-145</td><td>57%</td><td>57%</td><td class="">+0.3%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td title="1.70 decimal">-144</td><td>57%</td><td>47%</td><td class="edge-neg">-10.1%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td title="2.25 decimal">+125</td><td>43%</td><td>53%</td><td class="edge-pos">+10.1%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.25</td><td title="1.95 decimal">-105</td><td>49%</td><td>34%</td><td class="edge-neg">-14.7%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.25</td><td title="1.87 decimal">-115</td><td>51%</td><td>66%</td><td class="edge-pos">+14.7%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.17 decimal">+116</td><td>43%</td><td>34%</td><td class="edge-neg">-9.2%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.67 decimal">-150</td><td>57%</td><td>66%</td><td class="edge-pos">+9.2%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Scotland +0.5</td><td title="2.24 decimal">+124</td><td>43%</td><td>43%</td><td class="edge-neg">-0.3%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Morocco -0.5</td><td title="1.70 decimal">-144</td><td>57%</td><td>57%</td><td class="">+0.3%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Under 2</strong> (Total goals) @ +122, edge <strong>+7.2%</strong> — best price +125 (betus). Flat 1u, paper record.</p></div>
-<p class="verify-flag">totals under 2.25: model-priced edge +11.8% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 18, 7:08 PM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 2 can push (P 27%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
+<p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
+<p class="verify-flag">totals under 2: model-priced edge +10.1% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">totals under 2.25: model-priced edge +14.7% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">totals under 2.5: model-priced edge +9.2% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 19, 8:21 AM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 2 can push (P 27%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> Morocco −1; McTominay/set-piece props.</p></blockquote></div>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
@@ -731,7 +722,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.6893,lb=1.4442,N=8,SHOW=6,i,j;
+  var la=0.6236,lb=1.4482,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
