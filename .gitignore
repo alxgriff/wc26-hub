@@ -10,3 +10,6 @@ data/History/*.csv
 
 # Raw futi.live screenshots (provenance for the 6/18 ratings; OCR'd into the CSV, ~19MB)
 data/Ratings/Futi_6_18/
+
+# football-data.co.uk closing-odds CSVs (re-fetch via backtest_market.py --download)
+data/MarketHistory/
