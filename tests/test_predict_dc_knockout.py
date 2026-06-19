@@ -59,14 +59,16 @@ class DixonColesTests(unittest.TestCase):
         self.assertLess(abs(pr.p_b - b), 1e-12)
 
     def test_rho_zero_reproduces_known_baseline(self):
-        """Locked documented output (C1 triangulation): Brazil 53 / draw 28 / Morocco 19.
-        Integration lock against the live verified ratings (like RealDataTests). Was
-        55/26/19 until the Tier 3.1 Maher-form total params were activated (2026-06-14,
-        calibration.json mu0 2.60->2.45 / alpha 0.20->0.30 / maher_w 1.0): the lower mu0
-        trims totals on this moderate matchup, nudging draw up 2pp. rho is still 0."""
+        """Locked documented output (C1 triangulation): Brazil 51 / draw 29 / Morocco 20.
+        Integration lock against the live verified ratings (like RealDataTests). History:
+        55/26/19 -> 53/28/19 when the Tier 3.1 Maher-form total params were activated
+        (2026-06-14). Now 51/29/20 after the 2026-06-18 model update (Futi tilt w_futi
+        1.0->1.5 AND the post-MD1 6/18 futi.live ratings): Futi rates Morocco far higher
+        than Elo (rank 8 vs 22), so the heavier Futi weight lifts Morocco ~1pp and trims
+        Brazil ~2pp. rho is still 0."""
         pr = P.predict_match(MODEL, "Brazil", "Morocco")
         got = (round(pr.p_a * 100), round(pr.p_draw * 100), round(pr.p_b * 100))
-        self.assertEqual(got, (53, 28, 19), got)
+        self.assertEqual(got, (51, 29, 20), got)
 
     def test_dc_tau_per_cell_lambda_mapping(self):
         """Pin the EXACT per-cell Dixon-Coles form, incl. the deliberate cross-mapping

@@ -34,6 +34,22 @@ you make a non-obvious call, add it here.*
 
 ## Prediction model (`predict.py`)
 
+- **Modest fixed Futi tilt (Elo:Futi = 1 : 1.5) + post-MD1 6/18 futi ratings, forward-only (2026-06-18).**
+  A colleague claimed a Futi-only model beats our equal-weight hybrid. Independent backtest
+  (`scripts/eval_blend.py`) on 558–999 recent WC-team internationals + the 16 tournament
+  games says: Futi is the marginally stronger single source (Elo-only is significantly the
+  WORST config; ranking AUC Futi 0.78 vs Elo 0.77), but Futi-**only** is *not* reliably
+  better than the hybrid — its tournament "win" is ~3 known-bias games and partly leakage
+  (post-MD1 ratings retrodicting results). Elo↔Futi correlate r=0.94, so the Brier optimum
+  is a flat plateau (f≈0.5–0.9). Decision: bank the consistent direction with a **fixed
+  prior tilt** w_futi 1.0→1.5 (f=0.60) — a judgment call, NOT a data-fit (the
+  forecast-combination puzzle says don't tune weights on small samples), and ingest the
+  match-driven 6/18 futi.live ratings for **upcoming** predictions only (played games stay
+  graded from their immutable logged calls — verified no MD1 leakage). futi.live is an
+  Expected-Possession-Value / "goals added" model (ex-American Soccer Analysis), orthogonal
+  to results-based Elo. Re-tune only after ~30+ matches clear a significance test. C1
+  baseline 53/28/19→51/29/20. *`scripts/predict.py` (`Config.w_futi`, `FUTI_FILE`);
+  `scripts/eval_blend.py`; investigation 2026-06-18.*
 - **θ recalibrated 290→190; the "Zeileis consensus" was retired as fake.** θ was re-fit
   to the Elo expectancy curve (the old value understated favorites 6–8pp) and locked by a
   regression test. The Zeileis "bookmaker consensus" file was proven synthetic and

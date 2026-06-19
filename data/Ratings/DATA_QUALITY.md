@@ -9,7 +9,7 @@ before use in the predictor (`scripts/predict.py`).
 | Source | Status | Use it for |
 |---|---|---|
 | **Elo** | ⚠️ original corrupted — **use `Elo_Ratings_World_Cup_2026_VERIFIED.csv`** | match-strength backbone |
-| **Futi** (`...Futi_Detailed_Profiles_Final.csv`) | ✅ reliable | Attack/Defense goals model + tactical color |
+| **Futi** (`World_Cup_2026_Futi_6_18.csv`, active) | ✅ reliable, post-MD1 refresh | match-strength (1.5× weight) + Attack/Defense goals model |
 | **Opta** (`Opta_Predictions...`) | ✅ reputable, but tournament-level | context overlay only (advance %, win %) |
 | **Market** (`Market_Outrights_VERIFIED.csv`) | ✅ real market, de-vigged | public-sentiment context + divergence flags |
 | **Zeileis** (`Zeileis_Hybrid_Model...`) | ❌ both key columns broken | **not used at all** |
@@ -25,6 +25,16 @@ before use in the predictor (`scripts/predict.py`).
   original is kept only for provenance — **do not use it.**
 - **Futi is the most trustworthy** — it independently rated Morocco a top-8 side,
   catching the Elo error.
+- **Futi = futi.live** (Imburgio/Muller, ex-American Soccer Analysis): an Expected
+  Possession Value / "goals added" model — chance-quality, *orthogonal* to results-based
+  Elo. Its tournament ratings are match-driven (dynamic). **`World_Cup_2026_Futi_6_18.csv`**
+  is the post-MD1 refresh, OCR'd from 48 app screenshots (`Futi_6_18/`, gitignored, kept
+  local). It barely moved from the 6/12 pre-tournament file (mean 0.44 pts; corr +0.36 with
+  MD1 points), so it's ingested for going-forward predictions only — played games stay
+  graded from immutable logged calls (no leakage). Pre-tournament vintage kept for
+  provenance: `World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv`. The 1.5×
+  Futi blend weight and this whole call are documented in DECISIONS.md (2026-06-18) and
+  reproducible via `scripts/eval_blend.py`.
 - **Opta** is from Stats Perform and its ordering is sound, but its numbers are
   tournament-path probabilities (bracket-confounded), so they are context, not
   match strength.

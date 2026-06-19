@@ -7,3 +7,6 @@ data/History/*.csv
 
 # Playwright MCP scratch artifacts
 .playwright-mcp/
+
+# Raw futi.live screenshots (provenance for the 6/18 ratings; OCR'd into the CSV, ~19MB)
+data/Ratings/Futi_6_18/

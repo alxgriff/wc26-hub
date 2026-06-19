@@ -97,7 +97,12 @@ ALIAS = {
 HOST_BY_COUNTRY = {"Mexico": "Mexico", "USA": "United States", "Canada": "Canada"}
 
 ELO_FILE = "Elo_Ratings_World_Cup_2026_VERIFIED.csv"   # NOT the corrupted original
-FUTI_FILE = "World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv"
+FUTI_FILE = "World_Cup_2026_Futi_6_18.csv"   # match-driven futi.live EPV ratings,
+# refreshed 2026-06-18 (post-MD1). Ingested for GOING-FORWARD predictions only; already-
+# played games are graded from their immutable pre-kickoff logged calls (ledger.grade /
+# build_site.render_call), never recomputed — so the small post-MD1 drift (mean 0.44 pts,
+# corr +0.36 with MD1 points) can't leak into MD1 scoring. Prior vintage (pre-tournament,
+# 6/12): World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv.
 OPTA_FILE = "Opta_Predictions_World_Cup_2026.csv"
 MARKET_FILE = "Market_Outrights_VERIFIED.csv"          # real de-vigged outright market
 OPTA_MATCH_FILE = "Opta_Match_Predictions.csv"         # per-match W/D/L overlay
@@ -131,8 +136,19 @@ class Config:
                             # (fit_hfa), so prefer FITTING per-host values against actual
                             # results as the tournament runs over guessing crowd discounts.
     max_goals: int = 8      # score-matrix truncation (captures >99.99%)
-    w_elo: float = 1.0      # consensus weights (equal by default)
-    w_futi: float = 1.0
+    w_elo: float = 1.0      # consensus weights. Modest FIXED Futi tilt (1 : 1.5,
+    w_futi: float = 1.5     # i.e. Futi share f=0.60), set 2026-06-18 — a PRIOR, not a
+                            # fit. Rationale (scripts/eval_blend.py, investigation
+                            # 2026-06-18): across 558-999 recent WC-team internationals
+                            # Futi is the marginally stronger single source (Elo-only is
+                            # significantly the WORST config; ranking AUC Futi 0.78 vs Elo
+                            # 0.77) and Futi carries ~12% orthogonal (xG/possession-value)
+                            # signal Elo lacks. The Brier optimum is a FLAT plateau f=0.5-
+                            # 0.9, so a 1:1.5 lean banks the consistent direction without
+                            # over-fitting the (within-noise, ~0.002 Brier) "optimum". Do
+                            # NOT re-tune this on group-stage games: 16-30 matches cannot
+                            # separate blend weights (forecast-combination puzzle). Revert
+                            # to 1.0/1.0 if a 30+-match calibration signal argues against it.
     # Dixon-Coles low-score dependence. 0.0 = INERT: identical to independent
     # Poisson. Activate only from a data fit (fit_rho.py); football fits are small
     # and negative — typically about -0.13 to -0.18 (allow down to ~-0.20). Never
