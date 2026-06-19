@@ -74,6 +74,20 @@ def brier(p: tuple, outcome: int) -> float:
     return sum((p[i] - (1.0 if i == outcome else 0.0)) ** 2 for i in range(3))
 
 
+def rps(p: tuple, outcome: int) -> float:
+    """Ranked Probability Score for ORDERED outcomes (home > draw > away — the
+    goal-difference axis). Reported ALONGSIDE Brier, not instead of it (Brier is
+    the CLAUDE.md contract). Unlike Brier, RPS uses the ordering: it penalises a
+    near-miss less — predicting a DRAW when the home side wins costs less than
+    predicting an AWAY win, because draw is adjacent to home on the W-D-L scale.
+    This is why the football-forecasting literature (Constantinou & Fenton 2012)
+    treats RPS as the appropriate metric for 1X2. Range 0 (perfect) to 1 (all mass
+    on the opposite extreme); lower is better. outcome: 0=home, 1=draw, 2=away."""
+    cum_p = (p[0], p[0] + p[1])                       # cumulative predicted (3rd term is 1≡1)
+    cum_o = ((1.0, 1.0), (0.0, 1.0), (0.0, 0.0))[outcome]
+    return 0.5 * sum((cum_p[i] - cum_o[i]) ** 2 for i in range(2))
+
+
 def probs_valid(probs) -> bool:
     """True iff a W/D/L triple is finite, each in [0, 1], and sums to 1.0±0.001 —
     the CLAUDE.md probability contract. The single gate shared by the site's
@@ -157,7 +171,7 @@ def grade(matches: list, ledger_rows: list[dict],
         p = (float(r["p_home"]), float(r["p_draw"]), float(r["p_away"]))
         o = outcome_index(m.score_a, m.score_b)
         out[m.match_id] = {
-            "p": p, "outcome": o, "brier": brier(p, o),
+            "p": p, "outcome": o, "brier": brier(p, o), "rps": rps(p, o),
             "correct": max(range(3), key=lambda i: p[i]) == o,
             "predicted_score": r.get("predicted_score", ""),
         }
@@ -171,10 +185,12 @@ def cumulative_line(matches: list, ledger_rows: list[dict]) -> str | None:
         return None
     n = len(graded)
     mean_b = sum(g["brier"] for g in graded.values()) / n
+    mean_r = sum(g["rps"] for g in graded.values()) / n
     hits = sum(1 for g in graded.values() if g["correct"])
     return (f"Ledger to date: {n} graded prediction{'s' if n != 1 else ''}, "
             f"{hits} correct call{'s' if hits != 1 else ''}, "
-            f"cumulative Brier {mean_b:.3f} (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max)")
+            f"cumulative Brier {mean_b:.3f} (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max), "
+            f"RPS {mean_r:.3f} (0 = perfect, 1 = worst — rewards near-misses on the W-D-L order)")
 
 
 # ---------------------------------------------------------------- logging a slate

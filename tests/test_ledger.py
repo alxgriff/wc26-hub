@@ -130,6 +130,17 @@ class GradingTests(unittest.TestCase):
         self.assertIn("2 graded", line)
         self.assertIn("1 correct", line)
         self.assertIn("1.000", line)                     # mean of 0 and 2
+        self.assertIn("RPS", line)                       # reported alongside Brier
+
+    def test_rps_perfect_and_worst(self):
+        self.assertAlmostEqual(lg.rps((1.0, 0.0, 0.0), 0), 0.0)   # called it exactly
+        self.assertAlmostEqual(lg.rps((0.0, 0.0, 1.0), 0), 1.0)   # all mass on opposite extreme
+
+    def test_rps_respects_ordering_unlike_brier(self):
+        # home wins; a draw-heavy miss is "closer" than an away-heavy miss on W-D-L
+        draw_heavy, away_heavy = (0.2, 0.6, 0.2), (0.2, 0.2, 0.6)
+        self.assertAlmostEqual(lg.brier(draw_heavy, 0), lg.brier(away_heavy, 0))  # Brier blind to order
+        self.assertLess(lg.rps(draw_heavy, 0), lg.rps(away_heavy, 0))             # RPS punishes the further miss
 
 
 class FileRoundTripTests(unittest.TestCase):
