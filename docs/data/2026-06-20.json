@@ -959,7 +959,7 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-20 11:43",
+ "generated_at": "2026-06-20 16:01",
  "slate_date": "2026-06-20",
  "bracket": {
   "schema": 1,
@@ -1182,73 +1182,73 @@
    "73": {
     "team": "Switzerland",
     "loser": "South Korea",
-    "p": 0.714383382174564,
+    "p": 0.714280220992763,
     "source": "model"
    },
    "75": {
     "team": "Morocco",
     "loser": "Sweden",
-    "p": 0.7350881219847776,
+    "p": 0.7349667456278933,
     "source": "model"
    },
    "76": {
     "team": "Brazil",
     "loser": "Japan",
-    "p": 0.7235418679318213,
+    "p": 0.7234134896263205,
     "source": "model"
    },
    "78": {
     "team": "France",
     "loser": "Côte d'Ivoire",
-    "p": 0.8769787530333312,
+    "p": 0.8768908981948987,
     "source": "model"
    },
    "83": {
     "team": "DR Congo",
     "loser": "Ghana",
-    "p": 0.6392373851653468,
+    "p": 0.6391870374239909,
     "source": "model"
    },
    "84": {
     "team": "Austria",
     "loser": "Saudi Arabia",
-    "p": 0.849203627717978,
+    "p": 0.8491000081363287,
     "source": "model"
    },
    "86": {
     "team": "Argentina",
     "loser": "Uruguay",
-    "p": 0.7866898494550241,
+    "p": 0.7865953347053287,
     "source": "model"
    },
    "88": {
     "team": "Australia",
     "loser": "New Zealand",
-    "p": 0.8268841235369586,
+    "p": 0.8267695844240381,
     "source": "model"
    },
    "90": {
     "team": "Morocco",
     "loser": "Switzerland",
-    "p": 0.5851224732357608,
+    "p": 0.5850377456299928,
     "source": "model"
    },
    "91": {
     "team": "France",
     "loser": "Brazil",
-    "p": 0.5442501009115334,
+    "p": 0.5442755998717486,
     "source": "model"
    },
    "93": {
     "team": "Austria",
     "loser": "DR Congo",
-    "p": 0.7625510055545525,
+    "p": 0.7624423989359648,
     "source": "model"
    },
    "95": {
     "team": "Argentina",
     "loser": "Australia",
-    "p": 0.8800562969865958,
+    "p": 0.8799641956128426,
     "source": "model"
    }
   },
