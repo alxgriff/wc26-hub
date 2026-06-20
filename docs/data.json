@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 31,
+ "played": 32,
  "total": 72,
  "groups": {
   "A": {
@@ -207,7 +207,7 @@
      "ga": 1,
      "gd": 5,
      "pts": 6,
-     "fate": null
+     "fate": "through"
     },
     {
      "pos": 2,
@@ -225,35 +225,35 @@
     },
     {
      "pos": 3,
-     "team": "Türkiye",
+     "team": "Paraguay",
      "group": "D",
-     "p": 1,
-     "w": 0,
+     "p": 2,
+     "w": 1,
      "d": 0,
      "l": 1,
-     "gf": 0,
-     "ga": 2,
+     "gf": 2,
+     "ga": 4,
      "gd": -2,
-     "pts": 0,
+     "pts": 3,
      "fate": null
     },
     {
      "pos": 4,
-     "team": "Paraguay",
+     "team": "Türkiye",
      "group": "D",
-     "p": 1,
+     "p": 2,
      "w": 0,
      "d": 0,
-     "l": 1,
-     "gf": 1,
-     "ga": 4,
+     "l": 2,
+     "gf": 0,
+     "ga": 3,
      "gd": -3,
      "pts": 0,
      "fate": null
     }
    ],
    "notes": [
-    "Group D: overall goal difference/goals separate Paraguay / Türkiye (level on points and head-to-head)."
+    "Group D: overall goal difference/goals separate Australia / Paraguay (level on points and head-to-head)."
    ]
   },
   "E": {
@@ -788,6 +788,21 @@
    },
    {
     "pos": 2,
+    "team": "Paraguay",
+    "group": "D",
+    "p": 2,
+    "w": 1,
+    "d": 0,
+    "l": 1,
+    "gf": 2,
+    "ga": 4,
+    "gd": -2,
+    "pts": 3,
+    "qualifying": true,
+    "fate": null
+   },
+   {
+    "pos": 3,
     "team": "Netherlands",
     "group": "F",
     "p": 1,
@@ -802,7 +817,7 @@
     "fate": null
    },
    {
-    "pos": 3,
+    "pos": 4,
     "team": "Belgium",
     "group": "G",
     "p": 1,
@@ -817,7 +832,7 @@
     "fate": null
    },
    {
-    "pos": 4,
+    "pos": 5,
     "team": "Portugal",
     "group": "K",
     "p": 1,
@@ -832,7 +847,7 @@
     "fate": null
    },
    {
-    "pos": 5,
+    "pos": 6,
     "team": "Cape Verde",
     "group": "H",
     "p": 1,
@@ -847,7 +862,7 @@
     "fate": null
    },
    {
-    "pos": 6,
+    "pos": 7,
     "team": "Czechia",
     "group": "A",
     "p": 2,
@@ -862,7 +877,7 @@
     "fate": null
    },
    {
-    "pos": 7,
+    "pos": 8,
     "team": "Bosnia and Herzegovina",
     "group": "B",
     "p": 2,
@@ -877,7 +892,7 @@
     "fate": null
    },
    {
-    "pos": 8,
+    "pos": 9,
     "team": "Ecuador",
     "group": "E",
     "p": 1,
@@ -888,11 +903,11 @@
     "ga": 1,
     "gd": -1,
     "pts": 0,
-    "qualifying": true,
+    "qualifying": false,
     "fate": null
    },
    {
-    "pos": 9,
+    "pos": 10,
     "team": "Panama",
     "group": "L",
     "p": 1,
@@ -907,7 +922,7 @@
     "fate": null
    },
    {
-    "pos": 10,
+    "pos": 11,
     "team": "Jordan",
     "group": "J",
     "p": 1,
@@ -922,7 +937,7 @@
     "fate": null
    },
    {
-    "pos": 11,
+    "pos": 12,
     "team": "Senegal",
     "group": "I",
     "p": 1,
@@ -931,21 +946,6 @@
     "l": 1,
     "gf": 1,
     "ga": 3,
-    "gd": -2,
-    "pts": 0,
-    "qualifying": false,
-    "fate": null
-   },
-   {
-    "pos": 12,
-    "team": "Türkiye",
-    "group": "D",
-    "p": 1,
-    "w": 0,
-    "d": 0,
-    "l": 1,
-    "gf": 0,
-    "ga": 2,
     "gd": -2,
     "pts": 0,
     "qualifying": false,
@@ -959,11 +959,11 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-20 04:59",
+ "generated_at": "2026-06-20 11:43",
  "slate_date": "2026-06-20",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 31,
+  "as_of_matches_played": 32,
   "fully_projectable": false,
   "thirds_resolved": false,
   "r32": {
