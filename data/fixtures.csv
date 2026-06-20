@@ -14,7 +14,7 @@ B6,B,3,2026-06-24,15:00,3:00 PM,Bosnia and Herzegovina,Qatar,Lumen Field,Seattle
 C1,C,1,2026-06-13,18:00,6:00 PM,Brazil,Morocco,MetLife Stadium,East Rutherford,USA,FS1,1,1,played,
 C2,C,1,2026-06-13,21:00,9:00 PM,Haiti,Scotland,Gillette Stadium,Foxborough,USA,FS1,0,1,played,
 C3,C,2,2026-06-19,18:00,6:00 PM,Scotland,Morocco,Gillette Stadium,Foxborough,USA,Fox,0,1,played,
-C4,C,2,2026-06-19,20:30,8:30 PM,Brazil,Haiti,Lincoln Financial Field,Philadelphia,USA,Fox,,,scheduled,
+C4,C,2,2026-06-19,20:30,8:30 PM,Brazil,Haiti,Lincoln Financial Field,Philadelphia,USA,Fox,3,0,played,
 C5,C,3,2026-06-24,18:00,6:00 PM,Scotland,Brazil,Hard Rock Stadium,Miami Gardens,USA,Fox,,,scheduled,"Simultaneous with C6 (matchday 3 rule)"
 C6,C,3,2026-06-24,18:00,6:00 PM,Morocco,Haiti,Mercedes-Benz Stadium,Atlanta,USA,FS1,,,scheduled,"Simultaneous with C5 (matchday 3 rule)"
 D1,D,1,2026-06-12,21:00,9:00 PM,United States,Paraguay,SoFi Stadium,Inglewood,USA,Fox,4,1,played,
