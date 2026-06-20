@@ -302,6 +302,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -560,10 +568,35 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Germany win 68 percent, draw 20 percent, Côte d&#x27;Ivoire win 13 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:68">68%</span><span class="pd" style="flex:20">20%</span><span class="pb" style="flex:13">13%</span></div>
-  <div class="scale" aria-hidden="true"><span>Germany 68%</span><span>draw 20%</span><span>Côte d&#x27;Ivoire 13%</span></div>
-  <p class="factline">most likely score <b>2–0</b> · expected goals <b>2.85</b> · over 2.5 <b>54%</b> · both score <b>47%</b><br>single source: rating model (Elo+Futi)</p>
+  <p class="sr-only">Germany win 70 percent, draw 19 percent, Côte d&#x27;Ivoire win 11 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:70">70%</span><span class="pd" style="flex:19">19%</span><span class="pb" style="flex:11">11%</span></div>
+  <div class="scale" aria-hidden="true"><span>Germany 70%</span><span>draw 19%</span><span>Côte d&#x27;Ivoire 11%</span></div>
+  <p class="factline">most likely score <b>2–0</b> · expected goals <b>2.85</b> · over 2.5 <b>54%</b> · both score <b>45%</b><br>single source: rating model (Elo+Futi)</p>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (conf-tuned)</p>
+    <p class="sr-only">Structural (conf-tuned) says Germany win 65 percent, draw 20 percent, Côte d&#x27;Ivoire win 14 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:65">65%</span><span class="pd" style="flex:20">20%</span><span class="pb" style="flex:14">14%</span></div>
+    <div class="scale" aria-hidden="true"><span>Germany 65%</span><span>draw 20%</span><span>Côte d&#x27;Ivoire 14%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (no Elo)</p>
+    <p class="sr-only">100% Futi (no Elo) says Germany win 67 percent, draw 20 percent, Côte d&#x27;Ivoire win 13 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:67">67%</span><span class="pd" style="flex:20">20%</span><span class="pb" style="flex:13">13%</span></div>
+    <div class="scale" aria-hidden="true"><span>Germany 67%</span><span>draw 20%</span><span>Côte d&#x27;Ivoire 13%</span></div>
+  </div>
+  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
+    <p class="sr-only">Structural (post-MD1 fitted) says Germany win 61 percent, draw 22 percent, Côte d&#x27;Ivoire win 18 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:61">61%</span><span class="pd" style="flex:22">22%</span><span class="pb" style="flex:18">18%</span></div>
+    <div class="scale" aria-hidden="true"><span>Germany 61%</span><span>draw 22%</span><span>Côte d&#x27;Ivoire 18%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
+    <p class="sr-only">100% Futi (post-MD1 fitted) says Germany win 59 percent, draw 22 percent, Côte d&#x27;Ivoire win 19 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:59">59%</span><span class="pd" style="flex:22">22%</span><span class="pb" style="flex:19">19%</span></div>
+    <div class="scale" aria-hidden="true"><span>Germany 59%</span><span>draw 22%</span><span>Côte d&#x27;Ivoire 19%</span></div>
+  </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> genuine toss-up tilted slightly German; high entertainment probability.</p></blockquote></div>
 </section>
@@ -630,12 +663,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
 <div class="conditions">
-  <span class="cond-stamp">Forecast · as of 2026-06-20 07:39 ET</span>
-  <p class="cond-stats">~74°F · moderate humidity (40% RH) · WBGT 71.1°F</p>
-  <div class="cond-track" aria-label="Match heat index: Mild (27/100)"><div class="cond-fill" style="width:27%"></div></div>
+  <span class="cond-stamp">Forecast · as of 2026-06-20 11:08 ET</span>
+  <p class="cond-stats">~76°F · dry (38% RH) · WBGT 71.9°F</p>
+  <div class="cond-track" aria-label="Match heat index: Mild (30/100)"><div class="cond-fill" style="width:30%"></div></div>
   <p class="cond-sev cond-sev-mild">Mild</p>
   <p class="cond-blurb">Comfortable conditions — heat is a non-factor for both sides.</p>
-  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Germany</span><div class="cond-dis-track" aria-label="Heat disadvantage 12/100"><div class="cond-dis-fill" style="width:12%"></div></div><span class="cond-delta">+2.2°F vs home</span></div><div class="cond-team"><span class="cond-tname">Côte d&#x27;Ivoire</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-12.7°F vs home</span></div></div>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Germany</span><div class="cond-dis-track" aria-label="Heat disadvantage 17/100"><div class="cond-dis-fill" style="width:17%"></div></div><span class="cond-delta">+3.0°F vs home</span></div><div class="cond-team"><span class="cond-tname">Côte d&#x27;Ivoire</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-12.0°F vs home</span></div></div>
 </div>
 </section>
 
@@ -681,19 +714,19 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">Germany</td><td title="1.51 decimal">-196</td><td>64%</td><td>68%</td><td class="edge-pos">+4.1%</td></tr>
-      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="4.70 decimal">+370</td><td>20%</td><td>20%</td><td class="edge-neg">-0.9%</td></tr>
-      <tr><td class="lbl">1X2</td><td class="lbl">Côte d&#x27;Ivoire</td><td title="6.00 decimal">+500</td><td>16%</td><td>13%</td><td class="edge-neg">-3.2%</td></tr>
+      <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">Germany</td><td title="1.51 decimal">-196</td><td>64%</td><td>70%</td><td class="edge-pos">+6.4%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="4.70 decimal">+370</td><td>20%</td><td>19%</td><td class="edge-neg">-1.8%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Côte d&#x27;Ivoire</td><td title="6.00 decimal">+500</td><td>16%</td><td>11%</td><td class="edge-neg">-4.7%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.56 decimal">-179</td><td>61%</td><td>54%</td><td class="edge-neg">-6.2%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.39 decimal">+139</td><td>39%</td><td>46%</td><td class="edge-pos">+6.2%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td title="1.95 decimal">-105</td><td>49%</td><td>41%</td><td class="edge-neg">-7.9%</td></tr>
       <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td title="1.88 decimal">-114</td><td>51%</td><td>59%</td><td class="edge-pos">+7.9%</td></tr>
-      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Germany -1</td><td title="1.82 decimal">-122</td><td>53%</td><td>57%</td><td class="edge-pos">+4.6%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Côte d&#x27;Ivoire +1</td><td title="2.02 decimal">+102</td><td>47%</td><td>43%</td><td class="edge-neg">-4.6%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Germany -1</td><td title="1.82 decimal">-122</td><td>53%</td><td>60%</td><td class="edge-pos">+7.7%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Côte d&#x27;Ivoire +1</td><td title="2.02 decimal">+102</td><td>47%</td><td>40%</td><td class="edge-neg">-7.7%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bets — top 3, ≥4% edge</span><p>1. <strong>Under 3</strong> (Total goals) @ -114, edge <strong>+7.9%</strong> — best price -114 (mybookieag). Flat 1u, paper record.</p><p>2. <strong>Germany -1</strong> (Asian handicap) @ -122, edge <strong>+4.6%</strong> — best price -118 (betonlineag). Flat 1u, paper record.</p><p>3. <strong>Germany</strong> (1X2) @ -196, edge <strong>+4.1%</strong> — best price -196 (draftkings). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p></div>
+<div class="bet-callout"><span class="tag">Best bets — top 3, ≥4% edge</span><p>1. <strong>Under 3</strong> (Total goals) @ -114, edge <strong>+7.9%</strong> — best price -114 (mybookieag). Flat 1u, paper record.</p><p>2. <strong>Germany -1</strong> (Asian handicap) @ -122, edge <strong>+7.7%</strong> — best price -118 (betonlineag). Flat 1u, paper record.</p><p>3. <strong>Germany</strong> (1X2) @ -196, edge <strong>+6.4%</strong> — best price -196 (draftkings). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p></div>
 <p class="odds-note">Logged pick: Under 3.5 @ -182 (betrivers), edge 7.2pp · open.</p>
 <p class="odds-note">Logged pick: Germany -1 @ -118 (betonlineag), edge 5.0pp · open.</p>
 <p class="odds-note">Logged pick: Germany @ -196 (draftkings), edge 4.1pp · open.</p>
@@ -721,7 +754,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=2.0807,lb=0.7727,N=8,SHOW=6,i,j;
+  var la=2.1330,lb=0.7204,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

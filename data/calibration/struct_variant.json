@@ -31,12 +31,12 @@
     "conf_offset": {
       "CAF": 60,
       "CONMEBOL": -60,
-      "AFC": 60
+      "AFC": 20
     },
     "group": "post-md1",
-    "_note": "Best structural that retains an Elo signal (elo_ratio\u22650.25), fitted on WC26 in-tournament results \u2014 elo_ratio=0.250, mean RPS=0.1592 (-13.5% vs 50/50 baseline). Unconstrained search collapses to 0% Elo (see 100% Futi post-MD1). Retune as more matches land.",
-    "_fit_slice": "fit_slice: 28 played WC26 matches as of 2026-06-19",
-    "asof": "2026-06-19"
+    "_note": "Best structural that retains an Elo signal (elo_ratio\u22650.25), fitted on WC26 in-tournament results \u2014 elo_ratio=0.250, mean RPS=0.1660 (-10.0% vs 50/50 baseline). Unconstrained search collapses to 0% Elo (see 100% Futi post-MD1). Retune as more matches land.",
+    "_fit_slice": "fit_slice: 32 played WC26 matches as of 2026-06-20",
+    "asof": "2026-06-20"
   },
   {
     "label": "100% Futi (post-MD1 fitted)",
@@ -46,11 +46,11 @@
     "conf_offset": {
       "CAF": 60,
       "CONMEBOL": -60,
-      "AFC": 60
+      "AFC": 20
     },
     "group": "post-md1",
-    "_note": "Futi-only (w_elo=0) with confederation offsets fitted on WC26 results \u2014 mean RPS=0.1522 (-17.3% vs 50/50 baseline). Retune as more matches land.",
-    "_fit_slice": "fit_slice: 28 played WC26 matches as of 2026-06-19",
-    "asof": "2026-06-19"
+    "_note": "Futi-only (w_elo=0) with confederation offsets fitted on WC26 results \u2014 mean RPS=0.1589 (-13.8% vs 50/50 baseline). Retune as more matches land.",
+    "_fit_slice": "fit_slice: 32 played WC26 matches as of 2026-06-20",
+    "asof": "2026-06-20"
   }
 ]
