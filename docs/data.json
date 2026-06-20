@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 29,
+ "played": 30,
  "total": 72,
  "groups": {
   "A": {
@@ -134,35 +134,35 @@
    "rows": [
     {
      "pos": 1,
-     "team": "Scotland",
+     "team": "Morocco",
      "group": "C",
-     "p": 1,
+     "p": 2,
      "w": 1,
-     "d": 0,
+     "d": 1,
      "l": 0,
-     "gf": 1,
-     "ga": 0,
+     "gf": 2,
+     "ga": 1,
      "gd": 1,
-     "pts": 3,
+     "pts": 4,
      "fate": null
     },
     {
      "pos": 2,
-     "team": "Brazil",
+     "team": "Scotland",
      "group": "C",
-     "p": 1,
-     "w": 0,
-     "d": 1,
-     "l": 0,
+     "p": 2,
+     "w": 1,
+     "d": 0,
+     "l": 1,
      "gf": 1,
      "ga": 1,
      "gd": 0,
-     "pts": 1,
+     "pts": 3,
      "fate": null
     },
     {
      "pos": 3,
-     "team": "Morocco",
+     "team": "Brazil",
      "group": "C",
      "p": 1,
      "w": 0,
@@ -189,9 +189,7 @@
      "fate": null
     }
    ],
-   "notes": [
-    "⚠️ Group C: Brazil / Morocco level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
-   ]
+   "notes": []
   },
   "D": {
    "rows": [
@@ -803,7 +801,7 @@
    },
    {
     "pos": 3,
-    "team": "Morocco",
+    "team": "Brazil",
     "group": "C",
     "p": 1,
     "w": 0,
@@ -953,17 +951,17 @@
    }
   ],
   "notes": [
-   "⚠️ Third-place ranking: Belgium / Morocco / Portugal level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.",
+   "⚠️ Third-place ranking: Belgium / Brazil / Portugal level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.",
    "⚠️ Third-place ranking: Ecuador / Panama level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.",
    "⚠️ Third-place ranking: Jordan / Senegal level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-19 22:48",
+ "generated_at": "2026-06-20 01:26",
  "slate_date": "2026-06-19",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 29,
+  "as_of_matches_played": 30,
   "fully_projectable": false,
   "thirds_resolved": false,
   "r32": {
@@ -989,14 +987,14 @@
     "match": 75,
     "home": "Sweden",
     "home_label": "Winner F",
-    "away": "Brazil",
+    "away": "Scotland",
     "away_label": "Runner-up C",
     "provisional": true,
     "half": "top"
    },
    "76": {
     "match": 76,
-    "home": "Scotland",
+    "home": "Morocco",
     "home_label": "Winner C",
     "away": "Japan",
     "away_label": "Runner-up F",
@@ -1182,73 +1180,73 @@
    "73": {
     "team": "Switzerland",
     "loser": "South Korea",
-    "p": 0.7139382148425497,
+    "p": 0.7140966204694783,
     "source": "model"
    },
    "75": {
-    "team": "Brazil",
-    "loser": "Sweden",
-    "p": 0.8791990985828756,
+    "team": "Sweden",
+    "loser": "Scotland",
+    "p": 0.55039439808684,
     "source": "model"
    },
    "76": {
-    "team": "Japan",
-    "loser": "Scotland",
-    "p": 0.7181771068300361,
+    "team": "Morocco",
+    "loser": "Japan",
+    "p": 0.5552729081338705,
     "source": "model"
    },
    "78": {
     "team": "France",
     "loser": "Côte d'Ivoire",
-    "p": 0.8765992789933088,
+    "p": 0.876734415418149,
     "source": "model"
    },
    "83": {
     "team": "DR Congo",
     "loser": "Ghana",
-    "p": 0.6390201825382763,
+    "p": 0.6390974524144406,
     "source": "model"
    },
    "84": {
     "team": "Austria",
     "loser": "Saudi Arabia",
-    "p": 0.8487561266409068,
+    "p": 0.8489154688039089,
     "source": "model"
    },
    "86": {
     "team": "Argentina",
     "loser": "Uruguay",
-    "p": 0.7862818523668107,
+    "p": 0.7864270737335326,
     "source": "model"
    },
    "88": {
     "team": "Australia",
     "loser": "New Zealand",
-    "p": 0.8263894851434548,
+    "p": 0.8265656053376071,
     "source": "model"
    },
    "90": {
-    "team": "Brazil",
-    "loser": "Switzerland",
-    "p": 0.7533268201130817,
+    "team": "Switzerland",
+    "loser": "Sweden",
+    "p": 0.687232182642702,
     "source": "model"
    },
    "91": {
     "team": "France",
-    "loser": "Japan",
-    "p": 0.7534990906585933,
+    "loser": "Morocco",
+    "p": 0.676084413547318,
     "source": "model"
    },
    "93": {
     "team": "Austria",
     "loser": "DR Congo",
-    "p": 0.7620822196253046,
+    "p": 0.7622490653811773,
     "source": "model"
    },
    "95": {
     "team": "Argentina",
     "loser": "Australia",
-    "p": 0.879658390210162,
+    "p": 0.8798001178157252,
     "source": "model"
    }
   },
@@ -1259,10 +1257,10 @@
    ],
    "75": [
     "Sweden",
-    "Brazil"
+    "Scotland"
    ],
    "76": [
-    "Scotland",
+    "Morocco",
     "Japan"
    ],
    "78": [
@@ -1287,10 +1285,10 @@
    ],
    "90": [
     "Switzerland",
-    "Brazil"
+    "Sweden"
    ],
    "91": [
-    "Japan",
+    "Morocco",
     "France"
    ],
    "93": [
