@@ -175,17 +175,17 @@ def main():
         '</div>'
     )
 
-    # Scoreboard cards
-    card_html = []
-    sep_inserted = False
+    # Scoreboard cards — post-MD1 models only
+    card_html = [POST_MD1_SECTION_HTML]
+    display_idx = 1
     for fc_i, (label, mean_rps, hits, n_valid, group) in enumerate(stats):
-        if group == "post-md1" and not sep_inserted:
-            card_html.append(POST_MD1_SECTION_HTML)
-            sep_inserted = True
+        if group != "post-md1":
+            continue
         if mean_rps is None:
             continue
         is_best = (mean_rps == best_rps)
-        if fc_i == 0 or struct_rps is None:
+        display_label = label.replace(" (post-MD1 fitted)", "")
+        if struct_rps is None:
             delta_html = '<span class="delta">—</span>'
         else:
             delta_pct = (mean_rps - struct_rps) / struct_rps * 100
@@ -194,17 +194,20 @@ def main():
             delta_html = f'<span class="delta {cls}">{sign}{delta_pct:.1f}% vs structural</span>'
         card_html.append(
             f'<div class="card{"  best" if is_best else ""}">'
-            f'<div class="nm">#{fc_i + 1} {_esc(label)}</div>'
+            f'<div class="nm">#{display_idx} {_esc(display_label)}</div>'
             f'<div class="rps">{mean_rps:.4f}</div>'
             f'<div class="sub">mean RPS · {delta_html}</div>'
             f'<div class="sub">hit rate {hits}/{n_valid}</div>'
             f'</div>')
+        display_idx += 1
 
-    # Match bars
+    # Match bars — post-MD1 models only; skip MD1 matches (no post-MD1 data)
     match_html = []
     current_matchday = None
     for mi, row in enumerate(rows):
         matchday = int(row.get("matchday", 1))
+        if matchday == 1:
+            continue
         if current_matchday is not None and matchday != current_matchday:
             match_html.append(
                 f'<div class="section-sep" style="margin:22px 0 14px">'
@@ -223,11 +226,10 @@ def main():
         home_icon = "🏠 " if hfa_team == row["team_a"].strip() else ""
 
         bars = []
-        bar_sep_inserted = False
+        bar_display_idx = 1
         for fc_i, (label, _, group) in enumerate(forecasters):
-            if group == "post-md1" and not bar_sep_inserted:
-                bars.append('<div class="bar-sep"></div>')
-                bar_sep_inserted = True
+            if group != "post-md1":
+                continue
             fc_data = match_results[mi][fc_i]
             if fc_data is None:
                 continue
@@ -238,12 +240,13 @@ def main():
             lb = f"{wb}" if wb >= 6 else ""
             bars.append(
                 f'<div class=barrow>'
-                f'<span class=lbl>#{fc_i + 1} {short(label)}</span>'
+                f'<span class=lbl>#{bar_display_idx} {short(label)}</span>'
                 f'<div class="bar">'
                 f'<span class="pa" style="flex:{wa}">{la}</span>'
                 f'<span class="pd" style="flex:{wd}">{ld}</span>'
                 f'<span class="pb" style="flex:{wb}">{lb}</span>'
                 f'</div></div>')
+            bar_display_idx += 1
 
         match_html.append(
             f'<div class=match>'
@@ -255,17 +258,13 @@ def main():
             + f'<div class=scale><span>{a}</span><span>draw</span><span>{b}</span></div>'
             + f'</div>')
 
-    n_fc = len(forecasters)
     n_post = sum(1 for _, _, g in forecasters if g == "post-md1")
     n_md1 = sum(1 for r in rows if int(r.get("matchday", 1)) == 1)
     n_md2plus = n_matches - n_md1
-    lede = (f'{n_fc} forecaster{"s" if n_fc != 1 else ""} '
-            f'({n_fc - n_post} pre-tournament · {n_post} post-MD1) '
-            f'on {n_matches} played WC26 matches. '
+    lede = (f'{n_post} post-MD1-fitted forecaster{"s" if n_post != 1 else ""} '
+            f'on {n_md2plus} MD2+ match{"es" if n_md2plus != 1 else ""}. '
             f'Lower RPS = sharper. '
-            f'Pre-tournament models scored on all {n_matches} matches. '
-            f'Post-MD1 models scored on MD2+ only ({n_md2plus} match{"es" if n_md2plus != 1 else ""}) '
-            f'— their ratings incorporate MD1 results so MD1 comparisons would be poisoned.')
+            f'Ratings incorporate MD1 results — MD1 matches excluded to avoid data leakage.')
 
     now = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M")
 
