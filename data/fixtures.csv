@@ -25,13 +25,13 @@ D5,D,3,2026-06-25,22:00,10:00 PM,Türkiye,United States,SoFi Stadium,Inglewood,U
 D6,D,3,2026-06-25,22:00,10:00 PM,Paraguay,Australia,Levi's Stadium,Santa Clara,USA,FS1,,,scheduled,"Simultaneous with D5 (matchday 3 rule)"
 E1,E,1,2026-06-14,13:00,1:00 PM,Germany,Curaçao,NRG Stadium,Houston,USA,Fox,7,1,played,
 E2,E,1,2026-06-14,19:00,7:00 PM,Côte d'Ivoire,Ecuador,Lincoln Financial Field,Philadelphia,USA,FS1,1,0,played,
-E3,E,2,2026-06-20,16:00,4:00 PM,Germany,Côte d'Ivoire,BMO Field,Toronto,Canada,Fox,,,scheduled,
+E3,E,2,2026-06-20,16:00,4:00 PM,Germany,Côte d'Ivoire,BMO Field,Toronto,Canada,Fox,2,1,played,
 E4,E,2,2026-06-20,20:00,8:00 PM,Ecuador,Curaçao,Arrowhead Stadium,Kansas City,USA,FS1,,,scheduled,
 E5,E,3,2026-06-25,16:00,4:00 PM,Curaçao,Côte d'Ivoire,Lincoln Financial Field,Philadelphia,USA,FS1,,,scheduled,"Simultaneous with E6 (matchday 3 rule)"
 E6,E,3,2026-06-25,16:00,4:00 PM,Ecuador,Germany,MetLife Stadium,East Rutherford,USA,Fox,,,scheduled,"Simultaneous with E5 (matchday 3 rule)"
 F1,F,1,2026-06-14,16:00,4:00 PM,Netherlands,Japan,AT&T Stadium,Arlington,USA,Fox,2,2,played,
 F2,F,1,2026-06-14,22:00,10:00 PM,Sweden,Tunisia,Estadio BBVA,Monterrey,Mexico,FS1,5,1,played,
-F3,F,2,2026-06-20,13:00,1:00 PM,Netherlands,Sweden,NRG Stadium,Houston,USA,Fox,,,scheduled,
+F3,F,2,2026-06-20,13:00,1:00 PM,Netherlands,Sweden,NRG Stadium,Houston,USA,Fox,5,1,played,
 F4,F,2,2026-06-21,00:00,12:00 AM,Tunisia,Japan,Estadio BBVA,Monterrey,Mexico,FS1,,,scheduled,"Kicks off 10:00 PM June 20 local (Monterrey); belongs to the June 20 evening slate. Re-verify kickoff before the June 20 edition"
 F5,F,3,2026-06-25,19:00,7:00 PM,Japan,Sweden,AT&T Stadium,Arlington,USA,FS1,,,scheduled,"Simultaneous with F6 (matchday 3 rule)"
 F6,F,3,2026-06-25,19:00,7:00 PM,Tunisia,Netherlands,Arrowhead Stadium,Kansas City,USA,Fox,,,scheduled,"Simultaneous with F5 (matchday 3 rule)"

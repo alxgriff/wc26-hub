@@ -562,10 +562,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Scotland win 7 percent, draw 15 percent, Brazil win 78 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:7">7%</span><span class="pd" style="flex:15">15%</span><span class="pb" style="flex:78">78%</span></div>
-  <div class="scale" aria-hidden="true"><span>Scotland 7%</span><span>draw 15%</span><span>Brazil 78%</span></div>
-  <p class="factline">most likely score <b>0–2</b> · expected goals <b>3.09</b> · over 2.5 <b>60%</b> · both score <b>42%</b><br>single source: rating model (Elo+Futi)</p>
+  <p class="sr-only">Scotland win 7 percent, draw 14 percent, Brazil win 79 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:7">7%</span><span class="pd" style="flex:14">14%</span><span class="pb" style="flex:79">79%</span></div>
+  <div class="scale" aria-hidden="true"><span>Scotland 7%</span><span>draw 14%</span><span>Brazil 79%</span></div>
+  <p class="factline">most likely score <b>0–2</b> · expected goals <b>3.09</b> · over 2.5 <b>60%</b> · both score <b>41%</b><br>single source: rating model (Elo+Futi)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Brazil, but rotation + motivation asymmetry is the classic MD3 value spot.</p></blockquote></div>
 </section>
@@ -677,15 +677,15 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.02 decimal">+102</td><td>47%</td><td>40%</td><td class="edge-neg">-7.1%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.75</td><td title="2.06 decimal">+106</td><td>47%</td><td>60%</td><td class="edge-pos">+13.1%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.75</td><td title="1.79 decimal">-126</td><td>53%</td><td>40%</td><td class="edge-neg">-13.1%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Scotland +1.25</td><td title="2.04 decimal">+104</td><td>47%</td><td>38%</td><td class="edge-neg">-9.8%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Brazil -1.25</td><td title="1.83 decimal">-120</td><td>53%</td><td>62%</td><td class="edge-pos">+9.8%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Scotland +1.25</td><td title="2.04 decimal">+104</td><td>47%</td><td>36%</td><td class="edge-neg">-11.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Brazil -1.25</td><td title="1.83 decimal">-120</td><td>53%</td><td>64%</td><td class="edge-pos">+11.6%</td></tr>
     </tbody>
   </table>
 </div>
 <div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2.5</strong> (Total goals) @ -122, edge <strong>+7.1%</strong> — best price -120 (betmgm). Flat 1u, paper record.</p></div>
 <p class="verify-flag">totals over 2.75: model-priced edge +13.1% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads away -1.25: model-priced edge +9.8% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 20, 12:01 PM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<p class="verify-flag">spreads away -1.25: model-priced edge +11.6% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 20, 6:52 PM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -708,7 +708,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.6237,lb=2.4669,N=8,SHOW=6,i,j;
+  var la=0.5856,lb=2.5050,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
