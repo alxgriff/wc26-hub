@@ -25,6 +25,11 @@ Cloudflare Pages on push.
 ## Open items
 
 ### Model (`predict.py` / MODEL_IMPROVEMENTS.md)
+- **DONE 2026-06-19 — Elo auto-rolls forward.** `scripts/update_elo.py` rolls the VERIFIED
+  6/11 anchor through played WC results (K=60) into a gitignored `..._CURRENT.csv` the model
+  prefers; runs nightly in daily-build + closing-odds (forward-only, deterministic, fail-soft).
+  Closes MODEL_IMPROVEMENTS §3.2. NB it does NOT fix the USA<Australia gap — that's structural
+  (host effect), not staleness (post-roll USA rk24 still < AUS rk21).
 - **DONE 2026-06-18 — Futi tilt + 6/18 ratings.** Investigation of "Futi-only vs hybrid"
   (`scripts/eval_blend.py`) → fixed Futi tilt `w_futi 1.0→1.5` (f=0.60) + ingest the
   post-MD1 6/18 futi.live ratings, forward-only (no MD1 leakage). See DECISIONS.md.

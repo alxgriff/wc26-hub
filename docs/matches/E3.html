@@ -302,14 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -568,35 +560,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Germany win 70 percent, draw 19 percent, Côte d&#x27;Ivoire win 11 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:70">70%</span><span class="pd" style="flex:19">19%</span><span class="pb" style="flex:11">11%</span></div>
-  <div class="scale" aria-hidden="true"><span>Germany 70%</span><span>draw 19%</span><span>Côte d&#x27;Ivoire 11%</span></div>
-  <p class="factline">most likely score <b>2–0</b> · expected goals <b>2.85</b> · over 2.5 <b>54%</b> · both score <b>45%</b><br>single source: rating model (Elo+Futi)</p>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (conf-tuned)</p>
-    <p class="sr-only">Structural (conf-tuned) says Germany win 65 percent, draw 20 percent, Côte d&#x27;Ivoire win 14 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:65">65%</span><span class="pd" style="flex:20">20%</span><span class="pb" style="flex:14">14%</span></div>
-    <div class="scale" aria-hidden="true"><span>Germany 65%</span><span>draw 20%</span><span>Côte d&#x27;Ivoire 14%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (no Elo)</p>
-    <p class="sr-only">100% Futi (no Elo) says Germany win 67 percent, draw 20 percent, Côte d&#x27;Ivoire win 13 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:67">67%</span><span class="pd" style="flex:20">20%</span><span class="pb" style="flex:13">13%</span></div>
-    <div class="scale" aria-hidden="true"><span>Germany 67%</span><span>draw 20%</span><span>Côte d&#x27;Ivoire 13%</span></div>
-  </div>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
-    <p class="sr-only">Structural (post-MD1 fitted) says Germany win 61 percent, draw 22 percent, Côte d&#x27;Ivoire win 18 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:61">61%</span><span class="pd" style="flex:22">22%</span><span class="pb" style="flex:18">18%</span></div>
-    <div class="scale" aria-hidden="true"><span>Germany 61%</span><span>draw 22%</span><span>Côte d&#x27;Ivoire 18%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
-    <p class="sr-only">100% Futi (post-MD1 fitted) says Germany win 59 percent, draw 22 percent, Côte d&#x27;Ivoire win 19 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:59">59%</span><span class="pd" style="flex:22">22%</span><span class="pb" style="flex:19">19%</span></div>
-    <div class="scale" aria-hidden="true"><span>Germany 59%</span><span>draw 22%</span><span>Côte d&#x27;Ivoire 19%</span></div>
-  </div>
+  <p class="sr-only">Germany win 68 percent, draw 20 percent, Côte d&#x27;Ivoire win 13 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:68">68%</span><span class="pd" style="flex:20">20%</span><span class="pb" style="flex:13">13%</span></div>
+  <div class="scale" aria-hidden="true"><span>Germany 68%</span><span>draw 20%</span><span>Côte d&#x27;Ivoire 13%</span></div>
+  <p class="factline">most likely score <b>2–0</b> · expected goals <b>2.85</b> · over 2.5 <b>54%</b> · both score <b>47%</b><br>single source: rating model (Elo+Futi)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> genuine toss-up tilted slightly German; high entertainment probability.</p></blockquote></div>
 </section>
@@ -662,7 +629,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Sweat Factor</span>
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
-<div class="placeholder-slot">Sweat Factor forecast pending — this match is not yet within the 16-day Open-Meteo forecast window. The section fills automatically once available; no data is invented.</div>
+<div class="conditions">
+  <span class="cond-stamp">Forecast · as of 2026-06-20 07:39 ET</span>
+  <p class="cond-stats">~74°F · moderate humidity (40% RH) · WBGT 71.1°F</p>
+  <div class="cond-track" aria-label="Match heat index: Mild (27/100)"><div class="cond-fill" style="width:27%"></div></div>
+  <p class="cond-sev cond-sev-mild">Mild</p>
+  <p class="cond-blurb">Comfortable conditions — heat is a non-factor for both sides.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Germany</span><div class="cond-dis-track" aria-label="Heat disadvantage 12/100"><div class="cond-dis-fill" style="width:12%"></div></div><span class="cond-delta">+2.2°F vs home</span></div><div class="cond-team"><span class="cond-tname">Côte d&#x27;Ivoire</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-12.7°F vs home</span></div></div>
+</div>
 </section>
 
 <section aria-labelledby="card-h" class="read-grid">
@@ -682,7 +656,19 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </div>
 </section>
 
-
+<section aria-labelledby="wire-h">
+  <div class="sec-head">
+    <span class="kicker">The Wire</span>
+    <h2 id="wire-h">What's being reported</h2>
+  </div>
+  <div class="wire">
+    <p class="wire-tag">Auto-gathered 2026-06-20 · every claim carries its source · relayed as reporting, not verified by the hub — click through before it bears weight.</p>
+<ul><li><strong>Germany — no injury or suspension concerns:</strong> Germany enter matchday two without any confirmed injury or suspension concerns emerging from their opening match. The 7-1 win over Curaçao was managed comfortably enough to suggest the first-choice XI came through unscathed. (source: <a href="https://sportslens.com/news/germany-v-cote-d-ivoire-predictions/" rel="nofollow">https://sportslens.com/news/germany-v-cote-d-ivoire-predictions/</a>)</li></ul>
+<ul><li><strong>Manuel Neuer (GER) — fit:</strong> No Germany players appear on the World Cup injury table, and Manuel Neuer, who carried a calf knock into the tournament, came through the opener fine and is projected to start. (source: <a href="https://www.rotowire.com/soccer/article/germany-vs-ivory-coast-preview-predicted-lineups-team-news-tactical-analysis-2026-world-cup-group-e-118798" rel="nofollow">https://www.rotowire.com/soccer/article/germany-vs-ivory-coast-preview-predicted-lineups-team-news-tactical-analysis-2026-world-cup-group-e-118798</a>)</li></ul>
+<ul><li><strong>Côte d'Ivoire — no confirmed injury or suspension:</strong> No confirmed injury or suspension was found in the current squad. (source: <a href="https://www.telecomasia.net/sports-betting/tips/football/fifa-world-cup/germany-vs-cote-d-ivoire-match-prediction-20-june-2026/" rel="nofollow">https://www.telecomasia.net/sports-betting/tips/football/fifa-world-cup/germany-vs-cote-d-ivoire-match-prediction-20-june-2026/</a>)</li></ul>
+<ul><li><strong>Côte d'Ivoire head coach Emerse Fae:</strong> No reported injuries or suspensions in the data available, and no confirmed lineup has been released ahead of the Toronto clash. (source: <a href="https://www.goal.com/en/news/germany-ivory-coast-world-cup-preview/bltf447b5794f5d1174" rel="nofollow">https://www.goal.com/en/news/germany-ivory-coast-world-cup-preview/bltf447b5794f5d1174</a>)</li></ul>
+  </div>
+</section>
 
 <section aria-labelledby="odds-h">
   <div class="sec-head">
@@ -695,18 +681,23 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.65 decimal">-154</td><td>58%</td><td>54%</td><td class="edge-neg">-4.1%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.32 decimal">+132</td><td>42%</td><td>46%</td><td class="edge-pos">+4.1%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td title="1.96 decimal">-104</td><td>48%</td><td>41%</td><td class="edge-neg">-6.8%</td></tr>
-      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td title="1.81 decimal">-123</td><td>52%</td><td>59%</td><td class="edge-pos">+6.8%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Germany -1</td><td title="1.91 decimal">-110</td><td>50%</td><td>60%</td><td class="edge-pos">+10.0%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Côte d&#x27;Ivoire +1</td><td title="1.93 decimal">-108</td><td>50%</td><td>40%</td><td class="edge-neg">-10.0%</td></tr>
+      <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">Germany</td><td title="1.51 decimal">-196</td><td>64%</td><td>68%</td><td class="edge-pos">+4.1%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="4.70 decimal">+370</td><td>20%</td><td>20%</td><td class="edge-neg">-0.9%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Côte d&#x27;Ivoire</td><td title="6.00 decimal">+500</td><td>16%</td><td>13%</td><td class="edge-neg">-3.2%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.56 decimal">-179</td><td>61%</td><td>54%</td><td class="edge-neg">-6.2%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.39 decimal">+139</td><td>39%</td><td>46%</td><td class="edge-pos">+6.2%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td title="1.95 decimal">-105</td><td>49%</td><td>41%</td><td class="edge-neg">-7.9%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td title="1.88 decimal">-114</td><td>51%</td><td>59%</td><td class="edge-pos">+7.9%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Germany -1</td><td title="1.82 decimal">-122</td><td>53%</td><td>57%</td><td class="edge-pos">+4.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Côte d&#x27;Ivoire +1</td><td title="2.02 decimal">+102</td><td>47%</td><td>43%</td><td class="edge-neg">-4.6%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Under 3</strong> (Total goals) @ -123, edge <strong>+6.8%</strong> — best price -118 (bovada). Flat 1u, paper record.</p></div>
-<p class="verify-flag">spreads home -1: model-priced edge +10.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 19, 8:21 AM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
+<div class="bet-callout"><span class="tag">Best bets — top 3, ≥4% edge</span><p>1. <strong>Under 3</strong> (Total goals) @ -114, edge <strong>+7.9%</strong> — best price -114 (mybookieag). Flat 1u, paper record.</p><p>2. <strong>Germany -1</strong> (Asian handicap) @ -122, edge <strong>+4.6%</strong> — best price -118 (betonlineag). Flat 1u, paper record.</p><p>3. <strong>Germany</strong> (1X2) @ -196, edge <strong>+4.1%</strong> — best price -196 (draftkings). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p></div>
+<p class="odds-note">Logged pick: Under 3.5 @ -182 (betrivers), edge 7.2pp · open.</p>
+<p class="odds-note">Logged pick: Germany -1 @ -118 (betonlineag), edge 5.0pp · open.</p>
+<p class="odds-note">Logged pick: Germany @ -196 (draftkings), edge 4.1pp · open.</p>
+<p class="odds-note">market snapshot Jun 20, 7:39 AM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> BTTS; over 2.5.</p></blockquote></div>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
@@ -730,7 +721,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=2.1330,lb=0.7204,N=8,SHOW=6,i,j;
+  var la=2.0807,lb=0.7727,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

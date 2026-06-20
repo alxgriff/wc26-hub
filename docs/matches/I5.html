@@ -693,19 +693,19 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.77 decimal">-130</td><td>53%</td><td>58%</td><td class="edge-pos">+5.4%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.96 decimal">-104</td><td>47%</td><td>42%</td><td class="edge-neg">-5.4%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.81 decimal">-123</td><td>52%</td><td>58%</td><td class="edge-pos">+6.0%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.96 decimal">-104</td><td>48%</td><td>42%</td><td class="edge-neg">-6.0%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.75</td><td title="2.00 decimal">+100</td><td>48%</td><td>58%</td><td class="edge-pos">+10.2%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.75</td><td title="1.83 decimal">-120</td><td>52%</td><td>42%</td><td class="edge-neg">-10.2%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Norway +0.5</td><td title="2.02 decimal">+102</td><td>48%</td><td>36%</td><td class="edge-neg">-11.8%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">France -0.5</td><td title="1.85 decimal">-118</td><td>52%</td><td>64%</td><td class="edge-pos">+11.8%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Norway +0.5</td><td title="2.02 decimal">+102</td><td>48%</td><td>36%</td><td class="edge-neg">-12.0%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">France -0.5</td><td title="1.85 decimal">-118</td><td>52%</td><td>64%</td><td class="edge-pos">+12.0%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2.5</strong> (Total goals) @ -130, edge <strong>+5.4%</strong> — best price -118 (betrivers). Flat 1u, paper record.</p></div>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2.5</strong> (Total goals) @ -123, edge <strong>+6.0%</strong> — best price -118 (betrivers). Flat 1u, paper record.</p></div>
 <p class="verify-flag">totals over 2.75: model-priced edge +10.2% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads away -0.5: model-priced edge +11.8% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 19, 8:21 AM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<p class="verify-flag">spreads away -0.5: model-priced edge +12.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 20, 7:39 AM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -728,7 +728,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.9292,lb=2.0845,N=8,SHOW=6,i,j;
+  var la=0.9258,lb=2.0879,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

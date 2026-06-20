@@ -302,14 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -550,7 +542,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   </nav>
   <p class="eyebrow">WC26 Daily Hub · Matchup Preview · Pre-baked June 11, verified day-of</p>
   <h1><a href="../teams/united-states.html">United States</a><span class="vs">v</span><a href="../teams/australia.html">Australia</a></h1>
-  
+  <p class="scoreline">2–0<span class="sr-only"> — final score: United States 2, Australia 0</span></p>
   <div class="metaline">
     <span class="stamp">D3</span>
     <span>Group D · Matchday 2</span>
@@ -571,32 +563,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <p class="sr-only">United States win 38 percent, draw 27 percent, Australia win 35 percent.</p>
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:38">38%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:35">35%</span></div>
   <div class="scale" aria-hidden="true"><span>United States 38%</span><span>draw 27%</span><span>Australia 35%</span></div>
-  <p class="factline">most likely score <b>1–1</b> · expected goals <b>2.52</b> · over 2.5 <b>46%</b> · both score <b>51%</b><br>single source: rating model (Elo+Futi) · home-field bonus: United States</p>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (conf-tuned)</p>
-    <p class="sr-only">Structural (conf-tuned) says United States win 35 percent, draw 27 percent, Australia win 38 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:35">35%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:38">38%</span></div>
-    <div class="scale" aria-hidden="true"><span>United States 35%</span><span>draw 27%</span><span>Australia 38%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (no Elo)</p>
-    <p class="sr-only">100% Futi (no Elo) says United States win 38 percent, draw 27 percent, Australia win 35 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:38">38%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:35">35%</span></div>
-    <div class="scale" aria-hidden="true"><span>United States 38%</span><span>draw 27%</span><span>Australia 35%</span></div>
-  </div>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
-    <p class="sr-only">Structural (post-MD1 fitted) says United States win 29 percent, draw 26 percent, Australia win 45 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:29">29%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:45">45%</span></div>
-    <div class="scale" aria-hidden="true"><span>United States 29%</span><span>draw 26%</span><span>Australia 45%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
-    <p class="sr-only">100% Futi (post-MD1 fitted) says United States win 29 percent, draw 26 percent, Australia win 45 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:29">29%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:45">45%</span></div>
-    <div class="scale" aria-hidden="true"><span>United States 29%</span><span>draw 26%</span><span>Australia 45%</span></div>
-  </div>
+  <p class="factline">predicted score <b>1-1</b><br>published consensus — logged Jun 19, 1:17 AM ET, pre-kickoff<br><b>Graded:</b> final 2–0 (United States win) · the logged call had it at <b>38%</b> · Brier <b>0.584</b> (0 best · 0.667 coin-flip · 2 worst)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> US favored at home; Australia's structure compresses the margin.</p></blockquote></div>
 </section>
@@ -606,52 +573,51 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Stakes</span>
     <h2 id="stakes-h">The table as it stands</h2>
   </div>
-  <p class="standfirst">After 2 matches in Group D: United States 1st on 3 pts (1-0-0, +3 GD), Australia 2nd on 3 pts (1-0-0, +2 GD). United States and Australia share the lead on 3 pts; both hold top-two places as it stands.</p>
+  <p class="standfirst">After 4 matches in Group D: United States 1st on 6 pts (2-0-0, +5 GD), Australia 2nd on 3 pts (1-0-1, 0 GD). United States lead the group on 6 pts; both hold top-two places as it stands.</p>
 
   <div class="mini-table">
 <article class="card" id="group-d" style="--i:0" aria-labelledby="gh-d">
-  <h3 id="gh-d"><span class="stamp" aria-hidden="true">D</span>Group D<span class="played-tag">2/6 played</span></h3>
+  <h3 id="gh-d"><span class="stamp" aria-hidden="true">D</span>Group D<span class="played-tag">4/6 played</span></h3>
   <table>
-    <caption class="sr-only">Group D standings after 2 of 6 matches</caption>
+    <caption class="sr-only">Group D standings after 4 of 6 matches</caption>
     <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="United States"><a href="../teams/united-states.html">United States</a><span class="dag">†</span></th>
-        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, not yet played, not yet played</span></td>
-        <td>4</td>
-        <td>+3</td>
-        <td class="pts">3</td>
+        <th class="team" scope="row" title="United States"><a href="../teams/united-states.html">United States</a></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, won, not yet played</span></td>
+        <td>6</td>
+        <td>+5</td>
+        <td class="pts">6</td>
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
         <th class="team" scope="row" title="Australia"><a href="../teams/australia.html">Australia</a><span class="dag">†</span></th>
-        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, not yet played, not yet played</span></td>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, lost, not yet played</span></td>
         <td>2</td>
-        <td>+2</td>
+        <td>0</td>
         <td class="pts">3</td>
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Türkiye"><a href="../teams/turkiye.html">Türkiye</a><span class="dag">‡</span></th>
-        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">lost, not yet played, not yet played</span></td>
-        <td>0</td>
+        <th class="team" scope="row" title="Paraguay"><a href="../teams/paraguay.html">Paraguay</a><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">lost, won, not yet played</span></td>
+        <td>2</td>
         <td>-2</td>
-        <td class="pts">0</td>
+        <td class="pts">3</td>
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Paraguay"><a href="../teams/paraguay.html">Paraguay</a><span class="dag">‡</span></th>
-        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">lost, not yet played, not yet played</span></td>
-        <td>1</td>
+        <th class="team" scope="row" title="Türkiye"><a href="../teams/turkiye.html">Türkiye</a></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">lost, lost, not yet played</span></td>
+        <td>0</td>
         <td>-3</td>
         <td class="pts">0</td>
       </tr>
     </tbody>
   </table>
   <ul class="notes">
-    <li><span class="dag">†</span> overall goal difference/goals separate Australia / United States (level on points and head-to-head).</li>
-    <li><span class="dag">‡</span> overall goal difference/goals separate Paraguay / Türkiye (level on points and head-to-head).</li>
+    <li><span class="dag">†</span> overall goal difference/goals separate Australia / Paraguay (level on points and head-to-head).</li>
   </ul>
 </article>
   </div>
@@ -663,12 +629,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
 <div class="conditions">
-  <span class="cond-stamp">Forecast · as of 2026-06-19 09:10 ET</span>
-  <p class="cond-stats">~74°F · moderate humidity (48% RH) · WBGT 72.9°F</p>
-  <div class="cond-track" aria-label="Match heat index: High (34/100)"><div class="cond-fill" style="width:34%"></div></div>
+  <span class="cond-stamp">Actual · as of 2026-06-20 07:39 ET</span>
+  <p class="cond-stats">~74°F · moderate humidity (45% RH) · WBGT 71.6°F</p>
+  <div class="cond-track" aria-label="Match heat index: High (29/100)"><div class="cond-fill" style="width:29%"></div></div>
   <p class="cond-sev cond-sev-high">High</p>
-  <p class="cond-blurb">Hot match-up, and a real edge for United States: Australia are +14°F above their home climate while United States are well-adapted to this heat.</p>
-  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">United States</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-5.7°F vs home</span></div><div class="cond-team"><span class="cond-tname">Australia</span><div class="cond-dis-track" aria-label="Heat disadvantage 79/100"><div class="cond-dis-fill cond-dis-hot" style="width:79%"></div></div><span class="cond-delta">+14.2°F vs home</span></div></div>
+  <p class="cond-blurb">Hot match-up, and a real edge for United States: Australia are +13°F above their home climate while United States are well-adapted to this heat.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">United States</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-7.0°F vs home</span></div><div class="cond-team"><span class="cond-tname">Australia</span><div class="cond-dis-track" aria-label="Heat disadvantage 72/100"><div class="cond-dis-fill cond-dis-hot" style="width:72%"></div></div><span class="cond-delta">+13.0°F vs home</span></div></div>
 </div>
 </section>
 
@@ -715,22 +681,22 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">1X2</td><td class="lbl">United States</td><td title="1.62 decimal">-161</td><td>59%</td><td>38%</td><td class="edge-neg">-21.5%</td></tr>
-      <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="4.30 decimal">+330</td><td>22%</td><td>27%</td><td class="edge-pos">+4.5%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">United States</td><td title="1.62 decimal">-161</td><td>59%</td><td>38%</td><td class="edge-neg">-21.2%</td></tr>
+      <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="4.20 decimal">+320</td><td>23%</td><td>27%</td><td class="edge-pos">+4.1%</td></tr>
       <tr><td class="lbl">1X2</td><td class="lbl">Australia</td><td title="5.25 decimal">+425</td><td>18%</td><td>35%</td><td class="edge-pos">+17.1%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.87 decimal">-115</td><td>51%</td><td>46%</td><td class="edge-neg">-4.7%</td></tr>
-      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.94 decimal">-106</td><td>49%</td><td>54%</td><td class="edge-pos">+4.7%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">United States -1</td><td title="2.08 decimal">+108</td><td>47%</td><td>21%</td><td class="edge-neg">-25.3%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Australia +1</td><td title="1.81 decimal">-123</td><td>53%</td><td>79%</td><td class="edge-pos">+25.3%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.87 decimal">-115</td><td>51%</td><td>46%</td><td class="edge-neg">-4.8%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.95 decimal">-105</td><td>49%</td><td>54%</td><td class="edge-pos">+4.8%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">United States -1</td><td title="2.04 decimal">+104</td><td>47%</td><td>26%</td><td class="edge-neg">-21.5%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Australia +1</td><td title="1.83 decimal">-120</td><td>53%</td><td>74%</td><td class="edge-pos">+21.5%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bets — top 2, ≥4% edge</span><p>1. <strong>Under 2.5</strong> (Total goals) @ -106, edge <strong>+4.7%</strong> — best price -102 (bovada). Flat 1u, paper record.</p><p>2. <strong>Draw</strong> (1X2) @ +330, edge <strong>+4.5%</strong> — best price +330 (draftkings). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p></div>
-<p class="odds-note">Logged pick: Under 2.5 @ -102 (bovada), edge 4.7pp · open.</p>
-<p class="odds-note">Logged pick: Draw @ +330 (draftkings), edge 4.5pp · open.</p>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Under 2.5</strong> (Total goals), model edge <strong>+4.8%</strong></p><p><strong>Draw</strong> (1X2), model edge <strong>+4.1%</strong></p><p class="odds-note">the model likes these, but the line is over 12h old (the book hasn't reposted), so they are <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
+<p class="odds-note">Logged pick: Under 2.5 @ -102 (bovada), edge 4.7pp · settled <b>won</b> for +0.98u · CLV -0.1pp.</p>
+<p class="odds-note">Logged pick: Draw @ +330 (draftkings), edge 4.5pp · settled <b>lost</b> for -1.00u · CLV +0.4pp.</p>
 <p class="verify-flag">h2h away: edge +17.1% implausibly large — verify odds freshness and team news before trusting</p>
-<p class="verify-flag">spreads away 1: model-priced edge +25.3% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 19, 8:21 AM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
+<p class="verify-flag">spreads away 1: model-priced edge +21.5% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 19, 12:24 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> under 2.5; US to win to nil.</p></blockquote></div>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
@@ -754,7 +720,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.2881,lb=1.2365,N=8,SHOW=6,i,j;
+  var la=1.3836,lb=1.1410,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

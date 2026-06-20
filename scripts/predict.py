@@ -97,6 +97,13 @@ ALIAS = {
 HOST_BY_COUNTRY = {"Mexico": "Mexico", "USA": "United States", "Canada": "Canada"}
 
 ELO_FILE = "Elo_Ratings_World_Cup_2026_VERIFIED.csv"   # NOT the corrupted original
+# Pre-tournament VERIFIED is the committed ANCHOR. update_elo.py rolls it forward through
+# played WC results (K=60) into CURRENT (gitignored, regenerated each nightly build);
+# load_ratings prefers CURRENT when present so the live model stays current mid-tournament.
+# Forward-only/leak-free: CURRENT rolls through PLAYED games only, and already-logged calls
+# are graded from the immutable ledger, never recomputed. Pass elo_current=False to pin to
+# the VERIFIED anchor (used by the exact-value regression baseline so it can't drift nightly).
+ELO_CURRENT = "Elo_Ratings_World_Cup_2026_CURRENT.csv"
 FUTI_FILE = "World_Cup_2026_Futi_6_18.csv"   # match-driven futi.live EPV ratings,
 # refreshed 2026-06-18 (post-MD1). Ingested for GOING-FORWARD predictions only; already-
 # played games are graded from their immutable pre-kickoff logged calls (ledger.grade /
@@ -263,7 +270,8 @@ def _ranks(values: dict) -> dict:
 
 def load_ratings(ratings_dir: str | Path = RATINGS_DIR,
                  fixtures: str | Path = FIXTURES,
-                 config: Config | None = None) -> RatingModel:
+                 config: Config | None = None,
+                 elo_current: bool = True) -> RatingModel:
     """Build the consensus rating model from the verified Elo + Futi files, with
     Opta/Zeileis as context. Validates that every fixtures team resolves to a
     rating (stop-and-report on any canon mismatch, per the data contract)."""
@@ -282,7 +290,8 @@ def load_ratings(ratings_dir: str | Path = RATINGS_DIR,
         if cal and cal.get("hfa_by_host"):
             config.hfa_by_host = {k: float(v) for k, v in cal["hfa_by_host"].items()}
     ratings_dir = Path(ratings_dir)
-    elo = _read(ratings_dir / ELO_FILE)
+    _cur = ratings_dir / ELO_CURRENT
+    elo = _read(_cur if (elo_current and _cur.exists()) else ratings_dir / ELO_FILE)
     futi = _read(ratings_dir / FUTI_FILE)
     opta = _read(ratings_dir / OPTA_FILE) if (ratings_dir / OPTA_FILE).exists() else {}
     market = _read(ratings_dir / MARKET_FILE) if (ratings_dir / MARKET_FILE).exists() else {}
