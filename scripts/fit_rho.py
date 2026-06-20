@@ -42,8 +42,12 @@ MIN_TEAM_MATCHES = 10            # below this, a team gets league-average att/de
 
 def load_curated(path: Path, start: str) -> list[dict]:
     """Played, competitive (non-friendly), integer-score matches on/after ``start``.
-    Drops the unplayed NA rows (incl. future WC2026 fixtures) so there is no leakage."""
+    Drops the unplayed NA rows (incl. future WC2026 fixtures) so there is no leakage.
+    Folds played WC2026 results in from fixtures.csv (corpus_sync) so the snapshot's lag
+    doesn't silently exclude the tournament — added after the 2026-06-20 audit."""
+    import corpus_sync
     rows = list(csv.DictReader(path.open(encoding="utf-8")))
+    rows, _n_wc = corpus_sync.merge_wc(rows)
     out = []
     for r in rows:
         if (r.get("tournament") or "") == "Friendly":

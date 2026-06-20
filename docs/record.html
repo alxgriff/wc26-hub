@@ -336,6 +336,8 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
 .no-bet{font-family:var(--mono);font-size:.78rem;margin:10px 0;max-width:680px}
 .no-bet b{letter-spacing:.06em}
 .odds-note{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.7;max-width:680px}
+.odds-note.warn{color:var(--amber)}
+.caut{cursor:help;color:var(--amber);text-decoration:none;font-weight:700}
 .ledger-line{font-family:var(--mono);font-size:.74rem;font-weight:700;margin-top:14px}
 
 /* ---------- morning-line blurb ---------- */
@@ -574,7 +576,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Brier</span>
     <h2 id="calls-h">The Calls</h2>
   </div>
-  <p class="standfirst">Ledger to date: 29 graded predictions, 16 correct calls, cumulative Brier 0.617 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max), RPS 0.189 (0 = perfect, 1 = worst — rewards near-misses on the W-D-L order)</p>
+  <p class="standfirst">Ledger to date: 25 graded predictions, 13 correct calls, cumulative Brier 0.649 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max), RPS 0.190 (0 = perfect, 1 = worst — rewards near-misses on the W-D-L order)</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">Every logged call graded: probabilities, result, hit or miss, Brier score</caption>
@@ -787,39 +789,6 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td class="pts">0.049</td>
       </tr>
       <tr class="subtotal"><td colspan="4">June 18 — 4 graded</td><td>3/4</td><td>0.352</td></tr>
-      <tr>
-        <td class="lbl"><a href="matches/C3.html">Scotland v Morocco</a></td>
-        <td>16%/27%/57% (0-1)</td>
-        <td>0–1</td>
-        <td>away</td>
-        <td><span class="hit hit-y" aria-hidden="true">✓</span><span class="sr-only">correct call</span></td>
-        <td class="pts">0.281</td>
-      </tr>
-      <tr>
-        <td class="lbl"><a href="matches/C4.html">Brazil v Haiti</a></td>
-        <td>96%/3%/1% (4-0)</td>
-        <td>3–0</td>
-        <td>home</td>
-        <td><span class="hit hit-y" aria-hidden="true">✓</span><span class="sr-only">correct call</span></td>
-        <td class="pts">0.003</td>
-      </tr>
-      <tr>
-        <td class="lbl"><a href="matches/D3.html">United States v Australia</a></td>
-        <td>38%/27%/35% (1-1)</td>
-        <td>2–0</td>
-        <td>home</td>
-        <td><span class="hit hit-y" aria-hidden="true">✓</span><span class="sr-only">correct call</span></td>
-        <td class="pts">0.584</td>
-      </tr>
-      <tr>
-        <td class="lbl"><a href="matches/D4.html">Türkiye v Paraguay</a></td>
-        <td>45%/26%/29% (1-1)</td>
-        <td>0–1</td>
-        <td>away</td>
-        <td><span class="hit hit-n" aria-hidden="true">✗</span><span class="sr-only">missed</span></td>
-        <td class="pts">0.777</td>
-      </tr>
-      <tr class="subtotal"><td colspan="4">June 19 — 4 graded</td><td>3/4</td><td>0.411</td></tr>
     </tbody>
   </table>
 </div>
@@ -830,7 +799,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Units &amp; CLV</span>
     <h2 id="bets-h">The Bets</h2>
   </div>
-  <p class="standfirst">Picks: 35 settled (15W-20L), -2.12u at flat 1u stakes; avg CLV +0.3pp over 29 closing line(s) 7 open picks, 7u at risk.</p>
+  <p class="standfirst">Picks: 30 settled (12W-18L), -4.06u at flat 1u stakes; avg CLV +0.3pp over 24 closing line(s) 3 open picks, 3u at risk.</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">Every recorded pick: selection, price, edge at record, settlement, units, closing line value</caption>
@@ -839,7 +808,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 12</td>
         <td class="lbl"><a href="matches/D1.html">United States v Paraguay</a></td>
-        <td class="lbl">Paraguay</td>
+        <td class="lbl">Paraguay <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td title="4.00 decimal">+300</td>
         <td class="lbl">betonlineag</td>
         <td>11.0pp</td>
@@ -905,7 +874,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 13</td>
         <td class="lbl"><a href="matches/D2.html">Australia v Türkiye</a></td>
-        <td class="lbl">Australia</td>
+        <td class="lbl">Australia <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td title="5.40 decimal">+440</td>
         <td class="lbl">betonlineag</td>
         <td>5.8pp</td>
@@ -938,7 +907,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 14</td>
         <td class="lbl"><a href="matches/F1.html">Netherlands v Japan</a></td>
-        <td class="lbl">Japan</td>
+        <td class="lbl">Japan <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td title="3.82 decimal">+282</td>
         <td class="lbl">betus</td>
         <td>4.2pp</td>
@@ -960,7 +929,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 14</td>
         <td class="lbl"><a href="matches/F2.html">Sweden v Tunisia</a></td>
-        <td class="lbl">Tunisia</td>
+        <td class="lbl">Tunisia <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td title="4.35 decimal">+335</td>
         <td class="lbl">betonlineag</td>
         <td>4.0pp</td>
@@ -971,7 +940,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 15</td>
         <td class="lbl"><a href="matches/G1.html">Belgium v Egypt</a></td>
-        <td class="lbl">Belgium</td>
+        <td class="lbl">Belgium <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td title="1.59 decimal">-169</td>
         <td class="lbl">draftkings</td>
         <td>7.5pp</td>
@@ -982,7 +951,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 15</td>
         <td class="lbl"><a href="matches/H1.html">Spain v Cape Verde</a></td>
-        <td class="lbl">Spain</td>
+        <td class="lbl">Spain <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td title="1.07 decimal">-1429</td>
         <td class="lbl">draftkings</td>
         <td>4.5pp</td>
@@ -993,7 +962,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 15</td>
         <td class="lbl"><a href="matches/H2.html">Saudi Arabia v Uruguay</a></td>
-        <td class="lbl">Uruguay</td>
+        <td class="lbl">Uruguay <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td title="1.45 decimal">-222</td>
         <td class="lbl">draftkings</td>
         <td>9.8pp</td>
@@ -1026,7 +995,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 16</td>
         <td class="lbl"><a href="matches/J1.html">Argentina v Algeria</a></td>
-        <td class="lbl">Argentina</td>
+        <td class="lbl">Argentina <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td title="1.44 decimal">-227</td>
         <td class="lbl">draftkings</td>
         <td>13.0pp</td>
@@ -1059,7 +1028,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 17</td>
         <td class="lbl"><a href="matches/K1.html">Portugal v DR Congo</a></td>
-        <td class="lbl">Portugal</td>
+        <td class="lbl">Portugal <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td title="1.28 decimal">-357</td>
         <td class="lbl">draftkings</td>
         <td>5.4pp</td>
@@ -1092,7 +1061,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 17</td>
         <td class="lbl"><a href="matches/K2.html">Uzbekistan v Colombia</a></td>
-        <td class="lbl">Colombia</td>
+        <td class="lbl">Colombia <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td title="1.37 decimal">-270</td>
         <td class="lbl">draftkings</td>
         <td>6.2pp</td>
@@ -1125,7 +1094,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 18</td>
         <td class="lbl"><a href="matches/A3.html">Czechia v South Africa</a></td>
-        <td class="lbl">Czechia</td>
+        <td class="lbl">Czechia <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td title="1.80 decimal">-125</td>
         <td class="lbl">draftkings</td>
         <td>10.4pp</td>
@@ -1147,7 +1116,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 18</td>
         <td class="lbl"><a href="matches/A4.html">Mexico v South Korea</a></td>
-        <td class="lbl">Mexico</td>
+        <td class="lbl">Mexico <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td title="2.05 decimal">+105</td>
         <td class="lbl">draftkings</td>
         <td>12.5pp</td>
@@ -1158,7 +1127,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 18</td>
         <td class="lbl"><a href="matches/B4.html">Canada v Qatar</a></td>
-        <td class="lbl">Canada</td>
+        <td class="lbl">Canada <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td title="1.29 decimal">-345</td>
         <td class="lbl">draftkings</td>
         <td>8.8pp</td>
@@ -1169,13 +1138,13 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 19</td>
         <td class="lbl"><a href="matches/C4.html">Brazil v Haiti</a></td>
-        <td class="lbl">Brazil</td>
+        <td class="lbl">Brazil <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td title="1.11 decimal">-909</td>
         <td class="lbl">draftkings</td>
         <td>9.3pp</td>
-        <td class="lbl status-won">won</td>
-        <td class="pts">+0.11</td>
-        <td>-0.5pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
       </tr>
       <tr>
         <td class="lbl">Jun 19</td>
@@ -1184,9 +1153,9 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td title="1.98 decimal">-102</td>
         <td class="lbl">bovada</td>
         <td>4.7pp</td>
-        <td class="lbl status-won">won</td>
-        <td class="pts">+0.98</td>
-        <td>-0.1pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
       </tr>
       <tr>
         <td class="lbl">Jun 19</td>
@@ -1195,105 +1164,6 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td title="4.30 decimal">+330</td>
         <td class="lbl">draftkings</td>
         <td>4.5pp</td>
-        <td class="lbl status-lost">lost</td>
-        <td class="pts">-1.00</td>
-        <td>+0.4pp</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 19</td>
-        <td class="lbl"><a href="matches/D4.html">Türkiye v Paraguay</a></td>
-        <td class="lbl">Over 2.5</td>
-        <td title="2.15 decimal">+115</td>
-        <td class="lbl">betus</td>
-        <td>4.1pp</td>
-        <td class="lbl status-lost">lost</td>
-        <td class="pts">-1.00</td>
-        <td>-0.0pp</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 19</td>
-        <td class="lbl"><a href="matches/D4.html">Türkiye v Paraguay</a></td>
-        <td class="lbl">Paraguay</td>
-        <td title="3.85 decimal">+285</td>
-        <td class="lbl">draftkings</td>
-        <td>4.0pp</td>
-        <td class="lbl status-won">won</td>
-        <td class="pts">+2.85</td>
-        <td>-0.0pp</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 20</td>
-        <td class="lbl"><a href="matches/E3.html">Germany v Côte d&#x27;Ivoire</a></td>
-        <td class="lbl">Under 3.5</td>
-        <td title="1.55 decimal">-182</td>
-        <td class="lbl">betrivers</td>
-        <td>7.2pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 20</td>
-        <td class="lbl"><a href="matches/E3.html">Germany v Côte d&#x27;Ivoire</a></td>
-        <td class="lbl">Germany -1</td>
-        <td title="1.85 decimal">-118</td>
-        <td class="lbl">betonlineag</td>
-        <td>5.0pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 20</td>
-        <td class="lbl"><a href="matches/E3.html">Germany v Côte d&#x27;Ivoire</a></td>
-        <td class="lbl">Germany</td>
-        <td title="1.51 decimal">-196</td>
-        <td class="lbl">draftkings</td>
-        <td>4.1pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 20</td>
-        <td class="lbl"><a href="matches/E4.html">Ecuador v Curaçao</a></td>
-        <td class="lbl">Under 2.5</td>
-        <td title="2.38 decimal">+138</td>
-        <td class="lbl">betmgm</td>
-        <td>6.6pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 20</td>
-        <td class="lbl"><a href="matches/E4.html">Ecuador v Curaçao</a></td>
-        <td class="lbl">Ecuador</td>
-        <td title="1.14 decimal">-714</td>
-        <td class="lbl">draftkings</td>
-        <td>4.5pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 20</td>
-        <td class="lbl"><a href="matches/F3.html">Netherlands v Sweden</a></td>
-        <td class="lbl">Netherlands</td>
-        <td title="1.74 decimal">-135</td>
-        <td class="lbl">draftkings</td>
-        <td>13.8pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 20</td>
-        <td class="lbl"><a href="matches/F4.html">Tunisia v Japan</a></td>
-        <td class="lbl">Japan</td>
-        <td title="1.56 decimal">-179</td>
-        <td class="lbl">draftkings</td>
-        <td>7.7pp</td>
         <td class="lbl status-open">open</td>
         <td class="pts">—</td>
         <td>—</td>
@@ -1301,6 +1171,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     </tbody>
   </table>
 </div>
+<p class="odds-note warn">‡ the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with extra caution until the draw calibration is re-checked after MD3.</p>
 </section>
 
 <section id="shadow" aria-labelledby="shadow-h">
@@ -1308,7 +1179,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Risky · model vs market</span>
     <h2 id="shadow-h">The Shadow Book</h2>
   </div>
-  <p class="standfirst">21 settled, 8W-13L, -5.40u paper (flat 1u, not staked); 1X2 1W-4L -3.44u; model-priced 7W-9L -1.96u 6 awaiting result.</p>
+  <p class="standfirst">16 settled, 6W-10L, -4.14u paper (flat 1u, not staked); 1X2 1W-3L -2.44u; model-priced 5W-7L -1.70u 5 awaiting result.</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">The shadow book: risky calls above the sanity ceiling (severe model–market disagreement), tracked on paper but too risky to stake, with hypothetical flat-1u units</caption>
@@ -1327,7 +1198,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 14</td>
         <td class="lbl"><a href="matches/E2.html">Côte d&#x27;Ivoire v Ecuador</a></td>
-        <td class="lbl">Ecuador</td>
+        <td class="lbl">Ecuador <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td>+165</td>
         <td>20.9pp</td>
         <td>58%</td>
@@ -1337,7 +1208,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 15</td>
         <td class="lbl"><a href="matches/G2.html">Iran v New Zealand</a></td>
-        <td class="lbl">Iran</td>
+        <td class="lbl">Iran <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td>-120</td>
         <td>16.7pp</td>
         <td>69%</td>
@@ -1407,7 +1278,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 17</td>
         <td class="lbl"><a href="matches/L2.html">Ghana v Panama</a></td>
-        <td class="lbl">Panama</td>
+        <td class="lbl">Panama <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td>+225</td>
         <td>23.3pp</td>
         <td>53%</td>
@@ -1457,7 +1328,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr>
         <td class="lbl">Jun 18</td>
         <td class="lbl"><a href="matches/B3.html">Switzerland v Bosnia and Herzegovina</a></td>
-        <td class="lbl">Switzerland</td>
+        <td class="lbl">Switzerland <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td>-179</td>
         <td>18.0pp</td>
         <td>79%</td>
@@ -1481,8 +1352,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td>-120</td>
         <td>13.5pp</td>
         <td>66%</td>
-        <td class="lbl status-won">won</td>
-        <td class="pts">+0.83</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
       </tr>
       <tr>
         <td class="lbl">Jun 19</td>
@@ -1491,8 +1362,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td>-110</td>
         <td>20.9pp</td>
         <td>71%</td>
-        <td class="lbl status-won">won</td>
-        <td class="pts">+0.91</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
       </tr>
       <tr>
         <td class="lbl">Jun 19</td>
@@ -1501,8 +1372,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td>+100</td>
         <td>14.5pp</td>
         <td>62%</td>
-        <td class="lbl status-lost">lost</td>
-        <td class="pts">-1.00</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
       </tr>
       <tr>
         <td class="lbl">Jun 19</td>
@@ -1511,76 +1382,16 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td>-120</td>
         <td>25.4pp</td>
         <td>79%</td>
-        <td class="lbl status-lost">lost</td>
-        <td class="pts">-1.00</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
       </tr>
       <tr>
         <td class="lbl">Jun 19</td>
         <td class="lbl"><a href="matches/D3.html">United States v Australia</a></td>
-        <td class="lbl">Australia</td>
+        <td class="lbl">Australia <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
         <td>+425</td>
         <td>17.1pp</td>
         <td>35%</td>
-        <td class="lbl status-lost">lost</td>
-        <td class="pts">-1.00</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 20</td>
-        <td class="lbl"><a href="matches/E3.html">Germany v Côte d&#x27;Ivoire</a></td>
-        <td class="lbl">Under 3</td>
-        <td>-110</td>
-        <td>8.2pp</td>
-        <td>59%</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 20</td>
-        <td class="lbl"><a href="matches/E4.html">Ecuador v Curaçao</a></td>
-        <td class="lbl">Under 3</td>
-        <td>-101</td>
-        <td>10.2pp</td>
-        <td>60%</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 20</td>
-        <td class="lbl"><a href="matches/F3.html">Netherlands v Sweden</a></td>
-        <td class="lbl">Over 2.75</td>
-        <td>-115</td>
-        <td>16.1pp</td>
-        <td>67%</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 20</td>
-        <td class="lbl"><a href="matches/F3.html">Netherlands v Sweden</a></td>
-        <td class="lbl">Netherlands -0.5</td>
-        <td>-141</td>
-        <td>12.6pp</td>
-        <td>69%</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 20</td>
-        <td class="lbl"><a href="matches/F4.html">Tunisia v Japan</a></td>
-        <td class="lbl">Japan -1</td>
-        <td>+110</td>
-        <td>11.0pp</td>
-        <td>58%</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-      </tr>
-      <tr>
-        <td class="lbl">Jun 20</td>
-        <td class="lbl"><a href="matches/F4.html">Tunisia v Japan</a></td>
-        <td class="lbl">Under 2.25</td>
-        <td>-105</td>
-        <td>8.8pp</td>
-        <td>58%</td>
         <td class="lbl status-open">open</td>
         <td class="pts">—</td>
       </tr>
@@ -1588,13 +1399,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   </table>
 </div>
 <p class="odds-note">*hypothetical flat-1u, on paper — these are risky calls (severe model–market gap), tracked to test the model, not staked.</p>
+<p class="odds-note warn">‡ the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with extra caution until the draw calibration is re-checked after MD3.</p>
 </section>
 
 </main>
 
 <footer>
   <p class="colophon">
-    Generated 2026-06-20 16:01 · calls graded from data/predictions_log.csv (logged
+    Generated 2026-06-20 14:44 · calls graded from data/predictions_log.csv (logged
     pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
     at fresh prices, revisions explicit, settled rows immutable) · Brier: 0 best ·
     0.667 coin-flip · 2 worst · CLV = closing implied minus our implied at record ·

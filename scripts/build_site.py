@@ -871,6 +871,23 @@ def _american_odds(decimal: float) -> str:
     return f"-{round(100 / (decimal - 1))}"
 
 
+# The 2026-06-20 audit found the model systematically under-prices draws (mean p_draw
+# ≈19% vs ≈36% realised group-stage), and that draw mass is parked on the favourite — so
+# a win-side 1X2 (moneyline) edge is inflated and least trustworthy. We DISCLOSE this on
+# every such pick rather than hand-pick a stricter edge bar (the draw magnitude is small-
+# sample and is deferred to the post-MD3 re-grade; see DECISIONS.md / model-audit memo).
+_DRAW_AUDIT_CAUTION = (
+    "the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which "
+    "inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with "
+    "extra caution until the draw calibration is re-checked after MD3")
+
+
+def _h2h_win_side(market: str, selection: str) -> bool:
+    """A 1X2 pick backing a team to WIN — the selection whose edge the draw under-pricing
+    inflates. (A draw pick has the opposite, conservative bias, so it isn't flagged.)"""
+    return market == "h2h" and selection in ("home", "away")
+
+
 def render_market(odds_info: dict | None, team_a: str, team_b: str,
                   prebaked: str | None, played: bool = False) -> str:
     """Odds & Best Bet block: the de-vigged edge table + the pick when the
@@ -942,9 +959,11 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
         corr = ('<p class="odds-note">same-match picks are correlated — they tend '
                 'to win and lose together; the units record swings accordingly.</p>'
                 if len(fresh) > 1 else "")
+        draw_caut = (f'<p class="odds-note warn">⚠ {_DRAW_AUDIT_CAUTION}.</p>'
+                     if any(_h2h_win_side(pk["market"], pk["selection"]) for pk in fresh) else "")
         tag = "Best bet" if len(fresh) == 1 else f"Best bets — top {len(fresh)}, ≥{record_threshold:.0%} edge"
         parts.append(f'<div class="bet-callout"><span class="tag">{_esc(tag)}</span>'
-                     + "".join(pick_lines) + corr + '</div>')
+                     + "".join(pick_lines) + corr + draw_caut + '</div>')
     elif rows_html and not stale:
         parts.append(f'<p class="no-bet"><b>NO BET</b> — no edge clears the '
                      f'{record_threshold:.0%} recording bar (a normal, expected '
@@ -1242,12 +1261,14 @@ def render_record_bets(rows: list[dict], root: str = "",
             odds_cell = f'<td title="{float(p["odds"]):.2f} decimal">{_american_odds(float(p["odds"]))}</td>'
         except (ValueError, KeyError):
             odds_cell = f'<td>{_esc(str(p.get("odds", "")))}</td>'
+        caut = ' <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr>' \
+            if _h2h_win_side(p["market"], p["selection"]) else ""
         body.append(
             f'      <tr>\n'
             f'        <td class="lbl">{_esc(when)}</td>\n'
             f'        <td class="lbl"><a href="{root}matches/{_esc(mid)}.html">'
             f'{_esc(a)} v {_esc(b)}</a></td>\n'
-            f'        <td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}</td>\n'
+            f'        <td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}{caut}</td>\n'
             f'        {odds_cell}\n'
             f'        <td class="lbl">{_esc(p.get("book") or "")}</td>\n'
             f'        <td>{_esc(p.get("edge_pp") or "")}pp</td>\n'
@@ -1265,6 +1286,8 @@ def render_record_bets(rows: list[dict], root: str = "",
         '<th scope="col">Edge</th><th class="lbl" scope="col">Status</th>'
         '<th scope="col">Units</th><th scope="col">CLV</th></tr></thead>\n'
         '    <tbody>\n' + "\n".join(body) + "\n    </tbody>\n  </table>\n</div>")
+    if any(_h2h_win_side(p["market"], p["selection"]) for p in picks):
+        table += (f'\n<p class="odds-note warn">‡ {_DRAW_AUDIT_CAUTION}.</p>')
     return table, units_line
 
 
@@ -1304,12 +1327,14 @@ def render_record_shadow(rows: list[dict], root: str = "",
             modp = f'{float(p["our_p"]) * 100:.0f}%'
         except (ValueError, KeyError):
             odds_cell, modp = _esc(str(p.get("odds", ""))), "—"
+        caut = ' <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr>' \
+            if _h2h_win_side(p["market"], p["selection"]) else ""
         body.append(
             f'      <tr>\n'
             f'        <td class="lbl">{_esc(when)}</td>\n'
             f'        <td class="lbl"><a href="{root}matches/{_esc(mid)}.html">'
             f'{_esc(a)} v {_esc(b)}</a></td>\n'
-            f'        <td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}</td>\n'
+            f'        <td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}{caut}</td>\n'
             f'        <td>{odds_cell}</td>\n'
             f'        <td>{_esc(p.get("edge_pp") or "")}pp</td>\n'
             f'        <td>{modp}</td>\n'
@@ -1329,6 +1354,8 @@ def render_record_shadow(rows: list[dict], root: str = "",
         '    <tbody>\n' + "\n".join(body) + "\n    </tbody>\n  </table>\n</div>\n"
         '<p class="odds-note">*hypothetical flat-1u, on paper — these are risky calls '
         '(severe model–market gap), tracked to test the model, not staked.</p>')
+    if any(_h2h_win_side(p["market"], p["selection"]) for p in picks):
+        table += (f'\n<p class="odds-note warn">‡ {_DRAW_AUDIT_CAUTION}.</p>')
     return table, summary_line
 
 

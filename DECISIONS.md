@@ -34,6 +34,17 @@ you make a non-obvious call, add it here.*
 
 ## Prediction model (`predict.py`)
 
+- **Model audit at 28 games (2026-06-20): one real defect — DRAW under-pricing — but no model/weight
+  change shipped.** 9-agent audit (5 lanes + 3 adversarial verifiers): live model Brier 0.649 (barely beats
+  the 0.667 baseline) but the entire deficit is draws (0/9 hit, 67% of error, p_draw ≈19% vs ≈36% realised);
+  on the 16 decisive games it's Brier 0.337, BEATING the market's 0.593. No change cleared the bar — every
+  Elo:Futi weight CI straddles 0, ρ still OOS-worse (even with 28 WC games folded in), hosts are the BEST
+  subset (no host-bump), and a draw uplift fails leak-free OOS splits (defer to the post-MD3 re-grade, n≥40).
+  **Follow-ups shipped (not parameter changes):** (1) a draw-bias CAUTION on win-side 1X2 picks across cards,
+  record and the shadow book (`build_site._h2h_win_side` / `_DRAW_AUDIT_CAUTION`) — a disclosure, deliberately
+  NOT an invented stricter edge bar; (2) `scripts/corpus_sync.py` folds played WC results into the lever-fit
+  corpus (fit_rho/fit_hfa now read through the tournament), and `fit_hfa`'s adopt bar now needs a ≥0.5% OOS
+  RMSE gain (the old `1e-4` bar fired on a 0.05% artifact). *memory: model-audit-2026-06-20.*
 - **538-style margin-of-victory multiplier TESTED, NOT adopted (2026-06-19).** Asked whether
   FiveThirtyEight's winner-corrected MoV weight — `ln(GD+1) × 2.2/((winner−loser)·0.001+2.2)`,
   which dampens a favourite's blowout and amplifies an underdog's upset — beats our eloratings

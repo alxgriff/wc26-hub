@@ -336,6 +336,8 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
 .no-bet{font-family:var(--mono);font-size:.78rem;margin:10px 0;max-width:680px}
 .no-bet b{letter-spacing:.06em}
 .odds-note{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.7;max-width:680px}
+.odds-note.warn{color:var(--amber)}
+.caut{cursor:help;color:var(--amber);text-decoration:none;font-weight:700}
 .ledger-line{font-family:var(--mono);font-size:.74rem;font-weight:700;margin-top:14px}
 
 /* ---------- morning-line blurb ---------- */
@@ -623,7 +625,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
 <div class="conditions">
-  <span class="cond-stamp">Actual · as of 2026-06-20 07:39 ET</span>
+  <span class="cond-stamp">Actual · as of 2026-06-19 08:21 ET</span>
   <p class="cond-stats">~73°F · moderate humidity (53% RH) · WBGT 72.4°F</p>
   <div class="cond-track" aria-label="Match heat index: High (32/100)"><div class="cond-fill" style="width:32%"></div></div>
   <p class="cond-sev cond-sev-high">High</p>
@@ -678,7 +680,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.9915,lb=0.3674,N=8,SHOW=6,i,j;
+  var la=1.9911,lb=0.3678,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
