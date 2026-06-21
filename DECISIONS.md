@@ -34,6 +34,17 @@ you make a non-obvious call, add it here.*
 
 ## Prediction model (`predict.py`)
 
+- **Knockout layer CALIBRATED to the historical frequency bands (2026-06-21; MODEL_IMPROVEMENTS §2.5).**
+  Diagnostic: the resolve_knockout layer UNDER-predicted extra time / shootouts (reach-ET 24% vs the
+  historical ~32%; reach-shootout 13% vs ~20-25%). Calibrated three resolve_knockout-only knobs to those
+  bands (group predict_match byte-identical): **ko_mu_factor=0.93** (a modest goal cut keeping the KO total
+  at the historical ~2.4), **ko_rho=−0.20** (a knockout-only Dixon-Coles draw-clustering term — the RIGHT
+  lever for caginess, lifting reach-ET at *constant* goals; a μ-cut alone over-cuts goals to 2.13 and still
+  under-shoots), **et_caution 0.85→0.50** (reach-shootout band). Result reach-ET 30% / reach-SO 21% / KO
+  total 2.41. ko_rho capped at −0.20 for DC stability (residual ~2pp to 32% absorbed by the more-even real
+  KO field). Reproducible via `scripts/fit_knockout.py --write`; active in calibration.json. Forward-only /
+  projection-only — no knockout games yet, so the §2.5 *validate-narrow* half (advance-prob reliability)
+  awaits stage-labeled data. *`scripts/predict.py` (`ko_mu_factor`, `ko_rho`), `scripts/fit_knockout.py`.*
 - **Model audit at 28 games (2026-06-20): one real defect — DRAW under-pricing — but no model/weight
   change shipped.** 9-agent audit (5 lanes + 3 adversarial verifiers): live model Brier 0.649 (barely beats
   the 0.667 baseline) but the entire deficit is draws (0/9 hit, 67% of error, p_draw ≈19% vs ≈36% realised);

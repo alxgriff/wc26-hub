@@ -159,5 +159,28 @@ class KnockoutTests(unittest.TestCase):
         self.assertTrue(0.04 < mean_so < 0.28, mean_so)     # historical ~0.20-0.25
 
 
+class KnockoutCalibrationTests(unittest.TestCase):
+    """The 2.5 knockout calibration: ko_mu_factor + ko_rho + et_caution (calibration.json)."""
+
+    def test_inert_defaults_reproduce_reg_draw(self):
+        # Config() defaults (ko_mu_factor=1.0, ko_rho=0.0) => reach-ET is exactly the 90' draw
+        kp = P.resolve_knockout(_toy_model(1800.0, 1700.0), "A", "B")
+        self.assertAlmostEqual(kp.p_reach_et, kp.reg.p_draw, places=12)
+
+    def test_calibration_lifts_reach_et_and_shootout(self):
+        base = P.resolve_knockout(_toy_model(1800.0, 1700.0), "A", "B")
+        cal = P.resolve_knockout(
+            _toy_model(1800.0, 1700.0, P.Config(ko_mu_factor=0.93, ko_rho=-0.20, et_caution=0.5)),
+            "A", "B")
+        self.assertGreater(cal.p_reach_et, base.p_reach_et)          # ρ + μ-cut raise 90' draws
+        self.assertGreater(cal.p_reach_shootout, base.p_reach_shootout)
+        self.assertAlmostEqual(cal.p_advance_a + cal.p_advance_b, 1.0, places=9)
+
+    def test_live_calibration_is_active(self):
+        c = P.load_ratings().config                                 # config=None -> calibration.json
+        self.assertLess(c.ko_mu_factor, 1.0)
+        self.assertLess(c.ko_rho, 0.0)
+
+
 if __name__ == "__main__":
     unittest.main()

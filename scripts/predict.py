@@ -60,7 +60,7 @@ import math
 import statistics as stats
 import sys
 from collections.abc import Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -176,6 +176,17 @@ class Config:
     # defensible refinement, and only if a backtest supports it).
     et_caution: float = 0.85
     shootout_home: float = 0.5
+    # Knockout regulation goal-rate scale. 1.0 = INERT (group μ, byte-identical to before).
+    # Knockout matches are cagier/lower-scoring than group games, so a value <1 lifts the 90'
+    # draw rate (= reach-ET) toward the historical ~32% reach-ET / ~22% reach-shootout marks.
+    # Calibrated, never hand-picked (fit_knockout.py); applied only by resolve_knockout, so
+    # group predict_match is unaffected. Activate from calibration.json once fit.
+    ko_mu_factor: float = 1.0
+    # Knockout-only Dixon-Coles rho (draw-clustering). 0.0 = INERT. Negative lifts the 90'
+    # draw rate at CONSTANT goals — the right lever for knockout caginess (μ alone over-cuts
+    # goals and still under-shoots reach-ET). Distinct from `rho` (the group ρ, fit-rejected
+    # ≈0); resolve_knockout swaps it in for its W/D/L. Fit to the ~32% reach-ET band.
+    ko_rho: float = 0.0
 
 
 @dataclass
@@ -282,7 +293,7 @@ def load_ratings(ratings_dir: str | Path = RATINGS_DIR,
             config.rho = float(cal["rho"])
         # Tier 3.1 total-goals knobs, activated only from a fitted+validated
         # calibration.json (fit_maher.py); absent => the inert defaults above.
-        for _k in ("maher_w", "alpha", "mu0"):
+        for _k in ("maher_w", "alpha", "mu0", "ko_mu_factor", "ko_rho", "et_caution"):
             if cal and cal.get(_k) is not None:
                 setattr(config, _k, float(cal[_k]))
         if cal and cal.get("hfa") is not None:
@@ -472,17 +483,25 @@ def resolve_knockout(model: RatingModel, team_a: str, team_b: str,
     """
     cfg = model.config
     reg = predict_match(model, team_a, team_b, hfa_team=hfa_team)
-    # Extra time: same per-team rates scaled to 30' with a caution discount. Both
-    # lambdas scale equally, so the supremacy split is preserved; _wdl applies the
-    # same Dixon-Coles correction.
+    # Knockout regulation: knockouts are lower-scoring / cagier than group games, so scale the
+    # 90' goal rates by ko_mu_factor (<1 => more 90' draws => more reach-ET). mf=1.0 is inert
+    # (reuses reg's W/D/L exactly). The supremacy SPLIT is preserved (both lambdas scale alike).
+    mf = cfg.ko_mu_factor
+    la, lb = reg.lambda_a * mf, reg.lambda_b * mf
+    # knockout W/D/L: same supremacy, but a small μ cut + a knockout-only DC ρ (draw-clustering)
+    kcfg = cfg if cfg.ko_rho == cfg.rho else replace(cfg, rho=cfg.ko_rho)
+    inert = (mf == 1.0 and cfg.ko_rho == cfg.rho)
+    p_a, p_d, p_b = (reg.p_a, reg.p_draw, reg.p_b) if inert else _wdl(la, lb, kcfg)
+    # Extra time: 30' at the same (knockout-reduced) rates with a caution discount. Both
+    # lambdas scale equally, so the supremacy split is preserved; _wdl applies the same DC.
     k = _ET_FRACTION * cfg.et_caution
-    et_a, et_d, et_b = _wdl(reg.lambda_a * k, reg.lambda_b * k, cfg)
+    et_a, et_d, et_b = _wdl(la * k, lb * k, kcfg)
     s = cfg.shootout_home                       # P(team_a wins the shootout); flat 0.5
-    p_adv_a = reg.p_a + reg.p_draw * (et_a + et_d * s)
-    p_adv_b = 1.0 - p_adv_a                      # exact: et_a+et_d+et_b = p_a+p_draw+p_b = 1
+    p_adv_a = p_a + p_d * (et_a + et_d * s)
+    p_adv_b = 1.0 - p_adv_a                      # exact: et_a+et_d+et_b = p_a+p_d+p_b = 1
     return KnockoutPrediction(
         team_a, team_b, hfa_team, p_adv_a, p_adv_b, reg,
-        (et_a, et_d, et_b), reg.p_draw, reg.p_draw * et_d)
+        (et_a, et_d, et_b), p_d, p_d * et_d)
 
 
 # ---------------------------------------------------------------- match-level overlay

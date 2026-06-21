@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 36,
+ "played": 32,
  "total": 72,
  "groups": {
   "A": {
@@ -262,27 +262,27 @@
      "pos": 1,
      "team": "Germany",
      "group": "E",
-     "p": 2,
-     "w": 2,
+     "p": 1,
+     "w": 1,
      "d": 0,
      "l": 0,
-     "gf": 9,
-     "ga": 2,
-     "gd": 7,
-     "pts": 6,
-     "fate": "through"
+     "gf": 7,
+     "ga": 1,
+     "gd": 6,
+     "pts": 3,
+     "fate": null
     },
     {
      "pos": 2,
      "team": "Côte d'Ivoire",
      "group": "E",
-     "p": 2,
+     "p": 1,
      "w": 1,
      "d": 0,
-     "l": 1,
-     "gf": 2,
-     "ga": 2,
-     "gd": 0,
+     "l": 0,
+     "gf": 1,
+     "ga": 0,
+     "gd": 1,
      "pts": 3,
      "fate": null
     },
@@ -290,32 +290,33 @@
      "pos": 3,
      "team": "Ecuador",
      "group": "E",
-     "p": 2,
+     "p": 1,
      "w": 0,
-     "d": 1,
+     "d": 0,
      "l": 1,
      "gf": 0,
      "ga": 1,
      "gd": -1,
-     "pts": 1,
+     "pts": 0,
      "fate": null
     },
     {
      "pos": 4,
      "team": "Curaçao",
      "group": "E",
-     "p": 2,
+     "p": 1,
      "w": 0,
-     "d": 1,
+     "d": 0,
      "l": 1,
      "gf": 1,
      "ga": 7,
      "gd": -6,
-     "pts": 1,
+     "pts": 0,
      "fate": null
     }
    ],
    "notes": [
+    "Group E: overall goal difference/goals separate Côte d'Ivoire / Germany (level on points and head-to-head).",
     "Group E: overall goal difference/goals separate Curaçao / Ecuador (level on points and head-to-head)."
    ]
   },
@@ -323,63 +324,63 @@
    "rows": [
     {
      "pos": 1,
-     "team": "Netherlands",
+     "team": "Sweden",
      "group": "F",
-     "p": 2,
+     "p": 1,
      "w": 1,
-     "d": 1,
+     "d": 0,
      "l": 0,
-     "gf": 7,
-     "ga": 3,
+     "gf": 5,
+     "ga": 1,
      "gd": 4,
-     "pts": 4,
+     "pts": 3,
      "fate": null
     },
     {
      "pos": 2,
      "team": "Japan",
      "group": "F",
-     "p": 2,
-     "w": 1,
+     "p": 1,
+     "w": 0,
      "d": 1,
      "l": 0,
-     "gf": 6,
+     "gf": 2,
      "ga": 2,
-     "gd": 4,
-     "pts": 4,
+     "gd": 0,
+     "pts": 1,
      "fate": null
     },
     {
      "pos": 3,
-     "team": "Sweden",
+     "team": "Netherlands",
      "group": "F",
-     "p": 2,
-     "w": 1,
-     "d": 0,
-     "l": 1,
-     "gf": 6,
-     "ga": 6,
+     "p": 1,
+     "w": 0,
+     "d": 1,
+     "l": 0,
+     "gf": 2,
+     "ga": 2,
      "gd": 0,
-     "pts": 3,
+     "pts": 1,
      "fate": null
     },
     {
      "pos": 4,
      "team": "Tunisia",
      "group": "F",
-     "p": 2,
+     "p": 1,
      "w": 0,
      "d": 0,
-     "l": 2,
+     "l": 1,
      "gf": 1,
-     "ga": 9,
-     "gd": -8,
+     "ga": 5,
+     "gd": -4,
      "pts": 0,
      "fate": null
     }
    ],
    "notes": [
-    "Group F: overall goal difference/goals separate Japan / Netherlands (level on points and head-to-head)."
+    "⚠️ Group F: Japan / Netherlands level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
    ]
   },
   "G": {
@@ -772,21 +773,6 @@
   "rows": [
    {
     "pos": 1,
-    "team": "Sweden",
-    "group": "F",
-    "p": 2,
-    "w": 1,
-    "d": 0,
-    "l": 1,
-    "gf": 6,
-    "ga": 6,
-    "gd": 0,
-    "pts": 3,
-    "qualifying": true,
-    "fate": null
-   },
-   {
-    "pos": 2,
     "team": "Scotland",
     "group": "C",
     "p": 2,
@@ -801,7 +787,7 @@
     "fate": null
    },
    {
-    "pos": 3,
+    "pos": 2,
     "team": "Paraguay",
     "group": "D",
     "p": 2,
@@ -812,6 +798,21 @@
     "ga": 4,
     "gd": -2,
     "pts": 3,
+    "qualifying": true,
+    "fate": null
+   },
+   {
+    "pos": 3,
+    "team": "Netherlands",
+    "group": "F",
+    "p": 1,
+    "w": 0,
+    "d": 1,
+    "l": 0,
+    "gf": 2,
+    "ga": 2,
+    "gd": 0,
+    "pts": 1,
     "qualifying": true,
     "fate": null
    },
@@ -877,21 +878,6 @@
    },
    {
     "pos": 8,
-    "team": "Ecuador",
-    "group": "E",
-    "p": 2,
-    "w": 0,
-    "d": 1,
-    "l": 1,
-    "gf": 0,
-    "ga": 1,
-    "gd": -1,
-    "pts": 1,
-    "qualifying": true,
-    "fate": null
-   },
-   {
-    "pos": 9,
     "team": "Bosnia and Herzegovina",
     "group": "B",
     "p": 2,
@@ -902,6 +888,21 @@
     "ga": 5,
     "gd": -3,
     "pts": 1,
+    "qualifying": true,
+    "fate": null
+   },
+   {
+    "pos": 9,
+    "team": "Ecuador",
+    "group": "E",
+    "p": 1,
+    "w": 0,
+    "d": 0,
+    "l": 1,
+    "gf": 0,
+    "ga": 1,
+    "gd": -1,
+    "pts": 0,
     "qualifying": false,
     "fate": null
    },
@@ -953,15 +954,16 @@
   ],
   "notes": [
    "⚠️ Third-place ranking: Belgium / Portugal level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.",
+   "⚠️ Third-place ranking: Ecuador / Panama level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.",
    "⚠️ Third-place ranking: Jordan / Senegal level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-21 16:11",
+ "generated_at": "2026-06-21 12:25",
  "slate_date": "2026-06-21",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 36,
+  "as_of_matches_played": 32,
   "fully_projectable": false,
   "thirds_resolved": false,
   "r32": {
@@ -985,7 +987,7 @@
    },
    "75": {
     "match": 75,
-    "home": "Netherlands",
+    "home": "Sweden",
     "home_label": "Winner F",
     "away": "Morocco",
     "away_label": "Runner-up C",
@@ -1180,73 +1182,73 @@
    "73": {
     "team": "Switzerland",
     "loser": "South Korea",
-    "p": 0.7145342031142965,
+    "p": 0.7025544587554864,
     "source": "model"
    },
    "75": {
-    "team": "Netherlands",
-    "loser": "Morocco",
-    "p": 0.5424068494073617,
+    "team": "Morocco",
+    "loser": "Sweden",
+    "p": 0.7080851377613219,
     "source": "model"
    },
    "76": {
     "team": "Brazil",
     "loser": "Japan",
-    "p": 0.7150914089953632,
+    "p": 0.7072312857942131,
     "source": "model"
    },
    "78": {
     "team": "France",
     "loser": "Côte d'Ivoire",
-    "p": 0.8808380096169149,
+    "p": 0.8603523376537532,
     "source": "model"
    },
    "83": {
     "team": "DR Congo",
     "loser": "Ghana",
-    "p": 0.6393110085863153,
+    "p": 0.6301968466159161,
     "source": "model"
    },
    "84": {
     "team": "Austria",
     "loser": "Saudi Arabia",
-    "p": 0.849355029375739,
+    "p": 0.8326164698963441,
     "source": "model"
    },
    "86": {
     "team": "Argentina",
     "loser": "Uruguay",
-    "p": 0.786827993796409,
+    "p": 0.7693027498692335,
     "source": "model"
    },
    "88": {
     "team": "Australia",
     "loser": "New Zealand",
-    "p": 0.8270514852565037,
+    "p": 0.8219971193268705,
     "source": "model"
    },
    "90": {
-    "team": "Netherlands",
+    "team": "Morocco",
     "loser": "Switzerland",
-    "p": 0.6521443021760245,
+    "p": 0.5637012847457326,
     "source": "model"
    },
    "91": {
     "team": "France",
     "loser": "Brazil",
-    "p": 0.5442128098682955,
+    "p": 0.5465956864555503,
     "source": "model"
    },
    "93": {
     "team": "Austria",
     "loser": "DR Congo",
-    "p": 0.762709757442951,
+    "p": 0.7473605074483091,
     "source": "model"
    },
    "95": {
     "team": "Argentina",
     "loser": "Australia",
-    "p": 0.8801908315630691,
+    "p": 0.8530162821234869,
     "source": "model"
    }
   },
@@ -1256,7 +1258,7 @@
     "Switzerland"
    ],
    "75": [
-    "Netherlands",
+    "Sweden",
     "Morocco"
    ],
    "76": [
@@ -1285,7 +1287,7 @@
    ],
    "90": [
     "Switzerland",
-    "Netherlands"
+    "Morocco"
    ],
    "91": [
     "Brazil",

@@ -663,18 +663,16 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.25</td><td title="1.80 decimal">-125</td><td>53%</td><td>53%</td><td class="edge-neg">-0.2%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.25</td><td title="2.05 decimal">+105</td><td>47%</td><td>47%</td><td class="">+0.2%</td></tr>
-      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.04 decimal">+104</td><td>46%</td><td>53%</td><td class="edge-pos">+7.0%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.74 decimal">-135</td><td>54%</td><td>47%</td><td class="edge-neg">-7.0%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Croatia -1</td><td title="2.10 decimal">+110</td><td>46%</td><td>73%</td><td class="edge-pos">+26.6%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Ghana +1</td><td title="1.79 decimal">-127</td><td>54%</td><td>27%</td><td class="edge-neg">-26.6%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.04 decimal">+104</td><td>46%</td><td>53%</td><td class="edge-pos">+6.6%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.77 decimal">-130</td><td>54%</td><td>47%</td><td class="edge-neg">-6.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Croatia -1</td><td title="2.09 decimal">+109</td><td>46%</td><td>73%</td><td class="edge-pos">+26.5%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Ghana +1</td><td title="1.78 decimal">-127</td><td>54%</td><td>27%</td><td class="edge-neg">-26.5%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2.5</strong> (Total goals) @ +104, edge <strong>+7.0%</strong> — best price +104 (betonlineag). Flat 1u, paper record.</p></div>
-<p class="verify-flag">spreads home -1: model-priced edge +26.6% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 21, 12:11 PM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Over 2.5</strong> (Total goals), model edge <strong>+6.6%</strong></p><p class="odds-note">the model likes this, but the line is over 12h old (the book hasn't reposted), so it is <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
+<p class="verify-flag">spreads home -1: model-priced edge +26.5% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 20, 12:01 PM ET · DraftKings where quoted, else best of 6 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -697,7 +695,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=2.3223,lb=0.4769,N=8,SHOW=6,i,j;
+  var la=2.3207,lb=0.4785,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

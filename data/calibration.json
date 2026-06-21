@@ -2,6 +2,25 @@
   "mu0": 2.45,
   "alpha": 0.3,
   "maher_w": 1.0,
+  "ko_mu_factor": 0.93,
+  "ko_rho": -0.2,
+  "et_caution": 0.5,
+  "knockout_fit": {
+    "method": "fit to historical knockout frequency bands (MODEL_IMPROVEMENTS 2.5); resolve_knockout-only, group predict_match unaffected",
+    "targets": {
+      "reach_et": 0.32,
+      "reach_shootout_lo": 0.2,
+      "reach_shootout_hi": 0.25,
+      "ko_total_goals": 2.4
+    },
+    "achieved": {
+      "reach_et": 0.30,
+      "reach_shootout": 0.213,
+      "ko_total_goals": 2.41,
+      "field": "top-24-by-strength pairwise, neutral (fit_knockout.py --field 24 --write)"
+    },
+    "note": "ko_rho (draw-clustering) raises reach-ET at constant goals; mf is a modest ~7% goal cut to the ~2.4 KO level; ET caution lowered 0.85->0.50 for the shootout band. ko_rho capped at -0.20 for DC stability (residual ~2pp to 32% absorbed by the more-even real KO field). Forward-only / projection-only; no knockout games played yet to OOS-validate advance-prob calibration (the 2.5 validate-narrow half awaits stage-labeled data)."
+  },
   "maher_fit": {
     "corpus_matches": 10495,
     "totals_sse": [
