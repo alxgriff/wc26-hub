@@ -5,9 +5,12 @@ Computes the 12 group tables and the cross-group third-place ranking from
 played matches in data/fixtures.csv, applying the tournament tiebreakers
 documented in CLAUDE.md:
 
-  Group:        points, goal difference, goals scored, head-to-head,
-                fair play points, drawing of lots
-  Third place:  points, goal difference, goals scored, fair play, lots
+  Group:        points, head-to-head (its points, GD, goals scored;
+                re-applied to any still-level subset), overall goal
+                difference, overall goals scored, fair play, FIFA World Ranking
+  Third place:  points, overall goal difference, goals scored, fair play,
+                FIFA World Ranking  (no head-to-head — teams are in different
+                groups)
 
 Head-to-head is applied as a mini-table (points, GD, goals scored) over the
 matches among the tied teams, and re-applied recursively to any subset that
@@ -25,8 +28,9 @@ available, using the FIFA convention that points are deductions — higher
 (closer to zero) ranks first. Keys must exact-match the team names in the
 fixtures (the CLAUDE.md canon); unknown names raise ValueError rather than
 silently scoring 0. Ties that survive every criterion are shown
-alphabetically and flagged in the table notes: drawing of lots cannot be
-simulated, only reported.
+alphabetically and flagged in the table notes: the FIFA Men's World Ranking
+decides this case but is not modelled here, so the residual tie is reported
+provisionally, never silently resolved (the 2026 rules removed drawing of lots).
 
 CLI:
     python scripts/standings.py [--fixtures data/fixtures.csv]

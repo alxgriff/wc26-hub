@@ -117,18 +117,55 @@ def _classify_combo(teams, current, unplayed, combo) -> dict:
         gd_lo[m.team_b] += lb
         gd_hi[m.team_b] += hb
 
+    rng = _position_range(teams, pts, gd_lo, gd_hi)
     buckets = {}
+    for t in teams:
+        lo_bucket, hi_bucket = _bucket(rng[t][0]), _bucket(rng[t][1])
+        buckets[t] = lo_bucket if lo_bucket == hi_bucket else "margin"
+    return buckets
+
+
+def _position_range(teams, pts, gd_lo, gd_hi) -> dict:
+    """{team: (min_pos, max_pos)} — the reachable EXACT position range within points
+    clusters (GD as an interval). min==max means the exact rank is pinned."""
+    out = {}
     for t in teams:
         p = pts[t]
         cluster = [u for u in teams if pts[u] == p]
         base = 1 + sum(1 for u in teams if pts[u] > p)
         above = sum(1 for u in cluster if u != t and gd_lo[u] > gd_hi[t])   # must rank ahead
         below = sum(1 for u in cluster if u != t and gd_lo[t] > gd_hi[u])   # must rank behind
-        min_pos = base + above
-        max_pos = base + (len(cluster) - 1 - below)
-        lo_bucket, hi_bucket = _bucket(min_pos), _bucket(max_pos)
-        buckets[t] = lo_bucket if lo_bucket == hi_bucket else "margin"
-    return buckets
+        out[t] = (base + above, base + (len(cluster) - 1 - below))
+    return out
+
+
+_CLINCH_SCORES = ((8, 0), (0, 0), (0, 8))   # big home win / draw / big away win
+
+
+def clinched_ranks(group: str, matches) -> dict:
+    """{team: rank} (1=winner, 2=runner-up, 3=third, 4=last) for teams whose EXACT final
+    group position is mathematically LOCKED — it is the same in EVERY outcome of the
+    remaining games. Uses the FULL 2026 tiebreakers (compute_standings: points → head-to-head
+    → GD → goals) by replaying each remaining game at extreme margins, so an H2H- or
+    cushion-secured rank is detected (the points+GD-interval bucketing alone misses head-to-
+    head). A finished group locks every position; an un-/part-played one yields fewer or none."""
+    import dataclasses
+    gms = sorted((m for m in matches if m.group == group), key=lambda m: m.match_id)
+    if not gms:
+        return {}
+    played = [m for m in gms if m.is_played]
+    rem = [m for m in gms if not m.is_played]
+    fp = st.load_discipline()
+    if not rem:                                    # group finished — all positions locked
+        rows = st.compute_standings(gms, fair_play=fp).groups[group].rows
+        return {r.team: i for i, r in enumerate(rows, 1)}
+    possible: dict[str, set] = {}
+    for combo in product(_CLINCH_SCORES, repeat=len(rem)):
+        proj = played + [dataclasses.replace(m, status="played", score_a=s[0], score_b=s[1])
+                         for m, s in zip(rem, combo)]
+        for i, r in enumerate(st.compute_standings(proj, fair_play=fp).groups[group].rows, 1):
+            possible.setdefault(r.team, set()).add(i)
+    return {t: next(iter(ps)) for t, ps in possible.items() if len(ps) == 1}
 
 
 # ---------------------------------------------------------------- plain language
