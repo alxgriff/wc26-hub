@@ -594,7 +594,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Brier</span>
     <h2 id="calls-h">The Calls</h2>
   </div>
-  <p class="standfirst">Ledger to date: 33 graded predictions, 19 correct calls, cumulative Brier 0.604 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max), RPS 0.183 (0 = perfect, 1 = worst — rewards near-misses on the W-D-L order)</p>
+  <p class="standfirst">Ledger to date: 35 graded predictions, 20 correct calls, cumulative Brier 0.600 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max), RPS 0.178 (0 = perfect, 1 = worst — rewards near-misses on the W-D-L order)</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">Every logged call graded: probabilities, result, hit or miss, Brier score</caption>
@@ -873,6 +873,23 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td class="pts">0.146</td>
       </tr>
       <tr class="subtotal"><td colspan="4">June 20 — 4 graded</td><td>3/4</td><td>0.513</td></tr>
+      <tr>
+        <td class="lbl"><a href="matches/G3.html">Belgium v Iran</a></td>
+        <td>63%/21%/16% (1-0)</td>
+        <td>0–0</td>
+        <td>draw</td>
+        <td><span class="hit hit-n" aria-hidden="true">✗</span><span class="sr-only">missed</span></td>
+        <td class="pts">1.042</td>
+      </tr>
+      <tr>
+        <td class="lbl"><a href="matches/H3.html">Spain v Saudi Arabia</a></td>
+        <td>92%/7%/1% (2-0)</td>
+        <td>4–0</td>
+        <td>home</td>
+        <td><span class="hit hit-y" aria-hidden="true">✓</span><span class="sr-only">correct call</span></td>
+        <td class="pts">0.013</td>
+      </tr>
+      <tr class="subtotal"><td colspan="4">June 21 — 2 graded</td><td>1/2</td><td>0.527</td></tr>
     </tbody>
   </table>
 </div>
@@ -883,7 +900,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Units &amp; CLV</span>
     <h2 id="bets-h">The Bets</h2>
   </div>
-  <p class="standfirst">Picks: 45 settled (21W-23L-1P), -0.55u at flat 1u stakes; avg CLV +0.4pp over 39 closing line(s) 4 open picks, 4u at risk.</p>
+  <p class="standfirst">Picks: 47 settled (22W-24L-1P), -0.30u at flat 1u stakes; avg CLV +0.4pp over 39 closing line(s) 2 open picks, 2u at risk.</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">Every recorded pick: selection, price, edge at record, settlement, units, closing line value</caption>
@@ -1391,8 +1408,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td title="2.25 decimal">+125</td>
         <td class="lbl">betus</td>
         <td>6.4pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
+        <td class="lbl status-won">won</td>
+        <td class="pts">+1.25</td>
         <td>—</td>
       </tr>
       <tr>
@@ -1402,8 +1419,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td title="2.28 decimal">+128</td>
         <td class="lbl">betonlineag</td>
         <td>6.8pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
+        <td class="lbl status-lost">lost</td>
+        <td class="pts">-1.00</td>
         <td>—</td>
       </tr>
       <tr>
@@ -1439,7 +1456,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Risky · model vs market</span>
     <h2 id="shadow-h">The Shadow Book</h2>
   </div>
-  <p class="standfirst">27 settled, 12W-14L, -2.73u paper (flat 1u, not staked); 1X2 1W-4L -3.44u; model-priced 11W-10L +0.71u 3 awaiting result.</p>
+  <p class="standfirst">28 settled, 12W-15L, -3.73u paper (flat 1u, not staked); 1X2 1W-4L -3.44u; model-priced 11W-11L -0.29u 2 awaiting result.</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">The shadow book: risky calls above the sanity ceiling (severe model–market disagreement), tracked on paper but too risky to stake, with hypothetical flat-1u units</caption>
@@ -1732,8 +1749,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td>-105</td>
         <td>11.7pp</td>
         <td>61%</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
+        <td class="lbl status-lost">lost</td>
+        <td class="pts">-1.00</td>
       </tr>
       <tr>
         <td class="lbl">Jun 21</td>
@@ -1756,7 +1773,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 
 <footer>
   <p class="colophon">
-    Generated 2026-06-21 13:42 · calls graded from data/predictions_log.csv (logged
+    Generated 2026-06-21 22:52 · calls graded from data/predictions_log.csv (logged
     pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
     at fresh prices, revisions explicit, settled rows immutable) · Brier: 0 best ·
     0.667 coin-flip · 2 worst · CLV = closing implied minus our implied at record ·

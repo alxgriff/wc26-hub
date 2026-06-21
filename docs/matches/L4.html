@@ -580,9 +580,9 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Panama win 7 percent, draw 15 percent, Croatia win 78 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:7">7%</span><span class="pd" style="flex:15">15%</span><span class="pb" style="flex:78">78%</span></div>
-  <div class="scale" aria-hidden="true"><span>Panama 7%</span><span>draw 15%</span><span>Croatia 78%</span></div>
+  <p class="sr-only">Panama win 7 percent, draw 14 percent, Croatia win 78 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:7">7%</span><span class="pd" style="flex:14">14%</span><span class="pb" style="flex:78">78%</span></div>
+  <div class="scale" aria-hidden="true"><span>Panama 7%</span><span>draw 14%</span><span>Croatia 78%</span></div>
   <p class="factline">most likely score <b>0–2</b> · expected goals <b>3.10</b> · over 2.5 <b>60%</b> · both score <b>42%</b><br>single source: rating model (Elo+Futi)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Croatia, low score; Panama's set pieces are the live tail.</p></blockquote></div>
@@ -684,15 +684,15 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <tbody>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.92 decimal">-109</td><td>50%</td><td>60%</td><td class="edge-pos">+10.4%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.89 decimal">-112</td><td>50%</td><td>40%</td><td class="edge-neg">-10.4%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Panama +1</td><td title="1.87 decimal">-115</td><td>51%</td><td>28%</td><td class="edge-neg">-23.2%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Croatia -1</td><td title="1.95 decimal">-105</td><td>49%</td><td>72%</td><td class="edge-pos">+23.2%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Panama +1</td><td title="1.87 decimal">-115</td><td>50%</td><td>28%</td><td class="edge-neg">-22.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Croatia -1</td><td title="1.89 decimal">-112</td><td>50%</td><td>72%</td><td class="edge-pos">+22.6%</td></tr>
     </tbody>
   </table>
 </div>
 <p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
 <p class="verify-flag">totals over 2.5: model-priced edge +10.4% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads away -1: model-priced edge +23.2% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 21, 12:11 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<p class="verify-flag">spreads away -1: model-priced edge +22.6% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 21, 6:52 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> under 2.5; Croatia win to nil.</p></blockquote></div>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
@@ -716,7 +716,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.6160,lb=2.4880,N=8,SHOW=6,i,j;
+  var la=0.6132,lb=2.4907,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
