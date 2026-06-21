@@ -1505,7 +1505,9 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
 
     now_view = _bracket_view(
         proj, "view-now", "Projected to lift the trophy",
-        "Linked names hold their group position as it stands; italic / blank slots are still open.")
+        "Drawn all the way out from the standings as they stand — every group winner, runner-up "
+        "and the eight best thirds (slotted by the FIFA Annex C logic). Positions are provisional "
+        "and shift with each result; abstract slots remain only where a group hasn't kicked off.")
     if projected is not None:
         proj_view = _bracket_view(
             projected, "view-proj", "Projected champion",
@@ -2012,7 +2014,11 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     bracket_proj = None
     bracket_full = None
     try:
-        bracket_proj = bk.project(s)
+        # resolve_provisional: slot the thirds via Annex C using the standings' deterministic
+        # order even when the cutline is provisional (FIFA ranking unmodelled) — so the
+        # as-it-stands bracket shows the real third-place logic, honestly flagged, rather than
+        # abstract "Best 3rd of …" pools. Still gated on all 12 groups having STARTED.
+        bracket_proj = bk.project(s, resolve_provisional=True)
     except (FileNotFoundError, ValueError) as e:
         warnings.append(f"Bracket page skipped: {e}")
     if bracket_proj is not None:

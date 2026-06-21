@@ -135,9 +135,9 @@ def project(standings: "st.Standings", annex: dict | None = None,
             third_assign = annex[combo]
             thirds_resolved = True
             if cutline_provisional and resolve_provisional:
-                warnings.append("Projected finish: the third-place cutline has ties broken "
-                                "deterministically (FIFA World Ranking isn't modelled) — a scenario, "
-                                "not a forecast of which thirds qualify.")
+                warnings.append("Third-place cutline has ties broken deterministically (FIFA World "
+                                "Ranking isn't modelled, so the standings' order decides) — the "
+                                "qualifying thirds and their slots are provisional and may change.")
         elif cutline_provisional:
             warnings.append("Third-place cutline is provisional (teams level on all "
                             "modelled criteria) — the eight winner-vs-third matches are not resolved.")

@@ -957,13 +957,13 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-21 12:43",
+ "generated_at": "2026-06-21 12:51",
  "slate_date": "2026-06-21",
  "bracket": {
   "schema": 1,
   "as_of_matches_played": 36,
-  "fully_projectable": false,
-  "thirds_resolved": false,
+  "fully_projectable": true,
+  "thirds_resolved": true,
   "r32": {
    "73": {
     "match": 73,
@@ -978,8 +978,8 @@
     "match": 74,
     "home": "Germany",
     "home_label": "Winner E",
-    "away": null,
-    "away_label": "Best 3rd of A/B/C/D/F",
+    "away": "Scotland",
+    "away_label": "3rd C",
     "provisional": true,
     "half": "top"
    },
@@ -1005,8 +1005,8 @@
     "match": 77,
     "home": "Norway",
     "home_label": "Winner I",
-    "away": null,
-    "away_label": "Best 3rd of C/D/F/G/H",
+    "away": "Sweden",
+    "away_label": "3rd F",
     "provisional": true,
     "half": "top"
    },
@@ -1023,8 +1023,8 @@
     "match": 79,
     "home": "Mexico",
     "home_label": "Winner A",
-    "away": null,
-    "away_label": "Best 3rd of C/E/F/H/I",
+    "away": "Cape Verde",
+    "away_label": "3rd H",
     "provisional": true,
     "half": "bottom"
    },
@@ -1032,8 +1032,8 @@
     "match": 80,
     "home": "England",
     "home_label": "Winner L",
-    "away": null,
-    "away_label": "Best 3rd of E/H/I/J/K",
+    "away": "Portugal",
+    "away_label": "3rd K",
     "provisional": true,
     "half": "bottom"
    },
@@ -1041,8 +1041,8 @@
     "match": 81,
     "home": "United States",
     "home_label": "Winner D",
-    "away": null,
-    "away_label": "Best 3rd of B/E/F/I/J",
+    "away": "Ecuador",
+    "away_label": "3rd E",
     "provisional": true,
     "half": "top"
    },
@@ -1050,8 +1050,8 @@
     "match": 82,
     "home": "Iran",
     "home_label": "Winner G",
-    "away": null,
-    "away_label": "Best 3rd of A/E/H/I/J",
+    "away": "Czechia",
+    "away_label": "3rd A",
     "provisional": true,
     "half": "top"
    },
@@ -1077,8 +1077,8 @@
     "match": 85,
     "home": "Canada",
     "home_label": "Winner B",
-    "away": null,
-    "away_label": "Best 3rd of E/F/G/I/J",
+    "away": "Belgium",
+    "away_label": "3rd G",
     "provisional": true,
     "half": "bottom"
    },
@@ -1095,8 +1095,8 @@
     "match": 87,
     "home": "Colombia",
     "home_label": "Winner K",
-    "away": null,
-    "away_label": "Best 3rd of D/E/I/J/L",
+    "away": "Paraguay",
+    "away_label": "3rd D",
     "provisional": true,
     "half": "bottom"
    },
@@ -1174,13 +1174,19 @@
   },
   "third_place_match": 103,
   "warnings": [
-   "Third-place cutline is provisional (teams level on all modelled criteria) — the eight winner-vs-third matches are not resolved."
+   "Third-place cutline has ties broken deterministically (FIFA World Ranking isn't modelled, so the standings' order decides) — the qualifying thirds and their slots are provisional and may change."
   ],
   "winners": {
    "73": {
     "team": "Switzerland",
     "loser": "South Korea",
     "p": 0.7025544587554864,
+    "source": "model"
+   },
+   "74": {
+    "team": "Germany",
+    "loser": "Scotland",
+    "p": 0.7994694088189911,
     "source": "model"
    },
    "75": {
@@ -1195,10 +1201,40 @@
     "p": 0.7072312857942131,
     "source": "model"
    },
+   "77": {
+    "team": "Norway",
+    "loser": "Sweden",
+    "p": 0.7109834497075787,
+    "source": "model"
+   },
    "78": {
     "team": "France",
     "loser": "Côte d'Ivoire",
     "p": 0.8603523376537532,
+    "source": "model"
+   },
+   "79": {
+    "team": "Mexico",
+    "loser": "Cape Verde",
+    "p": 0.8198192477001449,
+    "source": "model"
+   },
+   "80": {
+    "team": "England",
+    "loser": "Portugal",
+    "p": 0.5913779863575773,
+    "source": "model"
+   },
+   "81": {
+    "team": "Ecuador",
+    "loser": "United States",
+    "p": 0.6964996952898904,
+    "source": "model"
+   },
+   "82": {
+    "team": "Iran",
+    "loser": "Czechia",
+    "p": 0.5943791590720083,
     "source": "model"
    },
    "83": {
@@ -1213,16 +1249,34 @@
     "p": 0.8326164698963441,
     "source": "model"
    },
+   "85": {
+    "team": "Belgium",
+    "loser": "Canada",
+    "p": 0.7636574284855213,
+    "source": "model"
+   },
    "86": {
     "team": "Argentina",
     "loser": "Uruguay",
     "p": 0.7693027498692335,
     "source": "model"
    },
+   "87": {
+    "team": "Colombia",
+    "loser": "Paraguay",
+    "p": 0.8052649114005614,
+    "source": "model"
+   },
    "88": {
     "team": "Australia",
     "loser": "New Zealand",
     "p": 0.8219971193268705,
+    "source": "model"
+   },
+   "89": {
+    "team": "Germany",
+    "loser": "Norway",
+    "p": 0.5947893729934088,
     "source": "model"
    },
    "90": {
@@ -1237,10 +1291,22 @@
     "p": 0.5465956864555503,
     "source": "model"
    },
+   "92": {
+    "team": "England",
+    "loser": "Mexico",
+    "p": 0.7895614952615131,
+    "source": "model"
+   },
    "93": {
     "team": "Austria",
     "loser": "DR Congo",
     "p": 0.7473605074483091,
+    "source": "model"
+   },
+   "94": {
+    "team": "Ecuador",
+    "loser": "Iran",
+    "p": 0.6621089358190786,
     "source": "model"
    },
    "95": {
@@ -1248,12 +1314,70 @@
     "loser": "Australia",
     "p": 0.8530162821234869,
     "source": "model"
+   },
+   "96": {
+    "team": "Colombia",
+    "loser": "Belgium",
+    "p": 0.5923752621452901,
+    "source": "model"
+   },
+   "97": {
+    "team": "Netherlands",
+    "loser": "Germany",
+    "p": 0.5015634829981535,
+    "source": "model"
+   },
+   "98": {
+    "team": "Ecuador",
+    "loser": "Austria",
+    "p": 0.551757731346876,
+    "source": "model"
+   },
+   "99": {
+    "team": "England",
+    "loser": "France",
+    "p": 0.5168312655755029,
+    "source": "model"
+   },
+   "100": {
+    "team": "Argentina",
+    "loser": "Colombia",
+    "p": 0.6907211945841789,
+    "source": "model"
+   },
+   "101": {
+    "team": "Netherlands",
+    "loser": "Ecuador",
+    "p": 0.5820320570126188,
+    "source": "model"
+   },
+   "102": {
+    "team": "Argentina",
+    "loser": "England",
+    "p": 0.5749361350347735,
+    "source": "model"
+   },
+   "104": {
+    "team": "Argentina",
+    "loser": "Netherlands",
+    "p": 0.7498889057406211,
+    "source": "model"
+   },
+   "103": {
+    "team": "England",
+    "loser": "Ecuador",
+    "p": 0.7112278932378935,
+    "source": "model"
    }
   },
   "participants": {
    "73": [
     "South Korea",
     "Switzerland"
+   ],
+   "74": [
+    "Germany",
+    "Scotland"
    ],
    "75": [
     "Netherlands",
@@ -1263,9 +1387,29 @@
     "Brazil",
     "Japan"
    ],
+   "77": [
+    "Norway",
+    "Sweden"
+   ],
    "78": [
     "Côte d'Ivoire",
     "France"
+   ],
+   "79": [
+    "Mexico",
+    "Cape Verde"
+   ],
+   "80": [
+    "England",
+    "Portugal"
+   ],
+   "81": [
+    "United States",
+    "Ecuador"
+   ],
+   "82": [
+    "Iran",
+    "Czechia"
    ],
    "83": [
     "DR Congo",
@@ -1275,13 +1419,25 @@
     "Saudi Arabia",
     "Austria"
    ],
+   "85": [
+    "Canada",
+    "Belgium"
+   ],
    "86": [
     "Argentina",
     "Uruguay"
    ],
+   "87": [
+    "Colombia",
+    "Paraguay"
+   ],
    "88": [
     "Australia",
     "New Zealand"
+   ],
+   "89": [
+    "Germany",
+    "Norway"
    ],
    "90": [
     "Switzerland",
@@ -1291,16 +1447,60 @@
     "Brazil",
     "France"
    ],
+   "92": [
+    "Mexico",
+    "England"
+   ],
    "93": [
     "DR Congo",
     "Austria"
    ],
+   "94": [
+    "Ecuador",
+    "Iran"
+   ],
    "95": [
     "Argentina",
     "Australia"
+   ],
+   "96": [
+    "Belgium",
+    "Colombia"
+   ],
+   "97": [
+    "Germany",
+    "Netherlands"
+   ],
+   "98": [
+    "Austria",
+    "Ecuador"
+   ],
+   "99": [
+    "France",
+    "England"
+   ],
+   "100": [
+    "Argentina",
+    "Colombia"
+   ],
+   "101": [
+    "Netherlands",
+    "Ecuador"
+   ],
+   "102": [
+    "England",
+    "Argentina"
+   ],
+   "104": [
+    "Netherlands",
+    "Argentina"
+   ],
+   "103": [
+    "Ecuador",
+    "England"
    ]
   },
-  "champion": null
+  "champion": "Argentina"
  },
  "bracket_projected": {
   "schema": 1,
@@ -1517,7 +1717,7 @@
   },
   "third_place_match": 103,
   "warnings": [
-   "Projected finish: the third-place cutline has ties broken deterministically (FIFA World Ranking isn't modelled) — a scenario, not a forecast of which thirds qualify."
+   "Third-place cutline has ties broken deterministically (FIFA World Ranking isn't modelled, so the standings' order decides) — the qualifying thirds and their slots are provisional and may change."
   ],
   "winners": {
    "73": {
