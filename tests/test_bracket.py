@@ -147,5 +147,33 @@ class FeedTests(unittest.TestCase):
             self.assertTrue(all(pr))
 
 
+LIVE = REPO / "data" / "fixtures.csv"
+
+
+class ProjectedFinishTests(unittest.TestCase):
+    """The 'projected finish' view: project remaining games -> the full bracket resolves."""
+
+    def test_project_final_standings_completes_every_group(self):
+        s = bk.project_final_standings(st.load_fixtures(LIVE), lambda m: (1, 0))
+        self.assertEqual(len(s.groups), 12)
+        for gt in s.groups.values():                       # four teams, three games each
+            self.assertEqual(len(gt.rows), 4)
+            for r in gt.rows:
+                self.assertEqual(r.played, 3)
+
+    def test_projected_bracket_fully_resolves_to_a_champion(self):
+        s = bk.project_final_standings(st.load_fixtures(LIVE), lambda m: (2, 1))
+        proj = bk.feed(bk.project(s, resolve_provisional=True), _alpha_resolver)
+        self.assertTrue(proj["fully_projectable"])
+        self.assertTrue(proj["thirds_resolved"])
+        self.assertIsNotNone(proj.get("champion"))
+
+    def test_resolve_provisional_breaks_the_cutline(self):
+        # all draws => every team level => the third-place cutline is provisional everywhere
+        s = bk.project_final_standings(st.load_fixtures(LIVE), lambda m: (1, 1))
+        self.assertFalse(bk.project(s)["thirds_resolved"])                 # gated by default
+        self.assertTrue(bk.project(s, resolve_provisional=True)["thirds_resolved"])
+
+
 if __name__ == "__main__":
     unittest.main()

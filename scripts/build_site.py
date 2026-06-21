@@ -374,6 +374,34 @@ def load_knockout_resolver():
     return resolve
 
 
+def load_group_projector():
+    """Defensive adapter for the 'projected finish' bracket: score(match) -> (score_a, score_b)
+    = the model's most-likely DECISIVE scoreline for a group game, or None if predict.py is
+    unavailable. Decisive (skips the modal draw) so the projected final tables don't tie into a
+    provisional third-place cutline that would block the bracket. Neutral venue (Match carries
+    no country, and KO venues aren't modelled either — kept consistent)."""
+    try:
+        import predict as pr
+        model = pr.load_ratings()
+    except Exception:
+        return None
+
+    def score(m):
+        try:
+            a, b = pr._canon(m.team_a), pr._canon(m.team_b)
+            if a not in model.teams or b not in model.teams:
+                return (1, 0)
+            pred = pr.predict_match(model, a, b)         # neutral
+            for (i, j), _p in pred.top_scores:           # most-likely scorelines, high→low
+                if i != j:
+                    return (i, j)                        # first decisive one
+            return (1, 0) if pred.p_a >= pred.p_b else (0, 1)   # all-draw top: favoured side by 1
+        except Exception:
+            return (1, 0)
+
+    return score
+
+
 def render_call(info: dict | None, team_a: str, team_b: str,
                 prebaked_lean: str | None,
                 result: tuple[int, int] | None = None,
@@ -1451,8 +1479,21 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
     return f'<ol class="bracket">{"".join(cols)}</ol>{third}'
 
 
+def _bracket_view(proj: dict, view_cls: str, champ_label: str, sub: str) -> str:
+    """One bracket view (champion banner + sub-note + the scrollable cascade)."""
+    champ = proj.get("champion")
+    cb = (f'<p class="bchamp"><span class="lbl">{champ_label}</span>'
+          f'<strong>{_esc(champ)}</strong></p>' if champ else "")
+    return (f'<div class="bview {view_cls}">{cb}'
+            f'<p class="bview-sub">{_esc(sub)}</p>'
+            f'<div class="bracket-wrap" tabindex="0" role="region" '
+            f'aria-label="Knockout bracket, scrollable">{render_bracket_html(proj, root="")}'
+            f'</div></div>')
+
+
 def render_bracket_page(proj: dict, css: str, generated_at: str,
-                        template_dir: Path = TEMPLATE_DIR) -> str:
+                        template_dir: Path = TEMPLATE_DIR,
+                        projected: "dict | None" = None) -> str:
     n = proj["as_of_matches_played"]
     resolved = ("All eight group-winner-vs-best-third matches are projected from "
                 "the current third-place race." if proj["thirds_resolved"] else
@@ -1461,16 +1502,34 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
                 "third-place cutline is settled.")
     notes_html = "".join(f'<li>{_esc(w)}</li>' for w in proj["warnings"])
     notes_html = f'<ul class="bnotes">{notes_html}</ul>' if notes_html else ""
-    champ = proj.get("champion")
-    champion_html = (f'<p class="bchamp"><span class="lbl">Projected to lift the '
-                     f'trophy</span><strong>{_esc(champ)}</strong></p>' if champ else "")
+
+    now_view = _bracket_view(
+        proj, "view-now", "Projected to lift the trophy",
+        "Linked names hold their group position as it stands; italic / blank slots are still open.")
+    if projected is not None:
+        proj_view = _bracket_view(
+            projected, "view-proj", "Projected champion",
+            "Every remaining group game played out to the model's most likely decisive result, "
+            "then the whole bracket run through — a full scenario, not a forecast of who qualifies.")
+        # CSS-only radio toggle (no JS in the output): the radios precede the views so the
+        # `#id:checked ~ .view` sibling rules can show/hide. 'As it stands' is the default.
+        bracket_html = (
+            '<input type="radio" name="bview" id="bv-now" class="bview-radio" checked>'
+            '<input type="radio" name="bview" id="bv-proj" class="bview-radio">'
+            '<div class="bview-tabs" role="tablist" aria-label="Bracket view">'
+            '<label for="bv-now">As it stands</label>'
+            '<label for="bv-proj">Projected finish</label></div>'
+            + now_view + proj_view)
+    else:
+        bracket_html = now_view
+
     tpl = Template((template_dir / "bracket.html").read_text(encoding="utf-8"))
     return tpl.safe_substitute(
         site_css=css,
-        bracket_html=render_bracket_html(proj, root=""),
+        bracket_html=bracket_html,
         played=n, total=72, progress_pct=round(n / 72 * 100),
         resolved_note=_esc(resolved),
-        champion_html=champion_html,
+        champion_html="",                  # champion banners now live inside each view
         notes_html=notes_html,
         generated_at=_esc(generated_at),
         repo_url=REPO_URL,
@@ -1951,6 +2010,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     # Annex C is committed static data; a missing/corrupt table degrades to no
     # bracket page + a warning rather than a broken build (never an invented slot).
     bracket_proj = None
+    bracket_full = None
     try:
         bracket_proj = bk.project(s)
     except (FileNotFoundError, ValueError) as e:
@@ -1964,6 +2024,17 @@ def build_site(out_dir: Path, target: date, generated_at: str,
             # results=None: no knockout has been played yet (group stage only);
             # actual results will override the model here once those fixtures exist
             bracket_proj = bk.feed(bracket_proj, knockout_resolver)
+        # 'Projected finish' view: project every remaining group game to a decisive result,
+        # resolve the WHOLE bracket (all 12 groups final, thirds slotted), run it through.
+        projector = load_group_projector()
+        if projector is not None:
+            try:
+                s_full = bk.project_final_standings(matches, projector)
+                bracket_full = bk.project(s_full, resolve_provisional=True)
+                if knockout_resolver:
+                    bracket_full = bk.feed(bracket_full, knockout_resolver)
+            except (FileNotFoundError, ValueError) as e:
+                warnings.append(f"Projected-finish bracket skipped: {e}")
 
     index, data = build_page(matches, rows, target, generated_at,
                              template_path=template_dir / "page.html",
@@ -1975,6 +2046,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                              fates=fates)
     if bracket_proj is not None:
         data["bracket"] = bk.to_dict(bracket_proj)
+    if bracket_full is not None:
+        data["bracket_projected"] = bk.to_dict(bracket_full)
     (out_dir / "index.html").write_text(index, encoding="utf-8")
     (out_dir / "data.json").write_text(
         json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -1990,7 +2063,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         encoding="utf-8")
     if bracket_proj is not None:
         (out_dir / "bracket.html").write_text(
-            render_bracket_page(bracket_proj, css, generated_at, template_dir),
+            render_bracket_page(bracket_proj, css, generated_at, template_dir,
+                                projected=bracket_full),
             encoding="utf-8")
 
     fixture_teams = sorted({m.team_a for m in matches} | {m.team_b for m in matches})

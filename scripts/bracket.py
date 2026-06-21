@@ -101,11 +101,15 @@ def _slot_label(kind: str, g: str) -> str:
     return {"W": f"Winner {g}", "RU": f"Runner-up {g}"}[kind]
 
 
-def project(standings: "st.Standings", annex: dict | None = None) -> dict:
+def project(standings: "st.Standings", annex: dict | None = None,
+            resolve_provisional: bool = False) -> dict:
     """Project the R32->Final bracket from current standings (as if final). Returns a
     pure dict (see to_dict for the shape). Gated: unstarted groups -> abstract slots;
     third-hosting matches resolve only when all 12 groups have a standing and the
-    third-place cutline is not flagged provisional."""
+    third-place cutline is not flagged provisional. ``resolve_provisional=True`` (the
+    'projected finish' view) breaks a provisional cutline deterministically — using the
+    standings' own order (alphabetical on a modelled tie) — so the full bracket resolves
+    for the scenario; the as-it-stands view leaves it False and stays honestly gated."""
     annex = annex if annex is not None else load_annex_c()
     groups = standings.groups
     warnings: list[str] = list(standings.warnings)
@@ -127,9 +131,13 @@ def project(standings: "st.Standings", annex: dict | None = None) -> dict:
     if all_started and len(standings.third_place) >= st.QUALIFYING_THIRDS:
         qualifying = standings.third_place[:st.QUALIFYING_THIRDS]
         combo = tuple(sorted(r.group for r in qualifying))
-        if combo in annex and not cutline_provisional:
+        if combo in annex and (resolve_provisional or not cutline_provisional):
             third_assign = annex[combo]
             thirds_resolved = True
+            if cutline_provisional and resolve_provisional:
+                warnings.append("Projected finish: the third-place cutline has ties broken "
+                                "deterministically (FIFA World Ranking isn't modelled) — a scenario, "
+                                "not a forecast of which thirds qualify.")
         elif cutline_provisional:
             warnings.append("Third-place cutline is provisional (teams level on all "
                             "modelled criteria) — the eight winner-vs-third matches are not resolved.")
@@ -168,6 +176,20 @@ def project(standings: "st.Standings", annex: dict | None = None) -> dict:
 
 # the eight R32 matches feeding semi-final 101 (top) vs 102 (bottom)
 _TOP_HALF_R32 = frozenset({73, 74, 75, 77, 81, 82, 83, 84})
+
+
+def project_final_standings(matches: "list[st.Match]", score_fn) -> "st.Standings":
+    """Standings as if every remaining group game were played to the score ``score_fn``
+    predicts — so ``project`` can resolve the WHOLE bracket (all 12 groups final, thirds
+    slotted). ``score_fn(match) -> (score_a, score_b)`` is injected, so bracket.py stays
+    model-agnostic (build_site passes a predict-based one; tests a deterministic one).
+    A pure projection: it never touches fixtures.csv or the live as-it-stands standings."""
+    import dataclasses
+    projected = [m if m.is_played
+                 else dataclasses.replace(m, status="played",
+                                          score_a=(sc := score_fn(m))[0], score_b=sc[1])
+                 for m in matches]
+    return st.compute_standings(projected)
 
 
 def feed(projection: dict, resolver, results: "dict | None" = None) -> dict:
