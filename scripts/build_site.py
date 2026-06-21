@@ -1435,10 +1435,13 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
     winners = {int(k): v for k, v in proj.get("winners", {}).items()}
     parts = {int(k): tuple(v) for k, v in proj.get("participants", {}).items()}
 
-    def slot(team=None, label=None, *, win=False, p=None):
+    def slot(team=None, label=None, *, win=False, p=None, prov=False):
         if team:
             name = f'<a href="{_team_link(team, root)}">{_esc(team)}</a>'
             cls, title = "bslot", team
+            if prov:                                # concrete team, group position not sealed
+                cls += " prov"
+                title += " — provisional: group position not yet sealed, can still change"
         elif label:
             name, cls, title = _esc(label), "bslot tbd", label
         else:
@@ -1450,11 +1453,11 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
         ttl = f' title="{_esc(title)}"' if title else ""
         return f'<span class="{cls}"{ttl}><span class="bn">{name}</span>{pct}</span>'
 
-    def card(m, a_team, a_label, b_team, b_label):
+    def card(m, a_team, a_label, b_team, b_label, a_prov=False, b_prov=False):
         w = winners.get(m, {})
         wt, p = w.get("team"), w.get("p")
-        sa = slot(team=a_team, label=a_label, win=a_team is not None and a_team == wt, p=p)
-        sb = slot(team=b_team, label=b_label, win=b_team is not None and b_team == wt, p=p)
+        sa = slot(team=a_team, label=a_label, win=a_team is not None and a_team == wt, p=p, prov=a_prov)
+        sb = slot(team=b_team, label=b_label, win=b_team is not None and b_team == wt, p=p, prov=b_prov)
         return f'<li class="btie" id="m{m}"><div class="bpair">{sa}{sb}</div></li>'
 
     def downstream_card(m):
@@ -1467,7 +1470,8 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
         for m in nums:
             if r == 0:
                 e = r32[m]
-                items.append(card(m, e["home"], e["home_label"], e["away"], e["away_label"]))
+                items.append(card(m, e["home"], e["home_label"], e["away"], e["away_label"],
+                                  e.get("home_provisional", False), e.get("away_provisional", False)))
             else:
                 items.append(downstream_card(m))
         cols.append(f'<li class="bround" data-r="{r}"><h3>{_esc(_ROUND_TITLES[r])}</h3>'
@@ -1506,8 +1510,9 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
     now_view = _bracket_view(
         proj, "view-now", "Projected to lift the trophy",
         "Drawn all the way out from the standings as they stand — every group winner, runner-up "
-        "and the eight best thirds (slotted by the FIFA Annex C logic). Positions are provisional "
-        "and shift with each result; abstract slots remain only where a group hasn't kicked off.")
+        "and the eight best thirds (slotted by the FIFA Annex C logic). A dashed underline marks a "
+        "provisional position (not yet sealed — it shifts with each result); abstract slots remain "
+        "only where a group hasn't kicked off.")
     if projected is not None:
         proj_view = _bracket_view(
             projected, "view-proj", "Projected champion",

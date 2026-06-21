@@ -174,6 +174,21 @@ class ProjectedFinishTests(unittest.TestCase):
         self.assertFalse(bk.project(s)["thirds_resolved"])                 # gated by default
         self.assertTrue(bk.project(s, resolve_provisional=True)["thirds_resolved"])
 
+    def test_per_side_provisional_flags(self):
+        matches = st.load_fixtures(LIVE)
+        now = bk.project(st.compute_standings(matches), resolve_provisional=True)
+        for e in now["r32"].values():
+            self.assertIn("home_provisional", e)
+            self.assertIn("away_provisional", e)
+        # mid-group-stage no position is sealed, so concrete slots are flagged provisional
+        self.assertTrue(any(e["home_provisional"] or e["away_provisional"]
+                            for e in now["r32"].values()))
+        # projected-final standings (every team played 3) => nothing provisional
+        full = bk.project(bk.project_final_standings(matches, lambda m: (2, 1)),
+                          resolve_provisional=True)
+        self.assertFalse(any(e["home_provisional"] or e["away_provisional"]
+                             for e in full["r32"].values()))
+
 
 if __name__ == "__main__":
     unittest.main()

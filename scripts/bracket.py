@@ -160,7 +160,10 @@ def project(standings: "st.Standings", annex: dict | None = None,
         prov = bool(sa[2] or sb[2] or sa[0] is None or sb[0] is None)
         half = "top" if m in _TOP_HALF_R32 else "bottom"
         r32[m] = {"match": m, "home": sa[0], "home_label": sa[1],
-                  "away": sb[0], "away_label": sb[1], "provisional": prov, "half": half}
+                  "away": sb[0], "away_label": sb[1], "provisional": prov, "half": half,
+                  # per-side: a CONCRETE team whose group position isn't sealed yet (can change)
+                  "home_provisional": bool(sa[0] is not None and sa[2]),
+                  "away_provisional": bool(sb[0] is not None and sb[2])}
 
     return {
         "schema": 1,

@@ -459,6 +459,9 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bslot a{text-decoration:none}
 .bslot a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
 .bslot.tbd{font-weight:500;font-style:italic;color:var(--ink-soft)}
+/* provisional: a concrete team whose group position isn't sealed — dashed underline so it
+   reads "tentative", and still works under the green winner / muted loser colour states */
+.bslot.prov .bn{border-bottom:1.5px dashed var(--ink-soft)}
 /* projected advancer (bracket.feed): the winning slot in green; the other reads muted */
 .bslot.win .bn{color:var(--green)}
 .btie:has(.win) .bslot:not(.win) .bn{color:var(--ink-soft);font-weight:500}
@@ -1325,7 +1328,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   </div>
 <p class="ledger-line">Picks: 45 settled (21W-23L-1P), -0.55u at flat 1u stakes; avg CLV +0.4pp over 39 closing line(s)</p>
   <p class="colophon">
-    Generated 2026-06-21 12:51 · standings computed from data/fixtures.csv by scripts/standings.py ·
+    Generated 2026-06-21 12:56 · standings computed from data/fixtures.csv by scripts/standings.py ·
     tiebreakers (2026): points, head-to-head, goal difference, goals scored, fair play, FIFA ranking ·
     <a href="https://github.com/alxgriff/wc26-hub">source &amp; data</a> · machine-readable copy embedded below
   </p>
@@ -2292,7 +2295,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-21 12:51",
+ "generated_at": "2026-06-21 12:56",
  "slate_date": "2026-06-21"
 }
 </script>

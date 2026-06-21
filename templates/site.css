@@ -448,6 +448,9 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bslot a{text-decoration:none}
 .bslot a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
 .bslot.tbd{font-weight:500;font-style:italic;color:var(--ink-soft)}
+/* provisional: a concrete team whose group position isn't sealed — dashed underline so it
+   reads "tentative", and still works under the green winner / muted loser colour states */
+.bslot.prov .bn{border-bottom:1.5px dashed var(--ink-soft)}
 /* projected advancer (bracket.feed): the winning slot in green; the other reads muted */
 .bslot.win .bn{color:var(--green)}
 .btie:has(.win) .bslot:not(.win) .bn{color:var(--ink-soft);font-weight:500}

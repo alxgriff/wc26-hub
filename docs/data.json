@@ -957,7 +957,7 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-21 12:51",
+ "generated_at": "2026-06-21 12:56",
  "slate_date": "2026-06-21",
  "bracket": {
   "schema": 1,
@@ -972,7 +972,9 @@
     "away": "Switzerland",
     "away_label": "Runner-up B",
     "provisional": true,
-    "half": "top"
+    "half": "top",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "74": {
     "match": 74,
@@ -981,7 +983,9 @@
     "away": "Scotland",
     "away_label": "3rd C",
     "provisional": true,
-    "half": "top"
+    "half": "top",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "75": {
     "match": 75,
@@ -990,7 +994,9 @@
     "away": "Morocco",
     "away_label": "Runner-up C",
     "provisional": true,
-    "half": "top"
+    "half": "top",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "76": {
     "match": 76,
@@ -999,7 +1005,9 @@
     "away": "Japan",
     "away_label": "Runner-up F",
     "provisional": true,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "77": {
     "match": 77,
@@ -1008,7 +1016,9 @@
     "away": "Sweden",
     "away_label": "3rd F",
     "provisional": true,
-    "half": "top"
+    "half": "top",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "78": {
     "match": 78,
@@ -1017,7 +1027,9 @@
     "away": "France",
     "away_label": "Runner-up I",
     "provisional": true,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "79": {
     "match": 79,
@@ -1026,7 +1038,9 @@
     "away": "Cape Verde",
     "away_label": "3rd H",
     "provisional": true,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "80": {
     "match": 80,
@@ -1035,7 +1049,9 @@
     "away": "Portugal",
     "away_label": "3rd K",
     "provisional": true,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "81": {
     "match": 81,
@@ -1044,7 +1060,9 @@
     "away": "Ecuador",
     "away_label": "3rd E",
     "provisional": true,
-    "half": "top"
+    "half": "top",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "82": {
     "match": 82,
@@ -1053,7 +1071,9 @@
     "away": "Czechia",
     "away_label": "3rd A",
     "provisional": true,
-    "half": "top"
+    "half": "top",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "83": {
     "match": 83,
@@ -1062,7 +1082,9 @@
     "away": "Ghana",
     "away_label": "Runner-up L",
     "provisional": true,
-    "half": "top"
+    "half": "top",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "84": {
     "match": 84,
@@ -1071,7 +1093,9 @@
     "away": "Austria",
     "away_label": "Runner-up J",
     "provisional": true,
-    "half": "top"
+    "half": "top",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "85": {
     "match": 85,
@@ -1080,7 +1104,9 @@
     "away": "Belgium",
     "away_label": "3rd G",
     "provisional": true,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "86": {
     "match": 86,
@@ -1089,7 +1115,9 @@
     "away": "Uruguay",
     "away_label": "Runner-up H",
     "provisional": true,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "87": {
     "match": 87,
@@ -1098,7 +1126,9 @@
     "away": "Paraguay",
     "away_label": "3rd D",
     "provisional": true,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": true,
+    "away_provisional": true
    },
    "88": {
     "match": 88,
@@ -1107,7 +1137,9 @@
     "away": "New Zealand",
     "away_label": "Runner-up G",
     "provisional": true,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": true,
+    "away_provisional": true
    }
   },
   "tree": {
@@ -1515,7 +1547,9 @@
     "away": "Canada",
     "away_label": "Runner-up B",
     "provisional": false,
-    "half": "top"
+    "half": "top",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "74": {
     "match": 74,
@@ -1524,7 +1558,9 @@
     "away": "Scotland",
     "away_label": "3rd C",
     "provisional": false,
-    "half": "top"
+    "half": "top",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "75": {
     "match": 75,
@@ -1533,7 +1569,9 @@
     "away": "Morocco",
     "away_label": "Runner-up C",
     "provisional": false,
-    "half": "top"
+    "half": "top",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "76": {
     "match": 76,
@@ -1542,7 +1580,9 @@
     "away": "Japan",
     "away_label": "Runner-up F",
     "provisional": false,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "77": {
     "match": 77,
@@ -1551,7 +1591,9 @@
     "away": "Sweden",
     "away_label": "3rd F",
     "provisional": false,
-    "half": "top"
+    "half": "top",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "78": {
     "match": 78,
@@ -1560,7 +1602,9 @@
     "away": "Norway",
     "away_label": "Runner-up I",
     "provisional": false,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "79": {
     "match": 79,
@@ -1569,7 +1613,9 @@
     "away": "Saudi Arabia",
     "away_label": "3rd H",
     "provisional": false,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "80": {
     "match": 80,
@@ -1578,7 +1624,9 @@
     "away": "Senegal",
     "away_label": "3rd I",
     "provisional": false,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "81": {
     "match": 81,
@@ -1587,7 +1635,9 @@
     "away": "Bosnia and Herzegovina",
     "away_label": "3rd B",
     "provisional": false,
-    "half": "top"
+    "half": "top",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "82": {
     "match": 82,
@@ -1596,7 +1646,9 @@
     "away": "Algeria",
     "away_label": "3rd J",
     "provisional": false,
-    "half": "top"
+    "half": "top",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "83": {
     "match": 83,
@@ -1605,7 +1657,9 @@
     "away": "Croatia",
     "away_label": "Runner-up L",
     "provisional": false,
-    "half": "top"
+    "half": "top",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "84": {
     "match": 84,
@@ -1614,7 +1668,9 @@
     "away": "Austria",
     "away_label": "Runner-up J",
     "provisional": false,
-    "half": "top"
+    "half": "top",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "85": {
     "match": 85,
@@ -1623,7 +1679,9 @@
     "away": "Egypt",
     "away_label": "3rd G",
     "provisional": false,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "86": {
     "match": 86,
@@ -1632,7 +1690,9 @@
     "away": "Uruguay",
     "away_label": "Runner-up H",
     "provisional": false,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "87": {
     "match": 87,
@@ -1641,7 +1701,9 @@
     "away": "Paraguay",
     "away_label": "3rd D",
     "provisional": false,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": false,
+    "away_provisional": false
    },
    "88": {
     "match": 88,
@@ -1650,7 +1712,9 @@
     "away": "Iran",
     "away_label": "Runner-up G",
     "provisional": false,
-    "half": "bottom"
+    "half": "bottom",
+    "home_provisional": false,
+    "away_provisional": false
    }
   },
   "tree": {
