@@ -562,10 +562,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Curaçao win 5 percent, draw 14 percent, Côte d&#x27;Ivoire win 81 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:5"></span><span class="pd" style="flex:14">14%</span><span class="pb" style="flex:81">81%</span></div>
-  <div class="scale" aria-hidden="true"><span>Curaçao 5%</span><span>draw 14%</span><span>Côte d&#x27;Ivoire 81%</span></div>
-  <p class="factline">most likely score <b>0–2</b> · expected goals <b>2.79</b> · over 2.5 <b>53%</b> · both score <b>31%</b><br>single source: rating model (Elo+Futi)</p>
+  <p class="sr-only">Curaçao win 4 percent, draw 13 percent, Côte d&#x27;Ivoire win 82 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:4"></span><span class="pd" style="flex:13">13%</span><span class="pb" style="flex:82">82%</span></div>
+  <div class="scale" aria-hidden="true"><span>Curaçao 4%</span><span>draw 13%</span><span>Côte d&#x27;Ivoire 82%</span></div>
+  <p class="factline">most likely score <b>0–2</b> · expected goals <b>2.79</b> · over 2.5 <b>53%</b> · both score <b>29%</b><br>single source: rating model (Elo+Futi)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> CIV control and win; patience profile.</p></blockquote></div>
 </section>
@@ -680,16 +680,15 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.25</td><td title="1.83 decimal">-120</td><td>53%</td><td>69%</td><td class="edge-pos">+16.7%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="2.23 decimal">+123</td><td>42%</td><td>31%</td><td class="edge-neg">-11.8%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="1.64 decimal">-156</td><td>58%</td><td>69%</td><td class="edge-pos">+11.8%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Curaçao +2.25</td><td title="1.85 decimal">-118</td><td>52%</td><td>61%</td><td class="edge-pos">+8.9%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Côte d&#x27;Ivoire -2.25</td><td title="2.02 decimal">+102</td><td>48%</td><td>39%</td><td class="edge-neg">-8.9%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Curaçao +2.25</td><td title="1.85 decimal">-118</td><td>52%</td><td>60%</td><td class="edge-pos">+7.5%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Côte d&#x27;Ivoire -2.25</td><td title="2.02 decimal">+102</td><td>48%</td><td>40%</td><td class="edge-neg">-7.5%</td></tr>
     </tbody>
   </table>
 </div>
-<p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Curaçao +2.25</strong> (Asian handicap) @ -118, edge <strong>+7.5%</strong> — best price -118 (betonlineag). Flat 1u, paper record.</p></div>
 <p class="verify-flag">totals under 3: model-priced edge +13.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="verify-flag">totals under 3.25: model-priced edge +16.7% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="verify-flag">totals under 3.5: model-priced edge +11.8% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads home 2.25: model-priced edge +8.9% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 21, 12:11 PM ET · DraftKings where quoted, else best of 3 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
@@ -713,7 +712,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.4176,lb=2.3707,N=8,SHOW=6,i,j;
+  var la=0.3896,lb=2.3986,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
