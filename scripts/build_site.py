@@ -1419,6 +1419,24 @@ def _bracket_ordered_rounds() -> list[list[int]]:
     return rounds                          # [R32(16), R16(8), QF(4), SF(2), Final(1)]
 
 
+def _humanize_origin(label: str) -> str:
+    """Turn a slot's terse origin label into prose for the hover tooltip, so a reader can
+    see HOW a team landed where it did: 'Winner E' -> 'Group E winner', 'Runner-up B' ->
+    'Group B runner-up', '3rd C' -> '3rd place, Group C', 'Best 3rd of A/B/C' -> 'one of
+    the best third-placed teams (Group A/B/C)'. Unknown shapes pass through unchanged."""
+    if not label:
+        return ""
+    if label.startswith("Winner "):
+        return f"Group {label[7:]} winner"
+    if label.startswith("Runner-up "):
+        return f"Group {label[10:]} runner-up"
+    if label.startswith("3rd ") and " of " not in label:
+        return f"3rd place, Group {label[4:]}"
+    if label.startswith("Best 3rd of "):
+        return f"one of the best third-placed teams (Group {label[12:]})"
+    return label
+
+
 def render_bracket_html(proj: dict, root: str = "") -> str:
     """The as-it-stands knockout bracket as a traditional left-to-right cascade:
     R32 cards on the left, each later round's matches centred between their two
@@ -1435,15 +1453,26 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
     winners = {int(k): v for k, v in proj.get("winners", {}).items()}
     parts = {int(k): tuple(v) for k, v in proj.get("participants", {}).items()}
 
-    def slot(team=None, label=None, *, win=False, p=None, prov=False):
+    def slot(team=None, label=None, *, win=False, p=None, prov=False, conf=False):
+        # origin = how this slot was reached (Group D winner, 3rd place Group C, …) — shown
+        # on hover whether the slot is still abstract or already filled by a concrete team.
+        origin = _humanize_origin(label)
+        mark = ""
         if team:
             name = f'<a href="{_team_link(team, root)}">{_esc(team)}</a>'
-            cls, title = "bslot", team
-            if prov:                                # concrete team, group position not sealed
+            cls = "bslot"
+            base = f"{team} — {origin}" if origin else team
+            if conf:                                # this exact seed is mathematically secured
+                cls += " conf"
+                title = f"{base} (confirmed — this seed is mathematically secured)"
+                mark = '<span class="bmark" aria-label="confirmed" role="img">✓</span>'
+            elif prov:                              # concrete team, group position not sealed
                 cls += " prov"
-                title += " — provisional: group position not yet sealed, can still change"
+                title = f"{base} (provisional — not yet sealed, can still change)"
+            else:
+                title = base
         elif label:
-            name, cls, title = _esc(label), "bslot tbd", label
+            name, cls, title = _esc(label), "bslot tbd", origin or label
         else:
             name, cls, title = "", "bslot tbd", ""
         if win:
@@ -1451,13 +1480,16 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
         pct = (f'<span class="bp">{round(p * 100)}%</span>'
                if win and p is not None else "")
         ttl = f' title="{_esc(title)}"' if title else ""
-        return f'<span class="{cls}"{ttl}><span class="bn">{name}</span>{pct}</span>'
+        return f'<span class="{cls}"{ttl}><span class="bn">{name}</span>{mark}{pct}</span>'
 
-    def card(m, a_team, a_label, b_team, b_label, a_prov=False, b_prov=False):
+    def card(m, a_team, a_label, b_team, b_label, a_prov=False, b_prov=False,
+             a_conf=False, b_conf=False):
         w = winners.get(m, {})
         wt, p = w.get("team"), w.get("p")
-        sa = slot(team=a_team, label=a_label, win=a_team is not None and a_team == wt, p=p, prov=a_prov)
-        sb = slot(team=b_team, label=b_label, win=b_team is not None and b_team == wt, p=p, prov=b_prov)
+        sa = slot(team=a_team, label=a_label, win=a_team is not None and a_team == wt,
+                  p=p, prov=a_prov, conf=a_conf)
+        sb = slot(team=b_team, label=b_label, win=b_team is not None and b_team == wt,
+                  p=p, prov=b_prov, conf=b_conf)
         return f'<li class="btie" id="m{m}"><div class="bpair">{sa}{sb}</div></li>'
 
     def downstream_card(m):
@@ -1471,7 +1503,8 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
             if r == 0:
                 e = r32[m]
                 items.append(card(m, e["home"], e["home_label"], e["away"], e["away_label"],
-                                  e.get("home_provisional", False), e.get("away_provisional", False)))
+                                  e.get("home_provisional", False), e.get("away_provisional", False),
+                                  e.get("home_confirmed", False), e.get("away_confirmed", False)))
             else:
                 items.append(downstream_card(m))
         cols.append(f'<li class="bround" data-r="{r}"><h3>{_esc(_ROUND_TITLES[r])}</h3>'
@@ -1510,9 +1543,10 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
     now_view = _bracket_view(
         proj, "view-now", "Projected to lift the trophy",
         "Drawn all the way out from the standings as they stand — every group winner, runner-up "
-        "and the eight best thirds (slotted by the FIFA Annex C logic). A dashed underline marks a "
-        "provisional position (not yet sealed — it shifts with each result); abstract slots remain "
-        "only where a group hasn't kicked off.")
+        "and the eight best thirds (slotted by the FIFA Annex C logic). A green ✓ marks a seed "
+        "already mathematically secured; a dashed underline marks a provisional position (not yet "
+        "sealed — it shifts with each result); abstract slots remain only where a group hasn't "
+        "kicked off. Hover any slot to see how a team reached it.")
     if projected is not None:
         proj_view = _bracket_view(
             projected, "view-proj", "Projected champion",
@@ -2023,7 +2057,10 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         # order even when the cutline is provisional (FIFA ranking unmodelled) — so the
         # as-it-stands bracket shows the real third-place logic, honestly flagged, rather than
         # abstract "Best 3rd of …" pools. Still gated on all 12 groups having STARTED.
-        bracket_proj = bk.project(s, resolve_provisional=True)
+        # clinched: which exact seeds are mathematically secured (full 2026 tiebreakers, incl.
+        # head-to-head) — drives the confirmed (✓) vs provisional (dashed) per-side marks.
+        clinched = {g: scen.clinched_ranks(g, matches) for g in s.groups}
+        bracket_proj = bk.project(s, resolve_provisional=True, clinched=clinched)
     except (FileNotFoundError, ValueError) as e:
         warnings.append(f"Bracket page skipped: {e}")
     if bracket_proj is not None:

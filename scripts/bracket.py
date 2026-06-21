@@ -102,25 +102,40 @@ def _slot_label(kind: str, g: str) -> str:
 
 
 def project(standings: "st.Standings", annex: dict | None = None,
-            resolve_provisional: bool = False) -> dict:
+            resolve_provisional: bool = False, clinched: dict | None = None) -> dict:
     """Project the R32->Final bracket from current standings (as if final). Returns a
     pure dict (see to_dict for the shape). Gated: unstarted groups -> abstract slots;
     third-hosting matches resolve only when all 12 groups have a standing and the
     third-place cutline is not flagged provisional. ``resolve_provisional=True`` (the
     'projected finish' view) breaks a provisional cutline deterministically — using the
     standings' own order (alphabetical on a modelled tie) — so the full bracket resolves
-    for the scenario; the as-it-stands view leaves it False and stays honestly gated."""
+    for the scenario; the as-it-stands view leaves it False and stays honestly gated.
+
+    ``clinched`` is an optional {group_letter: {team: clinched_rank}} map (from
+    scenarios.clinched_ranks, computed with the full 2026 tiebreakers). When supplied it
+    drives the per-side ``home_confirmed``/``away_confirmed`` flags: a slot is CONFIRMED
+    when its occupant has mathematically secured that exact seed and so cannot be
+    reshuffled by any remaining result. It is only ever read for the honest as-it-stands
+    view; the hypothetical 'projected finish' view passes None, so nothing there is ever
+    marked confirmed (a projection clinches nothing)."""
     annex = annex if annex is not None else load_annex_c()
     groups = standings.groups
     warnings: list[str] = list(standings.warnings)
+    groups_complete = (len(groups) == 12 and all(
+        r.played >= st.GAMES_PER_TEAM for gt in groups.values() for r in gt.rows))
 
     def team_or_label(kind: str, g: str):
-        """(team_name | None, label, provisional?) for a Winner/Runner-up slot."""
+        """(team | None, label, provisional?, confirmed?) for a Winner/Runner-up slot.
+        confirmed = the occupant has clinched this exact seed (rank 1 for a winner, 2 for
+        a runner-up) per the full tiebreakers — only ever True when a clinch map is given."""
         gt = groups.get(g)
         idx = 0 if kind == "W" else 1
         if gt is None or not _group_started(gt) or len(gt.rows) <= idx:
-            return None, _slot_label(kind, g), True
-        return gt.rows[idx].team, _slot_label(kind, g), gt.rows[idx].played < st.GAMES_PER_TEAM
+            return None, _slot_label(kind, g), True, False
+        team = gt.rows[idx].team
+        prov = gt.rows[idx].played < st.GAMES_PER_TEAM
+        confirmed = bool(clinched and clinched.get(g, {}).get(team) == idx + 1)
+        return team, _slot_label(kind, g), prov, confirmed
 
     # --- can the 8 third-hosting matches be resolved?
     all_started = len(groups) == 12 and all(_group_started(gt) for gt in groups.values())
@@ -149,9 +164,15 @@ def project(standings: "st.Standings", annex: dict | None = None,
             gt = groups.get(g)
             row = gt.rows[2] if gt and len(gt.rows) > 2 else None
             team = row.team if row else None
-            prov = (row.played < st.GAMES_PER_TEAM) if row else True
-            return team, f"3rd {g}", prov
-        return None, "Best 3rd of " + "/".join(pool), True
+            # a third-place slot stays provisional until the WHOLE group stage is done:
+            # even a team that's finished its games can be reshuffled out of (or into) the
+            # qualifying-8 set by other groups' results, which re-slots Annex C entirely.
+            prov = (not groups_complete) if team else True
+            confirmed = bool(team and clinched and groups_complete
+                             and not cutline_provisional
+                             and clinched.get(g, {}).get(team) == 3)
+            return team, f"3rd {g}", prov, confirmed
+        return None, "Best 3rd of " + "/".join(pool), True, False
 
     r32 = {}
     for m, (a, b) in R32_TEMPLATE.items():
@@ -163,7 +184,9 @@ def project(standings: "st.Standings", annex: dict | None = None,
                   "away": sb[0], "away_label": sb[1], "provisional": prov, "half": half,
                   # per-side: a CONCRETE team whose group position isn't sealed yet (can change)
                   "home_provisional": bool(sa[0] is not None and sa[2]),
-                  "away_provisional": bool(sb[0] is not None and sb[2])}
+                  "away_provisional": bool(sb[0] is not None and sb[2]),
+                  # per-side: this exact seed is mathematically secured (clinch map supplied)
+                  "home_confirmed": sa[3], "away_confirmed": sb[3]}
 
     return {
         "schema": 1,
