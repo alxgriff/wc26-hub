@@ -691,20 +691,20 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 1.5</td><td title="1.62 decimal">-160</td><td>58%</td><td>63%</td><td class="edge-pos">+4.7%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 1.5</td><td title="1.62 decimal">-160</td><td>58%</td><td>63%</td><td class="edge-pos">+4.7%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 1.5</td><td title="2.24 decimal">+124</td><td>42%</td><td>37%</td><td class="edge-neg">-4.7%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 1.75</td><td title="1.82 decimal">-122</td><td>53%</td><td>63%</td><td class="edge-pos">+10.0%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 1.75</td><td title="2.02 decimal">+102</td><td>47%</td><td>37%</td><td class="edge-neg">-10.0%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td title="2.15 decimal">+114</td><td>45%</td><td>49%</td><td class="edge-pos">+4.2%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td title="1.73 decimal">-137</td><td>55%</td><td>51%</td><td class="edge-neg">-4.2%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td title="2.27 decimal">+127</td><td>43%</td><td>49%</td><td class="edge-pos">+6.1%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td title="1.69 decimal">-145</td><td>57%</td><td>51%</td><td class="edge-neg">-6.1%</td></tr>
       <tr><td class="lbl">Asian handicap</td><td class="lbl">Paraguay -0.25</td><td title="2.25 decimal">+125</td><td>43%</td><td>37%</td><td class="edge-neg">-5.9%</td></tr>
       <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Australia +0.25</td><td title="1.70 decimal">-143</td><td>57%</td><td>63%</td><td class="edge-pos">+5.9%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bets — top 2, ≥4% edge</span><p>1. <strong>Australia +0.25</strong> (Asian handicap) @ -143, edge <strong>+5.9%</strong> — best price -143 (betonlineag). Flat 1u, paper record.</p><p>2. <strong>Over 1.5</strong> (Total goals) @ -160, edge <strong>+4.7%</strong> — best price -159 (betrivers). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p></div>
+<div class="bet-callout"><span class="tag">Best bets — top 2, ≥4% edge</span><p>1. <strong>Over 2</strong> (Total goals) @ +127, edge <strong>+6.1%</strong> — best price +128 (betonlineag). Flat 1u, paper record.</p><p>2. <strong>Australia +0.25</strong> (Asian handicap) @ -143, edge <strong>+5.9%</strong> — best price -143 (betonlineag). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p></div>
 <p class="verify-flag">totals over 1.75: model-priced edge +10.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 21, 6:52 PM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 2 can push (P 27%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
+<p class="odds-note">market snapshot Jun 21, 9:36 PM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 2 can push (P 27%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -727,7 +727,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.9921,lb=1.1319,N=8,SHOW=6,i,j;
+  var la=0.9924,lb=1.1316,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
