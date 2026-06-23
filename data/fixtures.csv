@@ -50,13 +50,13 @@ H6,H,3,2026-06-26,20:00,8:00 PM,Uruguay,Spain,Estadio Akron,Guadalajara,Mexico,F
 I1,I,1,2026-06-16,15:00,3:00 PM,France,Senegal,MetLife Stadium,East Rutherford,USA,Fox,3,1,played,
 I2,I,1,2026-06-16,18:00,6:00 PM,Iraq,Norway,Gillette Stadium,Foxborough,USA,Fox,1,4,played,
 I3,I,2,2026-06-22,17:00,5:00 PM,France,Iraq,Lincoln Financial Field,Philadelphia,USA,Fox,3,0,played,
-I4,I,2,2026-06-22,20:00,8:00 PM,Norway,Senegal,MetLife Stadium,East Rutherford,USA,Fox,,,scheduled,
+I4,I,2,2026-06-22,20:00,8:00 PM,Norway,Senegal,MetLife Stadium,East Rutherford,USA,Fox,3,2,played,
 I5,I,3,2026-06-26,15:00,3:00 PM,Norway,France,Gillette Stadium,Foxborough,USA,Fox,,,scheduled,"Simultaneous with I6 (matchday 3 rule)"
 I6,I,3,2026-06-26,15:00,3:00 PM,Senegal,Iraq,BMO Field,Toronto,Canada,FS1,,,scheduled,"Simultaneous with I5 (matchday 3 rule)"
 J1,J,1,2026-06-16,21:00,9:00 PM,Argentina,Algeria,Arrowhead Stadium,Kansas City,USA,Fox,3,0,played,
 J2,J,1,2026-06-17,00:00,12:00 AM,Austria,Jordan,Levi's Stadium,Santa Clara,USA,FS1,3,1,played,Kicks off 9:00 PM June 16 local (Pacific); belongs to the June 16 evening slate
 J3,J,2,2026-06-22,13:00,1:00 PM,Argentina,Austria,AT&T Stadium,Arlington,USA,Fox,2,0,played,
-J4,J,2,2026-06-22,23:00,11:00 PM,Jordan,Algeria,Levi's Stadium,Santa Clara,USA,FS1,,,scheduled,
+J4,J,2,2026-06-22,23:00,11:00 PM,Jordan,Algeria,Levi's Stadium,Santa Clara,USA,FS1,1,2,played,
 J5,J,3,2026-06-27,22:00,10:00 PM,Jordan,Argentina,AT&T Stadium,Arlington,USA,Fox,,,scheduled,"Simultaneous with J6 (matchday 3 rule)"
 J6,J,3,2026-06-27,22:00,10:00 PM,Algeria,Austria,Arrowhead Stadium,Kansas City,USA,FS1,,,scheduled,"Simultaneous with J5 (matchday 3 rule)"
 K1,K,1,2026-06-17,13:00,1:00 PM,Portugal,DR Congo,NRG Stadium,Houston,USA,Fox,1,1,played,

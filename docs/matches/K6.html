@@ -262,14 +262,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
 .metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
 .scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
-.record-scoreboard{display:flex;align-items:center;gap:0;margin-top:16px;border:2px solid var(--ink)}
-.scoreboard-stat{display:flex;flex-direction:column;gap:2px;padding:10px 22px;min-width:110px}
-.scoreboard-label{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
-.scoreboard-value{font-family:var(--mono);font-size:1.45rem;font-weight:700;line-height:1.1}
-.scoreboard-value.units-up{color:#1a7a3f}
-.scoreboard-value.units-down{color:var(--verm)}
-.scoreboard-sub{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
-.scoreboard-divider{width:2px;background:var(--ink);align-self:stretch}
 
 .strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
 .strap b{color:var(--ink);font-weight:700}
@@ -310,14 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -596,20 +580,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="factline">most likely score <b>0–1</b> · expected goals <b>1.92</b> · over 2.5 <b>30%</b> · both score <b>38%</b><br>single source: rating model (Elo+Futi)</p>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
-    <p class="sr-only">Structural (post-MD1 fitted) says DR Congo win 38 percent, draw 32 percent, Uzbekistan win 31 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:38">38%</span><span class="pd" style="flex:32">32%</span><span class="pb" style="flex:31">31%</span></div>
-    <div class="scale" aria-hidden="true"><span>DR Congo 38%</span><span>draw 32%</span><span>Uzbekistan 31%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
-    <p class="sr-only">100% Futi (post-MD1 fitted) says DR Congo win 40 percent, draw 31 percent, Uzbekistan win 29 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:40">40%</span><span class="pd" style="flex:31">31%</span><span class="pb" style="flex:29">29%</span></div>
-    <div class="scale" aria-hidden="true"><span>DR Congo 40%</span><span>draw 31%</span><span>Uzbekistan 29%</span></div>
-  </div>
+  <p class="sr-only">DR Congo win 33 percent, draw 32 percent, Uzbekistan win 35 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:33">33%</span><span class="pd" style="flex:32">32%</span><span class="pb" style="flex:35">35%</span></div>
+  <div class="scale" aria-hidden="true"><span>DR Congo 33%</span><span>draw 32%</span><span>Uzbekistan 35%</span></div>
+  <p class="factline">most likely score <b>0–0</b> · expected goals <b>1.92</b> · over 2.5 <b>30%</b> · both score <b>38%</b><br>single source: rating model (Elo+Futi)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> tight and tense; draw/under profile.</p></blockquote></div>
 </section>
@@ -709,16 +683,16 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.25</td><td title="2.07 decimal">+107</td><td>47%</td><td>70%</td><td class="edge-pos">+23.3%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.03 decimal">+103</td><td>46%</td><td>30%</td><td class="edge-neg">-15.5%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.70 decimal">-143</td><td>54%</td><td>70%</td><td class="edge-pos">+15.5%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">DR Congo -0.25</td><td title="1.82 decimal">-122</td><td>53%</td><td>37%</td><td class="edge-neg">-16.1%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Uzbekistan +0.25</td><td title="2.06 decimal">+106</td><td>47%</td><td>63%</td><td class="edge-pos">+16.1%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">DR Congo -0.25</td><td title="1.82 decimal">-122</td><td>53%</td><td>39%</td><td class="edge-neg">-13.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Uzbekistan +0.25</td><td title="2.06 decimal">+106</td><td>47%</td><td>61%</td><td class="edge-pos">+13.6%</td></tr>
     </tbody>
   </table>
 </div>
 <p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
 <p class="verify-flag">totals under 2.25: model-priced edge +23.3% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="verify-flag">totals under 2.5: model-priced edge +15.5% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads away 0.25: model-priced edge +16.1% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 22, 9:21 PM ET · DraftKings where quoted, else best of 3 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<p class="verify-flag">spreads away 0.25: model-priced edge +13.6% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 23, 8:02 AM ET · DraftKings where quoted, else best of 3 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -741,7 +715,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.9005,lb=1.0153,N=8,SHOW=6,i,j;
+  var la=0.9398,lb=0.9761,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

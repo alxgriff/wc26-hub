@@ -262,14 +262,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
 .metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
 .scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
-.record-scoreboard{display:flex;align-items:center;gap:0;margin-top:16px;border:2px solid var(--ink)}
-.scoreboard-stat{display:flex;flex-direction:column;gap:2px;padding:10px 22px;min-width:110px}
-.scoreboard-label{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
-.scoreboard-value{font-family:var(--mono);font-size:1.45rem;font-weight:700;line-height:1.1}
-.scoreboard-value.units-up{color:#1a7a3f}
-.scoreboard-value.units-down{color:var(--verm)}
-.scoreboard-sub{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
-.scoreboard-divider{width:2px;background:var(--ink);align-self:stretch}
 
 .strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
 .strap b{color:var(--ink);font-weight:700}
@@ -310,14 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -596,20 +580,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
+  <p class="sr-only">Türkiye win 32 percent, draw 23 percent, United States win 45 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:32">32%</span><span class="pd" style="flex:23">23%</span><span class="pb" style="flex:45">45%</span></div>
+  <div class="scale" aria-hidden="true"><span>Türkiye 32%</span><span>draw 23%</span><span>United States 45%</span></div>
   <p class="factline">most likely score <b>1–1</b> · expected goals <b>3.16</b> · over 2.5 <b>61%</b> · both score <b>63%</b><br>single source: rating model (Elo+Futi) · home-field bonus: United States</p>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
-    <p class="sr-only">Structural (post-MD1 fitted) says Türkiye win 41 percent, draw 24 percent, United States win 35 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:41">41%</span><span class="pd" style="flex:24">24%</span><span class="pb" style="flex:35">35%</span></div>
-    <div class="scale" aria-hidden="true"><span>Türkiye 41%</span><span>draw 24%</span><span>United States 35%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
-    <p class="sr-only">100% Futi (post-MD1 fitted) says Türkiye win 35 percent, draw 24 percent, United States win 42 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:35">35%</span><span class="pd" style="flex:24">24%</span><span class="pb" style="flex:42">42%</span></div>
-    <div class="scale" aria-hidden="true"><span>Türkiye 35%</span><span>draw 24%</span><span>United States 42%</span></div>
-  </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> even; home crowd vs superior creators.</p></blockquote></div>
 </section>
@@ -717,19 +691,18 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.71 decimal">-141</td><td>55%</td><td>61%</td><td class="edge-pos">+5.9%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.71 decimal">-142</td><td>55%</td><td>61%</td><td class="edge-pos">+5.9%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.11 decimal">+111</td><td>45%</td><td>39%</td><td class="edge-neg">-5.9%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.75</td><td title="1.98 decimal">-102</td><td>49%</td><td>61%</td><td class="edge-pos">+12.5%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.75</td><td title="1.88 decimal">-114</td><td>51%</td><td>39%</td><td class="edge-neg">-12.5%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Türkiye +0.5</td><td title="1.91 decimal">-110</td><td>50%</td><td>68%</td><td class="edge-pos">+18.4%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">United States -0.5</td><td title="1.91 decimal">-110</td><td>50%</td><td>32%</td><td class="edge-neg">-18.4%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Türkiye +0.5</td><td title="1.93 decimal">-108</td><td>50%</td><td>55%</td><td class="edge-pos">+5.0%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">United States -0.5</td><td title="1.91 decimal">-110</td><td>50%</td><td>45%</td><td class="edge-neg">-5.0%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2.5</strong> (Total goals) @ -141, edge <strong>+5.9%</strong> — best price -135 (betmgm). Flat 1u, paper record.</p></div>
+<div class="bet-callout"><span class="tag">Best bets — top 2, ≥4% edge</span><p>1. <strong>Over 2.5</strong> (Total goals) @ -142, edge <strong>+5.9%</strong> — best price -135 (betus). Flat 1u, paper record.</p><p>2. <strong>Türkiye +0.5</strong> (Asian handicap) @ -108, edge <strong>+5.0%</strong> — best price -106 (betonlineag). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p></div>
 <p class="verify-flag">totals over 2.75: model-priced edge +12.5% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads home 0.5: model-priced edge +18.4% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 22, 9:21 PM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<p class="odds-note">market snapshot Jun 23, 8:02 AM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -752,7 +725,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.7371,lb=1.4231,N=8,SHOW=6,i,j;
+  var la=1.4200,lb=1.7403,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

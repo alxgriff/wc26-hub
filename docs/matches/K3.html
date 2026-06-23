@@ -262,14 +262,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
 .metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
 .scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
-.record-scoreboard{display:flex;align-items:center;gap:0;margin-top:16px;border:2px solid var(--ink)}
-.scoreboard-stat{display:flex;flex-direction:column;gap:2px;padding:10px 22px;min-width:110px}
-.scoreboard-label{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
-.scoreboard-value{font-family:var(--mono);font-size:1.45rem;font-weight:700;line-height:1.1}
-.scoreboard-value.units-up{color:#1a7a3f}
-.scoreboard-value.units-down{color:var(--verm)}
-.scoreboard-sub{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
-.scoreboard-divider{width:2px;background:var(--ink);align-self:stretch}
 
 .strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
 .strap b{color:var(--ink);font-weight:700}
@@ -310,14 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -596,20 +580,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="factline">most likely score <b>2–0</b> · expected goals <b>2.76</b> · over 2.5 <b>52%</b> · both score <b>31%</b><br>single source: rating model (Elo+Futi)</p>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
-    <p class="sr-only">Structural (post-MD1 fitted) says Portugal win 80 percent, draw 15 percent, Uzbekistan win 5 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:80">80%</span><span class="pd" style="flex:15">15%</span><span class="pb" style="flex:5"></span></div>
-    <div class="scale" aria-hidden="true"><span>Portugal 80%</span><span>draw 15%</span><span>Uzbekistan 5%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
-    <p class="sr-only">100% Futi (post-MD1 fitted) says Portugal win 81 percent, draw 14 percent, Uzbekistan win 5 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:81">81%</span><span class="pd" style="flex:14">14%</span><span class="pb" style="flex:5"></span></div>
-    <div class="scale" aria-hidden="true"><span>Portugal 81%</span><span>draw 14%</span><span>Uzbekistan 5%</span></div>
-  </div>
+  <p class="sr-only">Portugal win 80 percent, draw 15 percent, Uzbekistan win 5 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:80">80%</span><span class="pd" style="flex:15">15%</span><span class="pb" style="flex:5"></span></div>
+  <div class="scale" aria-hidden="true"><span>Portugal 80%</span><span>draw 15%</span><span>Uzbekistan 5%</span></div>
+  <p class="factline">most likely score <b>2–0</b> · expected goals <b>2.76</b> · over 2.5 <b>52%</b> · both score <b>32%</b><br>single source: rating model (Elo+Futi)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Portugal control; one-goal-margin risk if finishing is wasteful.</p></blockquote></div>
 </section>
@@ -674,7 +648,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Sweat Factor</span>
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
-<div class="placeholder-slot">Sweat Factor forecast pending — this match is not yet within the 16-day Open-Meteo forecast window. The section fills automatically once available; no data is invented.</div>
+<p class="cond-ac">Indoors — climate-controlled. Heat not a factor.</p>
 </section>
 
 <section aria-labelledby="card-h" class="read-grid">
@@ -694,7 +668,20 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </div>
 </section>
 
-
+<section aria-labelledby="wire-h">
+  <div class="sec-head">
+    <span class="kicker">The Wire</span>
+    <h2 id="wire-h">What's being reported</h2>
+  </div>
+  <div class="wire">
+    <p class="wire-tag">Auto-gathered 2026-06-23 · every claim carries its source · relayed as reporting, not verified by the hub — click through before it bears weight.</p>
+<p><em>(Group K — 1:00 PM ET, NRG Stadium, Houston)</em></p>
+<ul><li>Portugal have no confirmed fresh injury or suspension issue ahead of this match, according to the latest public team-news reporting. (source: <a href="https://www.sportsmole.co.uk/football/portugal/world-cup/team-news/portugal-vs-uzbekistan-injury-suspension-list-predicted-xis_599766.html" rel="nofollow">https://www.sportsmole.co.uk/football/portugal/world-cup/team-news/portugal-vs-uzbekistan-injury-suspension-list-predicted-xis_599766.html</a>)</li></ul>
+<ul><li>Defender Rustam Ashurmatov is the only slight doubt for Uzbekistan's coach Fabio Cannavaro, after coming off during the defeat to Colombia. Otherwise there are no other injury concerns for Uzbekistan. (source: <a href="https://www.si.com/soccer/portugal-vs-uzbekistan-world-cup-preview-predictions-lineups-6-23-26" rel="nofollow">https://www.si.com/soccer/portugal-vs-uzbekistan-world-cup-preview-predictions-lineups-6-23-26</a>)</li></ul>
+<ul><li>No players are currently reported injured or suspended for either Portugal or Uzbekistan, per the tournament-wide injury tracker. (source: <a href="https://www.sportsgambler.com/injuries/football/fifa-world-cup/" rel="nofollow">https://www.sportsgambler.com/injuries/football/fifa-world-cup/</a>)</li></ul>
+<ul><li>Sports Mole predicted XIs — Portugal (4-3-3): Costa; Cancelo, Araujo, Veiga, Mendes; Neves, Vitinha, Fernandes; Silva, Neto, Ronaldo. Uzbekistan (3-4-3): Yusupov; Khusanov, Abdullaev, Ashurmatov; Karimov, Mozgovoy, Shukurov, Nasrullaev; Fayzullaev, Urunov, Shomurodov. (source: <a href="https://www.sportsmole.co.uk/football/portugal/world-cup/team-news/portugal-vs-uzbekistan-injury-suspension-list-predicted-xis_599766.html" rel="nofollow">https://www.sportsmole.co.uk/football/portugal/world-cup/team-news/portugal-vs-uzbekistan-injury-suspension-list-predicted-xis_599766.html</a>)</li></ul>
+  </div>
+</section>
 
 <section aria-labelledby="odds-h">
   <div class="sec-head">
@@ -707,19 +694,26 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td title="1.92 decimal">-109</td><td>50%</td><td>39%</td><td class="edge-neg">-11.6%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td title="1.93 decimal">-108</td><td>50%</td><td>61%</td><td class="edge-pos">+11.6%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="2.39 decimal">+139</td><td>39%</td><td>30%</td><td class="edge-neg">-9.3%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="1.54 decimal">-183</td><td>61%</td><td>70%</td><td class="edge-pos">+9.3%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Portugal -2</td><td title="1.93 decimal">-108</td><td>50%</td><td>44%</td><td class="edge-neg">-6.2%</td></tr>
-      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Uzbekistan +2</td><td title="1.91 decimal">-110</td><td>50%</td><td>56%</td><td class="edge-pos">+6.2%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Portugal</td><td title="1.14 decimal">-714</td><td>84%</td><td>80%</td><td class="edge-neg">-3.6%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="8.50 decimal">+750</td><td>11%</td><td>15%</td><td class="edge-pos">+3.3%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Uzbekistan</td><td title="19.00 decimal">+1800</td><td>5%</td><td>5%</td><td class="">+0.3%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td title="1.77 decimal">-130</td><td>54%</td><td>39%</td><td class="edge-neg">-16.0%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td title="2.12 decimal">+112</td><td>46%</td><td>61%</td><td class="edge-pos">+16.0%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.25</td><td title="1.98 decimal">-102</td><td>48%</td><td>30%</td><td class="edge-neg">-18.3%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.25</td><td title="1.85 decimal">-118</td><td>52%</td><td>70%</td><td class="edge-pos">+18.3%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="2.19 decimal">+118</td><td>43%</td><td>30%</td><td class="edge-neg">-13.2%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="1.66 decimal">-152</td><td>57%</td><td>70%</td><td class="edge-pos">+13.2%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Portugal -2</td><td title="1.70 decimal">-143</td><td>57%</td><td>43%</td><td class="edge-neg">-13.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Uzbekistan +2</td><td title="2.23 decimal">+123</td><td>43%</td><td>57%</td><td class="edge-pos">+13.6%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Uzbekistan +2</strong> (Asian handicap) @ -110, edge <strong>+6.2%</strong> — best price -108 (betonlineag). Flat 1u, paper record.</p></div>
-<p class="verify-flag">totals under 3: model-priced edge +11.6% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">totals under 3.5: model-priced edge +9.3% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 22, 9:21 PM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
+<p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
+<p class="verify-flag">totals under 3: model-priced edge +16.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">totals under 3.25: model-priced edge +18.3% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">totals under 3.5: model-priced edge +13.2% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">spreads away 2: model-priced edge +13.6% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 23, 8:02 AM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> Portugal win to nil.</p></blockquote></div>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
@@ -743,7 +737,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=2.3339,lb=0.4283,N=8,SHOW=6,i,j;
+  var la=2.3278,lb=0.4344,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
