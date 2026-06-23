@@ -319,6 +319,8 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
 .probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
+.draw-flag{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin:10px 0 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.draw-flag-tag{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:1.5px solid var(--ink-soft);color:var(--ink);padding:2px 7px;white-space:nowrap}
 
 .mini-table{max-width:560px}
 .team-pair{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}
@@ -596,20 +598,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="factline">most likely score <b>2–0</b> · expected goals <b>2.76</b> · over 2.5 <b>52%</b> · both score <b>31%</b><br>single source: rating model (Elo+Futi)</p>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
-    <p class="sr-only">Structural (post-MD1 fitted) says Portugal win 78 percent, draw 15 percent, Uzbekistan win 6 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:78">78%</span><span class="pd" style="flex:15">15%</span><span class="pb" style="flex:6">6%</span></div>
-    <div class="scale" aria-hidden="true"><span>Portugal 78%</span><span>draw 15%</span><span>Uzbekistan 6%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
-    <p class="sr-only">100% Futi (post-MD1 fitted) says Portugal win 80 percent, draw 15 percent, Uzbekistan win 5 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:80">80%</span><span class="pd" style="flex:15">15%</span><span class="pb" style="flex:5"></span></div>
-    <div class="scale" aria-hidden="true"><span>Portugal 80%</span><span>draw 15%</span><span>Uzbekistan 5%</span></div>
-  </div>
+  <p class="sr-only">Portugal win 80 percent, draw 14 percent, Uzbekistan win 5 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:80">80%</span><span class="pd" style="flex:14">14%</span><span class="pb" style="flex:5"></span></div>
+  <div class="scale" aria-hidden="true"><span>Portugal 80%</span><span>draw 14%</span><span>Uzbekistan 5%</span></div>
+  <p class="factline">predicted score <b>2-0</b><br>published consensus — logged Jun 23, 9:15 AM ET, pre-kickoff<br><b>Awaiting result</b> — kickoff has passed; this logged call is frozen and will be graded when the score is entered.</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Portugal control; one-goal-margin risk if finishing is wasteful.</p></blockquote></div>
 </section>

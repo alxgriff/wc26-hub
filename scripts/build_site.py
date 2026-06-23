@@ -550,6 +550,19 @@ def render_call(info: dict | None, team_a: str, team_b: str,
                 f'  <p class="factline">{" · ".join(facts)}<br>{srcline}{hfa}{graded}</p>'
                 f'{overlay_html}\n'
                 '</div>')
+        # Draw-live flag: shown on scheduled matches when the displayed model(s)
+        # average ≥20% draw probability — a signal that a draw is a live outcome.
+        if not logged and result is None and not kicked_off:
+            if has_post_md1 and post_md1_variants:
+                draw_p = sum(sv["p_draw"] for sv in post_md1_variants) / len(post_md1_variants)
+            else:
+                draw_p = info.get("p_draw", 0.0)
+            if draw_p >= 0.20:
+                draw_pct = round(draw_p * 100)
+                parts.append(
+                    f'<p class="draw-flag"><span class="draw-flag-tag">≈ Draw live</span>'
+                    f' Models average {draw_pct}% chance of a draw — worth checking the price.</p>'
+                )
     if prebaked_lean:
         parts.append('<div class="prose"><blockquote><p><strong>Pre-baked lean '
                      f'(June 11):</strong> {sc._inline(prebaked_lean)}</p></blockquote></div>')

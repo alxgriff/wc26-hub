@@ -319,6 +319,8 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
 .probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
+.draw-flag{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin:10px 0 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.draw-flag-tag{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:1.5px solid var(--ink-soft);color:var(--ink);padding:2px 7px;white-space:nowrap}
 
 .mini-table{max-width:560px}
 .team-pair{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}
@@ -727,7 +729,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bets — top 2, ≥4% edge</span><p>1. <strong>Algeria -1</strong> (Asian handicap) @ -119, edge <strong>+6.3%</strong> — best price -118 (betonlineag). Flat 1u, paper record.</p><p>2. <strong>Algeria</strong> (1X2) @ -196, edge <strong>+5.2%</strong> — best price -196 (draftkings). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p><p class="odds-note warn">⚠ the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with extra caution until the draw calibration is re-checked after MD3.</p></div>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Algeria -1</strong> (Asian handicap), model edge <strong>+6.3%</strong></p><p><strong>Algeria</strong> (1X2), model edge <strong>+5.2%</strong></p><p class="odds-note">the model likes these, but the line is over 12h old (the book hasn't reposted), so they are <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
 <p class="odds-note">Logged pick: Algeria @ -189 (draftkings), edge 5.8pp · settled <b>won</b> for +0.53u · CLV +0.6pp.</p>
 <p class="odds-note">Logged pick: Algeria -1 @ -118 (betonlineag), edge 7.3pp · settled <b>push</b> for +0.00u · CLV +0.0pp.</p>
 <p class="verify-flag">totals over 2.5: model-priced edge +12.3% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
