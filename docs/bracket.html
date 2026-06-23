@@ -262,6 +262,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
 .metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
 .scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
+.record-scoreboard{display:flex;align-items:center;gap:0;margin-top:16px;border:2px solid var(--ink)}
+.scoreboard-stat{display:flex;flex-direction:column;gap:2px;padding:10px 22px;min-width:110px}
+.scoreboard-label{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.scoreboard-value{font-family:var(--mono);font-size:1.45rem;font-weight:700;line-height:1.1}
+.scoreboard-value.units-up{color:#1a7a3f}
+.scoreboard-value.units-down{color:var(--verm)}
+.scoreboard-sub{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
+.scoreboard-divider{width:2px;background:var(--ink);align-self:stretch}
 
 .strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
 .strap b{color:var(--ink);font-weight:700}
@@ -607,7 +615,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 
 <footer>
   <p class="colophon">
-    Generated 2026-06-22 22:36 · projected from data/fixtures.csv by scripts/bracket.py ·
+    Generated 2026-06-22 22:41 · projected from data/fixtures.csv by scripts/bracket.py ·
     R32 template + Annex C third-place table (data/annex_c.csv) · gated: unstarted
     groups and the unsettled third-place cutline render as open slots · strictly
     provisional, a scenario tool · <a href="index.html">all standings</a> ·

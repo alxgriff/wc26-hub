@@ -1649,11 +1649,43 @@ def render_record_page(matches: "list[st.Match]", rows: list[dict],
     calls_html, cumulative = render_record_calls(matches, rows, ledger)
     bets_html, units_line = render_record_bets(rows, picks_log=picks_log)
     shadow_html, shadow_line = render_record_shadow(rows, shadow_log=shadow_log)
+
+    # Scorecard stats for the header
+    calls_wl = calls_graded = ""
+    if ledger:
+        grades = ledger["grade"](matches, ledger["rows"])
+        if grades:
+            n = len(grades)
+            hits = sum(1 for g in grades.values() if g["correct"])
+            calls_wl = f"{hits}W &middot; {n - hits}L"
+            calls_graded = f"{n} graded"
+    try:
+        import odds as od
+        _picks = od.load_picks(picks_log) if picks_log else od.load_picks()
+        settled = [p for p in _picks if p["status"] not in ("", "open")]
+        if settled:
+            _u = sum(float(p["units"]) for p in settled)
+            _w = sum(1 for p in settled if p["status"] in ("won", "half-won"))
+            _l = sum(1 for p in settled if p["status"] in ("lost", "half-lost"))
+            _push = len(settled) - _w - _l
+            picks_record = f"{_w}W &middot; {_l}L" + (f" &middot; {_push}P" if _push else "")
+            units_display = f"{_u:+.2f}u"
+            units_cls = "units-up" if _u >= 0 else "units-down"
+        else:
+            picks_record = units_display = units_cls = ""
+    except Exception:
+        picks_record = units_display = units_cls = ""
+
     tpl = Template((template_dir / "record.html").read_text(encoding="utf-8"))
     return tpl.safe_substitute(
         site_css=css,
         calls_html=calls_html,
         cumulative_line=_esc(cumulative),
+        calls_wl=calls_wl,
+        calls_graded=calls_graded,
+        picks_record=picks_record,
+        units_display=units_display,
+        units_cls=units_cls,
         bets_html=bets_html,
         units_line=_esc(units_line),
         shadow_html=shadow_html,

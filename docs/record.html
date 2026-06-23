@@ -262,6 +262,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
 .metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
 .scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
+.record-scoreboard{display:flex;align-items:center;gap:0;margin-top:16px;border:2px solid var(--ink)}
+.scoreboard-stat{display:flex;flex-direction:column;gap:2px;padding:10px 22px;min-width:110px}
+.scoreboard-label{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.scoreboard-value{font-family:var(--mono);font-size:1.45rem;font-weight:700;line-height:1.1}
+.scoreboard-value.units-up{color:#1a7a3f}
+.scoreboard-value.units-down{color:var(--verm)}
+.scoreboard-sub{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
+.scoreboard-divider{width:2px;background:var(--ink);align-self:stretch}
 
 .strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
 .strap b{color:var(--ink);font-weight:700}
@@ -573,6 +581,19 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <div class="metaline">
     <span>Every call logged before kickoff, graded after</span>
     <span>Every pick on paper at flat 1u</span>
+  </div>
+  <div class="record-scoreboard">
+    <div class="scoreboard-stat">
+      <span class="scoreboard-label">Calls</span>
+      <span class="scoreboard-value">23W &middot; 16L</span>
+      <span class="scoreboard-sub">39 graded</span>
+    </div>
+    <div class="scoreboard-divider"></div>
+    <div class="scoreboard-stat">
+      <span class="scoreboard-label">Picks</span>
+      <span class="scoreboard-value units-down">-1.07u</span>
+      <span class="scoreboard-sub">25W &middot; 27L &middot; 1P</span>
+    </div>
   </div>
   <a class="lab-nav-btn" href="model-lab.html">🧪 Model Lab</a>
 </header>
@@ -1933,7 +1954,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 
 <footer>
   <p class="colophon">
-    Generated 2026-06-22 22:36 · calls graded from data/predictions_log.csv (logged
+    Generated 2026-06-22 22:41 · calls graded from data/predictions_log.csv (logged
     pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
     at fresh prices, revisions explicit, settled rows immutable) · Brier: 0 best ·
     0.667 coin-flip · 2 worst · CLV = closing implied minus our implied at record ·
