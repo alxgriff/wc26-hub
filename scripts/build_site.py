@@ -496,17 +496,17 @@ def render_call(info: dict | None, team_a: str, team_b: str,
         # Scheduled matches only, same honesty rule. Inert unless
         # data/calibration/struct_variant.json is present (list format supported).
         if not logged:
-            sv_sep_inserted = False
-            for sv in info.get("struct_variants", []):
-                if sv.get("group") == "post-md1" and not sv_sep_inserted:
-                    overlay_html += (
-                        '\n  <div class="overlay-sep">'
-                        '<span class="overlay-sep-line"></span>'
-                        '<span class="overlay-sep-label">Post-MD1 Fitted</span>'
-                        '<span class="overlay-sep-line"></span>'
-                        '</div>'
-                    )
-                    sv_sep_inserted = True
+            post_md1_variants = [sv for sv in info.get("struct_variants", [])
+                                 if sv.get("group") == "post-md1"]
+            if post_md1_variants:
+                overlay_html += (
+                    '\n  <div class="overlay-sep">'
+                    '<span class="overlay-sep-line"></span>'
+                    '<span class="overlay-sep-label">Post-MD1 Fitted</span>'
+                    '<span class="overlay-sep-line"></span>'
+                    '</div>'
+                )
+            for sv in post_md1_variants:
                 sa_, sd_, sb_ = (max(round(sv[k] * 100), 1)
                                  for k in ("p_a", "p_draw", "p_b"))
                 lsa, lsd, lsb = (f"{w}%" if w >= 6 else "" for w in (sa_, sd_, sb_))
