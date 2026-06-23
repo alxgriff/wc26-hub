@@ -527,19 +527,29 @@ def render_call(info: dict | None, team_a: str, team_b: str,
                     f'<span>{_esc(team_b)} {sb_}%</span></div>\n'
                     '  </div>'
                 )
-        parts.append(
-            '<div class="probs">\n'
-            f'  <p class="sr-only">{_esc(team_a)} win {wa} percent, draw {wd} percent, '
-            f'{_esc(team_b)} win {wb} percent.</p>\n'
-            f'  <div class="probbar" aria-hidden="true">'
-            f'<span class="pa" style="flex:{wa}">{la}</span>'
-            f'<span class="pd" style="flex:{wd}">{ld}</span>'
-            f'<span class="pb" style="flex:{wb}">{lb}</span></div>\n'
-            f'  <div class="scale" aria-hidden="true"><span>{_esc(team_a)} {wa}%</span>'
-            f'<span>draw {wd}%</span><span>{_esc(team_b)} {wb}%</span></div>\n'
-            f'  <p class="factline">{" · ".join(facts)}<br>{srcline}{hfa}{graded}</p>'
-            f'{overlay_html}\n'
-            '</div>')
+        # When post-MD1 fitted variants are available, suppress the raw
+        # incumbent bar — the variants are the intended output on this branch.
+        has_post_md1 = bool(overlay_html) and not logged
+        if has_post_md1:
+            parts.append(
+                '<div class="probs">\n'
+                f'  <p class="factline">{" · ".join(facts)}<br>{srcline}{hfa}{graded}</p>'
+                f'{overlay_html}\n'
+                '</div>')
+        else:
+            parts.append(
+                '<div class="probs">\n'
+                f'  <p class="sr-only">{_esc(team_a)} win {wa} percent, draw {wd} percent, '
+                f'{_esc(team_b)} win {wb} percent.</p>\n'
+                f'  <div class="probbar" aria-hidden="true">'
+                f'<span class="pa" style="flex:{wa}">{la}</span>'
+                f'<span class="pd" style="flex:{wd}">{ld}</span>'
+                f'<span class="pb" style="flex:{wb}">{lb}</span></div>\n'
+                f'  <div class="scale" aria-hidden="true"><span>{_esc(team_a)} {wa}%</span>'
+                f'<span>draw {wd}%</span><span>{_esc(team_b)} {wb}%</span></div>\n'
+                f'  <p class="factline">{" · ".join(facts)}<br>{srcline}{hfa}{graded}</p>'
+                f'{overlay_html}\n'
+                '</div>')
     if prebaked_lean:
         parts.append('<div class="prose"><blockquote><p><strong>Pre-baked lean '
                      f'(June 11):</strong> {sc._inline(prebaked_lean)}</p></blockquote></div>')
