@@ -302,6 +302,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -649,12 +657,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
 <div class="conditions">
-  <span class="cond-stamp">Forecast · as of 2026-06-22 09:03 ET</span>
-  <p class="cond-stats">~92°F · dry (37% RH) · WBGT 86.1°F</p>
-  <div class="cond-track" aria-label="Match heat index: Severe (86/100)"><div class="cond-fill" style="width:86%"></div></div>
+  <span class="cond-stamp">Forecast · as of 2026-06-22 23:18 ET</span>
+  <p class="cond-stats">~85°F · moderate humidity (60% RH) · WBGT 87.0°F</p>
+  <div class="cond-track" aria-label="Match heat index: Severe (90/100)"><div class="cond-fill" style="width:90%"></div></div>
   <p class="cond-sev cond-sev-severe">Severe</p>
-  <p class="cond-blurb">Severe heat, and France carry the bigger burden: +17°F above their home baseline vs +2°F for Iraq.</p>
-  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">France</span><div class="cond-dis-track" aria-label="Heat disadvantage 92/100"><div class="cond-dis-fill cond-dis-hot" style="width:92%"></div></div><span class="cond-delta">+16.6°F vs home</span></div><div class="cond-team"><span class="cond-tname">Iraq</span><div class="cond-dis-track" aria-label="Heat disadvantage 9/100"><div class="cond-dis-fill" style="width:9%"></div></div><span class="cond-delta">+1.7°F vs home</span></div></div>
+  <p class="cond-blurb">Severe heat, and France carry the bigger burden: +18°F above their home baseline vs +3°F for Iraq.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">France</span><div class="cond-dis-track" aria-label="Heat disadvantage 98/100"><div class="cond-dis-fill cond-dis-hot" style="width:98%"></div></div><span class="cond-delta">+17.6°F vs home</span></div><div class="cond-team"><span class="cond-tname">Iraq</span><div class="cond-dis-track" aria-label="Heat disadvantage 15/100"><div class="cond-dis-fill" style="width:15%"></div></div><span class="cond-delta">+2.7°F vs home</span></div></div>
 </div>
 </section>
 
@@ -707,12 +715,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">1X2</td><td class="lbl">Iraq</td><td title="26.00 decimal">+2500</td><td>4%</td><td>2%</td><td class="edge-neg">-1.9%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="1.82 decimal">-122</td><td>52%</td><td>38%</td><td class="edge-neg">-14.7%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="2.01 decimal">+101</td><td>48%</td><td>62%</td><td class="edge-pos">+14.7%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">France -2.5</td><td title="1.75 decimal">-133</td><td>55%</td><td>49%</td><td class="edge-neg">-5.9%</td></tr>
-      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Iraq +2.5</td><td title="2.16 decimal">+116</td><td>45%</td><td>51%</td><td class="edge-pos">+5.9%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">France -2.5</td><td title="1.75 decimal">-133</td><td>55%</td><td>48%</td><td class="edge-neg">-6.9%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Iraq +2.5</td><td title="2.16 decimal">+116</td><td>45%</td><td>52%</td><td class="edge-pos">+6.9%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Iraq +2.5</strong> (Asian handicap) @ +116, edge <strong>+5.9%</strong> — best price +117 (betonlineag). Flat 1u, paper record.</p></div>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Iraq +2.5</strong> (Asian handicap) @ +116, edge <strong>+6.9%</strong> — best price +117 (betonlineag). Flat 1u, paper record.</p></div>
 <p class="odds-note">Logged pick: Iraq +2.5 @ +121 (betonlineag), edge 6.8pp · settled <b>lost</b> for -1.00u · CLV +0.5pp.</p>
 <p class="verify-flag">totals under 3.5: model-priced edge +14.7% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 22, 1:12 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
@@ -739,7 +747,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=2.8659,lb=0.2462,N=8,SHOW=6,i,j;
+  var la=2.8435,lb=0.2687,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

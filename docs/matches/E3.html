@@ -302,6 +302,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -580,10 +588,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Germany win 68 percent, draw 20 percent, Côte d&#x27;Ivoire win 13 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:68">68%</span><span class="pd" style="flex:20">20%</span><span class="pb" style="flex:13">13%</span></div>
-  <div class="scale" aria-hidden="true"><span>Germany 68%</span><span>draw 20%</span><span>Côte d&#x27;Ivoire 13%</span></div>
-  <p class="factline">predicted score <b>2-0</b><br>published consensus — logged Jun 20, 12:01 PM ET, pre-kickoff<br><b>Graded:</b> final 2–1 (Germany win) · the logged call had it at <b>68%</b> · Brier <b>0.159</b> (0 best · 0.667 coin-flip · 2 worst)</p>
+  <p class="sr-only">Germany win 70 percent, draw 19 percent, Côte d&#x27;Ivoire win 11 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:70">70%</span><span class="pd" style="flex:19">19%</span><span class="pb" style="flex:11">11%</span></div>
+  <div class="scale" aria-hidden="true"><span>Germany 70%</span><span>draw 19%</span><span>Côte d&#x27;Ivoire 11%</span></div>
+  <p class="factline">predicted score <b>2-0</b><br>published consensus — logged Jun 20, 11:09 AM ET, pre-kickoff<br><b>Graded:</b> final 2–1 (Germany win) · the logged call had it at <b>70%</b> · Brier <b>0.138</b> (0 best · 0.667 coin-flip · 2 worst)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> genuine toss-up tilted slightly German; high entertainment probability.</p></blockquote></div>
 </section>
@@ -709,12 +717,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td title="1.88 decimal">-114</td><td>51%</td><td>59%</td><td class="edge-pos">+7.9%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="2.35 decimal">+135</td><td>40%</td><td>32%</td><td class="edge-neg">-7.9%</td></tr>
       <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="1.56 decimal">-179</td><td>60%</td><td>68%</td><td class="edge-pos">+7.9%</td></tr>
-      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Germany -1</td><td title="1.78 decimal">-128</td><td>54%</td><td>59%</td><td class="edge-pos">+5.1%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Côte d&#x27;Ivoire +1</td><td title="2.12 decimal">+112</td><td>46%</td><td>41%</td><td class="edge-neg">-5.1%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Germany -1</td><td title="1.78 decimal">-128</td><td>54%</td><td>60%</td><td class="edge-pos">+5.9%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Côte d&#x27;Ivoire +1</td><td title="2.12 decimal">+112</td><td>46%</td><td>40%</td><td class="edge-neg">-5.9%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Under 3.5</strong> (Total goals), model edge <strong>+7.9%</strong></p><p><strong>Germany -1</strong> (Asian handicap), model edge <strong>+5.1%</strong></p><p class="odds-note">the model likes these, but the line is over 12h old (the book hasn't reposted), so they are <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Under 3.5</strong> (Total goals), model edge <strong>+7.9%</strong></p><p><strong>Germany -1</strong> (Asian handicap), model edge <strong>+5.9%</strong></p><p class="odds-note">the model likes these, but the line is over 12h old (the book hasn't reposted), so they are <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
 <p class="odds-note">Logged pick: Under 3.5 @ -182 (betrivers), edge 7.2pp · settled <b>won</b> for +0.55u · CLV -0.7pp.</p>
 <p class="odds-note">Logged pick: Germany -1 @ -118 (betonlineag), edge 5.0pp · settled <b>push</b> for +0.00u · CLV +2.2pp.</p>
 <p class="odds-note">Logged pick: Germany @ -196 (draftkings), edge 4.1pp · settled <b>won</b> for +0.51u · CLV +0.7pp.</p>
@@ -742,7 +750,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=2.1182,lb=0.7352,N=8,SHOW=6,i,j;
+  var la=2.1330,lb=0.7204,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

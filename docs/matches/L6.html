@@ -302,6 +302,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -580,10 +588,35 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Croatia win 79 percent, draw 15 percent, Ghana win 6 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:79">79%</span><span class="pd" style="flex:15">15%</span><span class="pb" style="flex:6">6%</span></div>
-  <div class="scale" aria-hidden="true"><span>Croatia 79%</span><span>draw 15%</span><span>Ghana 6%</span></div>
-  <p class="factline">most likely score <b>2–0</b> · expected goals <b>2.80</b> · over 2.5 <b>53%</b> · both score <b>34%</b><br>single source: rating model (Elo+Futi)</p>
+  <p class="sr-only">Croatia win 82 percent, draw 14 percent, Ghana win 5 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:82">82%</span><span class="pd" style="flex:14">14%</span><span class="pb" style="flex:5"></span></div>
+  <div class="scale" aria-hidden="true"><span>Croatia 82%</span><span>draw 14%</span><span>Ghana 5%</span></div>
+  <p class="factline">most likely score <b>2–0</b> · expected goals <b>2.80</b> · over 2.5 <b>53%</b> · both score <b>31%</b><br>single source: rating model (Elo+Futi)</p>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (conf-tuned)</p>
+    <p class="sr-only">Structural (conf-tuned) says Croatia win 79 percent, draw 15 percent, Ghana win 6 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:79">79%</span><span class="pd" style="flex:15">15%</span><span class="pb" style="flex:6">6%</span></div>
+    <div class="scale" aria-hidden="true"><span>Croatia 79%</span><span>draw 15%</span><span>Ghana 6%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (no Elo)</p>
+    <p class="sr-only">100% Futi (no Elo) says Croatia win 78 percent, draw 15 percent, Ghana win 6 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:78">78%</span><span class="pd" style="flex:15">15%</span><span class="pb" style="flex:6">6%</span></div>
+    <div class="scale" aria-hidden="true"><span>Croatia 78%</span><span>draw 15%</span><span>Ghana 6%</span></div>
+  </div>
+  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
+    <p class="sr-only">Structural (post-MD1 fitted) says Croatia win 75 percent, draw 17 percent, Ghana win 8 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:75">75%</span><span class="pd" style="flex:17">17%</span><span class="pb" style="flex:8">8%</span></div>
+    <div class="scale" aria-hidden="true"><span>Croatia 75%</span><span>draw 17%</span><span>Ghana 8%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
+    <p class="sr-only">100% Futi (post-MD1 fitted) says Croatia win 73 percent, draw 18 percent, Ghana win 10 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:73">73%</span><span class="pd" style="flex:18">18%</span><span class="pb" style="flex:10">10%</span></div>
+    <div class="scale" aria-hidden="true"><span>Croatia 73%</span><span>draw 18%</span><span>Ghana 10%</span></div>
+  </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Croatia, with Ghana's counters the live tail; under-ish.</p></blockquote></div>
 </section>
@@ -685,13 +718,13 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.25</td><td title="2.02 decimal">+102</td><td>47%</td><td>47%</td><td class="edge-neg">-0.4%</td></tr>
       <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.04 decimal">+104</td><td>46%</td><td>53%</td><td class="edge-pos">+7.3%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.72 decimal">-139</td><td>54%</td><td>47%</td><td class="edge-neg">-7.3%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Croatia -1</td><td title="2.10 decimal">+110</td><td>46%</td><td>73%</td><td class="edge-pos">+26.7%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Ghana +1</td><td title="1.79 decimal">-127</td><td>54%</td><td>27%</td><td class="edge-neg">-26.7%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Croatia -1</td><td title="2.10 decimal">+110</td><td>46%</td><td>76%</td><td class="edge-pos">+30.0%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Ghana +1</td><td title="1.79 decimal">-127</td><td>54%</td><td>24%</td><td class="edge-neg">-30.0%</td></tr>
     </tbody>
   </table>
 </div>
 <div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2.5</strong> (Total goals) @ +104, edge <strong>+7.3%</strong> — best price +110 (betrivers). Flat 1u, paper record.</p></div>
-<p class="verify-flag">spreads home -1: model-priced edge +26.7% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">spreads home -1: model-priced edge +30.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 22, 9:21 PM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
@@ -715,7 +748,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=2.3246,lb=0.4746,N=8,SHOW=6,i,j;
+  var la=2.3882,lb=0.4110,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

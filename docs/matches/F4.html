@@ -302,6 +302,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -580,10 +588,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Tunisia win 10 percent, draw 21 percent, Japan win 70 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:10">10%</span><span class="pd" style="flex:21">21%</span><span class="pb" style="flex:70">70%</span></div>
-  <div class="scale" aria-hidden="true"><span>Tunisia 10%</span><span>draw 21%</span><span>Japan 70%</span></div>
-  <p class="factline">predicted score <b>0-1</b><br>published consensus — logged Jun 20, 6:52 PM ET, pre-kickoff<br><b>Graded:</b> final 0–4 (Japan win) · the logged call had it at <b>70%</b> · Brier <b>0.146</b> (0 best · 0.667 coin-flip · 2 worst)</p>
+  <p class="sr-only">Tunisia win 11 percent, draw 22 percent, Japan win 68 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:11">11%</span><span class="pd" style="flex:22">22%</span><span class="pb" style="flex:68">68%</span></div>
+  <div class="scale" aria-hidden="true"><span>Tunisia 11%</span><span>draw 22%</span><span>Japan 68%</span></div>
+  <p class="factline">predicted score <b>0-1</b><br>published consensus — logged Jun 20, 11:09 AM ET, pre-kickoff<br><b>Graded:</b> final 0–4 (Japan win) · the logged call had it at <b>68%</b> · Brier <b>0.163</b> (0 best · 0.667 coin-flip · 2 worst)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Japan, narrowly and late; strongest 1-0 profile of MD2.</p></blockquote></div>
 </section>
@@ -709,12 +717,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.25</td><td title="2.00 decimal">+100</td><td>48%</td><td>58%</td><td class="edge-pos">+10.0%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.07 decimal">+107</td><td>46%</td><td>42%</td><td class="edge-neg">-4.0%</td></tr>
       <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.78 decimal">-127</td><td>54%</td><td>58%</td><td class="edge-pos">+4.0%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Tunisia +1</td><td title="2.14 decimal">+114</td><td>45%</td><td>40%</td><td class="edge-neg">-4.9%</td></tr>
-      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Japan -1</td><td title="1.75 decimal">-133</td><td>55%</td><td>60%</td><td class="edge-pos">+4.9%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Tunisia +1</td><td title="2.14 decimal">+114</td><td>45%</td><td>44%</td><td class="edge-neg">-0.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Japan -1</td><td title="1.75 decimal">-133</td><td>55%</td><td>56%</td><td class="">+0.6%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Japan -1</strong> (Asian handicap), model edge <strong>+4.9%</strong></p><p><strong>Japan</strong> (1X2), model edge <strong>+4.1%</strong></p><p><strong>Under 2.5</strong> (Total goals), model edge <strong>+4.0%</strong></p><p class="odds-note">the model likes these, but the line is over 12h old (the book hasn't reposted), so they are <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Japan</strong> (1X2), model edge <strong>+4.1%</strong></p><p><strong>Under 2.5</strong> (Total goals), model edge <strong>+4.0%</strong></p><p class="odds-note">the model likes these, but the line is over 12h old (the book hasn't reposted), so they are <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
 <p class="odds-note">Logged pick: Japan @ -179 (draftkings), edge 7.7pp · settled <b>won</b> for +0.56u · CLV +3.6pp.</p>
 <p class="odds-note">Logged pick: Japan -1 @ -120 (betus), edge 4.7pp · settled <b>won</b> for +0.83u · CLV +1.5pp.</p>
 <p class="odds-note">Logged pick: Under 2.5 @ -120 (betrivers), edge 4.0pp · settled <b>lost</b> for -1.00u · CLV -0.0pp.</p>
@@ -743,7 +751,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.4967,lb=1.8737,N=8,SHOW=6,i,j;
+  var la=0.5607,lb=1.8098,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

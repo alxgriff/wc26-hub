@@ -302,6 +302,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -584,6 +592,31 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:76">76%</span><span class="pd" style="flex:17">17%</span><span class="pb" style="flex:6">6%</span></div>
   <div class="scale" aria-hidden="true"><span>Colombia 76%</span><span>draw 17%</span><span>DR Congo 6%</span></div>
   <p class="factline">most likely score <b>2–0</b> · expected goals <b>2.45</b> · over 2.5 <b>44%</b> · both score <b>29%</b><br>single source: rating model (Elo+Futi)</p>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (conf-tuned)</p>
+    <p class="sr-only">Structural (conf-tuned) says Colombia win 69 percent, draw 21 percent, DR Congo win 10 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:69">69%</span><span class="pd" style="flex:21">21%</span><span class="pb" style="flex:10">10%</span></div>
+    <div class="scale" aria-hidden="true"><span>Colombia 69%</span><span>draw 21%</span><span>DR Congo 10%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (no Elo)</p>
+    <p class="sr-only">100% Futi (no Elo) says Colombia win 76 percent, draw 18 percent, DR Congo win 6 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:76">76%</span><span class="pd" style="flex:18">18%</span><span class="pb" style="flex:6">6%</span></div>
+    <div class="scale" aria-hidden="true"><span>Colombia 76%</span><span>draw 18%</span><span>DR Congo 6%</span></div>
+  </div>
+  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
+    <p class="sr-only">Structural (post-MD1 fitted) says Colombia win 64 percent, draw 22 percent, DR Congo win 13 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:64">64%</span><span class="pd" style="flex:22">22%</span><span class="pb" style="flex:13">13%</span></div>
+    <div class="scale" aria-hidden="true"><span>Colombia 64%</span><span>draw 22%</span><span>DR Congo 13%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
+    <p class="sr-only">100% Futi (post-MD1 fitted) says Colombia win 64 percent, draw 22 percent, DR Congo win 14 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:64">64%</span><span class="pd" style="flex:22">22%</span><span class="pb" style="flex:14">14%</span></div>
+    <div class="scale" aria-hidden="true"><span>Colombia 64%</span><span>draw 22%</span><span>DR Congo 14%</span></div>
+  </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Colombia, with a real DRC draw tail.</p></blockquote></div>
 </section>
@@ -687,13 +720,13 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.25</td><td title="1.83 decimal">-120</td><td>52%</td><td>56%</td><td class="edge-pos">+3.6%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.27 decimal">+127</td><td>43%</td><td>44%</td><td class="">+1.7%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.68 decimal">-148</td><td>57%</td><td>56%</td><td class="edge-neg">-1.7%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Colombia -1</td><td title="1.93 decimal">-108</td><td>50%</td><td>68%</td><td class="edge-pos">+18.1%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">DR Congo +1</td><td title="1.91 decimal">-110</td><td>50%</td><td>32%</td><td class="edge-neg">-18.1%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Colombia -1</td><td title="1.93 decimal">-108</td><td>50%</td><td>68%</td><td class="edge-pos">+18.5%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">DR Congo +1</td><td title="1.91 decimal">-110</td><td>50%</td><td>32%</td><td class="edge-neg">-18.5%</td></tr>
     </tbody>
   </table>
 </div>
 <p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
-<p class="verify-flag">spreads home -1: model-priced edge +18.1% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">spreads home -1: model-priced edge +18.5% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 22, 9:21 PM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 2 can push (P 26%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> DRC +1; under.</p></blockquote></div>
 <details class="outcome-grid-wrap">
@@ -718,7 +751,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=2.0391,lb=0.4070,N=8,SHOW=6,i,j;
+  var la=2.0449,lb=0.4011,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

@@ -302,6 +302,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -699,8 +707,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">Japan</td><td title="3.70 decimal">+270</td><td>26%</td><td>30%</td><td class="edge-pos">+4.2%</td></tr>
       <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.00 decimal">+100</td><td>48%</td><td>53%</td><td class="edge-pos">+5.3%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.85 decimal">-118</td><td>52%</td><td>47%</td><td class="edge-neg">-5.3%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Netherlands -0.5</td><td title="2.05 decimal">+105</td><td>47%</td><td>47%</td><td class="">+0.3%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Japan +0.5</td><td title="1.81 decimal">-123</td><td>53%</td><td>53%</td><td class="edge-neg">-0.3%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Netherlands -0.5</td><td title="2.05 decimal">+105</td><td>47%</td><td>47%</td><td class="edge-neg">-0.1%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Japan +0.5</td><td title="1.81 decimal">-123</td><td>53%</td><td>53%</td><td class="">+0.1%</td></tr>
     </tbody>
   </table>
 </div>
@@ -731,7 +739,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.6182,lb=1.1955,N=8,SHOW=6,i,j;
+  var la=1.6090,lb=1.2046,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

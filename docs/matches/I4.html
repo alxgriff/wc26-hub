@@ -302,6 +302,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -649,12 +657,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
 <div class="conditions">
-  <span class="cond-stamp">Forecast · as of 2026-06-22 09:03 ET</span>
-  <p class="cond-stats">~71°F · humid (90% RH) · WBGT 78.1°F</p>
-  <div class="cond-track" aria-label="Match heat index: High (54/100)"><div class="cond-fill" style="width:54%"></div></div>
-  <p class="cond-sev cond-sev-high">High</p>
-  <p class="cond-blurb">Hot match-up, and a real edge for Senegal: Norway are +13°F above their home climate while Senegal are well-adapted to this heat.</p>
-  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Norway</span><div class="cond-dis-track" aria-label="Heat disadvantage 74/100"><div class="cond-dis-fill cond-dis-hot" style="width:74%"></div></div><span class="cond-delta">+13.4°F vs home</span></div><div class="cond-team"><span class="cond-tname">Senegal</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-6.8°F vs home</span></div></div>
+  <span class="cond-stamp">Forecast · as of 2026-06-22 23:18 ET</span>
+  <p class="cond-stats">~68°F · humid (93% RH) · WBGT 74.8°F</p>
+  <div class="cond-track" aria-label="Match heat index: Moderate (41/100)"><div class="cond-fill" style="width:41%"></div></div>
+  <p class="cond-sev cond-sev-moderate">Moderate</p>
+  <p class="cond-blurb">Warm out; Norway are +10°F outside their comfort zone while Senegal are the better-acclimated side.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Norway</span><div class="cond-dis-track" aria-label="Heat disadvantage 56/100"><div class="cond-dis-fill cond-dis-hot" style="width:56%"></div></div><span class="cond-delta">+10.1°F vs home</span></div><div class="cond-team"><span class="cond-tname">Senegal</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-10.1°F vs home</span></div></div>
 </div>
 </section>
 
@@ -705,12 +713,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">1X2</td><td class="lbl">Senegal</td><td title="3.20 decimal">+220</td><td>30%</td><td>28%</td><td class="edge-neg">-2.3%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.93 decimal">-108</td><td>50%</td><td>49%</td><td class="edge-neg">-0.7%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.91 decimal">-110</td><td>50%</td><td>51%</td><td class="">+0.7%</td></tr>
-      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Norway -0.5</td><td title="2.34 decimal">+134</td><td>42%</td><td>47%</td><td class="edge-pos">+5.1%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Senegal +0.5</td><td title="1.66 decimal">-152</td><td>58%</td><td>53%</td><td class="edge-neg">-5.1%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Norway -0.5</td><td title="2.34 decimal">+134</td><td>42%</td><td>44%</td><td class="">+2.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Senegal +0.5</td><td title="1.66 decimal">-152</td><td>58%</td><td>56%</td><td class="edge-neg">-2.6%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bets — top 2, ≥4% edge</span><p>1. <strong>Norway -0.5</strong> (Asian handicap) @ +134, edge <strong>+5.1%</strong> — best price +134 (betonlineag). Flat 1u, paper record.</p><p>2. <strong>Norway</strong> (1X2) @ +130, edge <strong>+4.7%</strong> — best price +130 (draftkings). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p><p class="odds-note warn">⚠ the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with extra caution until the draw calibration is re-checked after MD3.</p></div>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Norway</strong> (1X2) @ +130, edge <strong>+4.7%</strong> — best price +130 (draftkings). Flat 1u, paper record.</p><p class="odds-note warn">⚠ the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with extra caution until the draw calibration is re-checked after MD3.</p></div>
 <p class="odds-note">Logged pick: Norway -0.5 @ +134 (betonlineag), edge 5.1pp · open.</p>
 <p class="odds-note">Logged pick: Norway @ +130 (draftkings), edge 4.7pp · open.</p>
 <p class="odds-note">market snapshot Jun 22, 7:02 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
@@ -737,7 +745,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.5207,lb=1.1153,N=8,SHOW=6,i,j;
+  var la=1.4695,lb=1.1665,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
