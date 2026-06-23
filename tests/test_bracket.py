@@ -11,6 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import bracket as bk      # noqa: E402
 import standings as st    # noqa: E402
+import scenarios as scen  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 SNAP = REPO / "tests" / "fixtures" / "site_snapshot" / "fixtures.csv"
@@ -145,6 +146,85 @@ class FeedTests(unittest.TestCase):
         # any resolved tie would have two concrete (non-None) participants
         for m, pr in fed["participants"].items():
             self.assertTrue(all(pr))
+
+
+LIVE = REPO / "data" / "fixtures.csv"
+
+
+class ProjectedFinishTests(unittest.TestCase):
+    """The 'projected finish' view: project remaining games -> the full bracket resolves."""
+
+    def test_project_final_standings_completes_every_group(self):
+        s = bk.project_final_standings(st.load_fixtures(LIVE), lambda m: (1, 0))
+        self.assertEqual(len(s.groups), 12)
+        for gt in s.groups.values():                       # four teams, three games each
+            self.assertEqual(len(gt.rows), 4)
+            for r in gt.rows:
+                self.assertEqual(r.played, 3)
+
+    def test_projected_bracket_fully_resolves_to_a_champion(self):
+        s = bk.project_final_standings(st.load_fixtures(LIVE), lambda m: (2, 1))
+        proj = bk.feed(bk.project(s, resolve_provisional=True), _alpha_resolver)
+        self.assertTrue(proj["fully_projectable"])
+        self.assertTrue(proj["thirds_resolved"])
+        self.assertIsNotNone(proj.get("champion"))
+
+    def test_resolve_provisional_breaks_the_cutline(self):
+        # all draws => every team level => the third-place cutline is provisional everywhere
+        s = bk.project_final_standings(st.load_fixtures(LIVE), lambda m: (1, 1))
+        self.assertFalse(bk.project(s)["thirds_resolved"])                 # gated by default
+        self.assertTrue(bk.project(s, resolve_provisional=True)["thirds_resolved"])
+
+    def test_per_side_provisional_flags(self):
+        matches = st.load_fixtures(LIVE)
+        now = bk.project(st.compute_standings(matches), resolve_provisional=True)
+        for e in now["r32"].values():
+            self.assertIn("home_provisional", e)
+            self.assertIn("away_provisional", e)
+        # mid-group-stage no position is sealed, so concrete slots are flagged provisional
+        self.assertTrue(any(e["home_provisional"] or e["away_provisional"]
+                            for e in now["r32"].values()))
+        # projected-final standings (every team played 3) => nothing provisional
+        full = bk.project(bk.project_final_standings(matches, lambda m: (2, 1)),
+                          resolve_provisional=True)
+        self.assertFalse(any(e["home_provisional"] or e["away_provisional"]
+                             for e in full["r32"].values()))
+
+
+class ConfirmedSlotTests(unittest.TestCase):
+    """The per-side confirmed (✓) flag: a slot is confirmed only when its occupant has
+    mathematically secured that exact seed, and only when a clinch map is supplied."""
+
+    def test_no_clinch_map_means_nothing_confirmed(self):
+        # even a fully-played tournament shows no ✓ unless the clinch map is passed —
+        # the hypothetical 'projected finish' view relies on exactly this.
+        proj = bk.project(st.compute_standings(_full_groups()), bk.load_annex_c())
+        self.assertFalse(any(e["home_confirmed"] or e["away_confirmed"]
+                             for e in proj["r32"].values()))
+
+    def test_fully_played_with_clinch_map_confirms_every_seed(self):
+        matches = _full_groups()
+        s = st.compute_standings(matches)
+        clinched = {g: scen.clinched_ranks(g, matches) for g in s.groups}
+        proj = bk.project(s, bk.load_annex_c(), clinched=clinched)
+        for m, e in proj["r32"].items():                    # all 72 games played -> every
+            self.assertTrue(e["home_confirmed"], m)         # seed is mathematically secured
+            self.assertTrue(e["away_confirmed"], m)
+            self.assertFalse(e["home_provisional"])         # confirmed and provisional are
+            self.assertFalse(e["away_provisional"])         # mutually exclusive at source
+
+    def test_confirmed_winner_or_runnerup_holds_that_exact_rank(self):
+        # live, mid-stage: any confirmed W/RU slot's occupant must hold that exact clinched
+        # rank (1 or 2). Conditional, so it's robust to whatever the live table looks like.
+        matches = st.load_fixtures(LIVE)
+        s = st.compute_standings(matches, fair_play=st.load_discipline())
+        clinched = {g: scen.clinched_ranks(g, matches) for g in s.groups}
+        proj = bk.project(s, resolve_provisional=True, clinched=clinched)
+        for m, e in proj["r32"].items():
+            for side, slot in (("home", bk.R32_TEMPLATE[m][0]), ("away", bk.R32_TEMPLATE[m][1])):
+                if e[f"{side}_confirmed"] and slot[0] in ("W", "RU"):
+                    rank = 1 if slot[0] == "W" else 2
+                    self.assertEqual(clinched[slot[1]].get(e[side]), rank, (m, side))
 
 
 if __name__ == "__main__":

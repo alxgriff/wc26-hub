@@ -302,14 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -344,6 +336,8 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
 .no-bet{font-family:var(--mono);font-size:.78rem;margin:10px 0;max-width:680px}
 .no-bet b{letter-spacing:.06em}
 .odds-note{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.7;max-width:680px}
+.odds-note.warn{color:var(--amber)}
+.caut{cursor:help;color:var(--amber);text-decoration:none;font-weight:700}
 .ledger-line{font-family:var(--mono);font-size:.74rem;font-weight:700;margin-top:14px}
 
 /* ---------- morning-line blurb ---------- */
@@ -465,6 +459,13 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bslot a{text-decoration:none}
 .bslot a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
 .bslot.tbd{font-weight:500;font-style:italic;color:var(--ink-soft)}
+/* provisional: a concrete team whose group position isn't sealed — dashed underline so it
+   reads "tentative", and still works under the green winner / muted loser colour states */
+.bslot.prov .bn{border-bottom:1.5px dashed var(--ink-soft)}
+/* confirmed: this exact seed is mathematically secured — solid green underline + a ✓ mark,
+   the visual opposite of the dashed provisional state (the two classes never co-occur) */
+.bslot.conf .bn{border-bottom:1.5px solid var(--green)}
+.bmark{flex:0 0 auto;font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);line-height:1}
 /* projected advancer (bracket.feed): the winning slot in green; the other reads muted */
 .bslot.win .bn{color:var(--green)}
 .btie:has(.win) .bslot:not(.win) .bn{color:var(--ink-soft);font-weight:500}
@@ -487,6 +488,17 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bracket-third .bslot{min-height:1.15em;border-bottom:1px dotted var(--hairline)}
 .bnotes{list-style:none;margin:14px 0 0;font-family:var(--mono);font-size:.72rem;color:var(--amber);line-height:1.6}
 .bnotes li{padding-left:1.1em;text-indent:-1.1em}
+/* CSS-only bracket view toggle (no JS): radios precede the views so `:checked ~ .view` works */
+.bview-radio{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.bview-tabs{display:inline-flex;margin:0 0 14px;border:1px solid var(--ink);background:var(--paper-2)}
+.bview-tabs label{padding:7px 16px;cursor:pointer;font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.bview-tabs label:first-child{border-right:1px solid var(--hairline)}
+#bv-now:checked ~ .bview-tabs label[for="bv-now"],
+#bv-proj:checked ~ .bview-tabs label[for="bv-proj"]{background:var(--ink);color:var(--paper)}
+.bview-radio:focus-visible ~ .bview-tabs{outline:2px solid var(--verm);outline-offset:2px}
+.bview{display:none}
+#bv-now:checked ~ .view-now,#bv-proj:checked ~ .view-proj{display:block}
+.bview-sub{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.6;margin:0 0 10px;max-width:680px}
 .bnotes li::before{content:"⚠ "}
 /* projected champion banner (only once the whole bracket resolves) */
 .bchamp{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:2px solid var(--green);background:var(--green-soft);padding:12px 18px;margin:18px 0 0}
@@ -637,7 +649,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
 <div class="conditions">
-  <span class="cond-stamp">Actual · as of 2026-06-20 07:39 ET</span>
+  <span class="cond-stamp">Actual · as of 2026-06-21 07:54 ET</span>
   <p class="cond-stats">~74°F · moderate humidity (45% RH) · WBGT 71.6°F</p>
   <div class="cond-track" aria-label="Match heat index: High (29/100)"><div class="cond-fill" style="width:29%"></div></div>
   <p class="cond-sev cond-sev-high">High</p>
@@ -694,8 +706,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">1X2</td><td class="lbl">Australia</td><td title="5.25 decimal">+425</td><td>18%</td><td>35%</td><td class="edge-pos">+17.1%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.87 decimal">-115</td><td>51%</td><td>46%</td><td class="edge-neg">-4.8%</td></tr>
       <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.95 decimal">-105</td><td>49%</td><td>54%</td><td class="edge-pos">+4.8%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">United States -1</td><td title="2.04 decimal">+104</td><td>47%</td><td>21%</td><td class="edge-neg">-26.0%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Australia +1</td><td title="1.83 decimal">-120</td><td>53%</td><td>79%</td><td class="edge-pos">+26.0%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">United States -1</td><td title="2.04 decimal">+104</td><td>47%</td><td>26%</td><td class="edge-neg">-21.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Australia +1</td><td title="1.83 decimal">-120</td><td>53%</td><td>74%</td><td class="edge-pos">+21.6%</td></tr>
     </tbody>
   </table>
 </div>
@@ -703,7 +715,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 <p class="odds-note">Logged pick: Under 2.5 @ -102 (bovada), edge 4.7pp · settled <b>won</b> for +0.98u · CLV -0.1pp.</p>
 <p class="odds-note">Logged pick: Draw @ +330 (draftkings), edge 4.5pp · settled <b>lost</b> for -1.00u · CLV +0.4pp.</p>
 <p class="verify-flag">h2h away: edge +17.1% implausibly large — verify odds freshness and team news before trusting</p>
-<p class="verify-flag">spreads away 1: model-priced edge +26.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">spreads away 1: model-priced edge +21.6% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 19, 12:24 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> under 2.5; US to win to nil.</p></blockquote></div>
 <details class="outcome-grid-wrap">
@@ -728,7 +740,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.2881,lb=1.2365,N=8,SHOW=6,i,j;
+  var la=1.3828,lb=1.1418,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

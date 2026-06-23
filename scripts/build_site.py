@@ -389,6 +389,34 @@ def load_knockout_resolver():
     return resolve
 
 
+def load_group_projector():
+    """Defensive adapter for the 'projected finish' bracket: score(match) -> (score_a, score_b)
+    = the model's most-likely DECISIVE scoreline for a group game, or None if predict.py is
+    unavailable. Decisive (skips the modal draw) so the projected final tables don't tie into a
+    provisional third-place cutline that would block the bracket. Neutral venue (Match carries
+    no country, and KO venues aren't modelled either — kept consistent)."""
+    try:
+        import predict as pr
+        model = pr.load_ratings()
+    except Exception:
+        return None
+
+    def score(m):
+        try:
+            a, b = pr._canon(m.team_a), pr._canon(m.team_b)
+            if a not in model.teams or b not in model.teams:
+                return (1, 0)
+            pred = pr.predict_match(model, a, b)         # neutral
+            for (i, j), _p in pred.top_scores:           # most-likely scorelines, high→low
+                if i != j:
+                    return (i, j)                        # first decisive one
+            return (1, 0) if pred.p_a >= pred.p_b else (0, 1)   # all-draw top: favoured side by 1
+        except Exception:
+            return (1, 0)
+
+    return score
+
+
 def render_call(info: dict | None, team_a: str, team_b: str,
                 prebaked_lean: str | None,
                 result: tuple[int, int] | None = None,
@@ -923,6 +951,23 @@ def _american_odds(decimal: float) -> str:
     return f"-{round(100 / (decimal - 1))}"
 
 
+# The 2026-06-20 audit found the model systematically under-prices draws (mean p_draw
+# ≈19% vs ≈36% realised group-stage), and that draw mass is parked on the favourite — so
+# a win-side 1X2 (moneyline) edge is inflated and least trustworthy. We DISCLOSE this on
+# every such pick rather than hand-pick a stricter edge bar (the draw magnitude is small-
+# sample and is deferred to the post-MD3 re-grade; see DECISIONS.md / model-audit memo).
+_DRAW_AUDIT_CAUTION = (
+    "the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which "
+    "inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with "
+    "extra caution until the draw calibration is re-checked after MD3")
+
+
+def _h2h_win_side(market: str, selection: str) -> bool:
+    """A 1X2 pick backing a team to WIN — the selection whose edge the draw under-pricing
+    inflates. (A draw pick has the opposite, conservative bias, so it isn't flagged.)"""
+    return market == "h2h" and selection in ("home", "away")
+
+
 def render_market(odds_info: dict | None, team_a: str, team_b: str,
                   prebaked: str | None, played: bool = False) -> str:
     """Odds & Best Bet block: the de-vigged edge table + the pick when the
@@ -994,9 +1039,11 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
         corr = ('<p class="odds-note">same-match picks are correlated — they tend '
                 'to win and lose together; the units record swings accordingly.</p>'
                 if len(fresh) > 1 else "")
+        draw_caut = (f'<p class="odds-note warn">⚠ {_DRAW_AUDIT_CAUTION}.</p>'
+                     if any(_h2h_win_side(pk["market"], pk["selection"]) for pk in fresh) else "")
         tag = "Best bet" if len(fresh) == 1 else f"Best bets — top {len(fresh)}, ≥{record_threshold:.0%} edge"
         parts.append(f'<div class="bet-callout"><span class="tag">{_esc(tag)}</span>'
-                     + "".join(pick_lines) + corr + '</div>')
+                     + "".join(pick_lines) + corr + draw_caut + '</div>')
     elif rows_html and not stale:
         parts.append(f'<p class="no-bet"><b>NO BET</b> — no edge clears the '
                      f'{record_threshold:.0%} recording bar (a normal, expected '
@@ -1294,12 +1341,14 @@ def render_record_bets(rows: list[dict], root: str = "",
             odds_cell = f'<td title="{float(p["odds"]):.2f} decimal">{_american_odds(float(p["odds"]))}</td>'
         except (ValueError, KeyError):
             odds_cell = f'<td>{_esc(str(p.get("odds", "")))}</td>'
+        caut = ' <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr>' \
+            if _h2h_win_side(p["market"], p["selection"]) else ""
         body.append(
             f'      <tr>\n'
             f'        <td class="lbl">{_esc(when)}</td>\n'
             f'        <td class="lbl"><a href="{root}matches/{_esc(mid)}.html">'
             f'{_esc(a)} v {_esc(b)}</a></td>\n'
-            f'        <td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}</td>\n'
+            f'        <td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}{caut}</td>\n'
             f'        {odds_cell}\n'
             f'        <td class="lbl">{_esc(p.get("book") or "")}</td>\n'
             f'        <td>{_esc(p.get("edge_pp") or "")}pp</td>\n'
@@ -1317,6 +1366,8 @@ def render_record_bets(rows: list[dict], root: str = "",
         '<th scope="col">Edge</th><th class="lbl" scope="col">Status</th>'
         '<th scope="col">Units</th><th scope="col">CLV</th></tr></thead>\n'
         '    <tbody>\n' + "\n".join(body) + "\n    </tbody>\n  </table>\n</div>")
+    if any(_h2h_win_side(p["market"], p["selection"]) for p in picks):
+        table += (f'\n<p class="odds-note warn">‡ {_DRAW_AUDIT_CAUTION}.</p>')
     return table, units_line
 
 
@@ -1356,12 +1407,14 @@ def render_record_shadow(rows: list[dict], root: str = "",
             modp = f'{float(p["our_p"]) * 100:.0f}%'
         except (ValueError, KeyError):
             odds_cell, modp = _esc(str(p.get("odds", ""))), "—"
+        caut = ' <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr>' \
+            if _h2h_win_side(p["market"], p["selection"]) else ""
         body.append(
             f'      <tr>\n'
             f'        <td class="lbl">{_esc(when)}</td>\n'
             f'        <td class="lbl"><a href="{root}matches/{_esc(mid)}.html">'
             f'{_esc(a)} v {_esc(b)}</a></td>\n'
-            f'        <td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}</td>\n'
+            f'        <td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}{caut}</td>\n'
             f'        <td>{odds_cell}</td>\n'
             f'        <td>{_esc(p.get("edge_pp") or "")}pp</td>\n'
             f'        <td>{modp}</td>\n'
@@ -1381,6 +1434,8 @@ def render_record_shadow(rows: list[dict], root: str = "",
         '    <tbody>\n' + "\n".join(body) + "\n    </tbody>\n  </table>\n</div>\n"
         '<p class="odds-note">*hypothetical flat-1u, on paper — these are risky calls '
         '(severe model–market gap), tracked to test the model, not staked.</p>')
+    if any(_h2h_win_side(p["market"], p["selection"]) for p in picks):
+        table += (f'\n<p class="odds-note warn">‡ {_DRAW_AUDIT_CAUTION}.</p>')
     return table, summary_line
 
 
@@ -1416,6 +1471,24 @@ def _bracket_ordered_rounds() -> list[list[int]]:
     return rounds                          # [R32(16), R16(8), QF(4), SF(2), Final(1)]
 
 
+def _humanize_origin(label: str) -> str:
+    """Turn a slot's terse origin label into prose for the hover tooltip, so a reader can
+    see HOW a team landed where it did: 'Winner E' -> 'Group E winner', 'Runner-up B' ->
+    'Group B runner-up', '3rd C' -> '3rd place, Group C', 'Best 3rd of A/B/C' -> 'one of
+    the best third-placed teams (Group A/B/C)'. Unknown shapes pass through unchanged."""
+    if not label:
+        return ""
+    if label.startswith("Winner "):
+        return f"Group {label[7:]} winner"
+    if label.startswith("Runner-up "):
+        return f"Group {label[10:]} runner-up"
+    if label.startswith("3rd ") and " of " not in label:
+        return f"3rd place, Group {label[4:]}"
+    if label.startswith("Best 3rd of "):
+        return f"one of the best third-placed teams (Group {label[12:]})"
+    return label
+
+
 def render_bracket_html(proj: dict, root: str = "") -> str:
     """The as-it-stands knockout bracket as a traditional left-to-right cascade:
     R32 cards on the left, each later round's matches centred between their two
@@ -1432,12 +1505,26 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
     winners = {int(k): v for k, v in proj.get("winners", {}).items()}
     parts = {int(k): tuple(v) for k, v in proj.get("participants", {}).items()}
 
-    def slot(team=None, label=None, *, win=False, p=None):
+    def slot(team=None, label=None, *, win=False, p=None, prov=False, conf=False):
+        # origin = how this slot was reached (Group D winner, 3rd place Group C, …) — shown
+        # on hover whether the slot is still abstract or already filled by a concrete team.
+        origin = _humanize_origin(label)
+        mark = ""
         if team:
             name = f'<a href="{_team_link(team, root)}">{_esc(team)}</a>'
-            cls, title = "bslot", team
+            cls = "bslot"
+            base = f"{team} — {origin}" if origin else team
+            if conf:                                # this exact seed is mathematically secured
+                cls += " conf"
+                title = f"{base} (confirmed — this seed is mathematically secured)"
+                mark = '<span class="bmark" aria-label="confirmed" role="img">✓</span>'
+            elif prov:                              # concrete team, group position not sealed
+                cls += " prov"
+                title = f"{base} (provisional — not yet sealed, can still change)"
+            else:
+                title = base
         elif label:
-            name, cls, title = _esc(label), "bslot tbd", label
+            name, cls, title = _esc(label), "bslot tbd", origin or label
         else:
             name, cls, title = "", "bslot tbd", ""
         if win:
@@ -1445,13 +1532,16 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
         pct = (f'<span class="bp">{round(p * 100)}%</span>'
                if win and p is not None else "")
         ttl = f' title="{_esc(title)}"' if title else ""
-        return f'<span class="{cls}"{ttl}><span class="bn">{name}</span>{pct}</span>'
+        return f'<span class="{cls}"{ttl}><span class="bn">{name}</span>{mark}{pct}</span>'
 
-    def card(m, a_team, a_label, b_team, b_label):
+    def card(m, a_team, a_label, b_team, b_label, a_prov=False, b_prov=False,
+             a_conf=False, b_conf=False):
         w = winners.get(m, {})
         wt, p = w.get("team"), w.get("p")
-        sa = slot(team=a_team, label=a_label, win=a_team is not None and a_team == wt, p=p)
-        sb = slot(team=b_team, label=b_label, win=b_team is not None and b_team == wt, p=p)
+        sa = slot(team=a_team, label=a_label, win=a_team is not None and a_team == wt,
+                  p=p, prov=a_prov, conf=a_conf)
+        sb = slot(team=b_team, label=b_label, win=b_team is not None and b_team == wt,
+                  p=p, prov=b_prov, conf=b_conf)
         return f'<li class="btie" id="m{m}"><div class="bpair">{sa}{sb}</div></li>'
 
     def downstream_card(m):
@@ -1464,7 +1554,9 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
         for m in nums:
             if r == 0:
                 e = r32[m]
-                items.append(card(m, e["home"], e["home_label"], e["away"], e["away_label"]))
+                items.append(card(m, e["home"], e["home_label"], e["away"], e["away_label"],
+                                  e.get("home_provisional", False), e.get("away_provisional", False),
+                                  e.get("home_confirmed", False), e.get("away_confirmed", False)))
             else:
                 items.append(downstream_card(m))
         cols.append(f'<li class="bround" data-r="{r}"><h3>{_esc(_ROUND_TITLES[r])}</h3>'
@@ -1476,8 +1568,21 @@ def render_bracket_html(proj: dict, root: str = "") -> str:
     return f'<ol class="bracket">{"".join(cols)}</ol>{third}'
 
 
+def _bracket_view(proj: dict, view_cls: str, champ_label: str, sub: str) -> str:
+    """One bracket view (champion banner + sub-note + the scrollable cascade)."""
+    champ = proj.get("champion")
+    cb = (f'<p class="bchamp"><span class="lbl">{champ_label}</span>'
+          f'<strong>{_esc(champ)}</strong></p>' if champ else "")
+    return (f'<div class="bview {view_cls}">{cb}'
+            f'<p class="bview-sub">{_esc(sub)}</p>'
+            f'<div class="bracket-wrap" tabindex="0" role="region" '
+            f'aria-label="Knockout bracket, scrollable">{render_bracket_html(proj, root="")}'
+            f'</div></div>')
+
+
 def render_bracket_page(proj: dict, css: str, generated_at: str,
-                        template_dir: Path = TEMPLATE_DIR) -> str:
+                        template_dir: Path = TEMPLATE_DIR,
+                        projected: "dict | None" = None) -> str:
     n = proj["as_of_matches_played"]
     resolved = ("All eight group-winner-vs-best-third matches are projected from "
                 "the current third-place race." if proj["thirds_resolved"] else
@@ -1486,16 +1591,38 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
                 "third-place cutline is settled.")
     notes_html = "".join(f'<li>{_esc(w)}</li>' for w in proj["warnings"])
     notes_html = f'<ul class="bnotes">{notes_html}</ul>' if notes_html else ""
-    champ = proj.get("champion")
-    champion_html = (f'<p class="bchamp"><span class="lbl">Projected to lift the '
-                     f'trophy</span><strong>{_esc(champ)}</strong></p>' if champ else "")
+
+    now_view = _bracket_view(
+        proj, "view-now", "Projected to lift the trophy",
+        "Drawn all the way out from the standings as they stand — every group winner, runner-up "
+        "and the eight best thirds (slotted by the FIFA Annex C logic). A green ✓ marks a seed "
+        "already mathematically secured; a dashed underline marks a provisional position (not yet "
+        "sealed — it shifts with each result); abstract slots remain only where a group hasn't "
+        "kicked off. Hover any slot to see how a team reached it.")
+    if projected is not None:
+        proj_view = _bracket_view(
+            projected, "view-proj", "Projected champion",
+            "Every remaining group game played out to the model's most likely decisive result, "
+            "then the whole bracket run through — a full scenario, not a forecast of who qualifies.")
+        # CSS-only radio toggle (no JS in the output): the radios precede the views so the
+        # `#id:checked ~ .view` sibling rules can show/hide. 'As it stands' is the default.
+        bracket_html = (
+            '<input type="radio" name="bview" id="bv-now" class="bview-radio" checked>'
+            '<input type="radio" name="bview" id="bv-proj" class="bview-radio">'
+            '<div class="bview-tabs" role="tablist" aria-label="Bracket view">'
+            '<label for="bv-now">As it stands</label>'
+            '<label for="bv-proj">Projected finish</label></div>'
+            + now_view + proj_view)
+    else:
+        bracket_html = now_view
+
     tpl = Template((template_dir / "bracket.html").read_text(encoding="utf-8"))
     return tpl.safe_substitute(
         site_css=css,
-        bracket_html=render_bracket_html(proj, root=""),
+        bracket_html=bracket_html,
         played=n, total=72, progress_pct=round(n / 72 * 100),
         resolved_note=_esc(resolved),
-        champion_html=champion_html,
+        champion_html="",                  # champion banners now live inside each view
         notes_html=notes_html,
         generated_at=_esc(generated_at),
         repo_url=REPO_URL,
@@ -1984,8 +2111,16 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     # Annex C is committed static data; a missing/corrupt table degrades to no
     # bracket page + a warning rather than a broken build (never an invented slot).
     bracket_proj = None
+    bracket_full = None
     try:
-        bracket_proj = bk.project(s)
+        # resolve_provisional: slot the thirds via Annex C using the standings' deterministic
+        # order even when the cutline is provisional (FIFA ranking unmodelled) — so the
+        # as-it-stands bracket shows the real third-place logic, honestly flagged, rather than
+        # abstract "Best 3rd of …" pools. Still gated on all 12 groups having STARTED.
+        # clinched: which exact seeds are mathematically secured (full 2026 tiebreakers, incl.
+        # head-to-head) — drives the confirmed (✓) vs provisional (dashed) per-side marks.
+        clinched = {g: scen.clinched_ranks(g, matches) for g in s.groups}
+        bracket_proj = bk.project(s, resolve_provisional=True, clinched=clinched)
     except (FileNotFoundError, ValueError) as e:
         warnings.append(f"Bracket page skipped: {e}")
     if bracket_proj is not None:
@@ -1997,6 +2132,17 @@ def build_site(out_dir: Path, target: date, generated_at: str,
             # results=None: no knockout has been played yet (group stage only);
             # actual results will override the model here once those fixtures exist
             bracket_proj = bk.feed(bracket_proj, knockout_resolver)
+        # 'Projected finish' view: project every remaining group game to a decisive result,
+        # resolve the WHOLE bracket (all 12 groups final, thirds slotted), run it through.
+        projector = load_group_projector()
+        if projector is not None:
+            try:
+                s_full = bk.project_final_standings(matches, projector)
+                bracket_full = bk.project(s_full, resolve_provisional=True)
+                if knockout_resolver:
+                    bracket_full = bk.feed(bracket_full, knockout_resolver)
+            except (FileNotFoundError, ValueError) as e:
+                warnings.append(f"Projected-finish bracket skipped: {e}")
 
     # Optional "Model Lab" footer link — appears only when the (locally generated,
     # experimental) model-lab.html exists in the output dir. Conditional so the
@@ -2020,6 +2166,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                              model_lab_nav_item=model_lab_nav_item)
     if bracket_proj is not None:
         data["bracket"] = bk.to_dict(bracket_proj)
+    if bracket_full is not None:
+        data["bracket_projected"] = bk.to_dict(bracket_full)
     (out_dir / "index.html").write_text(index, encoding="utf-8")
     (out_dir / "data.json").write_text(
         json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -2037,7 +2185,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         encoding="utf-8")
     if bracket_proj is not None:
         (out_dir / "bracket.html").write_text(
-            render_bracket_page(bracket_proj, css, generated_at, template_dir),
+            render_bracket_page(bracket_proj, css, generated_at, template_dir,
+                                projected=bracket_full),
             encoding="utf-8")
 
     fixture_teams = sorted({m.team_a for m in matches} | {m.team_b for m in matches})

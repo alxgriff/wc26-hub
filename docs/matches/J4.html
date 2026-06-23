@@ -302,14 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -344,6 +336,8 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
 .no-bet{font-family:var(--mono);font-size:.78rem;margin:10px 0;max-width:680px}
 .no-bet b{letter-spacing:.06em}
 .odds-note{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.7;max-width:680px}
+.odds-note.warn{color:var(--amber)}
+.caut{cursor:help;color:var(--amber);text-decoration:none;font-weight:700}
 .ledger-line{font-family:var(--mono);font-size:.74rem;font-weight:700;margin-top:14px}
 
 /* ---------- morning-line blurb ---------- */
@@ -465,6 +459,13 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bslot a{text-decoration:none}
 .bslot a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
 .bslot.tbd{font-weight:500;font-style:italic;color:var(--ink-soft)}
+/* provisional: a concrete team whose group position isn't sealed — dashed underline so it
+   reads "tentative", and still works under the green winner / muted loser colour states */
+.bslot.prov .bn{border-bottom:1.5px dashed var(--ink-soft)}
+/* confirmed: this exact seed is mathematically secured — solid green underline + a ✓ mark,
+   the visual opposite of the dashed provisional state (the two classes never co-occur) */
+.bslot.conf .bn{border-bottom:1.5px solid var(--green)}
+.bmark{flex:0 0 auto;font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);line-height:1}
 /* projected advancer (bracket.feed): the winning slot in green; the other reads muted */
 .bslot.win .bn{color:var(--green)}
 .btie:has(.win) .bslot:not(.win) .bn{color:var(--ink-soft);font-weight:500}
@@ -487,6 +488,17 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bracket-third .bslot{min-height:1.15em;border-bottom:1px dotted var(--hairline)}
 .bnotes{list-style:none;margin:14px 0 0;font-family:var(--mono);font-size:.72rem;color:var(--amber);line-height:1.6}
 .bnotes li{padding-left:1.1em;text-indent:-1.1em}
+/* CSS-only bracket view toggle (no JS): radios precede the views so `:checked ~ .view` works */
+.bview-radio{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.bview-tabs{display:inline-flex;margin:0 0 14px;border:1px solid var(--ink);background:var(--paper-2)}
+.bview-tabs label{padding:7px 16px;cursor:pointer;font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.bview-tabs label:first-child{border-right:1px solid var(--hairline)}
+#bv-now:checked ~ .bview-tabs label[for="bv-now"],
+#bv-proj:checked ~ .bview-tabs label[for="bv-proj"]{background:var(--ink);color:var(--paper)}
+.bview-radio:focus-visible ~ .bview-tabs{outline:2px solid var(--verm);outline-offset:2px}
+.bview{display:none}
+#bv-now:checked ~ .view-now,#bv-proj:checked ~ .view-proj{display:block}
+.bview-sub{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.6;margin:0 0 10px;max-width:680px}
 .bnotes li::before{content:"⚠ "}
 /* projected champion banner (only once the whole bracket resolves) */
 .bchamp{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:2px solid var(--green);background:var(--green-soft);padding:12px 18px;margin:18px 0 0}
@@ -568,35 +580,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Jordan win 14 percent, draw 18 percent, Algeria win 68 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:14">14%</span><span class="pd" style="flex:18">18%</span><span class="pb" style="flex:68">68%</span></div>
-  <div class="scale" aria-hidden="true"><span>Jordan 14%</span><span>draw 18%</span><span>Algeria 68%</span></div>
-  <p class="factline">most likely score <b>0–2</b> · expected goals <b>3.19</b> · over 2.5 <b>62%</b> · both score <b>54%</b><br>single source: rating model (Elo+Futi)</p>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (conf-tuned)</p>
-    <p class="sr-only">Structural (conf-tuned) says Jordan win 13 percent, draw 18 percent, Algeria win 69 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:13">13%</span><span class="pd" style="flex:18">18%</span><span class="pb" style="flex:69">69%</span></div>
-    <div class="scale" aria-hidden="true"><span>Jordan 13%</span><span>draw 18%</span><span>Algeria 69%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (no Elo)</p>
-    <p class="sr-only">100% Futi (no Elo) says Jordan win 9 percent, draw 15 percent, Algeria win 76 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:9">9%</span><span class="pd" style="flex:15">15%</span><span class="pb" style="flex:76">76%</span></div>
-    <div class="scale" aria-hidden="true"><span>Jordan 9%</span><span>draw 15%</span><span>Algeria 76%</span></div>
-  </div>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
-    <p class="sr-only">Structural (post-MD1 fitted) says Jordan win 9 percent, draw 15 percent, Algeria win 76 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:9">9%</span><span class="pd" style="flex:15">15%</span><span class="pb" style="flex:76">76%</span></div>
-    <div class="scale" aria-hidden="true"><span>Jordan 9%</span><span>draw 15%</span><span>Algeria 76%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
-    <p class="sr-only">100% Futi (post-MD1 fitted) says Jordan win 6 percent, draw 13 percent, Algeria win 80 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:6">6%</span><span class="pd" style="flex:13">13%</span><span class="pb" style="flex:80">80%</span></div>
-    <div class="scale" aria-hidden="true"><span>Jordan 6%</span><span>draw 13%</span><span>Algeria 80%</span></div>
-  </div>
+  <p class="sr-only">Jordan win 13 percent, draw 18 percent, Algeria win 69 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:13">13%</span><span class="pd" style="flex:18">18%</span><span class="pb" style="flex:69">69%</span></div>
+  <div class="scale" aria-hidden="true"><span>Jordan 13%</span><span>draw 18%</span><span>Algeria 69%</span></div>
+  <p class="factline">most likely score <b>0–2</b> · expected goals <b>3.19</b> · over 2.5 <b>62%</b> · both score <b>53%</b><br>single source: rating model (Elo+Futi)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Algeria narrowly; massive variance from their week-to-week form swings.</p></blockquote></div>
 </section>
@@ -606,34 +593,34 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Stakes</span>
     <h2 id="stakes-h">The table as it stands</h2>
   </div>
-  <p class="standfirst">After 2 matches in Group J: Jordan 3rd on 0 pts (0-0-1, -2 GD), Algeria 4th on 0 pts (0-0-1, -3 GD). Argentina and Austria share the lead on 3 pts; both sit outside the top two (Jordan 3 pts back, Algeria 3 pts back) — the best eight third-placed teams also advance.</p>
+  <p class="standfirst">After 3 matches in Group J: Jordan 3rd on 0 pts (0-0-1, -2 GD), Algeria 4th on 0 pts (0-0-1, -3 GD). Argentina lead the group on 6 pts; both sit outside the top two (Jordan 3 pts back, Algeria 3 pts back) — the best eight third-placed teams also advance.</p>
 
   <div class="mini-table">
 <article class="card" id="group-j" style="--i:0" aria-labelledby="gh-j">
-  <h3 id="gh-j"><span class="stamp" aria-hidden="true">J</span>Group J<span class="played-tag">2/6 played</span></h3>
+  <h3 id="gh-j"><span class="stamp" aria-hidden="true">J</span>Group J<span class="played-tag">3/6 played</span></h3>
   <table>
-    <caption class="sr-only">Group J standings after 2 of 6 matches</caption>
+    <caption class="sr-only">Group J standings after 3 of 6 matches</caption>
     <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Argentina"><a href="../teams/argentina.html">Argentina</a><span class="dag">†</span></th>
-        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, not yet played, not yet played</span></td>
-        <td>3</td>
-        <td>+3</td>
-        <td class="pts">3</td>
+        <th class="team" scope="row" title="Argentina"><a href="../teams/argentina.html">Argentina</a></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, won, not yet played</span></td>
+        <td>5</td>
+        <td>+5</td>
+        <td class="pts">6</td>
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="Austria"><a href="../teams/austria.html">Austria</a><span class="dag">†</span></th>
-        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, not yet played, not yet played</span></td>
+        <th class="team" scope="row" title="Austria"><a href="../teams/austria.html">Austria</a></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, lost, not yet played</span></td>
         <td>3</td>
-        <td>+2</td>
+        <td>0</td>
         <td class="pts">3</td>
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Jordan"><a href="../teams/jordan.html">Jordan</a><span class="dag">‡</span></th>
+        <th class="team" scope="row" title="Jordan"><a href="../teams/jordan.html">Jordan</a><span class="dag">†</span></th>
         <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">lost, not yet played, not yet played</span></td>
         <td>1</td>
         <td>-2</td>
@@ -641,7 +628,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Algeria"><a href="../teams/algeria.html">Algeria</a><span class="dag">‡</span></th>
+        <th class="team" scope="row" title="Algeria"><a href="../teams/algeria.html">Algeria</a><span class="dag">†</span></th>
         <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">lost, not yet played, not yet played</span></td>
         <td>0</td>
         <td>-3</td>
@@ -650,8 +637,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     </tbody>
   </table>
   <ul class="notes">
-    <li><span class="dag">†</span> overall goal difference/goals separate Argentina / Austria (level on points and head-to-head).</li>
-    <li><span class="dag">‡</span> overall goal difference/goals separate Algeria / Jordan (level on points and head-to-head).</li>
+    <li><span class="dag">†</span> overall goal difference/goals separate Algeria / Jordan (level on points and head-to-head).</li>
   </ul>
 </article>
   </div>
@@ -662,7 +648,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Sweat Factor</span>
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
-<div class="placeholder-slot">Sweat Factor forecast pending — this match is not yet within the 16-day Open-Meteo forecast window. The section fills automatically once available; no data is invented.</div>
+<div class="conditions">
+  <span class="cond-stamp">Forecast · as of 2026-06-22 09:03 ET</span>
+  <p class="cond-stats">~62°F · humid (77% RH) · WBGT 66.6°F</p>
+  <div class="cond-track" aria-label="Match heat index: Mild (9/100)"><div class="cond-fill" style="width:9%"></div></div>
+  <p class="cond-sev cond-sev-mild">Mild</p>
+  <p class="cond-blurb">Comfortable conditions — heat is a non-factor for both sides.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Jordan</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-8.4°F vs home</span></div><div class="cond-team"><span class="cond-tname">Algeria</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-13.4°F vs home</span></div></div>
+</div>
 </section>
 
 <section aria-labelledby="card-h" class="read-grid">
@@ -682,7 +675,20 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </div>
 </section>
 
-
+<section aria-labelledby="wire-h">
+  <div class="sec-head">
+    <span class="kicker">The Wire</span>
+    <h2 id="wire-h">What's being reported</h2>
+  </div>
+  <div class="wire">
+    <p class="wire-tag">Auto-gathered 2026-06-22 · every claim carries its source · relayed as reporting, not verified by the hub — click through before it bears weight.</p>
+<ul><li><strong>Abdallah Nasib (JOR) — injury concern:</strong> Abdallah Nasib will be assessed after going off with a suspected injury against Austria, meaning Sellami could be forced into a change in his three-man backline. (source: <a href="https://www.sportsmole.co.uk/football/jordan/world-cup-2026/preview/jordan-vs-algeria-prediction-team-news-lineups_599697.html" rel="nofollow">https://www.sportsmole.co.uk/football/jordan/world-cup-2026/preview/jordan-vs-algeria-prediction-team-news-lineups_599697.html</a>)</li></ul>
+<ul><li><strong>Ali Olwan (JOR) — confirmed starter:</strong> Ali Olwan made history by scoring Jordan's first-ever World Cup goal against Austria, and the forward is certain to retain his place in the starting XI for Monday's showdown with Algeria. (source: <a href="https://www.sportsmole.co.uk/football/jordan/world-cup-2026/predicted-lineups/history-maker-olwan-to-start-predicted-jordan-xi-vs-algeria_599709.html" rel="nofollow">https://www.sportsmole.co.uk/football/jordan/world-cup-2026/predicted-lineups/history-maker-olwan-to-start-predicted-jordan-xi-vs-algeria_599709.html</a>)</li></ul>
+<ul><li><strong>Algeria — Mahrez and Zerrouki set to come in:</strong> Riyad Mahrez and Ramiz Zerrouki are set to come into the XI at the expense of Nabil Bentaleb and Anis Hadj Moussa, whose performances against Argentina were judged as below standard. (source: <a href="https://www.sportsmole.co.uk/football/algeria/world-cup-2026/news/algeria-needs-vital-win-against-jordan-or_599750.html" rel="nofollow">https://www.sportsmole.co.uk/football/algeria/world-cup-2026/news/algeria-needs-vital-win-against-jordan-or_599750.html</a>)</li></ul>
+<ul><li><strong>Algeria no injuries or suspensions:</strong> No Algeria players appear on the World Cup injury table after the 3-0 loss to Argentina. (source: <a href="https://www.rotowire.com/soccer/article/jordan-vs-algeria-preview-predicted-lineups-team-news-tactical-analysis-2026-world-cup-group-j-119061" rel="nofollow">https://www.rotowire.com/soccer/article/jordan-vs-algeria-preview-predicted-lineups-team-news-tactical-analysis-2026-world-cup-group-j-119061</a>)</li></ul>
+<ul><li><strong>Jordan confirmed no other suspensions:</strong> Jordan are managed by Jamal Sellami. No injuries or suspensions have been confirmed ahead of the match beyond the Nasib assessment. (source: <a href="https://www.goal.com/en/news/jordan-algeria-world-cup-preview/bltddae6909cf8922c4" rel="nofollow">https://www.goal.com/en/news/jordan-algeria-world-cup-preview/bltddae6909cf8922c4</a>)</li></ul>
+  </div>
+</section>
 
 <section aria-labelledby="odds-h">
   <div class="sec-head">
@@ -695,17 +701,21 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
+      <tr><td class="lbl">1X2</td><td class="lbl">Jordan</td><td title="6.50 decimal">+550</td><td>15%</td><td>13%</td><td class="edge-neg">-1.5%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="4.40 decimal">+340</td><td>22%</td><td>18%</td><td class="edge-neg">-3.7%</td></tr>
+      <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">Algeria</td><td title="1.51 decimal">-196</td><td>63%</td><td>69%</td><td class="edge-pos">+5.2%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.93 decimal">-108</td><td>49%</td><td>62%</td><td class="edge-pos">+12.3%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.89 decimal">-112</td><td>51%</td><td>38%</td><td class="edge-neg">-12.3%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Jordan +1</td><td title="1.85 decimal">-118</td><td>52%</td><td>42%</td><td class="edge-neg">-10.0%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Algeria -1</td><td title="1.97 decimal">-103</td><td>48%</td><td>58%</td><td class="edge-pos">+10.0%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Jordan +1</td><td title="2.00 decimal">+100</td><td>48%</td><td>41%</td><td class="edge-neg">-7.3%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Algeria -1</td><td title="1.84 decimal">-119</td><td>52%</td><td>59%</td><td class="edge-pos">+7.3%</td></tr>
     </tbody>
   </table>
 </div>
-<p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
+<div class="bet-callout"><span class="tag">Best bets — top 2, ≥4% edge</span><p>1. <strong>Algeria -1</strong> (Asian handicap) @ -119, edge <strong>+7.3%</strong> — best price -118 (betonlineag). Flat 1u, paper record.</p><p>2. <strong>Algeria</strong> (1X2) @ -196, edge <strong>+5.2%</strong> — best price -196 (draftkings). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p><p class="odds-note warn">⚠ the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with extra caution until the draw calibration is re-checked after MD3.</p></div>
+<p class="odds-note">Logged pick: Algeria @ -189 (draftkings), edge 5.8pp · open.</p>
+<p class="odds-note">Logged pick: Algeria -1 @ -118 (betonlineag), edge 7.3pp · open.</p>
 <p class="verify-flag">totals over 2.5: model-priced edge +12.3% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads away -1: model-priced edge +10.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 20, 7:39 AM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<p class="odds-note">market snapshot Jun 22, 9:21 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> under 2.5; Al-Taamari shots-on-target type props later.</p></blockquote></div>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
@@ -729,7 +739,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.9141,lb=2.2754,N=8,SHOW=6,i,j;
+  var la=0.8971,lb=2.2924,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

@@ -101,22 +101,41 @@ def _slot_label(kind: str, g: str) -> str:
     return {"W": f"Winner {g}", "RU": f"Runner-up {g}"}[kind]
 
 
-def project(standings: "st.Standings", annex: dict | None = None) -> dict:
+def project(standings: "st.Standings", annex: dict | None = None,
+            resolve_provisional: bool = False, clinched: dict | None = None) -> dict:
     """Project the R32->Final bracket from current standings (as if final). Returns a
     pure dict (see to_dict for the shape). Gated: unstarted groups -> abstract slots;
     third-hosting matches resolve only when all 12 groups have a standing and the
-    third-place cutline is not flagged provisional."""
+    third-place cutline is not flagged provisional. ``resolve_provisional=True`` (the
+    'projected finish' view) breaks a provisional cutline deterministically — using the
+    standings' own order (alphabetical on a modelled tie) — so the full bracket resolves
+    for the scenario; the as-it-stands view leaves it False and stays honestly gated.
+
+    ``clinched`` is an optional {group_letter: {team: clinched_rank}} map (from
+    scenarios.clinched_ranks, computed with the full 2026 tiebreakers). When supplied it
+    drives the per-side ``home_confirmed``/``away_confirmed`` flags: a slot is CONFIRMED
+    when its occupant has mathematically secured that exact seed and so cannot be
+    reshuffled by any remaining result. It is only ever read for the honest as-it-stands
+    view; the hypothetical 'projected finish' view passes None, so nothing there is ever
+    marked confirmed (a projection clinches nothing)."""
     annex = annex if annex is not None else load_annex_c()
     groups = standings.groups
     warnings: list[str] = list(standings.warnings)
+    groups_complete = (len(groups) == 12 and all(
+        r.played >= st.GAMES_PER_TEAM for gt in groups.values() for r in gt.rows))
 
     def team_or_label(kind: str, g: str):
-        """(team_name | None, label, provisional?) for a Winner/Runner-up slot."""
+        """(team | None, label, provisional?, confirmed?) for a Winner/Runner-up slot.
+        confirmed = the occupant has clinched this exact seed (rank 1 for a winner, 2 for
+        a runner-up) per the full tiebreakers — only ever True when a clinch map is given."""
         gt = groups.get(g)
         idx = 0 if kind == "W" else 1
         if gt is None or not _group_started(gt) or len(gt.rows) <= idx:
-            return None, _slot_label(kind, g), True
-        return gt.rows[idx].team, _slot_label(kind, g), gt.rows[idx].played < st.GAMES_PER_TEAM
+            return None, _slot_label(kind, g), True, False
+        team = gt.rows[idx].team
+        prov = gt.rows[idx].played < st.GAMES_PER_TEAM
+        confirmed = bool(clinched and clinched.get(g, {}).get(team) == idx + 1)
+        return team, _slot_label(kind, g), prov, confirmed
 
     # --- can the 8 third-hosting matches be resolved?
     all_started = len(groups) == 12 and all(_group_started(gt) for gt in groups.values())
@@ -127,9 +146,13 @@ def project(standings: "st.Standings", annex: dict | None = None) -> dict:
     if all_started and len(standings.third_place) >= st.QUALIFYING_THIRDS:
         qualifying = standings.third_place[:st.QUALIFYING_THIRDS]
         combo = tuple(sorted(r.group for r in qualifying))
-        if combo in annex and not cutline_provisional:
+        if combo in annex and (resolve_provisional or not cutline_provisional):
             third_assign = annex[combo]
             thirds_resolved = True
+            if cutline_provisional and resolve_provisional:
+                warnings.append("Third-place cutline has ties broken deterministically (FIFA World "
+                                "Ranking isn't modelled, so the standings' order decides) — the "
+                                "qualifying thirds and their slots are provisional and may change.")
         elif cutline_provisional:
             warnings.append("Third-place cutline is provisional (teams level on all "
                             "modelled criteria) — the eight winner-vs-third matches are not resolved.")
@@ -141,9 +164,15 @@ def project(standings: "st.Standings", annex: dict | None = None) -> dict:
             gt = groups.get(g)
             row = gt.rows[2] if gt and len(gt.rows) > 2 else None
             team = row.team if row else None
-            prov = (row.played < st.GAMES_PER_TEAM) if row else True
-            return team, f"3rd {g}", prov
-        return None, "Best 3rd of " + "/".join(pool), True
+            # a third-place slot stays provisional until the WHOLE group stage is done:
+            # even a team that's finished its games can be reshuffled out of (or into) the
+            # qualifying-8 set by other groups' results, which re-slots Annex C entirely.
+            prov = (not groups_complete) if team else True
+            confirmed = bool(team and clinched and groups_complete
+                             and not cutline_provisional
+                             and clinched.get(g, {}).get(team) == 3)
+            return team, f"3rd {g}", prov, confirmed
+        return None, "Best 3rd of " + "/".join(pool), True, False
 
     r32 = {}
     for m, (a, b) in R32_TEMPLATE.items():
@@ -152,7 +181,12 @@ def project(standings: "st.Standings", annex: dict | None = None) -> dict:
         prov = bool(sa[2] or sb[2] or sa[0] is None or sb[0] is None)
         half = "top" if m in _TOP_HALF_R32 else "bottom"
         r32[m] = {"match": m, "home": sa[0], "home_label": sa[1],
-                  "away": sb[0], "away_label": sb[1], "provisional": prov, "half": half}
+                  "away": sb[0], "away_label": sb[1], "provisional": prov, "half": half,
+                  # per-side: a CONCRETE team whose group position isn't sealed yet (can change)
+                  "home_provisional": bool(sa[0] is not None and sa[2]),
+                  "away_provisional": bool(sb[0] is not None and sb[2]),
+                  # per-side: this exact seed is mathematically secured (clinch map supplied)
+                  "home_confirmed": sa[3], "away_confirmed": sb[3]}
 
     return {
         "schema": 1,
@@ -168,6 +202,20 @@ def project(standings: "st.Standings", annex: dict | None = None) -> dict:
 
 # the eight R32 matches feeding semi-final 101 (top) vs 102 (bottom)
 _TOP_HALF_R32 = frozenset({73, 74, 75, 77, 81, 82, 83, 84})
+
+
+def project_final_standings(matches: "list[st.Match]", score_fn) -> "st.Standings":
+    """Standings as if every remaining group game were played to the score ``score_fn``
+    predicts — so ``project`` can resolve the WHOLE bracket (all 12 groups final, thirds
+    slotted). ``score_fn(match) -> (score_a, score_b)`` is injected, so bracket.py stays
+    model-agnostic (build_site passes a predict-based one; tests a deterministic one).
+    A pure projection: it never touches fixtures.csv or the live as-it-stands standings."""
+    import dataclasses
+    projected = [m if m.is_played
+                 else dataclasses.replace(m, status="played",
+                                          score_a=(sc := score_fn(m))[0], score_b=sc[1])
+                 for m in matches]
+    return st.compute_standings(projected)
 
 
 def feed(projection: dict, resolver, results: "dict | None" = None) -> dict:

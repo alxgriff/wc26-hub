@@ -141,11 +141,17 @@ def main(argv: list | None = None) -> int:
           f"({'stronger host -> LARGER edge' if bs[2] > 0 else 'stronger host -> SMALLER edge' if bs[2] < 0 else 'flat'})")
     print(f"out-of-sample home-GD RMSE: flat {rmse_flat:.4f}  vs  scaled {rmse_scaled:.4f}  "
           f"(delta {rmse_scaled - rmse_flat:+.4f})")
-    helps = rmse_scaled < rmse_flat - 1e-4
-    print(f"\nverdict: per-match host-strength scaling {'IMPROVES' if helps else 'does NOT improve'} "
-          "out-of-sample home-GD; "
+    # Adopt only on a MEANINGFUL OOS gain, not any improvement. The prior `- 1e-4` bar fired
+    # on a ~0.055% RMSE artifact (2026-06-20 audit); require the scaled RMSE to beat flat by at
+    # least MIN_REL_GAIN of the flat RMSE so a sub-noise wiggle can't trigger an "adopt".
+    MIN_REL_GAIN = 0.005   # 0.5% of the flat home-GD RMSE
+    gain = rmse_flat - rmse_scaled
+    helps = gain > MIN_REL_GAIN * rmse_flat
+    print(f"\nverdict: per-match host-strength scaling "
+          f"{'IMPROVES' if helps else 'does NOT improve'} out-of-sample home-GD by a meaningful "
+          f"margin (gain {gain:+.4f} = {gain / rmse_flat:+.2%}, bar {MIN_REL_GAIN:.1%}); "
           + ("adopt a strength-scaled HFA." if helps
-             else "keep a FLAT host HFA (scaling unsupported per-match)."))
+             else "keep a FLAT host HFA (scaling unsupported / within noise per-match)."))
     return 0
 
 

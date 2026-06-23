@@ -279,5 +279,20 @@ class SweatFahrenheitTests(unittest.TestCase):
         self.assertNotIn("°F", html)
 
 
+class HumanizeOriginTests(unittest.TestCase):
+    """The bracket-slot origin tooltip prose — how a team reached its slot."""
+
+    def test_known_shapes(self):
+        self.assertEqual(bs._humanize_origin("Winner E"), "Group E winner")
+        self.assertEqual(bs._humanize_origin("Runner-up B"), "Group B runner-up")
+        self.assertEqual(bs._humanize_origin("3rd C"), "3rd place, Group C")
+        self.assertEqual(bs._humanize_origin("Best 3rd of A/B/C/D/F"),
+                         "one of the best third-placed teams (Group A/B/C/D/F)")
+
+    def test_empty_and_unknown_pass_through(self):
+        self.assertEqual(bs._humanize_origin(""), "")
+        self.assertEqual(bs._humanize_origin("Mystery"), "Mystery")
+
+
 if __name__ == "__main__":
     unittest.main()

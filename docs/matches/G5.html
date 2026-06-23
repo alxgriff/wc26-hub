@@ -302,14 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -344,6 +336,8 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
 .no-bet{font-family:var(--mono);font-size:.78rem;margin:10px 0;max-width:680px}
 .no-bet b{letter-spacing:.06em}
 .odds-note{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.7;max-width:680px}
+.odds-note.warn{color:var(--amber)}
+.caut{cursor:help;color:var(--amber);text-decoration:none;font-weight:700}
 .ledger-line{font-family:var(--mono);font-size:.74rem;font-weight:700;margin-top:14px}
 
 /* ---------- morning-line blurb ---------- */
@@ -465,6 +459,13 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bslot a{text-decoration:none}
 .bslot a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
 .bslot.tbd{font-weight:500;font-style:italic;color:var(--ink-soft)}
+/* provisional: a concrete team whose group position isn't sealed — dashed underline so it
+   reads "tentative", and still works under the green winner / muted loser colour states */
+.bslot.prov .bn{border-bottom:1.5px dashed var(--ink-soft)}
+/* confirmed: this exact seed is mathematically secured — solid green underline + a ✓ mark,
+   the visual opposite of the dashed provisional state (the two classes never co-occur) */
+.bslot.conf .bn{border-bottom:1.5px solid var(--green)}
+.bmark{flex:0 0 auto;font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);line-height:1}
 /* projected advancer (bracket.feed): the winning slot in green; the other reads muted */
 .bslot.win .bn{color:var(--green)}
 .btie:has(.win) .bslot:not(.win) .bn{color:var(--ink-soft);font-weight:500}
@@ -487,6 +488,17 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bracket-third .bslot{min-height:1.15em;border-bottom:1px dotted var(--hairline)}
 .bnotes{list-style:none;margin:14px 0 0;font-family:var(--mono);font-size:.72rem;color:var(--amber);line-height:1.6}
 .bnotes li{padding-left:1.1em;text-indent:-1.1em}
+/* CSS-only bracket view toggle (no JS): radios precede the views so `:checked ~ .view` works */
+.bview-radio{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.bview-tabs{display:inline-flex;margin:0 0 14px;border:1px solid var(--ink);background:var(--paper-2)}
+.bview-tabs label{padding:7px 16px;cursor:pointer;font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.bview-tabs label:first-child{border-right:1px solid var(--hairline)}
+#bv-now:checked ~ .bview-tabs label[for="bv-now"],
+#bv-proj:checked ~ .bview-tabs label[for="bv-proj"]{background:var(--ink);color:var(--paper)}
+.bview-radio:focus-visible ~ .bview-tabs{outline:2px solid var(--verm);outline-offset:2px}
+.bview{display:none}
+#bv-now:checked ~ .view-now,#bv-proj:checked ~ .view-proj{display:block}
+.bview-sub{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.6;margin:0 0 10px;max-width:680px}
 .bnotes li::before{content:"⚠ "}
 /* projected champion banner (only once the whole bracket resolves) */
 .bchamp{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:2px solid var(--green);background:var(--green-soft);padding:12px 18px;margin:18px 0 0}
@@ -568,35 +580,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Egypt win 29 percent, draw 29 percent, Iran win 42 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:29">29%</span><span class="pd" style="flex:29">29%</span><span class="pb" style="flex:42">42%</span></div>
-  <div class="scale" aria-hidden="true"><span>Egypt 29%</span><span>draw 29%</span><span>Iran 42%</span></div>
-  <p class="factline">most likely score <b>0–1</b> · expected goals <b>2.16</b> · over 2.5 <b>37%</b> · both score <b>43%</b><br>single source: rating model (Elo+Futi)</p>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (conf-tuned)</p>
-    <p class="sr-only">Structural (conf-tuned) says Egypt win 31 percent, draw 29 percent, Iran win 40 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:31">31%</span><span class="pd" style="flex:29">29%</span><span class="pb" style="flex:40">40%</span></div>
-    <div class="scale" aria-hidden="true"><span>Egypt 31%</span><span>draw 29%</span><span>Iran 40%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (no Elo)</p>
-    <p class="sr-only">100% Futi (no Elo) says Egypt win 32 percent, draw 29 percent, Iran win 39 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:32">32%</span><span class="pd" style="flex:29">29%</span><span class="pb" style="flex:39">39%</span></div>
-    <div class="scale" aria-hidden="true"><span>Egypt 32%</span><span>draw 29%</span><span>Iran 39%</span></div>
-  </div>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
-    <p class="sr-only">Structural (post-MD1 fitted) says Egypt win 35 percent, draw 29 percent, Iran win 35 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:35">35%</span><span class="pd" style="flex:29">29%</span><span class="pb" style="flex:35">35%</span></div>
-    <div class="scale" aria-hidden="true"><span>Egypt 35%</span><span>draw 29%</span><span>Iran 35%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
-    <p class="sr-only">100% Futi (post-MD1 fitted) says Egypt win 37 percent, draw 29 percent, Iran win 33 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:37">37%</span><span class="pd" style="flex:29">29%</span><span class="pb" style="flex:33">33%</span></div>
-    <div class="scale" aria-hidden="true"><span>Egypt 37%</span><span>draw 29%</span><span>Iran 33%</span></div>
-  </div>
+  <p class="sr-only">Egypt win 32 percent, draw 29 percent, Iran win 39 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:32">32%</span><span class="pd" style="flex:29">29%</span><span class="pb" style="flex:39">39%</span></div>
+  <div class="scale" aria-hidden="true"><span>Egypt 32%</span><span>draw 29%</span><span>Iran 39%</span></div>
+  <p class="factline">most likely score <b>1–1</b> · expected goals <b>2.16</b> · over 2.5 <b>37%</b> · both score <b>44%</b><br>single source: rating model (Elo+Futi)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> dead-even, deeply under-flavored.</p></blockquote></div>
 </section>
@@ -606,53 +593,63 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Stakes</span>
     <h2 id="stakes-h">The table as it stands</h2>
   </div>
-  <p class="standfirst">After 2 matches in Group G: Egypt 4th on 1 pt (0-1-0, 0 GD), Iran 1st on 1 pt (0-1-0, 0 GD). Iran and New Zealand and Belgium and Egypt share the lead on 1 pt; Iran hold a top-two spot; Egypt level on points of the cutline.</p>
-
+  <p class="standfirst">After 4 matches in Group G: Egypt 1st on 4 pts (1-1-0, +2 GD), Iran 2nd on 2 pts (0-2-0, 0 GD). Egypt lead the group on 4 pts; both hold top-two places as it stands.</p>
+<div class="scenario">
+  <p class="scenario-intro">Final matchday — both Group G games kick off simultaneously: 9 possible outcomes. Anything that comes down to goal difference is flagged margin-dependent, never guessed.</p>
+  <table>
+    <caption class="sr-only">Finish distribution across all outcome combinations</caption>
+    <thead><tr><th class="lbl" scope="col">Team</th><th scope="col">Top 2</th><th scope="col">3rd</th><th scope="col">Out</th><th scope="col">Margin</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl">Egypt</td><td>7</td><td>1</td><td>0</td><td>1</td></tr>
+      <tr><td class="lbl">Iran</td><td>3</td><td>3</td><td>0</td><td>3</td></tr>
+    </tbody>
+  </table>
+  <p class="scenario-team">Egypt</p>  <ul class="scenario-stakes"><li>Win: through (top 2)</li><li>Draw: through (top 2)</li><li>Loss: through (top 2) if New Zealand and Belgium draw; 3rd — into the best-thirds race if Belgium beat New Zealand; margin-dependent (goal difference/goals, then head-to-head, decide) if New Zealand beat Belgium</li></ul>
+  <p class="scenario-team">Iran</p>  <ul class="scenario-stakes"><li>Win: through (top 2)</li><li>Draw: 3rd — into the best-thirds race if New Zealand beat Belgium or Belgium beat New Zealand; margin-dependent (goal difference/goals, then head-to-head, decide) if New Zealand and Belgium draw</li><li>Loss: 3rd — into the best-thirds race if Belgium beat New Zealand; margin-dependent (goal difference/goals, then head-to-head, decide) if New Zealand beat Belgium or New Zealand and Belgium draw</li></ul>
+</div>
   <div class="mini-table">
 <article class="card" id="group-g" style="--i:0" aria-labelledby="gh-g">
-  <h3 id="gh-g"><span class="stamp" aria-hidden="true">G</span>Group G<span class="played-tag">2/6 played</span></h3>
+  <h3 id="gh-g"><span class="stamp" aria-hidden="true">G</span>Group G<span class="played-tag">4/6 played</span></h3>
   <table>
-    <caption class="sr-only">Group G standings after 2 of 6 matches</caption>
+    <caption class="sr-only">Group G standings after 4 of 6 matches</caption>
     <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Iran"><a href="../teams/iran.html">Iran</a><span class="dag">†‡</span></th>
-        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, not yet played, not yet played</span></td>
-        <td>2</td>
-        <td>0</td>
-        <td class="pts">1</td>
+        <th class="team" scope="row" title="Egypt"><a href="../teams/egypt.html">Egypt</a></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, won, not yet played</span></td>
+        <td>4</td>
+        <td>+2</td>
+        <td class="pts">4</td>
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="New Zealand"><a href="../teams/new-zealand.html">New Zealand</a><span class="dag">†‡</span></th>
-        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, not yet played, not yet played</span></td>
+        <th class="team" scope="row" title="Iran"><a href="../teams/iran.html">Iran</a><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, drew, not yet played</span></td>
         <td>2</td>
         <td>0</td>
-        <td class="pts">1</td>
+        <td class="pts">2</td>
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Belgium"><a href="../teams/belgium.html">Belgium</a><span class="dag">†§</span></th>
-        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, not yet played, not yet played</span></td>
+        <th class="team" scope="row" title="Belgium"><a href="../teams/belgium.html">Belgium</a><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, drew, not yet played</span></td>
         <td>1</td>
         <td>0</td>
-        <td class="pts">1</td>
+        <td class="pts">2</td>
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Egypt"><a href="../teams/egypt.html">Egypt</a><span class="dag">†§</span></th>
-        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, not yet played, not yet played</span></td>
-        <td>1</td>
-        <td>0</td>
+        <th class="team" scope="row" title="New Zealand"><a href="../teams/new-zealand.html">New Zealand</a></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, lost, not yet played</span></td>
+        <td>3</td>
+        <td>-2</td>
         <td class="pts">1</td>
       </tr>
     </tbody>
   </table>
   <ul class="notes">
-    <li><span class="dag">†</span> head-to-head (its points, then goal difference, then goals) separates Belgium / Egypt / Iran / New Zealand (level on points).</li>
-    <li class="warn"><span class="dag">‡</span> Iran / New Zealand level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.</li>
-    <li class="warn"><span class="dag">§</span> Belgium / Egypt level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.</li>
+    <li><span class="dag">†</span> overall goal difference/goals separate Belgium / Iran (level on points and head-to-head).</li>
   </ul>
 </article>
   </div>
@@ -694,20 +691,18 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 1.5</td><td title="1.49 decimal">-204</td><td>63%</td><td>64%</td><td class="">+0.6%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 1.5</td><td title="2.55 decimal">+155</td><td>37%</td><td>36%</td><td class="edge-neg">-0.6%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td title="1.85 decimal">-117</td><td>52%</td><td>50%</td><td class="edge-neg">-1.2%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td title="1.97 decimal">-103</td><td>48%</td><td>50%</td><td class="">+1.2%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.50 decimal">+150</td><td>38%</td><td>37%</td><td class="edge-neg">-0.7%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.50 decimal">-200</td><td>62%</td><td>63%</td><td class="">+0.7%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Egypt -0.25</td><td title="1.78 decimal">-128</td><td>54%</td><td>34%</td><td class="edge-neg">-20.6%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Iran +0.25</td><td title="2.12 decimal">+112</td><td>46%</td><td>66%</td><td class="edge-pos">+20.6%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 1.5</td><td title="1.51 decimal">-196</td><td>63%</td><td>64%</td><td class="">+1.1%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 1.5</td><td title="2.52 decimal">+152</td><td>37%</td><td>36%</td><td class="edge-neg">-1.1%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td title="1.93 decimal">-108</td><td>49%</td><td>50%</td><td class="">+1.4%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td title="1.85 decimal">-118</td><td>51%</td><td>50%</td><td class="edge-neg">-1.4%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Egypt -0.25</td><td title="2.01 decimal">+101</td><td>48%</td><td>37%</td><td class="edge-neg">-10.9%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Iran +0.25</td><td title="1.85 decimal">-118</td><td>52%</td><td>63%</td><td class="edge-pos">+10.9%</td></tr>
     </tbody>
   </table>
 </div>
 <p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
-<p class="verify-flag">spreads away 0.25: model-priced edge +20.6% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 20, 7:39 AM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 2 can push (P 27%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
+<p class="verify-flag">spreads away 0.25: model-priced edge +10.9% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 22, 9:21 PM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 2 can push (P 27%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -730,7 +725,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.9512,lb=1.2138,N=8,SHOW=6,i,j;
+  var la=1.0080,lb=1.1570,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

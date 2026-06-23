@@ -302,14 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -344,6 +336,8 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
 .no-bet{font-family:var(--mono);font-size:.78rem;margin:10px 0;max-width:680px}
 .no-bet b{letter-spacing:.06em}
 .odds-note{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.7;max-width:680px}
+.odds-note.warn{color:var(--amber)}
+.caut{cursor:help;color:var(--amber);text-decoration:none;font-weight:700}
 .ledger-line{font-family:var(--mono);font-size:.74rem;font-weight:700;margin-top:14px}
 
 /* ---------- morning-line blurb ---------- */
@@ -465,6 +459,13 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bslot a{text-decoration:none}
 .bslot a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
 .bslot.tbd{font-weight:500;font-style:italic;color:var(--ink-soft)}
+/* provisional: a concrete team whose group position isn't sealed — dashed underline so it
+   reads "tentative", and still works under the green winner / muted loser colour states */
+.bslot.prov .bn{border-bottom:1.5px dashed var(--ink-soft)}
+/* confirmed: this exact seed is mathematically secured — solid green underline + a ✓ mark,
+   the visual opposite of the dashed provisional state (the two classes never co-occur) */
+.bslot.conf .bn{border-bottom:1.5px solid var(--green)}
+.bmark{flex:0 0 auto;font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);line-height:1}
 /* projected advancer (bracket.feed): the winning slot in green; the other reads muted */
 .bslot.win .bn{color:var(--green)}
 .btie:has(.win) .bslot:not(.win) .bn{color:var(--ink-soft);font-weight:500}
@@ -487,6 +488,17 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bracket-third .bslot{min-height:1.15em;border-bottom:1px dotted var(--hairline)}
 .bnotes{list-style:none;margin:14px 0 0;font-family:var(--mono);font-size:.72rem;color:var(--amber);line-height:1.6}
 .bnotes li{padding-left:1.1em;text-indent:-1.1em}
+/* CSS-only bracket view toggle (no JS): radios precede the views so `:checked ~ .view` works */
+.bview-radio{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.bview-tabs{display:inline-flex;margin:0 0 14px;border:1px solid var(--ink);background:var(--paper-2)}
+.bview-tabs label{padding:7px 16px;cursor:pointer;font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.bview-tabs label:first-child{border-right:1px solid var(--hairline)}
+#bv-now:checked ~ .bview-tabs label[for="bv-now"],
+#bv-proj:checked ~ .bview-tabs label[for="bv-proj"]{background:var(--ink);color:var(--paper)}
+.bview-radio:focus-visible ~ .bview-tabs{outline:2px solid var(--verm);outline-offset:2px}
+.bview{display:none}
+#bv-now:checked ~ .view-now,#bv-proj:checked ~ .view-proj{display:block}
+.bview-sub{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.6;margin:0 0 10px;max-width:680px}
 .bnotes li::before{content:"⚠ "}
 /* projected champion banner (only once the whole bracket resolves) */
 .bchamp{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:2px solid var(--green);background:var(--green-soft);padding:12px 18px;margin:18px 0 0}
@@ -550,7 +562,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   </nav>
   <p class="eyebrow">WC26 Daily Hub · Matchup Preview · Pre-baked June 11, verified day-of</p>
   <h1><a href="../teams/new-zealand.html">New Zealand</a><span class="vs">v</span><a href="../teams/egypt.html">Egypt</a></h1>
-  
+  <p class="scoreline">1–3<span class="sr-only"> — final score: New Zealand 1, Egypt 3</span></p>
   <div class="metaline">
     <span class="stamp">G4</span>
     <span>Group G · Matchday 2</span>
@@ -571,32 +583,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <p class="sr-only">New Zealand win 13 percent, draw 26 percent, Egypt win 61 percent.</p>
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:13">13%</span><span class="pd" style="flex:26">26%</span><span class="pb" style="flex:61">61%</span></div>
   <div class="scale" aria-hidden="true"><span>New Zealand 13%</span><span>draw 26%</span><span>Egypt 61%</span></div>
-  <p class="factline">most likely score <b>0–1</b> · expected goals <b>2.02</b> · over 2.5 <b>33%</b> · both score <b>32%</b><br>single source: rating model (Elo+Futi)</p>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (conf-tuned)</p>
-    <p class="sr-only">Structural (conf-tuned) says New Zealand win 11 percent, draw 25 percent, Egypt win 64 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:11">11%</span><span class="pd" style="flex:25">25%</span><span class="pb" style="flex:64">64%</span></div>
-    <div class="scale" aria-hidden="true"><span>New Zealand 11%</span><span>draw 25%</span><span>Egypt 64%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (no Elo)</p>
-    <p class="sr-only">100% Futi (no Elo) says New Zealand win 10 percent, draw 24 percent, Egypt win 65 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:10">10%</span><span class="pd" style="flex:24">24%</span><span class="pb" style="flex:65">65%</span></div>
-    <div class="scale" aria-hidden="true"><span>New Zealand 10%</span><span>draw 24%</span><span>Egypt 65%</span></div>
-  </div>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
-    <p class="sr-only">Structural (post-MD1 fitted) says New Zealand win 8 percent, draw 23 percent, Egypt win 69 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:8">8%</span><span class="pd" style="flex:23">23%</span><span class="pb" style="flex:69">69%</span></div>
-    <div class="scale" aria-hidden="true"><span>New Zealand 8%</span><span>draw 23%</span><span>Egypt 69%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
-    <p class="sr-only">100% Futi (post-MD1 fitted) says New Zealand win 7 percent, draw 22 percent, Egypt win 71 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:7">7%</span><span class="pd" style="flex:22">22%</span><span class="pb" style="flex:71">71%</span></div>
-    <div class="scale" aria-hidden="true"><span>New Zealand 7%</span><span>draw 22%</span><span>Egypt 71%</span></div>
-  </div>
+  <p class="factline">predicted score <b>0-1</b><br>published consensus — logged Jun 21, 6:52 PM ET, pre-kickoff<br><b>Graded:</b> final 1–3 (Egypt win) · the logged call had it at <b>61%</b> · Brier <b>0.239</b> (0 best · 0.667 coin-flip · 2 worst)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Egypt's ceiling (Salah) vs NZ's floor (organization); slight Egypt edge.</p></blockquote></div>
 </section>
@@ -606,53 +593,51 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Stakes</span>
     <h2 id="stakes-h">The table as it stands</h2>
   </div>
-  <p class="standfirst">After 2 matches in Group G: New Zealand 2nd on 1 pt (0-1-0, 0 GD), Egypt 4th on 1 pt (0-1-0, 0 GD). Iran and New Zealand and Belgium and Egypt share the lead on 1 pt; New Zealand hold a top-two spot; Egypt level on points of the cutline.</p>
+  <p class="standfirst">After 4 matches in Group G: New Zealand 4th on 1 pt (0-1-1, -2 GD), Egypt 1st on 4 pts (1-1-0, +2 GD). Egypt lead the group on 4 pts; Egypt hold a top-two spot; New Zealand 1 pt back of the cutline.</p>
 
   <div class="mini-table">
 <article class="card" id="group-g" style="--i:0" aria-labelledby="gh-g">
-  <h3 id="gh-g"><span class="stamp" aria-hidden="true">G</span>Group G<span class="played-tag">2/6 played</span></h3>
+  <h3 id="gh-g"><span class="stamp" aria-hidden="true">G</span>Group G<span class="played-tag">4/6 played</span></h3>
   <table>
-    <caption class="sr-only">Group G standings after 2 of 6 matches</caption>
+    <caption class="sr-only">Group G standings after 4 of 6 matches</caption>
     <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Iran"><a href="../teams/iran.html">Iran</a><span class="dag">†‡</span></th>
-        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, not yet played, not yet played</span></td>
-        <td>2</td>
-        <td>0</td>
-        <td class="pts">1</td>
+        <th class="team" scope="row" title="Egypt"><a href="../teams/egypt.html">Egypt</a></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, won, not yet played</span></td>
+        <td>4</td>
+        <td>+2</td>
+        <td class="pts">4</td>
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="New Zealand"><a href="../teams/new-zealand.html">New Zealand</a><span class="dag">†‡</span></th>
-        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, not yet played, not yet played</span></td>
+        <th class="team" scope="row" title="Iran"><a href="../teams/iran.html">Iran</a><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, drew, not yet played</span></td>
         <td>2</td>
         <td>0</td>
-        <td class="pts">1</td>
+        <td class="pts">2</td>
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Belgium"><a href="../teams/belgium.html">Belgium</a><span class="dag">†§</span></th>
-        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, not yet played, not yet played</span></td>
+        <th class="team" scope="row" title="Belgium"><a href="../teams/belgium.html">Belgium</a><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, drew, not yet played</span></td>
         <td>1</td>
         <td>0</td>
-        <td class="pts">1</td>
+        <td class="pts">2</td>
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Egypt"><a href="../teams/egypt.html">Egypt</a><span class="dag">†§</span></th>
-        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, not yet played, not yet played</span></td>
-        <td>1</td>
-        <td>0</td>
+        <th class="team" scope="row" title="New Zealand"><a href="../teams/new-zealand.html">New Zealand</a></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">drew, lost, not yet played</span></td>
+        <td>3</td>
+        <td>-2</td>
         <td class="pts">1</td>
       </tr>
     </tbody>
   </table>
   <ul class="notes">
-    <li><span class="dag">†</span> head-to-head (its points, then goal difference, then goals) separates Belgium / Egypt / Iran / New Zealand (level on points).</li>
-    <li class="warn"><span class="dag">‡</span> Iran / New Zealand level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.</li>
-    <li class="warn"><span class="dag">§</span> Belgium / Egypt level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.</li>
+    <li><span class="dag">†</span> overall goal difference/goals separate Belgium / Iran (level on points and head-to-head).</li>
   </ul>
 </article>
   </div>
@@ -663,7 +648,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Sweat Factor</span>
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
-<div class="placeholder-slot">Sweat Factor forecast pending — this match is not yet within the 16-day Open-Meteo forecast window. The section fills automatically once available; no data is invented.</div>
+<div class="conditions">
+  <span class="cond-stamp">Actual · as of 2026-06-22 09:03 ET</span>
+  <p class="cond-stats">~72°F · moderate humidity (41% RH) · WBGT 69.2°F</p>
+  <div class="cond-track" aria-label="Match heat index: Moderate (19/100)"><div class="cond-fill" style="width:19%"></div></div>
+  <p class="cond-sev cond-sev-moderate">Moderate</p>
+  <p class="cond-blurb">Warm out; New Zealand are +11°F outside their comfort zone while Egypt are the better-acclimated side.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">New Zealand</span><div class="cond-dis-track" aria-label="Heat disadvantage 63/100"><div class="cond-dis-fill cond-dis-hot" style="width:63%"></div></div><span class="cond-delta">+11.3°F vs home</span></div><div class="cond-team"><span class="cond-tname">Egypt</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-13.4°F vs home</span></div></div>
+</div>
 </section>
 
 <section aria-labelledby="card-h" class="read-grid">
@@ -683,7 +675,18 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </div>
 </section>
 
-
+<section aria-labelledby="wire-h">
+  <div class="sec-head">
+    <span class="kicker">The Wire</span>
+    <h2 id="wire-h">What's being reported</h2>
+  </div>
+  <div class="wire">
+    <p class="wire-tag">Auto-gathered 2026-06-21 · every claim carries its source · relayed as reporting, not verified by the hub — click through before it bears weight.</p>
+<ul><li><strong>Matthew Garbett (New Zealand) — OUT (tournament):</strong> Garbett was replaced in the squad by Logan Rogerson on 15 June after being ruled out of the entire tournament with a hamstring injury. Darren Bazeley has no fresh fitness concerns beyond that. (source: <a href="https://www.sportsmole.co.uk/football/new-zealand/world-cup-2026/preview/new-zealand-vs-egypt-prediction-team-news-lineups_599606.html" rel="nofollow">https://www.sportsmole.co.uk/football/new-zealand/world-cup-2026/preview/new-zealand-vs-egypt-prediction-team-news-lineups_599606.html</a>)</li></ul>
+<ul><li><strong>New Zealand — no further injury concerns:</strong> No further injuries or suspensions have been confirmed for the All Whites ahead of this fixture, and no probable starting lineup has been released. (source: <a href="https://www.goal.com/en-us/news/new-zealand-egypt-world-cup-preview/blt1ef9c540246b6832" rel="nofollow">https://www.goal.com/en-us/news/new-zealand-egypt-world-cup-preview/blt1ef9c540246b6832</a>)</li></ul>
+<ul><li><strong>Egypt — no injury or suspension concerns:</strong> No players are currently reported injured or suspended for Egypt heading into this fixture. (source: <a href="https://www.sportsgambler.com/injuries/football/fifa-world-cup/" rel="nofollow">https://www.sportsgambler.com/injuries/football/fifa-world-cup/</a>)</li></ul>
+  </div>
+</section>
 
 <section aria-labelledby="odds-h">
   <div class="sec-head">
@@ -696,19 +699,19 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.25</td><td title="1.82 decimal">-122</td><td>53%</td><td>33%</td><td class="edge-neg">-19.6%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.25</td><td title="2.02 decimal">+102</td><td>47%</td><td>67%</td><td class="edge-pos">+19.6%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.08 decimal">+108</td><td>46%</td><td>33%</td><td class="edge-neg">-13.0%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.76 decimal">-131</td><td>54%</td><td>67%</td><td class="edge-pos">+13.0%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">New Zealand +0.5</td><td title="2.44 decimal">+144</td><td>40%</td><td>39%</td><td class="edge-neg">-0.8%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Egypt -0.5</td><td title="1.61 decimal">-164</td><td>60%</td><td>61%</td><td class="">+0.8%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">New Zealand</td><td title="6.00 decimal">+500</td><td>16%</td><td>13%</td><td class="edge-neg">-2.9%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="4.10 decimal">+310</td><td>23%</td><td>26%</td><td class="">+2.6%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Egypt</td><td title="1.59 decimal">-169</td><td>61%</td><td>61%</td><td class="">+0.3%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.05 decimal">+105</td><td>47%</td><td>33%</td><td class="edge-neg">-13.8%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.80 decimal">-125</td><td>53%</td><td>67%</td><td class="edge-pos">+13.8%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">New Zealand +1</td><td title="1.80 decimal">-125</td><td>53%</td><td>52%</td><td class="edge-neg">-1.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Egypt -1</td><td title="2.04 decimal">+104</td><td>47%</td><td>48%</td><td class="">+1.6%</td></tr>
     </tbody>
   </table>
 </div>
 <p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
-<p class="verify-flag">totals under 2.25: model-priced edge +19.6% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">totals under 2.5: model-priced edge +13.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 20, 7:39 AM ET · DraftKings where quoted, else best of 6 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<p class="verify-flag">totals under 2.5: model-priced edge +13.8% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 21, 6:52 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> under 2.5; Salah anytime.</p></blockquote></div>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
@@ -732,7 +735,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.5300,lb=1.4938,N=8,SHOW=6,i,j;
+  var la=0.4872,lb=1.5366,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

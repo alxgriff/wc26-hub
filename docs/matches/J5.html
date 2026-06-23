@@ -302,14 +302,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
 
 .mini-table{max-width:560px}
@@ -344,6 +336,8 @@ tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
 .no-bet{font-family:var(--mono);font-size:.78rem;margin:10px 0;max-width:680px}
 .no-bet b{letter-spacing:.06em}
 .odds-note{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.7;max-width:680px}
+.odds-note.warn{color:var(--amber)}
+.caut{cursor:help;color:var(--amber);text-decoration:none;font-weight:700}
 .ledger-line{font-family:var(--mono);font-size:.74rem;font-weight:700;margin-top:14px}
 
 /* ---------- morning-line blurb ---------- */
@@ -465,6 +459,13 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bslot a{text-decoration:none}
 .bslot a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
 .bslot.tbd{font-weight:500;font-style:italic;color:var(--ink-soft)}
+/* provisional: a concrete team whose group position isn't sealed — dashed underline so it
+   reads "tentative", and still works under the green winner / muted loser colour states */
+.bslot.prov .bn{border-bottom:1.5px dashed var(--ink-soft)}
+/* confirmed: this exact seed is mathematically secured — solid green underline + a ✓ mark,
+   the visual opposite of the dashed provisional state (the two classes never co-occur) */
+.bslot.conf .bn{border-bottom:1.5px solid var(--green)}
+.bmark{flex:0 0 auto;font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);line-height:1}
 /* projected advancer (bracket.feed): the winning slot in green; the other reads muted */
 .bslot.win .bn{color:var(--green)}
 .btie:has(.win) .bslot:not(.win) .bn{color:var(--ink-soft);font-weight:500}
@@ -487,6 +488,17 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bracket-third .bslot{min-height:1.15em;border-bottom:1px dotted var(--hairline)}
 .bnotes{list-style:none;margin:14px 0 0;font-family:var(--mono);font-size:.72rem;color:var(--amber);line-height:1.6}
 .bnotes li{padding-left:1.1em;text-indent:-1.1em}
+/* CSS-only bracket view toggle (no JS): radios precede the views so `:checked ~ .view` works */
+.bview-radio{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.bview-tabs{display:inline-flex;margin:0 0 14px;border:1px solid var(--ink);background:var(--paper-2)}
+.bview-tabs label{padding:7px 16px;cursor:pointer;font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.bview-tabs label:first-child{border-right:1px solid var(--hairline)}
+#bv-now:checked ~ .bview-tabs label[for="bv-now"],
+#bv-proj:checked ~ .bview-tabs label[for="bv-proj"]{background:var(--ink);color:var(--paper)}
+.bview-radio:focus-visible ~ .bview-tabs{outline:2px solid var(--verm);outline-offset:2px}
+.bview{display:none}
+#bv-now:checked ~ .view-now,#bv-proj:checked ~ .view-proj{display:block}
+.bview-sub{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.6;margin:0 0 10px;max-width:680px}
 .bnotes li::before{content:"⚠ "}
 /* projected champion banner (only once the whole bracket resolves) */
 .bchamp{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:2px solid var(--green);background:var(--green-soft);padding:12px 18px;margin:18px 0 0}
@@ -568,35 +580,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Jordan win 1 percent, draw 7 percent, Argentina win 92 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:1"></span><span class="pd" style="flex:7">7%</span><span class="pb" style="flex:92">92%</span></div>
-  <div class="scale" aria-hidden="true"><span>Jordan 1%</span><span>draw 7%</span><span>Argentina 92%</span></div>
-  <p class="factline">most likely score <b>0–3</b> · expected goals <b>3.37</b> · over 2.5 <b>65%</b> · both score <b>20%</b><br>single source: rating model (Elo+Futi)</p>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (conf-tuned)</p>
-    <p class="sr-only">Structural (conf-tuned) says Jordan win 2 percent, draw 8 percent, Argentina win 90 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:2"></span><span class="pd" style="flex:8">8%</span><span class="pb" style="flex:90">90%</span></div>
-    <div class="scale" aria-hidden="true"><span>Jordan 2%</span><span>draw 8%</span><span>Argentina 90%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (no Elo)</p>
-    <p class="sr-only">100% Futi (no Elo) says Jordan win 1 percent, draw 6 percent, Argentina win 93 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:1"></span><span class="pd" style="flex:6">6%</span><span class="pb" style="flex:93">93%</span></div>
-    <div class="scale" aria-hidden="true"><span>Jordan 1%</span><span>draw 6%</span><span>Argentina 93%</span></div>
-  </div>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
-    <p class="sr-only">Structural (post-MD1 fitted) says Jordan win 2 percent, draw 8 percent, Argentina win 90 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:2"></span><span class="pd" style="flex:8">8%</span><span class="pb" style="flex:90">90%</span></div>
-    <div class="scale" aria-hidden="true"><span>Jordan 2%</span><span>draw 8%</span><span>Argentina 90%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
-    <p class="sr-only">100% Futi (post-MD1 fitted) says Jordan win 2 percent, draw 7 percent, Argentina win 91 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:2"></span><span class="pd" style="flex:7">7%</span><span class="pb" style="flex:91">91%</span></div>
-    <div class="scale" aria-hidden="true"><span>Jordan 2%</span><span>draw 7%</span><span>Argentina 91%</span></div>
-  </div>
+  <p class="sr-only">Jordan win 1 percent, draw 6 percent, Argentina win 93 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:1"></span><span class="pd" style="flex:6">6%</span><span class="pb" style="flex:93">93%</span></div>
+  <div class="scale" aria-hidden="true"><span>Jordan 1%</span><span>draw 6%</span><span>Argentina 93%</span></div>
+  <p class="factline">most likely score <b>0–3</b> · expected goals <b>3.37</b> · over 2.5 <b>65%</b> · both score <b>19%</b><br>single source: rating model (Elo+Futi)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Argentina; rotation discount is the only market question.</p></blockquote></div>
 </section>
@@ -606,34 +593,34 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Stakes</span>
     <h2 id="stakes-h">The table as it stands</h2>
   </div>
-  <p class="standfirst">After 2 matches in Group J: Jordan 3rd on 0 pts (0-0-1, -2 GD), Argentina 1st on 3 pts (1-0-0, +3 GD). Argentina and Austria share the lead on 3 pts; Argentina hold a top-two spot; Jordan 3 pts back of the cutline — the best eight third-placed teams also advance.</p>
+  <p class="standfirst">After 3 matches in Group J: Jordan 3rd on 0 pts (0-0-1, -2 GD), Argentina 1st on 6 pts (2-0-0, +5 GD). Argentina lead the group on 6 pts; Argentina hold a top-two spot; Jordan 3 pts back of the cutline — the best eight third-placed teams also advance.</p>
 
   <div class="mini-table">
 <article class="card" id="group-j" style="--i:0" aria-labelledby="gh-j">
-  <h3 id="gh-j"><span class="stamp" aria-hidden="true">J</span>Group J<span class="played-tag">2/6 played</span></h3>
+  <h3 id="gh-j"><span class="stamp" aria-hidden="true">J</span>Group J<span class="played-tag">3/6 played</span></h3>
   <table>
-    <caption class="sr-only">Group J standings after 2 of 6 matches</caption>
+    <caption class="sr-only">Group J standings after 3 of 6 matches</caption>
     <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
     <tbody>
       <tr class="zone-top">
         <td class="pos">1</td>
-        <th class="team" scope="row" title="Argentina"><a href="../teams/argentina.html">Argentina</a><span class="dag">†</span></th>
-        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, not yet played, not yet played</span></td>
-        <td>3</td>
-        <td>+3</td>
-        <td class="pts">3</td>
+        <th class="team" scope="row" title="Argentina"><a href="../teams/argentina.html">Argentina</a></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, won, not yet played</span></td>
+        <td>5</td>
+        <td>+5</td>
+        <td class="pts">6</td>
       </tr>
       <tr class="zone-top">
         <td class="pos">2</td>
-        <th class="team" scope="row" title="Austria"><a href="../teams/austria.html">Austria</a><span class="dag">†</span></th>
-        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, not yet played, not yet played</span></td>
+        <th class="team" scope="row" title="Austria"><a href="../teams/austria.html">Austria</a></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">won, lost, not yet played</span></td>
         <td>3</td>
-        <td>+2</td>
+        <td>0</td>
         <td class="pts">3</td>
       </tr>
       <tr class="zone-third">
         <td class="pos">3</td>
-        <th class="team" scope="row" title="Jordan"><a href="../teams/jordan.html">Jordan</a><span class="dag">‡</span></th>
+        <th class="team" scope="row" title="Jordan"><a href="../teams/jordan.html">Jordan</a><span class="dag">†</span></th>
         <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">lost, not yet played, not yet played</span></td>
         <td>1</td>
         <td>-2</td>
@@ -641,7 +628,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       </tr>
       <tr class="zone-out">
         <td class="pos">4</td>
-        <th class="team" scope="row" title="Algeria"><a href="../teams/algeria.html">Algeria</a><span class="dag">‡</span></th>
+        <th class="team" scope="row" title="Algeria"><a href="../teams/algeria.html">Algeria</a><span class="dag">†</span></th>
         <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip" aria-hidden="true">·</span><span class="pip" aria-hidden="true">·</span><span class="sr-only">lost, not yet played, not yet played</span></td>
         <td>0</td>
         <td>-3</td>
@@ -650,8 +637,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     </tbody>
   </table>
   <ul class="notes">
-    <li><span class="dag">†</span> overall goal difference/goals separate Argentina / Austria (level on points and head-to-head).</li>
-    <li><span class="dag">‡</span> overall goal difference/goals separate Algeria / Jordan (level on points and head-to-head).</li>
+    <li><span class="dag">†</span> overall goal difference/goals separate Algeria / Jordan (level on points and head-to-head).</li>
   </ul>
 </article>
   </div>
@@ -693,18 +679,19 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.55 decimal">-180</td><td>60%</td><td>65%</td><td class="edge-pos">+5.6%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.31 decimal">+131</td><td>40%</td><td>35%</td><td class="edge-neg">-5.6%</td></tr>
-      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td title="2.00 decimal">-101</td><td>48%</td><td>56%</td><td class="edge-pos">+7.8%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td title="1.83 decimal">-120</td><td>52%</td><td>44%</td><td class="edge-neg">-7.8%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Jordan +2</td><td title="1.80 decimal">-125</td><td>53%</td><td>29%</td><td class="edge-neg">-24.0%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Argentina -2</td><td title="2.07 decimal">+107</td><td>47%</td><td>71%</td><td class="edge-pos">+24.0%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.56 decimal">-179</td><td>60%</td><td>65%</td><td class="edge-pos">+5.7%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.31 decimal">+132</td><td>40%</td><td>35%</td><td class="edge-neg">-5.7%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td title="2.04 decimal">+104</td><td>47%</td><td>56%</td><td class="edge-pos">+8.4%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td title="1.83 decimal">-120</td><td>53%</td><td>44%</td><td class="edge-neg">-8.4%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Jordan +2</td><td title="1.67 decimal">-149</td><td>58%</td><td>28%</td><td class="edge-neg">-29.7%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Argentina -2</td><td title="2.32 decimal">+132</td><td>42%</td><td>72%</td><td class="edge-pos">+29.7%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 3</strong> (Total goals) @ -101, edge <strong>+7.8%</strong> — best price +104 (betonlineag). Flat 1u, paper record.</p></div>
-<p class="verify-flag">spreads away -2: model-priced edge +24.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 20, 7:39 AM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2.5</strong> (Total goals) @ -179, edge <strong>+5.7%</strong> — best price -175 (betmgm). Flat 1u, paper record.</p></div>
+<p class="verify-flag">totals over 3: model-priced edge +8.4% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">spreads away -2: model-priced edge +29.7% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 22, 9:21 PM ET · DraftKings where quoted, else best of 3 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -727,7 +714,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.2375,lb=3.1310,N=8,SHOW=6,i,j;
+  var la=0.2156,lb=3.1530,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
