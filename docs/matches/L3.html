@@ -718,7 +718,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bets — top 3, ≥4% edge</span><p>1. <strong>England</strong> (1X2) @ -526, edge <strong>+8.0%</strong> — best price -526 (draftkings). Flat 1u, paper record.</p><p>2. <strong>Under 2.5</strong> (Total goals) @ +140, edge <strong>+7.0%</strong> — best price +140 (betmgm). Flat 1u, paper record.</p><p>3. <strong>England -2</strong> (Asian handicap) @ -110, edge <strong>+6.4%</strong> — best price -103 (mybookieag). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p><p class="odds-note warn">⚠ the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with extra caution until the draw calibration is re-checked after MD3.</p></div>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>England</strong> (1X2), model edge <strong>+8.0%</strong></p><p><strong>Under 2.5</strong> (Total goals), model edge <strong>+7.0%</strong></p><p><strong>England -2</strong> (Asian handicap), model edge <strong>+6.4%</strong></p><p class="odds-note">the model likes these, but the line is over 12h old (the book hasn't reposted), so they are <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
 <p class="odds-note">Logged pick: Under 3 @ -122 (bovada), edge 7.2pp · settled <b>won</b> for +0.82u · CLV -3.1pp.</p>
 <p class="odds-note">Logged pick: England @ -526 (draftkings), edge 8.0pp · settled <b>lost</b> for -1.00u · CLV +0.0pp.</p>
 <p class="odds-note">Logged pick: England -2 @ -103 (mybookieag), edge 7.8pp · settled <b>lost</b> for -1.00u · CLV +0.0pp.</p>
@@ -748,7 +748,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=2.5788,lb=0.2372,N=8,SHOW=6,i,j;
+  var la=2.5794,lb=0.2366,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
