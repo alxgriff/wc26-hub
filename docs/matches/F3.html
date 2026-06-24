@@ -262,14 +262,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
 .metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
 .scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
-.record-scoreboard{display:flex;align-items:center;gap:0;margin-top:16px;border:2px solid var(--ink)}
-.scoreboard-stat{display:flex;flex-direction:column;gap:2px;padding:10px 22px;min-width:110px}
-.scoreboard-label{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
-.scoreboard-value{font-family:var(--mono);font-size:1.45rem;font-weight:700;line-height:1.1}
-.scoreboard-value.units-up{color:#1a7a3f}
-.scoreboard-value.units-down{color:var(--verm)}
-.scoreboard-sub{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
-.scoreboard-divider{width:2px;background:var(--ink);align-self:stretch}
 
 .strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
 .strap b{color:var(--ink);font-weight:700}
@@ -310,17 +302,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
-.draw-flag{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin:10px 0 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.draw-flag-tag{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:1.5px solid var(--ink-soft);color:var(--ink);padding:2px 7px;white-space:nowrap}
 
 .mini-table{max-width:560px}
 .team-pair{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}
@@ -598,10 +580,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Netherlands win 72 percent, draw 16 percent, Sweden win 12 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:72">72%</span><span class="pd" style="flex:16">16%</span><span class="pb" style="flex:12">12%</span></div>
-  <div class="scale" aria-hidden="true"><span>Netherlands 72%</span><span>draw 16%</span><span>Sweden 12%</span></div>
-  <p class="factline">predicted score <b>2-0</b><br>published consensus — logged Jun 20, 11:09 AM ET, pre-kickoff<br><b>Graded:</b> final 5–1 (Netherlands win) · the logged call had it at <b>72%</b> · Brier <b>0.120</b> (0 best · 0.667 coin-flip · 2 worst)</p>
+  <p class="sr-only">Netherlands win 69 percent, draw 17 percent, Sweden win 14 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:69">69%</span><span class="pd" style="flex:17">17%</span><span class="pb" style="flex:14">14%</span></div>
+  <div class="scale" aria-hidden="true"><span>Netherlands 69%</span><span>draw 17%</span><span>Sweden 14%</span></div>
+  <p class="factline">predicted score <b>2-1</b><br>published consensus — logged Jun 20, 12:01 PM ET, pre-kickoff<br><b>Graded:</b> final 5–1 (Netherlands win) · the logged call had it at <b>69%</b> · Brier <b>0.145</b> (0 best · 0.667 coin-flip · 2 worst)</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Netherlands' midfield control vs Sweden's transition ceiling; slight Dutch edge, BTTS live.</p></blockquote></div>
 </section>
@@ -721,8 +703,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.29 decimal">+128</td><td>41%</td><td>33%</td><td class="edge-neg">-8.3%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td title="2.00 decimal">+100</td><td>48%</td><td>58%</td><td class="edge-pos">+10.0%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td title="1.85 decimal">-118</td><td>52%</td><td>42%</td><td class="edge-neg">-10.0%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Netherlands -0.5</td><td title="1.72 decimal">-139</td><td>56%</td><td>72%</td><td class="edge-pos">+15.5%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Sweden +0.5</td><td title="2.22 decimal">+122</td><td>44%</td><td>28%</td><td class="edge-neg">-15.5%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Netherlands -0.5</td><td title="1.72 decimal">-139</td><td>56%</td><td>72%</td><td class="edge-pos">+16.0%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Sweden +0.5</td><td title="2.22 decimal">+122</td><td>44%</td><td>28%</td><td class="edge-neg">-16.0%</td></tr>
     </tbody>
   </table>
 </div>
@@ -730,7 +712,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 <p class="odds-note">Logged pick: Netherlands @ -135 (draftkings), edge 13.8pp · settled <b>won</b> for +0.74u · CLV +1.3pp.</p>
 <p class="verify-flag">totals over 2.5: model-priced edge +8.3% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="verify-flag">totals over 3: model-priced edge +10.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads home -0.5: model-priced edge +15.5% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">spreads home -0.5: model-priced edge +16.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 20, 12:01 PM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> BTTS; Gyökeres anytime as the counter proxy.</p></blockquote></div>
 <details class="outcome-grid-wrap">
@@ -755,7 +737,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=2.5242,lb=0.9368,N=8,SHOW=6,i,j;
+  var la=2.5385,lb=0.9225,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
