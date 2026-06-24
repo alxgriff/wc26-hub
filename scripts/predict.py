@@ -81,7 +81,9 @@ ALIAS = {
 HOST_BY_COUNTRY = {"Mexico": "Mexico", "USA": "United States", "Canada": "Canada"}
 
 ELO_FILE = "Elo_Ratings_World_Cup_2026_VERIFIED.csv"   # NOT the corrupted original
-FUTI_FILE = "World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv"
+FUTI_FILE = "World_Cup_2026_Futi_6_24.csv"   # post-MD2 refresh (2026-06-24)
+# Update this pointer after each matchday; prior vintages kept for provenance:
+#   6/12 pre-tournament: World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv
 OPTA_FILE = "Opta_Predictions_World_Cup_2026.csv"
 MARKET_FILE = "Market_Outrights_VERIFIED.csv"          # real de-vigged outright market
 OPTA_MATCH_FILE = "Opta_Match_Predictions.csv"         # per-match W/D/L overlay
