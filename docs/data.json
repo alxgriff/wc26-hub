@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 46,
+ "played": 47,
  "total": 72,
  "groups": {
   "A": {
@@ -728,36 +728,35 @@
     },
     {
      "pos": 3,
-     "team": "Panama",
+     "team": "Croatia",
      "group": "L",
-     "p": 1,
-     "w": 0,
+     "p": 2,
+     "w": 1,
      "d": 0,
      "l": 1,
-     "gf": 0,
-     "ga": 1,
+     "gf": 3,
+     "ga": 4,
      "gd": -1,
-     "pts": 0,
+     "pts": 3,
      "fate": null
     },
     {
      "pos": 4,
-     "team": "Croatia",
+     "team": "Panama",
      "group": "L",
-     "p": 1,
+     "p": 2,
      "w": 0,
      "d": 0,
-     "l": 1,
-     "gf": 2,
-     "ga": 4,
+     "l": 2,
+     "gf": 0,
+     "ga": 2,
      "gd": -2,
      "pts": 0,
      "fate": null
     }
    ],
    "notes": [
-    "Group L: overall goal difference/goals separate England / Ghana (level on points and head-to-head).",
-    "Group L: overall goal difference/goals separate Croatia / Panama (level on points and head-to-head)."
+    "Group L: overall goal difference/goals separate England / Ghana (level on points and head-to-head)."
    ]
   }
  },
@@ -795,6 +794,21 @@
    },
    {
     "pos": 3,
+    "team": "Croatia",
+    "group": "L",
+    "p": 2,
+    "w": 1,
+    "d": 0,
+    "l": 1,
+    "gf": 3,
+    "ga": 4,
+    "gd": -1,
+    "pts": 3,
+    "qualifying": true,
+    "fate": null
+   },
+   {
+    "pos": 4,
     "team": "Algeria",
     "group": "J",
     "p": 2,
@@ -809,7 +823,7 @@
     "fate": null
    },
    {
-    "pos": 4,
+    "pos": 5,
     "team": "Paraguay",
     "group": "D",
     "p": 2,
@@ -824,7 +838,7 @@
     "fate": null
    },
    {
-    "pos": 5,
+    "pos": 6,
     "team": "Cape Verde",
     "group": "H",
     "p": 2,
@@ -839,7 +853,7 @@
     "fate": null
    },
    {
-    "pos": 6,
+    "pos": 7,
     "team": "Belgium",
     "group": "G",
     "p": 2,
@@ -854,7 +868,7 @@
     "fate": null
    },
    {
-    "pos": 7,
+    "pos": 8,
     "team": "DR Congo",
     "group": "K",
     "p": 1,
@@ -869,7 +883,7 @@
     "fate": null
    },
    {
-    "pos": 8,
+    "pos": 9,
     "team": "Czechia",
     "group": "A",
     "p": 2,
@@ -880,11 +894,11 @@
     "ga": 3,
     "gd": -1,
     "pts": 1,
-    "qualifying": true,
+    "qualifying": false,
     "fate": null
    },
    {
-    "pos": 9,
+    "pos": 10,
     "team": "Ecuador",
     "group": "E",
     "p": 2,
@@ -899,7 +913,7 @@
     "fate": null
    },
    {
-    "pos": 10,
+    "pos": 11,
     "team": "Bosnia and Herzegovina",
     "group": "B",
     "p": 2,
@@ -910,21 +924,6 @@
     "ga": 5,
     "gd": -3,
     "pts": 1,
-    "qualifying": false,
-    "fate": null
-   },
-   {
-    "pos": 11,
-    "team": "Panama",
-    "group": "L",
-    "p": 1,
-    "w": 0,
-    "d": 0,
-    "l": 1,
-    "gf": 0,
-    "ga": 1,
-    "gd": -1,
-    "pts": 0,
     "qualifying": false,
     "fate": null
    },
@@ -949,11 +948,11 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-23 22:53",
+ "generated_at": "2026-06-24 01:19",
  "slate_date": "2026-06-23",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 46,
+  "as_of_matches_played": 47,
   "fully_projectable": true,
   "thirds_resolved": true,
   "r32": {
@@ -974,8 +973,8 @@
     "match": 74,
     "home": "Germany",
     "home_label": "Winner E",
-    "away": "Scotland",
-    "away_label": "3rd C",
+    "away": "Paraguay",
+    "away_label": "3rd D",
     "provisional": true,
     "half": "top",
     "home_provisional": true,
@@ -1039,8 +1038,8 @@
     "match": 79,
     "home": "Mexico",
     "home_label": "Winner A",
-    "away": "Cape Verde",
-    "away_label": "3rd H",
+    "away": "Scotland",
+    "away_label": "3rd C",
     "provisional": true,
     "half": "bottom",
     "home_provisional": true,
@@ -1078,8 +1077,8 @@
     "match": 82,
     "home": "Egypt",
     "home_label": "Winner G",
-    "away": "Czechia",
-    "away_label": "3rd A",
+    "away": "Cape Verde",
+    "away_label": "3rd H",
     "provisional": true,
     "half": "top",
     "home_provisional": true,
@@ -1143,8 +1142,8 @@
     "match": 87,
     "home": "Portugal",
     "home_label": "Winner K",
-    "away": "Paraguay",
-    "away_label": "3rd D",
+    "away": "Croatia",
+    "away_label": "3rd L",
     "provisional": true,
     "half": "bottom",
     "home_provisional": true,
@@ -1236,91 +1235,91 @@
    "73": {
     "team": "Switzerland",
     "loser": "South Korea",
-    "p": 0.7036478878552145,
+    "p": 0.7038982115854473,
     "source": "model"
    },
    "74": {
     "team": "Germany",
-    "loser": "Scotland",
-    "p": 0.8191504188912055,
+    "loser": "Paraguay",
+    "p": 0.783472948417629,
     "source": "model"
    },
    "75": {
     "team": "Netherlands",
     "loser": "Morocco",
-    "p": 0.5395284525584565,
+    "p": 0.5394756361164103,
     "source": "model"
    },
    "76": {
     "team": "Brazil",
     "loser": "Japan",
-    "p": 0.7041836009212854,
+    "p": 0.704501453239649,
     "source": "model"
    },
    "77": {
     "team": "France",
     "loser": "Sweden",
-    "p": 0.8924730857889229,
+    "p": 0.8926732531891539,
     "source": "model"
    },
    "78": {
     "team": "Norway",
     "loser": "Côte d'Ivoire",
-    "p": 0.7310571379274735,
+    "p": 0.7312299997951546,
     "source": "model"
    },
    "79": {
     "team": "Mexico",
-    "loser": "Cape Verde",
-    "p": 0.81471676254502,
+    "loser": "Scotland",
+    "p": 0.6436071116589773,
     "source": "model"
    },
    "80": {
     "team": "England",
     "loser": "DR Congo",
-    "p": 0.8869810860453828,
+    "p": 0.8871958474085901,
     "source": "model"
    },
    "81": {
     "team": "Algeria",
     "loser": "United States",
-    "p": 0.5498125200021842,
+    "p": 0.5500005607039864,
     "source": "model"
    },
    "82": {
     "team": "Egypt",
-    "loser": "Czechia",
-    "p": 0.5519907049376046,
+    "loser": "Cape Verde",
+    "p": 0.711870517377876,
     "source": "model"
    },
    "83": {
     "team": "Colombia",
     "loser": "Ghana",
-    "p": 0.9246664601360529,
+    "p": 0.9248381138934263,
     "source": "model"
    },
    "84": {
     "team": "Spain",
     "loser": "Austria",
-    "p": 0.8481266749370604,
+    "p": 0.8483698967275084,
     "source": "model"
    },
    "85": {
     "team": "Belgium",
     "loser": "Canada",
-    "p": 0.7600121782655203,
+    "p": 0.7603668170962655,
     "source": "model"
    },
    "86": {
     "team": "Argentina",
     "loser": "Uruguay",
-    "p": 0.7821145105557687,
+    "p": 0.7823305303073461,
     "source": "model"
    },
    "87": {
     "team": "Portugal",
-    "loser": "Paraguay",
-    "p": 0.8283754169242503,
+    "loser": "Croatia",
+    "p": 0.6906705710220047,
     "source": "model"
    },
    "88": {
@@ -1332,97 +1331,97 @@
    "89": {
     "team": "France",
     "loser": "Germany",
-    "p": 0.6824615470031845,
+    "p": 0.6826318465794072,
     "source": "model"
    },
    "90": {
     "team": "Netherlands",
     "loser": "Switzerland",
-    "p": 0.6442560032569091,
+    "p": 0.6444322806237525,
     "source": "model"
    },
    "91": {
     "team": "Brazil",
     "loser": "Norway",
-    "p": 0.7098319724543574,
+    "p": 0.7101960819059281,
     "source": "model"
    },
    "92": {
     "team": "England",
     "loser": "Mexico",
-    "p": 0.7809054637537224,
+    "p": 0.7812410143323085,
     "source": "model"
    },
    "93": {
     "team": "Spain",
     "loser": "Colombia",
-    "p": 0.6991946563895285,
+    "p": 0.6994118449160264,
     "source": "model"
    },
    "94": {
     "team": "Algeria",
     "loser": "Egypt",
-    "p": 0.5683791672596473,
+    "p": 0.5684879160100716,
     "source": "model"
    },
    "95": {
     "team": "Argentina",
     "loser": "Australia",
-    "p": 0.8667284995291445,
+    "p": 0.8669517746682889,
     "source": "model"
    },
    "96": {
     "team": "Portugal",
     "loser": "Belgium",
-    "p": 0.6490662760656759,
+    "p": 0.6492065016279964,
     "source": "model"
    },
    "97": {
     "team": "France",
     "loser": "Netherlands",
-    "p": 0.666449629646279,
+    "p": 0.6666174964191732,
     "source": "model"
    },
    "98": {
     "team": "Spain",
     "loser": "Algeria",
-    "p": 0.8959104276667103,
+    "p": 0.8961160156996976,
     "source": "model"
    },
    "99": {
     "team": "England",
     "loser": "Brazil",
-    "p": 0.5376756902344526,
+    "p": 0.5377033171805631,
     "source": "model"
    },
    "100": {
     "team": "Argentina",
     "loser": "Portugal",
-    "p": 0.6659995110113905,
+    "p": 0.6661440995942303,
     "source": "model"
    },
    "101": {
     "team": "Spain",
     "loser": "France",
-    "p": 0.5955709358120883,
+    "p": 0.5957161183016367,
     "source": "model"
    },
    "102": {
     "team": "Argentina",
     "loser": "England",
-    "p": 0.5987640890019883,
+    "p": 0.5988353878615088,
     "source": "model"
    },
    "104": {
     "team": "Argentina",
     "loser": "Spain",
-    "p": 0.5185002674970305,
+    "p": 0.5185276176904352,
     "source": "model"
    },
    "103": {
     "team": "France",
     "loser": "England",
-    "p": 0.5036566702454353,
+    "p": 0.5035732055345925,
     "source": "model"
    }
   },
@@ -1433,7 +1432,7 @@
    ],
    "74": [
     "Germany",
-    "Scotland"
+    "Paraguay"
    ],
    "75": [
     "Netherlands",
@@ -1453,7 +1452,7 @@
    ],
    "79": [
     "Mexico",
-    "Cape Verde"
+    "Scotland"
    ],
    "80": [
     "England",
@@ -1465,7 +1464,7 @@
    ],
    "82": [
     "Egypt",
-    "Czechia"
+    "Cape Verde"
    ],
    "83": [
     "Colombia",
@@ -1485,7 +1484,7 @@
    ],
    "87": [
     "Portugal",
-    "Paraguay"
+    "Croatia"
    ],
    "88": [
     "Australia",
@@ -1849,85 +1848,85 @@
    "74": {
     "team": "Germany",
     "loser": "Scotland",
-    "p": 0.8191504188912055,
+    "p": 0.8194503619152949,
     "source": "model"
    },
    "75": {
     "team": "Netherlands",
     "loser": "Morocco",
-    "p": 0.5395284525584565,
+    "p": 0.5394756361164103,
     "source": "model"
    },
    "76": {
     "team": "Brazil",
     "loser": "Japan",
-    "p": 0.7041836009212854,
+    "p": 0.704501453239649,
     "source": "model"
    },
    "77": {
     "team": "France",
     "loser": "Sweden",
-    "p": 0.8924730857889229,
+    "p": 0.8926732531891539,
     "source": "model"
    },
    "78": {
     "team": "Norway",
     "loser": "Côte d'Ivoire",
-    "p": 0.7310571379274735,
+    "p": 0.7312299997951546,
     "source": "model"
    },
    "79": {
     "team": "Mexico",
     "loser": "Senegal",
-    "p": 0.5215661202264819,
+    "p": 0.5215112149348529,
     "source": "model"
    },
    "80": {
     "team": "England",
     "loser": "DR Congo",
-    "p": 0.8869810860453828,
+    "p": 0.8871958474085901,
     "source": "model"
    },
    "81": {
     "team": "United States",
     "loser": "Bosnia and Herzegovina",
-    "p": 0.7575012744037407,
+    "p": 0.7577105228128995,
     "source": "model"
    },
    "82": {
     "team": "Belgium",
     "loser": "Algeria",
-    "p": 0.7130169122813885,
+    "p": 0.7132984943277042,
     "source": "model"
    },
    "83": {
     "team": "Colombia",
     "loser": "Croatia",
-    "p": 0.6524266086142527,
+    "p": 0.6435455317566707,
     "source": "model"
    },
    "84": {
     "team": "Spain",
     "loser": "Austria",
-    "p": 0.8481266749370604,
+    "p": 0.8483698967275084,
     "source": "model"
    },
    "85": {
     "team": "Switzerland",
     "loser": "Egypt",
-    "p": 0.6812739458935633,
+    "p": 0.6814606836257755,
     "source": "model"
    },
    "86": {
     "team": "Argentina",
     "loser": "Saudi Arabia",
-    "p": 0.9492165315898593,
+    "p": 0.9493180455855962,
     "source": "model"
    },
    "87": {
     "team": "Portugal",
     "loser": "Ghana",
-    "p": 0.9427261268780391,
+    "p": 0.9428802787445512,
     "source": "model"
    },
    "88": {
@@ -1939,97 +1938,97 @@
    "89": {
     "team": "France",
     "loser": "Germany",
-    "p": 0.6824615470031845,
+    "p": 0.6826318465794072,
     "source": "model"
    },
    "90": {
     "team": "Netherlands",
     "loser": "Canada",
-    "p": 0.8009474592451207,
+    "p": 0.8012374620163389,
     "source": "model"
    },
    "91": {
     "team": "Brazil",
     "loser": "Norway",
-    "p": 0.7098319724543574,
+    "p": 0.7101960819059281,
     "source": "model"
    },
    "92": {
     "team": "England",
     "loser": "Mexico",
-    "p": 0.7809054637537224,
+    "p": 0.7812410143323085,
     "source": "model"
    },
    "93": {
     "team": "Spain",
     "loser": "Colombia",
-    "p": 0.6991946563895285,
+    "p": 0.6994118449160264,
     "source": "model"
    },
    "94": {
     "team": "Belgium",
     "loser": "United States",
-    "p": 0.754560543559791,
+    "p": 0.7549549861416214,
     "source": "model"
    },
    "95": {
     "team": "Argentina",
     "loser": "Australia",
-    "p": 0.8667284995291445,
+    "p": 0.8669517746682889,
     "source": "model"
    },
    "96": {
     "team": "Portugal",
     "loser": "Switzerland",
-    "p": 0.7227757329688027,
+    "p": 0.7230687795415476,
     "source": "model"
    },
    "97": {
     "team": "France",
     "loser": "Netherlands",
-    "p": 0.666449629646279,
+    "p": 0.6666174964191732,
     "source": "model"
    },
    "98": {
     "team": "Spain",
     "loser": "Belgium",
-    "p": 0.7817669810456215,
+    "p": 0.7819641027707455,
     "source": "model"
    },
    "99": {
     "team": "England",
     "loser": "Brazil",
-    "p": 0.5376756902344526,
+    "p": 0.5377033171805631,
     "source": "model"
    },
    "100": {
     "team": "Argentina",
     "loser": "Portugal",
-    "p": 0.6659995110113905,
+    "p": 0.6661440995942303,
     "source": "model"
    },
    "101": {
     "team": "Spain",
     "loser": "France",
-    "p": 0.5955709358120883,
+    "p": 0.5957161183016367,
     "source": "model"
    },
    "102": {
     "team": "Argentina",
     "loser": "England",
-    "p": 0.5987640890019883,
+    "p": 0.5988353878615088,
     "source": "model"
    },
    "104": {
     "team": "Argentina",
     "loser": "Spain",
-    "p": 0.5185002674970305,
+    "p": 0.5185276176904352,
     "source": "model"
    },
    "103": {
     "team": "France",
     "loser": "England",
-    "p": 0.5036566702454353,
+    "p": 0.5035732055345925,
     "source": "model"
    }
   },

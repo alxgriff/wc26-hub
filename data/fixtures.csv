@@ -68,6 +68,6 @@ K6,K,3,2026-06-27,19:30,7:30 PM,DR Congo,Uzbekistan,Mercedes-Benz Stadium,Atlant
 L1,L,1,2026-06-17,16:00,4:00 PM,England,Croatia,AT&T Stadium,Arlington,USA,Fox,4,2,played,
 L2,L,1,2026-06-17,19:00,7:00 PM,Ghana,Panama,BMO Field,Toronto,Canada,FS1,1,0,played,
 L3,L,2,2026-06-23,16:00,4:00 PM,England,Ghana,Gillette Stadium,Foxborough,USA,Fox,0,0,played,
-L4,L,2,2026-06-23,19:00,7:00 PM,Panama,Croatia,BMO Field,Toronto,Canada,Fox,,,scheduled,
+L4,L,2,2026-06-23,19:00,7:00 PM,Panama,Croatia,BMO Field,Toronto,Canada,Fox,0,1,played,
 L5,L,3,2026-06-27,17:00,5:00 PM,Panama,England,MetLife Stadium,East Rutherford,USA,Fox,,,scheduled,"Simultaneous with L6 (matchday 3 rule)"
 L6,L,3,2026-06-27,17:00,5:00 PM,Croatia,Ghana,Lincoln Financial Field,Philadelphia,USA,FS1,,,scheduled,"Simultaneous with L5 (matchday 3 rule)"
