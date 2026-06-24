@@ -583,7 +583,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <p class="sr-only">Scotland win 7 percent, draw 14 percent, Brazil win 79 percent.</p>
   <div class="probbar" aria-hidden="true"><span class="pa" style="flex:7">7%</span><span class="pd" style="flex:14">14%</span><span class="pb" style="flex:79">79%</span></div>
   <div class="scale" aria-hidden="true"><span>Scotland 7%</span><span>draw 14%</span><span>Brazil 79%</span></div>
-  <p class="factline">most likely score <b>0–2</b> · expected goals <b>3.09</b> · over 2.5 <b>60%</b> · both score <b>41%</b><br>single source: rating model (Elo+Futi)</p>
+  <p class="factline">predicted score <b>0-2</b><br>published consensus — logged Jun 24, 12:55 AM ET, pre-kickoff<br><b>Awaiting result</b> — kickoff has passed; this logged call is frozen and will be graded when the score is entered.</p>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> Brazil, but rotation + motivation asymmetry is the classic MD3 value spot.</p></blockquote></div>
 </section>
@@ -721,12 +721,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.04 decimal">+104</td><td>47%</td><td>40%</td><td class="edge-neg">-6.6%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.75</td><td title="2.02 decimal">+102</td><td>47%</td><td>60%</td><td class="edge-pos">+12.3%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.75</td><td title="1.82 decimal">-122</td><td>53%</td><td>40%</td><td class="edge-neg">-12.3%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Scotland +1.5</td><td title="1.91 decimal">-110</td><td>50%</td><td>43%</td><td class="edge-neg">-7.6%</td></tr>
-      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Brazil -1.5</td><td title="1.93 decimal">-108</td><td>50%</td><td>57%</td><td class="edge-pos">+7.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Scotland +1.5</td><td title="1.91 decimal">-110</td><td>50%</td><td>43%</td><td class="edge-neg">-7.7%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Brazil -1.5</td><td title="1.93 decimal">-108</td><td>50%</td><td>57%</td><td class="edge-pos">+7.7%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bets — top 3, ≥4% edge</span><p>1. <strong>Brazil -1.5</strong> (Asian handicap) @ -108, edge <strong>+7.6%</strong> — best price -108 (betonlineag). Flat 1u, paper record.</p><p>2. <strong>Brazil</strong> (1X2) @ -312, edge <strong>+6.8%</strong> — best price -312 (draftkings). Flat 1u, paper record.</p><p>3. <strong>Over 2.5</strong> (Total goals) @ -125, edge <strong>+6.6%</strong> — best price -120 (betonlineag). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p><p class="odds-note warn">⚠ the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with extra caution until the draw calibration is re-checked after MD3.</p></div>
+<div class="bet-callout"><span class="tag">Best bets — top 3, ≥4% edge</span><p>1. <strong>Brazil -1.5</strong> (Asian handicap) @ -108, edge <strong>+7.7%</strong> — best price -108 (betonlineag). Flat 1u, paper record.</p><p>2. <strong>Brazil</strong> (1X2) @ -312, edge <strong>+6.8%</strong> — best price -312 (draftkings). Flat 1u, paper record.</p><p>3. <strong>Over 2.5</strong> (Total goals) @ -125, edge <strong>+6.6%</strong> — best price -120 (betonlineag). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p><p class="odds-note warn">⚠ the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with extra caution until the draw calibration is re-checked after MD3.</p></div>
 <p class="odds-note">Logged pick: Brazil -1.5 @ +105 (betus), edge 7.0pp · open.</p>
 <p class="odds-note">Logged pick: Over 2.5 @ -115 (betus), edge 6.8pp · open.</p>
 <p class="odds-note">Logged pick: Brazil @ -312 (draftkings), edge 6.8pp · open.</p>
@@ -754,7 +754,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.5833,lb=2.5073,N=8,SHOW=6,i,j;
+  var la=0.5804,lb=2.5102,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
