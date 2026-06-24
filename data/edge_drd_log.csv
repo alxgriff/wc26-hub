@@ -1,7 +1,7 @@
 ﻿match_id,side,team,as_of,model_p,market_p,drd_edge,process_lean,market_capture,price_decimal,price_american,book,snapshot_implied,status,result,won,closing_implied,clv_pp
-B6,away,Qatar,2026-06-18T22:19:25-04:00,0.2014,0.1284,7.3,5.9,-1.3,7.500,+650,draftkings,0.1284,open,,,,
-C5,away,Brazil,2026-06-18T22:19:25-04:00,0.7909,0.6625,12.8,7.0,-5.8,1.440,-227,draftkings,0.6625,open,,,,
-C6,home,Morocco,2026-06-18T22:19:25-04:00,0.8483,0.7521,9.6,8.2,-1.4,1.280,-357,draftkings,0.7521,open,,,,
+B6,away,Qatar,2026-06-18T22:19:25-04:00,0.2014,0.1284,7.3,5.9,-1.3,7.500,+650,draftkings,0.1284,open,,,0.1137,-1.5
+C5,away,Brazil,2026-06-18T22:19:25-04:00,0.7909,0.6625,12.8,7.0,-5.8,1.440,-227,draftkings,0.6625,open,,,0.7252,+6.3
+C6,home,Morocco,2026-06-18T22:19:25-04:00,0.8483,0.7521,9.6,8.2,-1.4,1.280,-357,draftkings,0.7521,open,,,0.8152,+6.3
 D6,away,Australia,2026-06-18T22:19:25-04:00,0.3648,0.2695,9.5,9.0,-0.5,3.550,+255,draftkings,0.2695,open,,,,
 G6,away,Belgium,2026-06-18T22:19:25-04:00,0.8694,0.7803,8.9,3.7,-5.3,1.220,-455,draftkings,0.7803,open,,,,
 J4,away,Algeria,2026-06-18T22:19:25-04:00,0.6802,0.6114,6.9,16.1,9.2,1.570,-175,draftkings,0.6114,settled,1-2,1,0.6347,+2.3
