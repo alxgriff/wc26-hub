@@ -262,6 +262,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
 .metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
 .scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
+.record-scoreboard{display:flex;align-items:center;gap:0;margin-top:16px;border:2px solid var(--ink)}
+.scoreboard-stat{display:flex;flex-direction:column;gap:2px;padding:10px 22px;min-width:110px}
+.scoreboard-label{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.scoreboard-value{font-family:var(--mono);font-size:1.45rem;font-weight:700;line-height:1.1}
+.scoreboard-value.units-up{color:#1a7a3f}
+.scoreboard-value.units-down{color:var(--verm)}
+.scoreboard-sub{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
+.scoreboard-divider{width:2px;background:var(--ink);align-self:stretch}
 
 .strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
 .strap b{color:var(--ink);font-weight:700}
@@ -302,7 +310,17 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
+.draw-flag{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin:10px 0 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.draw-flag-tag{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:1.5px solid var(--ink-soft);color:var(--ink);padding:2px 7px;white-space:nowrap}
 
 .mini-table{max-width:560px}
 .team-pair{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}
@@ -580,10 +598,20 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="sr-only">Panama win 2 percent, draw 9 percent, England win 89 percent.</p>
-  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:2"></span><span class="pd" style="flex:9">9%</span><span class="pb" style="flex:89">89%</span></div>
-  <div class="scale" aria-hidden="true"><span>Panama 2%</span><span>draw 9%</span><span>England 89%</span></div>
-  <p class="factline">most likely score <b>0–2</b> · expected goals <b>3.15</b> · over 2.5 <b>61%</b> · both score <b>24%</b><br>single source: rating model (Elo+Futi)</p>
+  <p class="factline">most likely score <b>0–2</b> · expected goals <b>3.15</b> · over 2.5 <b>61%</b> · both score <b>26%</b><br>single source: rating model (Elo+Futi)</p>
+  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
+    <p class="sr-only">Structural (post-MD1 fitted) says Panama win 2 percent, draw 9 percent, England win 89 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:2"></span><span class="pd" style="flex:9">9%</span><span class="pb" style="flex:89">89%</span></div>
+    <div class="scale" aria-hidden="true"><span>Panama 2%</span><span>draw 9%</span><span>England 89%</span></div>
+  </div>
+  <div class="overlay-section">
+    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
+    <p class="sr-only">100% Futi (post-MD1 fitted) says Panama win 1 percent, draw 8 percent, England win 91 percent.</p>
+    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:1"></span><span class="pd" style="flex:8">8%</span><span class="pb" style="flex:91">91%</span></div>
+    <div class="scale" aria-hidden="true"><span>Panama 1%</span><span>draw 8%</span><span>England 91%</span></div>
+  </div>
 </div>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> England comfortably; margin market is the story.</p></blockquote></div>
 </section>
@@ -697,14 +725,13 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.25</td><td title="1.91 decimal">-110</td><td>50%</td><td>61%</td><td class="edge-pos">+11.4%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="2.15 decimal">+115</td><td>43%</td><td>39%</td><td class="edge-neg">-4.8%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="1.65 decimal">-155</td><td>57%</td><td>61%</td><td class="edge-pos">+4.8%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Panama +1.75</td><td title="2.39 decimal">+139</td><td>41%</td><td>33%</td><td class="edge-neg">-8.0%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">England -1.75</td><td title="1.63 decimal">-159</td><td>59%</td><td>67%</td><td class="edge-pos">+8.0%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Panama +1.75</td><td title="2.39 decimal">+139</td><td>41%</td><td>34%</td><td class="edge-neg">-6.3%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">England -1.75</td><td title="1.63 decimal">-159</td><td>59%</td><td>66%</td><td class="edge-pos">+6.3%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Under 3</strong> (Total goals) @ +125, edge <strong>+7.3%</strong> — best price +125 (betonlineag). Flat 1u, paper record.</p></div>
+<div class="bet-callout"><span class="tag">Best bets — top 2, ≥4% edge</span><p>1. <strong>Under 3</strong> (Total goals) @ +125, edge <strong>+7.3%</strong> — best price +125 (betonlineag). Flat 1u, paper record.</p><p>2. <strong>England -1.75</strong> (Asian handicap) @ -159, edge <strong>+6.3%</strong> — best price -159 (betonlineag). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p></div>
 <p class="verify-flag">totals under 3.25: model-priced edge +11.4% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads away -1.75: model-priced edge +8.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 24, 12:55 AM ET · DraftKings where quoted, else best of 3 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
@@ -728,7 +755,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.2880,lb=2.8590,N=8,SHOW=6,i,j;
+  var la=0.3246,lb=2.8224,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

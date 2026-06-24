@@ -262,6 +262,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
 .metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
 .scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
+.record-scoreboard{display:flex;align-items:center;gap:0;margin-top:16px;border:2px solid var(--ink)}
+.scoreboard-stat{display:flex;flex-direction:column;gap:2px;padding:10px 22px;min-width:110px}
+.scoreboard-label{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.scoreboard-value{font-family:var(--mono);font-size:1.45rem;font-weight:700;line-height:1.1}
+.scoreboard-value.units-up{color:#1a7a3f}
+.scoreboard-value.units-down{color:var(--verm)}
+.scoreboard-sub{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
+.scoreboard-divider{width:2px;background:var(--ink);align-self:stretch}
 
 .strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
 .strap b{color:var(--ink);font-weight:700}
@@ -302,7 +310,17 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
+.draw-flag{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin:10px 0 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.draw-flag-tag{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:1.5px solid var(--ink-soft);color:var(--ink);padding:2px 7px;white-space:nowrap}
 
 .mini-table{max-width:560px}
 .team-pair{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}
@@ -649,12 +667,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
 <div class="conditions">
-  <span class="cond-stamp">Forecast · as of 2026-06-23 08:02 ET</span>
-  <p class="cond-stats">~71°F · humid (79% RH) · WBGT 75.7°F</p>
-  <div class="cond-track" aria-label="Match heat index: Moderate (45/100)"><div class="cond-fill" style="width:45%"></div></div>
+  <span class="cond-stamp">Forecast · as of 2026-06-23 09:15 ET</span>
+  <p class="cond-stats">~68°F · humid (92% RH) · WBGT 74.9°F</p>
+  <div class="cond-track" aria-label="Match heat index: Moderate (42/100)"><div class="cond-fill" style="width:42%"></div></div>
   <p class="cond-sev cond-sev-moderate">Moderate</p>
-  <p class="cond-blurb">Warm out; England are +9°F outside their comfort zone while Ghana are the better-acclimated side.</p>
-  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">England</span><div class="cond-dis-track" aria-label="Heat disadvantage 51/100"><div class="cond-dis-fill cond-dis-hot" style="width:51%"></div></div><span class="cond-delta">+9.1°F vs home</span></div><div class="cond-team"><span class="cond-tname">Ghana</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-8.7°F vs home</span></div></div>
+  <p class="cond-blurb">Warm out; England are +8°F outside their comfort zone while Ghana are the better-acclimated side.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">England</span><div class="cond-dis-track" aria-label="Heat disadvantage 46/100"><div class="cond-dis-fill" style="width:46%"></div></div><span class="cond-delta">+8.3°F vs home</span></div><div class="cond-team"><span class="cond-tname">Ghana</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-9.5°F vs home</span></div></div>
 </div>
 </section>
 
@@ -704,26 +722,27 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">England</td><td title="1.19 decimal">-526</td><td>80%</td><td>88%</td><td class="edge-pos">+8.0%</td></tr>
-      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="7.00 decimal">+600</td><td>14%</td><td>10%</td><td class="edge-neg">-3.9%</td></tr>
-      <tr><td class="lbl">1X2</td><td class="lbl">Ghana</td><td title="16.00 decimal">+1500</td><td>6%</td><td>2%</td><td class="edge-neg">-4.1%</td></tr>
+      <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">England</td><td title="1.19 decimal">-526</td><td>80%</td><td>89%</td><td class="edge-pos">+8.2%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="7.00 decimal">+600</td><td>14%</td><td>10%</td><td class="edge-neg">-4.0%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Ghana</td><td title="16.00 decimal">+1500</td><td>6%</td><td>2%</td><td class="edge-neg">-4.2%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.57 decimal">-175</td><td>60%</td><td>53%</td><td class="edge-neg">-7.0%</td></tr>
       <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.40 decimal">+140</td><td>40%</td><td>47%</td><td class="edge-pos">+7.0%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td title="1.90 decimal">-111</td><td>50%</td><td>40%</td><td class="edge-neg">-10.3%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td title="1.93 decimal">-108</td><td>50%</td><td>60%</td><td class="edge-pos">+10.3%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="2.35 decimal">+135</td><td>40%</td><td>31%</td><td class="edge-neg">-8.7%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="1.56 decimal">-179</td><td>60%</td><td>69%</td><td class="edge-pos">+8.7%</td></tr>
-      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">England -2</td><td title="1.91 decimal">-110</td><td>50%</td><td>56%</td><td class="edge-pos">+6.4%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Ghana +2</td><td title="1.91 decimal">-110</td><td>50%</td><td>44%</td><td class="edge-neg">-6.4%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">England -2</td><td title="1.91 decimal">-110</td><td>50%</td><td>58%</td><td class="edge-pos">+8.3%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Ghana +2</td><td title="1.91 decimal">-110</td><td>50%</td><td>42%</td><td class="edge-neg">-8.3%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>England</strong> (1X2), model edge <strong>+8.0%</strong></p><p><strong>Under 2.5</strong> (Total goals), model edge <strong>+7.0%</strong></p><p><strong>England -2</strong> (Asian handicap), model edge <strong>+6.4%</strong></p><p class="odds-note">the model likes these, but the line is over 12h old (the book hasn't reposted), so they are <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>England</strong> (1X2), model edge <strong>+8.2%</strong></p><p><strong>Under 2.5</strong> (Total goals), model edge <strong>+7.0%</strong></p><p class="odds-note">the model likes these, but the line is over 12h old (the book hasn't reposted), so they are <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
 <p class="odds-note">Logged pick: Under 3 @ -122 (bovada), edge 7.2pp · settled <b>won</b> for +0.82u · CLV -3.1pp.</p>
 <p class="odds-note">Logged pick: England @ -526 (draftkings), edge 8.0pp · settled <b>lost</b> for -1.00u · CLV +0.0pp.</p>
 <p class="odds-note">Logged pick: England -2 @ -103 (mybookieag), edge 7.8pp · settled <b>lost</b> for -1.00u · CLV +0.0pp.</p>
 <p class="verify-flag">totals under 3: model-priced edge +10.3% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="verify-flag">totals under 3.5: model-priced edge +8.7% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">spreads home -2: model-priced edge +8.3% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 23, 12:20 PM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> England −1.5; under 3.5 hedge.</p></blockquote></div>
 <details class="outcome-grid-wrap">
@@ -748,7 +767,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=2.5794,lb=0.2366,N=8,SHOW=6,i,j;
+  var la=2.6106,lb=0.2054,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
