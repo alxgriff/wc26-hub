@@ -104,12 +104,12 @@ ELO_FILE = "Elo_Ratings_World_Cup_2026_VERIFIED.csv"   # NOT the corrupted origi
 # are graded from the immutable ledger, never recomputed. Pass elo_current=False to pin to
 # the VERIFIED anchor (used by the exact-value regression baseline so it can't drift nightly).
 ELO_CURRENT = "Elo_Ratings_World_Cup_2026_CURRENT.csv"
-FUTI_FILE = "World_Cup_2026_Futi_6_18.csv"   # match-driven futi.live EPV ratings,
-# refreshed 2026-06-18 (post-MD1). Ingested for GOING-FORWARD predictions only; already-
+FUTI_FILE = "World_Cup_2026_Futi_6_24.csv"   # match-driven futi.live EPV ratings,
+# refreshed 2026-06-24 (post-MD2). Ingested for GOING-FORWARD predictions only; already-
 # played games are graded from their immutable pre-kickoff logged calls (ledger.grade /
-# build_site.render_call), never recomputed — so the small post-MD1 drift (mean 0.44 pts,
-# corr +0.36 with MD1 points) can't leak into MD1 scoring. Prior vintage (pre-tournament,
-# 6/12): World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv.
+# build_site.render_call), never recomputed. Prior vintage (post-MD1, 6/18):
+# World_Cup_2026_Futi_6_18.csv. Pre-tournament (6/12):
+# World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv.
 OPTA_FILE = "Opta_Predictions_World_Cup_2026.csv"
 MARKET_FILE = "Market_Outrights_VERIFIED.csv"          # real de-vigged outright market
 OPTA_MATCH_FILE = "Opta_Match_Predictions.csv"         # per-match W/D/L overlay
