@@ -9,15 +9,18 @@ adds exactly zero, a loss subtracts an unknown amount.
 
 The FIFA 2026 group tiebreakers run points -> head-to-head (its points, then GD,
 then goals among the level teams) -> overall goal difference -> overall goals ->
-fair play -> FIFA World Ranking (no drawing of lots). So once two teams are level
-on points, the order turns on criteria — head-to-head and goal margins — that
-mostly depend on results we do not yet know. This module therefore:
-
-  * computes each team's final points for every combo (exact), and
-  * models each team's post-MD3 GD as an interval — draw -> [gd, gd] (known),
-    win -> [gd+1, +inf), loss -> (-inf, gd-1] — and resolves a points-tie only
-    when the intervals are disjoint. Anything that still comes down to GD/goals
-    (or head-to-head) is reported as **margin-dependent**, never guessed.
+fair play -> FIFA World Ranking (no drawing of lots). Head-to-head comes BEFORE
+overall goal difference, so a team level on points can already be decided by a
+result that has been PLAYED even when the goal margins of the remaining games are
+unknown. For the final-matchday case (<=3 games left), this module therefore
+determines each team's EXACT reachable finish per outcome combination by replaying
+the group through the real tiebreak engine (standings.compute_standings — head-to-
+head and all) at the extreme goal margins (a narrow vs a wide win, a low- vs a
+high-scoring draw). A finish that is identical at every margin is pinned; one that
+still moves with the margins is reported as **margin-dependent**, never guessed.
+(With 4+ games still to play it falls back to a cheap points + GD-interval
+approximation that does not see head-to-head — conservative: it can over-report
+margin-dependence but never the reverse.)
 
 Each team is then bucketed per combo by its EXACT reachable finish — 1st / 2nd /
 3rd / out (4th) — plus two "still-open" buckets: **top-2** (through for sure, but
@@ -98,15 +101,81 @@ def _bucket(pos: int) -> str:
     return {1: "first", 2: "second", 3: "third"}.get(pos, "out")
 
 
-def _classify_combo(teams, current, unplayed, combo) -> dict:
-    """Bucket every team for one outcome combination.
+def _range_to_bucket(lo_pos: int, hi_pos: int) -> str:
+    """A reachable EXACT-position range -> a finish bucket. Pinned to one seed ->
+    that seed; through but 1st-vs-2nd open -> 'top2'; straddling the qualify/eliminate
+    line -> 'margin'."""
+    lo_b, hi_b = _bucket(lo_pos), _bucket(hi_pos)
+    if lo_b == hi_b:
+        return lo_b                                   # exact finish pinned
+    if {lo_b, hi_b} <= {"first", "second"}:           # through, but 1st vs 2nd on GD
+        return "top2"
+    return "margin"                                   # qualify/eliminate still open
 
-    Points are exact; GD is an interval. A team's reachable position is a
-    contiguous range [base + (#cluster-mates definitely above), base + (cluster
-    size - 1) - (#definitely below)] within its points-cluster. If that whole
-    range falls in one qualification bucket it is decided; otherwise the team is
-    margin-dependent.
-    """
+
+# Goal-margin extremes per fixed outcome: a narrow vs a wide win, a low- vs a
+# high-scoring draw. Replaying a combo through the real standings engine at these
+# extremes brackets every margin-sensitive tiebreaker (overall GD/goals, and the
+# head-to-head GD/goals of a tied pair whose mutual game is itself this matchday).
+_MARGIN_VARIANTS = {"a": ((1, 0), (8, 0)), "b": ((0, 1), (0, 8)), "d": ((0, 0), (4, 4))}
+_PRECISE_MAX_UNPLAYED = 3      # above this the margin-extreme replay is costly and almost
+#                                everything is margin-dependent anyway -> GD-interval fallback
+
+
+def _provisional_bands(notes, order) -> dict:
+    """{team: set(tied positions)} for teams flagged in a residual-tie note. compute_standings
+    shows such ties alphabetically but flags them — so the scenario treats each tied team's
+    finish as the whole tied band, never the silent alphabetical pick (per the project rule:
+    a residual tie after fair play is reported, never silently resolved)."""
+    bands: dict[str, set] = {}
+    for n in notes:
+        if "level on all modelled criteria" not in n:
+            continue
+        seg = n.split(":", 1)[-1].split("level on all modelled criteria")[0]
+        tied = [t for t in (p.strip() for p in seg.split("/")) if t in order]
+        band = {order[t] for t in tied}
+        for t in tied:
+            bands[t] = band
+    return bands
+
+
+def _combo_positions(group, played, unplayed, combo, fair_play, cache) -> dict:
+    """{team: set(reachable final positions)} for ONE outcome combination, over the
+    goal-margin extremes and ranked by the FULL 2026 tiebreakers (head-to-head BEFORE
+    overall GD) via standings.compute_standings — the single source of tiebreak truth.
+    A singleton set means the exact rank is pinned for that combo; a spread means the
+    placing rides on goal margins (or an unresolved residual tie). Cached per combo."""
+    import dataclasses
+    if combo in cache:
+        return cache[combo]
+    positions: dict[str, set] = {}
+    for margins in product(*(_MARGIN_VARIANTS[oc] for oc in combo)):
+        proj = list(played) + [
+            dataclasses.replace(m, status="played", score_a=sa, score_b=sb)
+            for m, (sa, sb) in zip(unplayed, margins)]
+        gt = st.compute_standings(proj, fair_play=fair_play).groups[group]
+        order = {r.team: i for i, r in enumerate(gt.rows, 1)}
+        bands = _provisional_bands(gt.notes, order)
+        for team, pos in order.items():
+            positions.setdefault(team, set()).update(bands.get(team, {pos}))
+    cache[combo] = positions
+    return positions
+
+
+def _classify_combo_exact(group, played, unplayed, combo, fair_play, cache) -> dict:
+    """Final-matchday classifier: bucket every team for one combo by its EXACT reachable
+    finish, head-to-head honoured (see _combo_positions). This is what fixes a clinched-
+    by-H2H seed being mislabelled 'seed TBD' (e.g. a group winner who holds the H2H over
+    the only side that can match its points)."""
+    pos = _combo_positions(group, played, unplayed, combo, fair_play, cache)
+    return {t: _range_to_bucket(min(ps), max(ps)) for t, ps in pos.items()}
+
+
+def _classify_combo_gd(teams, current, unplayed, combo) -> dict:
+    """Cheaper points + goal-difference-interval fallback for the non-canonical case of
+    4+ games still to play (where replaying every margin extreme is costly and almost
+    everything is margin-dependent anyway). It does NOT see head-to-head, so it can
+    over-report margin-dependence but never under-report a pinned finish."""
     pts = {t: current[t].points for t in teams}
     gd_lo = {t: float(current[t].gd) for t in teams}
     gd_hi = {t: float(current[t].gd) for t in teams}
@@ -120,18 +189,8 @@ def _classify_combo(teams, current, unplayed, combo) -> dict:
         gd_hi[m.team_a] += ha
         gd_lo[m.team_b] += lb
         gd_hi[m.team_b] += hb
-
     rng = _position_range(teams, pts, gd_lo, gd_hi)
-    buckets = {}
-    for t in teams:
-        lo_b, hi_b = _bucket(rng[t][0]), _bucket(rng[t][1])
-        if lo_b == hi_b:
-            buckets[t] = lo_b                              # exact finish pinned
-        elif {lo_b, hi_b} <= {"first", "second"}:          # through, but 1st vs 2nd on GD
-            buckets[t] = "top2"
-        else:
-            buckets[t] = "margin"                          # qualify/eliminate still open
-    return buckets
+    return {t: _range_to_bucket(rng[t][0], rng[t][1]) for t in teams}
 
 
 def _position_range(teams, pts, gd_lo, gd_hi) -> dict:
@@ -205,9 +264,10 @@ def _summarise(by_oc: dict, x: str, y: str) -> str:
     return "; ".join(segs)
 
 
-def _team_stakes(team, teams, current, unplayed) -> list:
-    """Win/Draw/Loss prospects for `team`, conditioned on the other MD3 game.
-    Only meaningful in the standard two-games-left layout."""
+def _team_stakes(team, unplayed, group, played, fair_play, cache) -> list:
+    """Win/Draw/Loss prospects for `team`, conditioned on the other MD3 game. Only
+    called in the standard two-games-left layout, where the exact (head-to-head-aware)
+    classifier always applies."""
     i = next(idx for idx, m in enumerate(unplayed) if team in (m.team_a, m.team_b))
     j = 1 - i
     mine, other = unplayed[i], unplayed[j]
@@ -221,7 +281,8 @@ def _team_stakes(team, teams, current, unplayed) -> list:
             combo = [None, None]
             combo[i] = own_oc
             combo[j] = oc
-            by_oc[oc] = _classify_combo(teams, current, unplayed, tuple(combo))[team]
+            by_oc[oc] = _classify_combo_exact(group, played, unplayed, tuple(combo),
+                                              fair_play, cache)[team]
         lines.append(f"{label}: {_summarise(by_oc, x, y)}")
     return lines
 
@@ -243,10 +304,17 @@ def enumerate_scenarios(group: str, matches) -> ScenarioReport:
     unplayed = [m for m in group_matches if not m.is_played]
 
     notes = []
+    played = [m for m in group_matches if m.is_played]
+    # Final-matchday (<=3 games left): replay each combo through the real tiebreak engine
+    # at margin extremes, so head-to-head is honoured. Earlier than that -> cheap fallback.
+    precise = 0 < len(unplayed) <= _PRECISE_MAX_UNPLAYED
+    fair_play = st.load_discipline() if precise else None
+    cache: dict = {}
     combos = list(product(_OUTCOMES, repeat=len(unplayed)))
     counts = {t: {b: 0 for b in _BUCKET_ORDER} for t in teams}
     for combo in combos:
-        buckets = _classify_combo(teams, current, unplayed, combo)
+        buckets = (_classify_combo_exact(group, played, unplayed, combo, fair_play, cache)
+                   if precise else _classify_combo_gd(teams, current, unplayed, combo))
         for t in teams:
             counts[t][buckets[t]] += 1
 
@@ -265,7 +333,8 @@ def enumerate_scenarios(group: str, matches) -> ScenarioReport:
         team_scenarios.append(TeamScenario(
             team=r.team, group_pos=pos[r.team], points=r.points, gd=r.gd, gf=r.gf,
             counts=counts[r.team],
-            stakes=_team_stakes(r.team, teams, current, unplayed) if standard else [],
+            stakes=(_team_stakes(r.team, unplayed, group, played, fair_play, cache)
+                    if standard else []),
         ))
 
     return ScenarioReport(group, len(combos), unplayed, team_scenarios, rows, notes)
