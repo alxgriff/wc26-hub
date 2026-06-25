@@ -218,6 +218,83 @@ def project_final_standings(matches: "list[st.Match]", score_fn) -> "st.Standing
     return st.compute_standings(projected)
 
 
+def _poisson_sample(lam: float, rng) -> int:
+    """A goal count drawn from rate ``lam`` (Knuth's algorithm, stdlib only)."""
+    import math
+    target = math.exp(-lam)
+    k, p = 0, 1.0
+    while True:
+        p *= rng.random()
+        if p <= target:
+            return k
+        k += 1
+
+
+def project_modal_standings(matches: "list[st.Match]", rates_fn,
+                            n_sims: int = 2000, seed: int = 20260625) -> "st.Standings":
+    """Standings projected by SIMULATING the remaining group games (draws included) and
+    taking, per group, the model's MOST LIKELY winner plus the most likely final ordering
+    GIVEN that winner. A drop-in for project_final_standings in the 'projected finish'
+    bracket — returns a Standings.
+
+    Why not project_final_standings: that forces every remaining game to its single most-
+    likely DECISIVE result and chains them, which can crown a group winner that isn't even
+    the model's most likely one — it discards draws (so a leader who only needs a point can
+    be dropped) and forces a near-even game to the marginal favourite. Here each remaining
+    game is sampled from its modelled goal rates, the whole group is ranked by the real 2026
+    tiebreakers per simulation (compute_standings — head-to-head and all), and the modal
+    winner wins; a near-expected-margin representative of that ordering supplies concrete
+    scorelines so the cross-group third-place cutline stays coherent. ``rates_fn(match) ->
+    (lambda_a, lambda_b)`` is injected so bracket.py stays model-agnostic (build_site passes
+    a predict-based one; tests a deterministic one). Deterministic (seeded), pure (never
+    touches fixtures.csv)."""
+    import dataclasses
+    import random as _random
+    from collections import Counter
+    rng = _random.Random(seed)
+    fp = st.load_discipline()
+    chosen: dict[str, tuple] = {}      # match_id -> (score_a, score_b) for the unplayed games
+    for g in sorted({m.group for m in matches}):
+        gms = [m for m in matches if m.group == g]
+        unplayed = [m for m in gms if not m.is_played]
+        if not unplayed:
+            continue
+        played_g = [m for m in gms if m.is_played]
+        rates = {m.match_id: rates_fn(m) for m in unplayed}
+        tally: dict[tuple, list] = {}                # ordering -> [count, repr scores, deviation]
+        for _ in range(n_sims):
+            scores, dev = {}, 0.0
+            for m in unplayed:
+                la, lb = rates[m.match_id]
+                sa, sb = _poisson_sample(la, rng), _poisson_sample(lb, rng)
+                scores[m.match_id] = (sa, sb)
+                dev += abs(sa - la) + abs(sb - lb)       # distance from the expected scoreline
+            proj = played_g + [dataclasses.replace(m, status="played",
+                                  score_a=scores[m.match_id][0], score_b=scores[m.match_id][1])
+                               for m in unplayed]
+            order = tuple(r.team for r in st.compute_standings(proj, fair_play=fp).groups[g].rows)
+            slot = tally.get(order)
+            if slot is None:
+                tally[order] = [1, scores, dev]
+            else:
+                slot[0] += 1
+                if dev < slot[2]:                        # keep the most typical-margin sample
+                    slot[1], slot[2] = scores, dev
+        # the model's most likely WINNER (summed across orderings), then the modal ordering
+        # that produces it — so the winner is never a non-modal artefact of forced results.
+        winners = Counter()
+        for order, slot in tally.items():
+            winners[order[0]] += slot[0]
+        modal_winner = winners.most_common(1)[0][0]
+        modal = max((o for o in tally if o[0] == modal_winner), key=lambda o: tally[o][0])
+        chosen.update(tally[modal][1])
+    projected = [m if m.is_played
+                 else dataclasses.replace(m, status="played",
+                                          score_a=chosen[m.match_id][0], score_b=chosen[m.match_id][1])
+                 for m in matches]
+    return st.compute_standings(projected, fair_play=fp)
+
+
 def feed(projection: dict, resolver, results: "dict | None" = None) -> dict:
     """Propagate winners through the bracket tree, filling downstream rounds.
 

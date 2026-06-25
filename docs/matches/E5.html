@@ -692,6 +692,9 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
+      <tr><td class="lbl">1X2</td><td class="lbl">Curaçao</td><td title="19.00 decimal">+1800</td><td>5%</td><td>5%</td><td class="edge-neg">-0.2%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="8.50 decimal">+750</td><td>11%</td><td>14%</td><td class="">+2.9%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Côte d&#x27;Ivoire</td><td title="1.15 decimal">-667</td><td>84%</td><td>81%</td><td class="edge-neg">-2.7%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.54 decimal">-185</td><td>61%</td><td>51%</td><td class="edge-neg">-9.4%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.40 decimal">+140</td><td>39%</td><td>49%</td><td class="edge-pos">+9.4%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td title="1.79 decimal">-127</td><td>54%</td><td>38%</td><td class="edge-neg">-16.1%</td></tr>
@@ -700,8 +703,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.25</td><td title="1.82 decimal">-122</td><td>53%</td><td>71%</td><td class="edge-pos">+18.0%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="2.25 decimal">+125</td><td>42%</td><td>29%</td><td class="edge-neg">-12.5%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="1.62 decimal">-161</td><td>58%</td><td>71%</td><td class="edge-pos">+12.5%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Curaçao +2</td><td title="2.08 decimal">+108</td><td>46%</td><td>56%</td><td class="edge-pos">+9.7%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Côte d&#x27;Ivoire -2</td><td title="1.79 decimal">-127</td><td>54%</td><td>44%</td><td class="edge-neg">-9.7%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Curaçao +2</td><td title="2.08 decimal">+108</td><td>46%</td><td>56%</td><td class="edge-pos">+9.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Côte d&#x27;Ivoire -2</td><td title="1.79 decimal">-127</td><td>54%</td><td>44%</td><td class="edge-neg">-9.6%</td></tr>
     </tbody>
   </table>
 </div>
@@ -710,8 +713,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 <p class="verify-flag">totals under 3: model-priced edge +16.1% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="verify-flag">totals under 3.25: model-priced edge +18.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="verify-flag">totals under 3.5: model-priced edge +12.5% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads home 2: model-priced edge +9.7% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 25, 12:54 AM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
+<p class="verify-flag">spreads home 2: model-priced edge +9.6% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 25, 12:54 AM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -734,7 +737,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.4040,lb=2.3311,N=8,SHOW=6,i,j;
+  var la=0.4025,lb=2.3326,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

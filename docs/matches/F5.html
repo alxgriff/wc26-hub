@@ -691,6 +691,9 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
+      <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">Japan</td><td title="1.87 decimal">-115</td><td>51%</td><td>64%</td><td class="edge-pos">+12.0%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="3.55 decimal">+255</td><td>27%</td><td>20%</td><td class="edge-neg">-6.8%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Sweden</td><td title="4.50 decimal">+350</td><td>21%</td><td>16%</td><td class="edge-neg">-5.3%</td></tr>
       <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.80 decimal">-125</td><td>53%</td><td>58%</td><td class="edge-pos">+4.5%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.05 decimal">+105</td><td>47%</td><td>42%</td><td class="edge-neg">-4.5%</td></tr>
       <tr><td class="lbl">Asian handicap</td><td class="lbl">Japan -0.5</td><td title="1.86 decimal">-116</td><td>52%</td><td>64%</td><td class="edge-pos">+12.0%</td></tr>
@@ -698,10 +701,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2.5</strong> (Total goals) @ -125, edge <strong>+4.5%</strong> — best price -120 (bovada). Flat 1u, paper record.</p></div>
+<div class="bet-callout"><span class="tag">Best bets — top 2, ≥4% edge</span><p>1. <strong>Japan</strong> (1X2) @ -115, edge <strong>+12.0%</strong> — best price -115 (draftkings). Flat 1u, paper record.</p><p>2. <strong>Over 2.5</strong> (Total goals) @ -125, edge <strong>+4.5%</strong> — best price -120 (bovada). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p><p class="odds-note warn">⚠ the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with extra caution until the draw calibration is re-checked after MD3.</p></div>
 <p class="odds-note">Logged pick: Over 2.5 @ -120 (bovada), edge 4.5pp · open.</p>
 <p class="verify-flag">spreads home -0.5: model-priced edge +12.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 25, 12:54 AM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<p class="odds-note">market snapshot Jun 25, 12:54 AM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -724,7 +727,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=2.0670,lb=0.9342,N=8,SHOW=6,i,j;
+  var la=2.0679,lb=0.9333,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

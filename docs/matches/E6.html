@@ -691,6 +691,9 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
+      <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">Ecuador</td><td title="5.50 decimal">+450</td><td>17%</td><td>25%</td><td class="edge-pos">+7.6%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="4.90 decimal">+390</td><td>20%</td><td>27%</td><td class="edge-pos">+7.0%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Germany</td><td title="1.53 decimal">-189</td><td>63%</td><td>48%</td><td class="edge-neg">-14.7%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.66 decimal">-153</td><td>58%</td><td>43%</td><td class="edge-neg">-15.2%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.31 decimal">+131</td><td>42%</td><td>57%</td><td class="edge-pos">+15.2%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.75</td><td title="1.80 decimal">-125</td><td>53%</td><td>43%</td><td class="edge-neg">-10.2%</td></tr>
@@ -702,12 +705,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     </tbody>
   </table>
 </div>
-<p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Ecuador</strong> (1X2) @ +450, edge <strong>+7.6%</strong> — best price +450 (draftkings). Flat 1u, paper record.</p><p class="odds-note warn">⚠ the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with extra caution until the draw calibration is re-checked after MD3.</p></div>
 <p class="verify-flag">totals under 2.5: model-priced edge +15.2% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="verify-flag">totals under 2.75: model-priced edge +10.2% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="verify-flag">totals under 3: model-priced edge +18.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="verify-flag">spreads home 1: model-priced edge +20.2% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 25, 12:54 AM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 3 can push (P 21%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
+<p class="odds-note">market snapshot Jun 25, 12:54 AM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 3 can push (P 21%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -730,7 +733,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.9607,lb=1.4410,N=8,SHOW=6,i,j;
+  var la=0.9603,lb=1.4414,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

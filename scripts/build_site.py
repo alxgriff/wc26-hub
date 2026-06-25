@@ -374,32 +374,31 @@ def load_knockout_resolver():
     return resolve
 
 
-def load_group_projector():
-    """Defensive adapter for the 'projected finish' bracket: score(match) -> (score_a, score_b)
-    = the model's most-likely DECISIVE scoreline for a group game, or None if predict.py is
-    unavailable. Decisive (skips the modal draw) so the projected final tables don't tie into a
-    provisional third-place cutline that would block the bracket. Neutral venue (Match carries
-    no country, and KO venues aren't modelled either — kept consistent)."""
+def load_group_rates():
+    """Adapter for the 'projected finish' bracket: rates(match) -> (lambda_a, lambda_b) = the
+    model's expected goals per side for a group game, or None if predict.py is unavailable.
+    Feeds bracket.project_modal_standings, which SIMULATES the remaining games from these
+    rates and takes each group's most-likely final ordering — rather than forcing a single
+    decisive scoreline per game (which can crown a winner that isn't even the model's most
+    likely one). Neutral venue (Match carries no country, and KO venues aren't modelled
+    either — kept consistent)."""
     try:
         import predict as pr
         model = pr.load_ratings()
     except Exception:
         return None
 
-    def score(m):
+    def rates(m):
         try:
             a, b = pr._canon(m.team_a), pr._canon(m.team_b)
             if a not in model.teams or b not in model.teams:
-                return (1, 0)
+                return (1.3, 1.3)
             pred = pr.predict_match(model, a, b)         # neutral
-            for (i, j), _p in pred.top_scores:           # most-likely scorelines, high→low
-                if i != j:
-                    return (i, j)                        # first decisive one
-            return (1, 0) if pred.p_a >= pred.p_b else (0, 1)   # all-draw top: favoured side by 1
+            return (pred.lambda_a, pred.lambda_b)
         except Exception:
-            return (1, 0)
+            return (1.3, 1.3)
 
-    return score
+    return rates
 
 
 def render_call(info: dict | None, team_a: str, team_b: str,
@@ -1555,8 +1554,10 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
     if projected is not None:
         proj_view = _bracket_view(
             projected, "view-proj", "Projected champion",
-            "Every remaining group game played out to the model's most likely decisive result, "
-            "then the whole bracket run through — a full scenario, not a forecast of who qualifies.")
+            "Every remaining group game simulated from the model's goal rates and each group "
+            "settled on its most likely final table (draws included — a leader who only needs a "
+            "point keeps top spot), then the whole bracket run through. A full scenario, not a "
+            "forecast of who qualifies.")
         # CSS-only radio toggle (no JS in the output): the radios precede the views so the
         # `#id:checked ~ .view` sibling rules can show/hide. 'As it stands' is the default.
         bracket_html = (
@@ -2077,12 +2078,13 @@ def build_site(out_dir: Path, target: date, generated_at: str,
             # results=None: no knockout has been played yet (group stage only);
             # actual results will override the model here once those fixtures exist
             bracket_proj = bk.feed(bracket_proj, knockout_resolver)
-        # 'Projected finish' view: project every remaining group game to a decisive result,
-        # resolve the WHOLE bracket (all 12 groups final, thirds slotted), run it through.
-        projector = load_group_projector()
-        if projector is not None:
+        # 'Projected finish' view: SIMULATE every remaining group game from the model's goal
+        # rates, take each group's most-likely final standings (draws and all), resolve the
+        # WHOLE bracket (12 groups final, thirds slotted), run it through.
+        rates_fn = load_group_rates()
+        if rates_fn is not None:
             try:
-                s_full = bk.project_final_standings(matches, projector)
+                s_full = bk.project_modal_standings(matches, rates_fn)
                 bracket_full = bk.project(s_full, resolve_provisional=True)
                 if knockout_resolver:
                     bracket_full = bk.feed(bracket_full, knockout_resolver)
