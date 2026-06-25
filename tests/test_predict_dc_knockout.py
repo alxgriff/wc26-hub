@@ -61,16 +61,18 @@ class DixonColesTests(unittest.TestCase):
         self.assertLess(abs(pr.p_b - b), 1e-12)
 
     def test_rho_zero_reproduces_known_baseline(self):
-        """Locked documented output (C1 triangulation): Brazil 51 / draw 29 / Morocco 20.
+        """Locked documented output (C1 triangulation): Brazil 50 / draw 30 / Morocco 20.
         Integration lock against the live verified ratings (like RealDataTests). History:
         55/26/19 -> 53/28/19 when the Tier 3.1 Maher-form total params were activated
-        (2026-06-14). Now 51/29/20 after the 2026-06-18 model update (Futi tilt w_futi
-        1.0->1.5 AND the post-MD1 6/18 futi.live ratings): Futi rates Morocco far higher
-        than Elo (rank 8 vs 22), so the heavier Futi weight lifts Morocco ~1pp and trims
-        Brazil ~2pp. rho is still 0."""
+        (2026-06-14); -> 51/29/20 at the 2026-06-18 update (Futi tilt w_futi 1.0->1.5 AND
+        the post-MD1 6/18 futi.live ratings: Futi rates Morocco far higher than Elo, rank 8
+        vs 22). Now 50/30/20 after the 2026-06-24 post-MD2 futi.live refresh
+        (World_Cup_2026_Futi_6_24.csv): Morocco's Futi defense rose 95->97, lifting the draw
+        ~1pp and trimming Brazil ~1pp. Pinned to the VERIFIED Elo anchor (elo_current=False),
+        so only the Futi refresh moves it; rho is still 0."""
         pr = P.predict_match(MODEL, "Brazil", "Morocco")
         got = (round(pr.p_a * 100), round(pr.p_draw * 100), round(pr.p_b * 100))
-        self.assertEqual(got, (51, 29, 20), got)
+        self.assertEqual(got, (50, 30, 20), got)
 
     def test_dc_tau_per_cell_lambda_mapping(self):
         """Pin the EXACT per-cell Dixon-Coles form, incl. the deliberate cross-mapping
