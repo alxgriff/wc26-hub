@@ -598,14 +598,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <p class="scenario-intro">Final matchday — both Group H games kick off simultaneously: 9 possible outcomes. Anything that comes down to goal difference is flagged margin-dependent, never guessed.</p>
   <table>
     <caption class="sr-only">Finish distribution across all outcome combinations</caption>
-    <thead><tr><th class="lbl" scope="col">Team</th><th scope="col">Top 2</th><th scope="col">3rd</th><th scope="col">Out</th><th scope="col">Margin</th></tr></thead>
+    <thead><tr><th class="lbl" scope="col">Team</th><th scope="col">1st</th><th scope="col">2nd</th><th scope="col" title="through, but the 1st-vs-2nd seed rides on goal difference">Top&nbsp;2*</th><th scope="col">3rd</th><th scope="col">Out</th><th scope="col">Margin</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Uruguay</td><td>3</td><td>3</td><td>0</td><td>3</td></tr>
-      <tr><td class="lbl">Spain</td><td>7</td><td>1</td><td>0</td><td>1</td></tr>
+      <tr><td class="lbl">Uruguay</td><td>2</td><td>0</td><td>1</td><td>3</td><td>0</td><td>3</td></tr>
+      <tr><td class="lbl">Spain</td><td>5</td><td>2</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
     </tbody>
   </table>
-  <p class="scenario-team">Uruguay</p>  <ul class="scenario-stakes"><li>Win: through (top 2)</li><li>Draw: 3rd — into the best-thirds race if Cape Verde beat Saudi Arabia or Saudi Arabia beat Cape Verde; margin-dependent (goal difference/goals, then head-to-head, decide) if Cape Verde and Saudi Arabia draw</li><li>Loss: 3rd — into the best-thirds race if Cape Verde beat Saudi Arabia; margin-dependent (goal difference/goals, then head-to-head, decide) if Cape Verde and Saudi Arabia draw or Saudi Arabia beat Cape Verde</li></ul>
-  <p class="scenario-team">Spain</p>  <ul class="scenario-stakes"><li>Win: through (top 2)</li><li>Draw: through (top 2)</li><li>Loss: through (top 2) if Cape Verde and Saudi Arabia draw; 3rd — into the best-thirds race if Cape Verde beat Saudi Arabia; margin-dependent (goal difference/goals, then head-to-head, decide) if Saudi Arabia beat Cape Verde</li></ul>
+  <p class="scenario-team">Uruguay</p>  <ul class="scenario-stakes"><li>Win: win the group (1st — the easier Round-of-32 side) if Cape Verde and Saudi Arabia draw or Saudi Arabia beat Cape Verde; through, but 1st vs 2nd rides on goal difference if Cape Verde beat Saudi Arabia</li><li>Draw: 3rd — into the best-thirds race if Cape Verde beat Saudi Arabia or Saudi Arabia beat Cape Verde; margin-dependent (goal difference/goals, then head-to-head, decide) if Cape Verde and Saudi Arabia draw</li><li>Loss: 3rd — into the best-thirds race if Cape Verde beat Saudi Arabia; margin-dependent (goal difference/goals, then head-to-head, decide) if Cape Verde and Saudi Arabia draw or Saudi Arabia beat Cape Verde</li></ul>
+  <p class="scenario-team">Spain</p>  <ul class="scenario-stakes"><li>Win: win the group (1st — the easier Round-of-32 side)</li><li>Draw: win the group (1st — the easier Round-of-32 side) if Cape Verde and Saudi Arabia draw or Saudi Arabia beat Cape Verde; through, but 1st vs 2nd rides on goal difference if Cape Verde beat Saudi Arabia</li><li>Loss: runners-up (2nd) if Cape Verde and Saudi Arabia draw or Saudi Arabia beat Cape Verde; 3rd — into the best-thirds race if Cape Verde beat Saudi Arabia</li></ul>
 </div>
   <div class="mini-table">
 <article class="card" id="group-h" style="--i:0" aria-labelledby="gh-h">
@@ -691,16 +691,16 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.83 decimal">-120</td><td>52%</td><td>40%</td><td class="edge-neg">-11.7%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.00 decimal">+100</td><td>48%</td><td>60%</td><td class="edge-pos">+11.7%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Uruguay +1</td><td title="2.00 decimal">+100</td><td>48%</td><td>43%</td><td class="edge-neg">-4.8%</td></tr>
-      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Spain -1</td><td title="1.83 decimal">-120</td><td>52%</td><td>57%</td><td class="edge-pos">+4.8%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.82 decimal">-122</td><td>52%</td><td>40%</td><td class="edge-neg">-11.9%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.00 decimal">+100</td><td>48%</td><td>60%</td><td class="edge-pos">+11.9%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Uruguay +1</td><td title="2.00 decimal">+100</td><td>48%</td><td>43%</td><td class="edge-neg">-4.7%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Spain -1</td><td title="1.83 decimal">-120</td><td>52%</td><td>57%</td><td class="edge-pos">+4.7%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Spain -1</strong> (Asian handicap) @ -120, edge <strong>+4.8%</strong> — best price -118 (bovada). Flat 1u, paper record.</p></div>
-<p class="verify-flag">totals under 2.5: model-priced edge +11.7% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 24, 9:24 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Spain -1</strong> (Asian handicap) @ -120, edge <strong>+4.7%</strong> — best price -120 (bovada). Flat 1u, paper record.</p></div>
+<p class="verify-flag">totals under 2.5: model-priced edge +11.9% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 25, 12:54 AM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -723,7 +723,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.5070,lb=1.7959,N=8,SHOW=6,i,j;
+  var la=0.5079,lb=1.7949,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

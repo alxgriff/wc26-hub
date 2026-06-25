@@ -598,10 +598,10 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <p class="scenario-intro">Final matchday — both Group K games kick off simultaneously: 9 possible outcomes. Anything that comes down to goal difference is flagged margin-dependent, never guessed.</p>
   <table>
     <caption class="sr-only">Finish distribution across all outcome combinations</caption>
-    <thead><tr><th class="lbl" scope="col">Team</th><th scope="col">Top 2</th><th scope="col">3rd</th><th scope="col">Out</th><th scope="col">Margin</th></tr></thead>
+    <thead><tr><th class="lbl" scope="col">Team</th><th scope="col">1st</th><th scope="col">2nd</th><th scope="col" title="through, but the 1st-vs-2nd seed rides on goal difference">Top&nbsp;2*</th><th scope="col">3rd</th><th scope="col">Out</th><th scope="col">Margin</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">DR Congo</td><td>0</td><td>5</td><td>3</td><td>1</td></tr>
-      <tr><td class="lbl">Uzbekistan</td><td>0</td><td>3</td><td>6</td><td>0</td></tr>
+      <tr><td class="lbl">DR Congo</td><td>0</td><td>0</td><td>0</td><td>5</td><td>3</td><td>1</td></tr>
+      <tr><td class="lbl">Uzbekistan</td><td>0</td><td>0</td><td>0</td><td>3</td><td>6</td><td>0</td></tr>
     </tbody>
   </table>
   <p class="scenario-team">DR Congo</p>  <ul class="scenario-stakes"><li>Win: 3rd — into the best-thirds race if Colombia and Portugal draw or Portugal beat Colombia; margin-dependent (goal difference/goals, then head-to-head, decide) if Colombia beat Portugal</li><li>Draw: 3rd — into the best-thirds race</li><li>Loss: eliminated (4th)</li></ul>
@@ -690,15 +690,15 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <tbody>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.87 decimal">-115</td><td>51%</td><td>31%</td><td class="edge-neg">-20.1%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.93 decimal">-108</td><td>49%</td><td>69%</td><td class="edge-pos">+20.1%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">DR Congo -0.5</td><td title="1.80 decimal">-124</td><td>53%</td><td>36%</td><td class="edge-neg">-17.2%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Uzbekistan +0.5</td><td title="2.06 decimal">+106</td><td>47%</td><td>64%</td><td class="edge-pos">+17.2%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">DR Congo -0.5</td><td title="1.77 decimal">-130</td><td>54%</td><td>36%</td><td class="edge-neg">-18.4%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Uzbekistan +0.5</td><td title="2.12 decimal">+112</td><td>46%</td><td>64%</td><td class="edge-pos">+18.4%</td></tr>
     </tbody>
   </table>
 </div>
 <p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
 <p class="verify-flag">totals under 2.5: model-priced edge +20.1% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads away 0.5: model-priced edge +17.2% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 24, 9:24 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<p class="verify-flag">spreads away 0.5: model-priced edge +18.4% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 25, 12:54 AM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -721,7 +721,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.0042,lb=0.9349,N=8,SHOW=6,i,j;
+  var la=1.0041,lb=0.9351,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

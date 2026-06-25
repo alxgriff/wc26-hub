@@ -598,14 +598,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <p class="scenario-intro">Final matchday — both Group L games kick off simultaneously: 9 possible outcomes. Anything that comes down to goal difference is flagged margin-dependent, never guessed.</p>
   <table>
     <caption class="sr-only">Finish distribution across all outcome combinations</caption>
-    <thead><tr><th class="lbl" scope="col">Team</th><th scope="col">Top 2</th><th scope="col">3rd</th><th scope="col">Out</th><th scope="col">Margin</th></tr></thead>
+    <thead><tr><th class="lbl" scope="col">Team</th><th scope="col">1st</th><th scope="col">2nd</th><th scope="col" title="through, but the 1st-vs-2nd seed rides on goal difference">Top&nbsp;2*</th><th scope="col">3rd</th><th scope="col">Out</th><th scope="col">Margin</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Panama</td><td>0</td><td>1</td><td>8</td><td>0</td></tr>
-      <tr><td class="lbl">England</td><td>7</td><td>0</td><td>0</td><td>2</td></tr>
+      <tr><td class="lbl">Panama</td><td>0</td><td>0</td><td>0</td><td>0</td><td>9</td><td>0</td></tr>
+      <tr><td class="lbl">England</td><td>3</td><td>4</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
     </tbody>
   </table>
-  <p class="scenario-team">Panama</p>  <ul class="scenario-stakes"><li>Win: 3rd — into the best-thirds race if Ghana beat Croatia; eliminated (4th) if Croatia beat Ghana or Croatia and Ghana draw</li><li>Draw: eliminated (4th)</li><li>Loss: eliminated (4th)</li></ul>
-  <p class="scenario-team">England</p>  <ul class="scenario-stakes"><li>Win: through (top 2)</li><li>Draw: through (top 2)</li><li>Loss: through (top 2) if Ghana beat Croatia; margin-dependent (goal difference/goals, then head-to-head, decide) if Croatia beat Ghana or Croatia and Ghana draw</li></ul>
+  <p class="scenario-team">Panama</p>  <ul class="scenario-stakes"><li>Win: eliminated (4th)</li><li>Draw: eliminated (4th)</li><li>Loss: eliminated (4th)</li></ul>
+  <p class="scenario-team">England</p>  <ul class="scenario-stakes"><li>Win: win the group (1st — the easier Round-of-32 side) if Croatia beat Ghana or Croatia and Ghana draw; through, but 1st vs 2nd rides on goal difference if Ghana beat Croatia</li><li>Draw: win the group (1st — the easier Round-of-32 side) if Croatia and Ghana draw; runners-up (2nd) if Croatia beat Ghana or Ghana beat Croatia</li><li>Loss: runners-up (2nd) if Croatia and Ghana draw or Ghana beat Croatia; margin-dependent (goal difference/goals, then head-to-head, decide) if Croatia beat Ghana</li></ul>
 </div>
   <div class="mini-table">
 <article class="card" id="group-l" style="--i:0" aria-labelledby="gh-l">
@@ -705,7 +705,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 <div class="bet-callout"><span class="tag">Best bet</span><p><strong>Under 3</strong> (Total goals) @ +125, edge <strong>+5.4%</strong> — best price +125 (betonlineag). Flat 1u, paper record.</p></div>
 <p class="verify-flag">totals under 3.25: model-priced edge +10.4% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="verify-flag">spreads away -1.75: model-priced edge +8.8% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 24, 9:24 PM ET · DraftKings where quoted, else best of 3 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
+<p class="odds-note">market snapshot Jun 25, 12:54 AM ET · DraftKings where quoted, else best of 3 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -728,7 +728,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.3022,lb=2.9148,N=8,SHOW=6,i,j;
+  var la=0.3038,lb=2.9133,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

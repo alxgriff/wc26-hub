@@ -711,7 +711,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bets — top 2, ≥4% edge</span><p>1. <strong>Qatar</strong> (1X2) @ +750, edge <strong>+9.6%</strong> — best price +750 (draftkings). Flat 1u, paper record.</p><p>2. <strong>Under 2.5</strong> (Total goals) @ +135, edge <strong>+6.6%</strong> — best price +135 (betmgm). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p><p class="odds-note warn">⚠ the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with extra caution until the draw calibration is re-checked after MD3.</p></div>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Qatar</strong> (1X2), model edge <strong>+9.6%</strong></p><p><strong>Under 2.5</strong> (Total goals), model edge <strong>+6.6%</strong></p><p class="odds-note">the model likes these, but the line is over 12h old (the book hasn't reposted), so they are <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
 <p class="odds-note">Logged pick: Qatar @ +700 (draftkings), edge 8.9pp · settled <b>lost</b> for -1.00u · CLV -0.7pp.</p>
 <p class="verify-flag">totals under 3: model-priced edge +9.7% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="verify-flag">totals under 3.5: model-priced edge +8.8% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
@@ -739,7 +739,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.9024,lb=0.9107,N=8,SHOW=6,i,j;
+  var la=1.9018,lb=0.9114,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

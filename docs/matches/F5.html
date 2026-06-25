@@ -598,14 +598,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <p class="scenario-intro">Final matchday — both Group F games kick off simultaneously: 9 possible outcomes. Anything that comes down to goal difference is flagged margin-dependent, never guessed.</p>
   <table>
     <caption class="sr-only">Finish distribution across all outcome combinations</caption>
-    <thead><tr><th class="lbl" scope="col">Team</th><th scope="col">Top 2</th><th scope="col">3rd</th><th scope="col">Out</th><th scope="col">Margin</th></tr></thead>
+    <thead><tr><th class="lbl" scope="col">Team</th><th scope="col">1st</th><th scope="col">2nd</th><th scope="col" title="through, but the 1st-vs-2nd seed rides on goal difference">Top&nbsp;2*</th><th scope="col">3rd</th><th scope="col">Out</th><th scope="col">Margin</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Japan</td><td>6</td><td>2</td><td>0</td><td>1</td></tr>
-      <tr><td class="lbl">Sweden</td><td>3</td><td>4</td><td>0</td><td>2</td></tr>
+      <tr><td class="lbl">Japan</td><td>3</td><td>1</td><td>2</td><td>2</td><td>0</td><td>1</td></tr>
+      <tr><td class="lbl">Sweden</td><td>2</td><td>1</td><td>0</td><td>6</td><td>0</td><td>0</td></tr>
     </tbody>
   </table>
-  <p class="scenario-team">Japan</p>  <ul class="scenario-stakes"><li>Win: through (top 2)</li><li>Draw: through (top 2)</li><li>Loss: 3rd — into the best-thirds race if Tunisia and Netherlands draw or Netherlands beat Tunisia; margin-dependent (goal difference/goals, then head-to-head, decide) if Tunisia beat Netherlands</li></ul>
-  <p class="scenario-team">Sweden</p>  <ul class="scenario-stakes"><li>Win: through (top 2)</li><li>Draw: 3rd — into the best-thirds race if Tunisia and Netherlands draw or Netherlands beat Tunisia; margin-dependent (goal difference/goals, then head-to-head, decide) if Tunisia beat Netherlands</li><li>Loss: 3rd — into the best-thirds race if Tunisia and Netherlands draw or Netherlands beat Tunisia; margin-dependent (goal difference/goals, then head-to-head, decide) if Tunisia beat Netherlands</li></ul>
+  <p class="scenario-team">Japan</p>  <ul class="scenario-stakes"><li>Win: win the group (1st — the easier Round-of-32 side) if Tunisia beat Netherlands or Tunisia and Netherlands draw; through, but 1st vs 2nd rides on goal difference if Netherlands beat Tunisia</li><li>Draw: win the group (1st — the easier Round-of-32 side) if Tunisia beat Netherlands; runners-up (2nd) if Netherlands beat Tunisia; through, but 1st vs 2nd rides on goal difference if Tunisia and Netherlands draw</li><li>Loss: 3rd — into the best-thirds race if Tunisia and Netherlands draw or Netherlands beat Tunisia; margin-dependent (goal difference/goals, then head-to-head, decide) if Tunisia beat Netherlands</li></ul>
+  <p class="scenario-team">Sweden</p>  <ul class="scenario-stakes"><li>Win: win the group (1st — the easier Round-of-32 side) if Tunisia beat Netherlands or Tunisia and Netherlands draw; runners-up (2nd) if Netherlands beat Tunisia</li><li>Draw: 3rd — into the best-thirds race</li><li>Loss: 3rd — into the best-thirds race</li></ul>
 </div>
   <div class="mini-table">
 <article class="card" id="group-f" style="--i:0" aria-labelledby="gh-f">
@@ -691,19 +691,17 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.75 decimal">-132</td><td>54%</td><td>58%</td><td class="edge-pos">+3.2%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.10 decimal">+110</td><td>46%</td><td>42%</td><td class="edge-neg">-3.2%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.75</td><td title="1.95 decimal">-105</td><td>49%</td><td>58%</td><td class="edge-pos">+8.8%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.75</td><td title="1.87 decimal">-115</td><td>51%</td><td>42%</td><td class="edge-neg">-8.8%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Japan -0.5</td><td title="1.87 decimal">-115</td><td>51%</td><td>64%</td><td class="edge-pos">+12.1%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Sweden +0.5</td><td title="1.98 decimal">-102</td><td>49%</td><td>36%</td><td class="edge-neg">-12.1%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.80 decimal">-125</td><td>53%</td><td>58%</td><td class="edge-pos">+4.5%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.05 decimal">+105</td><td>47%</td><td>42%</td><td class="edge-neg">-4.5%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Japan -0.5</td><td title="1.86 decimal">-116</td><td>52%</td><td>64%</td><td class="edge-pos">+12.0%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Sweden +0.5</td><td title="1.98 decimal">-102</td><td>48%</td><td>36%</td><td class="edge-neg">-12.0%</td></tr>
     </tbody>
   </table>
 </div>
-<p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
-<p class="verify-flag">totals over 2.75: model-priced edge +8.8% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads home -0.5: model-priced edge +12.1% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 24, 9:24 PM ET · DraftKings where quoted, else best of 6 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2.5</strong> (Total goals) @ -125, edge <strong>+4.5%</strong> — best price -120 (bovada). Flat 1u, paper record.</p></div>
+<p class="odds-note">Logged pick: Over 2.5 @ -120 (bovada), edge 4.5pp · open.</p>
+<p class="verify-flag">spreads home -0.5: model-priced edge +12.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 25, 12:54 AM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -726,7 +724,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=2.0679,lb=0.9333,N=8,SHOW=6,i,j;
+  var la=2.0670,lb=0.9342,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
