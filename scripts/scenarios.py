@@ -7,21 +7,27 @@ each combination every team's final **points** are fixed exactly, but the goal
 **margins** are not — a win adds an unknown amount to goal difference, a draw
 adds exactly zero, a loss subtracts an unknown amount.
 
-The FIFA 2026 group tiebreakers run points -> goal difference -> goals scored ->
-head-to-head -> fair play -> lots. So once two teams are level on points, the
-very next criterion (GD) usually depends on margins we do not know. This module
-therefore:
+The FIFA 2026 group tiebreakers run points -> head-to-head (its points, then GD,
+then goals among the level teams) -> overall goal difference -> overall goals ->
+fair play -> FIFA World Ranking (no drawing of lots). So once two teams are level
+on points, the order turns on criteria — head-to-head and goal margins — that
+mostly depend on results we do not yet know. This module therefore:
 
   * computes each team's final points for every combo (exact), and
   * models each team's post-MD3 GD as an interval — draw -> [gd, gd] (known),
     win -> [gd+1, +inf), loss -> (-inf, gd-1] — and resolves a points-tie only
-    when the intervals are disjoint. Anything that still comes down to GD/GF is
-    reported as **margin-dependent**, never guessed.
+    when the intervals are disjoint. Anything that still comes down to GD/goals
+    (or head-to-head) is reported as **margin-dependent**, never guessed.
 
-Each team is then bucketed per combo as top-2 / 3rd / out (4th) / margin-
-dependent, and we tally the buckets across the 9 combos. Note: a side can always
-win its last game to at least tie for 3rd, so no team is ever *guaranteed* 4th —
-"eliminated" means it cannot reach the top two in any combination (top-2 = 0).
+Each team is then bucketed per combo by its EXACT reachable finish — 1st / 2nd /
+3rd / out (4th) — plus two "still-open" buckets: **top-2** (through for sure, but
+the 1st-vs-2nd seed rides on goal difference) and **margin-dependent** (even the
+qualify/eliminate bucket is unresolved). We tally these across the 9 combos. The
+1st-vs-2nd split matters: winning the group earns the easier Round-of-32 side, so
+a team already through but still chasing top spot has plenty to play for. Note: a
+side can always win its last game to at least tie for 3rd, so no team is ever
+*guaranteed* 4th — "eliminated" means it cannot reach the top two in any
+combination (1st = 2nd = top-2 = 0).
 
 Ranking of decided positions reuses the points/GD ordering; this module never
 re-implements the full tiebreak engine (that lives in standings.py).
@@ -50,7 +56,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 _INF = float("inf")
 _OUTCOMES = ("a", "d", "b")               # team_a win / draw / team_b win
 _POINT_DELTA = {"a": (3, 0), "d": (1, 1), "b": (0, 3)}
-_BUCKET_ORDER = ("top2", "third", "margin", "out")
+_BUCKET_ORDER = ("first", "second", "top2", "third", "margin", "out")
 
 
 # ---------------------------------------------------------------- data
@@ -87,11 +93,9 @@ def _gd_delta(outcome: str, is_a: bool) -> tuple[float, float]:
 
 
 def _bucket(pos: int) -> str:
-    if pos <= 2:
-        return "top2"
-    if pos == 3:
-        return "third"
-    return "out"
+    """An EXACT finishing position -> its bucket (1st and 2nd kept distinct, since
+    winning the group earns the easier Round-of-32 side)."""
+    return {1: "first", 2: "second", 3: "third"}.get(pos, "out")
 
 
 def _classify_combo(teams, current, unplayed, combo) -> dict:
@@ -120,8 +124,13 @@ def _classify_combo(teams, current, unplayed, combo) -> dict:
     rng = _position_range(teams, pts, gd_lo, gd_hi)
     buckets = {}
     for t in teams:
-        lo_bucket, hi_bucket = _bucket(rng[t][0]), _bucket(rng[t][1])
-        buckets[t] = lo_bucket if lo_bucket == hi_bucket else "margin"
+        lo_b, hi_b = _bucket(rng[t][0]), _bucket(rng[t][1])
+        if lo_b == hi_b:
+            buckets[t] = lo_b                              # exact finish pinned
+        elif {lo_b, hi_b} <= {"first", "second"}:          # through, but 1st vs 2nd on GD
+            buckets[t] = "top2"
+        else:
+            buckets[t] = "margin"                          # qualify/eliminate still open
     return buckets
 
 
@@ -172,7 +181,9 @@ def clinched_ranks(group: str, matches) -> dict:
 
 def _word(bucket: str) -> str:
     return {
-        "top2": "through (top 2)",
+        "first": "win the group (1st — the easier Round-of-32 side)",
+        "second": "runners-up (2nd)",
+        "top2": "through, but 1st vs 2nd rides on goal difference",
         "third": "3rd — into the best-thirds race",
         "out": "eliminated (4th)",
         "margin": "margin-dependent (goal difference/goals, then head-to-head, decide)",
@@ -233,7 +244,7 @@ def enumerate_scenarios(group: str, matches) -> ScenarioReport:
 
     notes = []
     combos = list(product(_OUTCOMES, repeat=len(unplayed)))
-    counts = {t: {b: 0 for b in ("top2", "third", "out", "margin")} for t in teams}
+    counts = {t: {b: 0 for b in _BUCKET_ORDER} for t in teams}
     for combo in combos:
         buckets = _classify_combo(teams, current, unplayed, combo)
         for t in teams:
@@ -300,13 +311,16 @@ def render_markdown(report: ScenarioReport) -> str:
     lines += ["## Current table", "", *_render_table(report.current_rows), ""]
 
     lines += ["## Where each team can finish",
-              f"_Across all {report.n_combos} combinations. Top two advance directly; the "
-              "best eight third-placed teams also reach the Round of 32._", "",
-              "| Team | Top 2 | 3rd | Out (4th) | Margin-dependent |",
-              "|:---|---:|---:|---:|---:|"]
+              f"_Across all {report.n_combos} combinations. Top two advance directly — winning "
+              "the group earns the easier Round-of-32 side, so 1st and 2nd are kept apart; the "
+              "best eight third-placed teams also reach the Round of 32. **Top 2 (seed TBD)** = "
+              "through, but the 1st-vs-2nd seed still rides on goal difference._", "",
+              "| Team | 1st | 2nd | Top 2 (seed TBD) | 3rd | Out (4th) | Margin |",
+              "|:---|---:|---:|---:|---:|---:|---:|"]
     for ts in report.teams:
         c = ts.counts
-        lines.append(f"| {ts.team} | {c['top2']} | {c['third']} | {c['out']} | {c['margin']} |")
+        lines.append(f"| {ts.team} | {c['first']} | {c['second']} | {c['top2']} | "
+                     f"{c['third']} | {c['out']} | {c['margin']} |")
     lines.append("")
 
     if any(ts.stakes for ts in report.teams):
@@ -339,12 +353,13 @@ def render_match_stakes(report: ScenarioReport, team_a: str, team_b: str) -> str
         f"{report.n_combos} possible outcomes. Placings that come down to goal difference "
         "are flagged margin-dependent._",
         "",
-        "| Team | Top 2 | 3rd | Out | Margin |",
-        "|:---|---:|---:|---:|---:|",
+        "| Team | 1st | 2nd | Top 2 (seed TBD) | 3rd | Out | Margin |",
+        "|:---|---:|---:|---:|---:|---:|---:|",
     ]
     for ts in (ta, tb):
         c = ts.counts
-        lines.append(f"| {ts.team} | {c['top2']} | {c['third']} | {c['out']} | {c['margin']} |")
+        lines.append(f"| {ts.team} | {c['first']} | {c['second']} | {c['top2']} | "
+                     f"{c['third']} | {c['out']} | {c['margin']} |")
     lines.append("")
     for ts in (ta, tb):
         if ts.stakes:

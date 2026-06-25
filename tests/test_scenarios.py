@@ -50,14 +50,21 @@ class ScenarioCoreTests(unittest.TestCase):
         self.assertEqual(len(self.report.unplayed), 2)
 
     def test_a_leader_is_locked_top_two_in_all_nine(self):
-        self.assertEqual(counts(self.report, "L")["top2"], 9)
-        self.assertEqual(counts(self.report, "M")["top2"], 9)
+        # 'through' now spans the exact seeds: first + second + seed-TBD top2 = all 9.
+        for t in ("L", "M"):
+            c = counts(self.report, t)
+            self.assertEqual(c["first"] + c["second"] + c["top2"], 9)
+        # the 1st-vs-2nd nuance is populated: L wins the group unless it loses to M.
+        lc = counts(self.report, "L")
+        self.assertGreater(lc["first"], 0)
+        self.assertGreater(lc["second"], 0)
 
     def test_c_trailers_can_never_reach_top_two(self):
         # "eliminated" = out of the top two in every combo (a side can always win
         # to at least tie for 3rd, so nobody is ever *guaranteed* 4th).
-        self.assertEqual(counts(self.report, "B")["top2"], 0)
-        self.assertEqual(counts(self.report, "D")["top2"], 0)
+        for t in ("B", "D"):
+            c = counts(self.report, t)
+            self.assertEqual(c["first"] + c["second"] + c["top2"], 0)
 
     def test_b_margin_dependent_combo_exists(self):
         # B and D both drawing leaves them level on points and (known) GD -> margin.
@@ -104,14 +111,38 @@ class GdResolutionTests(unittest.TestCase):
         self.assertGreater(counts(report, "D")["margin"], 0)
 
 
+class SeedUndecidedTests(unittest.TestCase):
+    """The 1st-vs-2nd split: two teams through but with the seed still on goal
+    difference land in the 'top2 (seed TBD)' bucket, not 'first'/'second'."""
+
+    def test_top2_seed_tbd_when_two_leaders_finish_level(self):
+        # P and Q draw their head-to-head (MD1) and enter MD3 level on points AND GD.
+        # In the combo where both win their MD3 game they finish level on 7 pts with
+        # overlapping GD -> through, but 1st-vs-2nd unresolved -> the seed-TBD bucket.
+        g = [
+            mk("A1", "P", "Q", 0, 0), mk("A2", "R", "S", 0, 0),
+            mk("A3", "P", "R", 1, 0), mk("A4", "Q", "S", 1, 0),
+            mk("A5", "P", "S"), mk("A6", "Q", "R"),
+        ]
+        rep = sc.enumerate_scenarios("A", g)
+        self.assertGreater(counts(rep, "P")["top2"], 0)
+        self.assertGreater(counts(rep, "Q")["top2"], 0)
+        for t in ("P", "Q", "R", "S"):           # buckets still partition the 9 combos
+            self.assertEqual(sum(counts(rep, t).values()), 9)
+
+
 class StakesAndRenderTests(unittest.TestCase):
     def setUp(self):
         self.report = sc.enumerate_scenarios("A", GROUP_A)
 
-    def test_locked_leader_stakes_are_uniformly_through(self):
+    def test_locked_leader_stakes_show_first_vs_second(self):
         stakes = next(ts.stakes for ts in self.report.teams if ts.team == "L")
         self.assertEqual(len(stakes), 3)                     # Win / Draw / Loss
-        self.assertTrue(all("through (top 2)" in s for s in stakes))
+        # always through, and the 1st-vs-2nd nuance now surfaces: every line names a
+        # seed; L wins the group unless it loses to M (then runners-up).
+        self.assertTrue(all(("1st" in s or "2nd" in s) for s in stakes))
+        self.assertTrue(any("1st" in s for s in stakes))
+        self.assertTrue(any("2nd" in s for s in stakes))
 
     def test_trailer_stakes_condition_on_the_other_game(self):
         stakes = next(ts.stakes for ts in self.report.teams if ts.team == "B")
@@ -128,7 +159,7 @@ class StakesAndRenderTests(unittest.TestCase):
         for heading in ("# Group A — Matchday 3 scenarios", "## Current table",
                         "## Where each team can finish", "## What each team needs"):
             self.assertIn(heading, md)
-        self.assertIn("| Team | Top 2 | 3rd | Out (4th) | Margin-dependent |", md)
+        self.assertIn("| Team | 1st | 2nd | Top 2 (seed TBD) | 3rd | Out (4th) | Margin |", md)
 
 
 class CliTests(unittest.TestCase):

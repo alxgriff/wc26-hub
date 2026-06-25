@@ -1135,9 +1135,12 @@ def compute_fates(matches: "list[st.Match]", warnings: list[str]
                             f"({e.__class__.__name__}: {e}) — no fate marks")
             continue
         for ts in report.teams:
-            if ts.counts["top2"] == report.n_combos:
+            c = ts.counts
+            # 'through' = top-2 in EVERY combo, whether the exact seed (1st/2nd) is
+            # pinned or still on goal difference (first + second + seed-TBD top2).
+            if c["first"] + c["second"] + c["top2"] == report.n_combos:
                 fates[ts.team] = "through"
-            elif ts.counts["out"] == report.n_combos:
+            elif c["out"] == report.n_combos:
                 fates[ts.team] = "out"
         if len(report.unplayed) == 2:
             md3_reports[group] = report
@@ -1157,8 +1160,8 @@ def render_scenario_block(report: "scen.ScenarioReport",
     for ts in (ta, tb):
         c = ts.counts
         rows.append(f'      <tr><td class="lbl">{_esc(ts.team)}</td>'
-                    f'<td>{c["top2"]}</td><td>{c["third"]}</td>'
-                    f'<td>{c["out"]}</td><td>{c["margin"]}</td></tr>')
+                    f'<td>{c["first"]}</td><td>{c["second"]}</td><td>{c["top2"]}</td>'
+                    f'<td>{c["third"]}</td><td>{c["out"]}</td><td>{c["margin"]}</td></tr>')
     parts = [
         '<div class="scenario">',
         f'  <p class="scenario-intro">Final matchday — both Group {_esc(report.group)} '
@@ -1169,7 +1172,9 @@ def render_scenario_block(report: "scen.ScenarioReport",
         '    <caption class="sr-only">Finish distribution across all outcome '
         'combinations</caption>',
         '    <thead><tr><th class="lbl" scope="col">Team</th>'
-        '<th scope="col">Top 2</th><th scope="col">3rd</th>'
+        '<th scope="col">1st</th><th scope="col">2nd</th>'
+        '<th scope="col" title="through, but the 1st-vs-2nd seed rides on goal difference">'
+        'Top&nbsp;2*</th><th scope="col">3rd</th>'
         '<th scope="col">Out</th><th scope="col">Margin</th></tr></thead>',
         '    <tbody>\n' + "\n".join(rows) + '\n    </tbody>',
         '  </table>',
