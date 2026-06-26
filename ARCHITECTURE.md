@@ -49,6 +49,8 @@ it, so there is no second implementation to drift.
 | `scenarios.py` | MD3 outcome enumerator (9 combos → top2/third/out/margin-dependent) | `enumerate_scenarios`, `render_match_stakes` | `scenarios.py A` |
 | `predict.py` | Match predictor: Elo+Futi consensus → Poisson matrix → W/D/L, score, O/U, BTTS; knockout resolver | `load_ratings`, `predict_match`, `resolve_knockout`, `blend_wdl`; `Config`, `Prediction`, `KnockoutPrediction` | `predict.py <id\|teams>` |
 | `bracket.py` | Knockout projector R32→Final; gated; Annex C third-place lookup; winner propagation | `load_annex_c`, `project`, `feed`, `to_dict`, `render_markdown`; `R32_TEMPLATE`, `BRACKET_TREE` | `bracket.py` |
+| `knockout.py` | Knockout data contract (matches 73–104): loader/validator, R32+feeder team resolver, penalty-aware result entry | `load_knockout`, `materialize_teams`, `enter_ko_result`, `results_dict`, `slot_labels`; `KnockoutMatch` | `knockout.py --resolve\|--enter` |
+| `knockout_cards.py` | Sonnet-grounded knockout match cards (KB profiles + facts + Wire), fail-soft, auto-published to `cards/ko/` | `generate_card`, `build_facts`, `load_ko_card` | `knockout_cards.py [DATE]` |
 
 ### Accountability + odds
 | Module | Role | Key API | CLI |
@@ -66,6 +68,7 @@ it, so there is no second implementation to drift.
 | Module | Role | CLI |
 |---|---|---|
 | `fetch_results.py` | Pull completed scores from The Odds API → `fixtures.csv` | `fetch_results.py [--dry-run]` |
+| `fetch_ko_results.py` | Knockout scores → `knockout.csv` (decisive auto-entered; level/penalty reported for manual entry) | `fetch_ko_results.py [--dry-run]` |
 | `weather.py` | Open-Meteo forecast/actual → WBGT heat + per-team climate (Sweat Factor) | `weather.py --date\|--baselines\|--backfill` |
 | `stakes_blurb.py` | Sonnet-written morning standfirst, grounded only in computed facts | `stakes_blurb.py [DATE]` |
 | `fetch_news.py` | Sonnet+web UNVERIFIED injury/lineup digest → `news/` ("The Wire") | `fetch_news.py [DATE]` |
@@ -89,6 +92,8 @@ Committed unless noted. CSVs carry a UTF-8 BOM (use `utf-8-sig`).
 | `Ratings/*.csv` | Pre-tournament ratings (Elo VERIFIED, Futi, Opta context, Market); audited in `Ratings/DATA_QUALITY.md` | human |
 | `ratings.csv`, `team_strength.csv` | Consensus rating outputs | `predict.py --build-ratings` |
 | `annex_c.csv` | 495-row R32 third-place assignment table | `parse_annex_c.py` |
+| `knockout.csv` | Knockout stage (matches 73–104): static schedule + materialized teams + results | `knockout.py`/`fetch_ko_results.py` |
+| `ko_predictions_log.csv` | Pre-kickoff knockout advance calls + 2-class Brier (immutable) | `ledger.py log-ko` |
 | `predictions_log.csv` | Pre-kickoff W/D/L calls + predicted score (immutable) | `ledger.py` |
 | `odds_log.csv` | Market snapshots + closing lines (append-only) | `odds.py` |
 | `picks_log.csv` | Recorded picks + units + CLV | `odds.py` |
@@ -110,7 +115,7 @@ Committed unless noted. CSVs carry a UTF-8 BOM (use `utf-8-sig`).
 | `news/` | UNVERIFIED auto-gathered digests (gated; human-reviewed) |
 
 ## Tests, CI, deploy
-- **Tests:** `python -m unittest discover -s tests` (372 green, ~3s). *Do not* use the
+- **Tests:** `python -m unittest discover -s tests` (544 green, ~10s). *Do not* use the
   dotted-path form — there's no `tests/__init__.py`. Hermetic site tests build from
   `tests/fixtures/site_snapshot/` with an injected clock, so live data drift can't
   redden them.

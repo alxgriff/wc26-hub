@@ -32,6 +32,37 @@ you make a non-obvious call, add it here.*
   does **not** apply host HFA — knockout venues aren't modelled in-repo. The shown `%` is
   the winner's 90'+ET+shootout advance probability. *`scripts/build_site.py` (`load_knockout_resolver`); commits `2ddd01f`, `1828533`.*
 
+## Knockout stage (the live tournament, R32→Final — `knockout-stage` branch)
+
+- **Knockout fixtures live in a SEPARATE `data/knockout.csv`, not `fixtures.csv`.** `standings`
+  locks `fixtures.csv`'s `match_id` to the `A1–L6` form, and CLAUDE.md names it the GROUP
+  single source of truth — so the knockout stage (matches 73–104, the FIFA/bracket numbering)
+  gets its own contract file. team_a/team_b are a **materialized view of `bracket.py`** (the
+  structural authority — no second implementation to drift), filled by `knockout.py --resolve`:
+  R32 from locked group positions, later rounds from played feeders. *`scripts/knockout.py`.*
+- **A shootout winner is NEVER inferred from the score.** A level knockout result is recorded
+  with `decided_by=penalties` and an explicit `winner` side (A|B), which is authoritative for
+  advancement (`bracket.feed` + the ledger read `winner`, not the score). `fetch_ko_results.py`
+  auto-enters only DECISIVE results and reports level ones for manual `--enter` — the API can't
+  say who won a shootout, so we don't guess. (The API also doesn't flag extra time, so a decisive
+  auto-entry records `regulation`; revise to `extra_time` by hand if needed.) *`scripts/knockout.py`, `scripts/fetch_ko_results.py`.*
+- **Knockout cards are auto-generated AND auto-published (user-chosen).** Sonnet writes the
+  tactical sections grounded STRICTLY in the two teams' KB profiles + computed facts + the Wire,
+  injuries tagged "(verify before use)", fail-soft to a placeholder (never fabricates) — the same
+  grounding contract as `stakes_blurb.py`. Matchups aren't known until a round resolves, so cards
+  can't be pre-baked; they generate in the overnight build. *`scripts/knockout_cards.py`.*
+- **Knockout betting is a 2-way model-priced ADVANCE market.** "To qualify" (advance, incl. ET +
+  a coin-flip shootout) priced from `predict.resolve_knockout`; model-priced ⇒ the stricter **8pp**
+  sanity ceiling. Settled penalty-aware from `knockout.csv`'s `winner`. **Assumption (flagged for
+  review):** The Odds API quotes 90-minute markets, not "to qualify", so advance odds are entered
+  manually (`odds.py enter … advance H,A`) — absent a 2-way line the honest output is "No bet".
+  Accountability is a **2-class advance Brier** (0 best / 0.5 coin-flip / 2 worst). *`scripts/odds.py`, `scripts/ledger.py`.*
+- **The site/edition flip to the knockout phase by data, not date.** When the group stage
+  completes (or the slate date passes the last group date), the masthead/progress/slate switch to
+  knockout and a banner elevates the bracket — so the most-trafficked moment (the R32) never lands
+  on a frozen "rest day" page. Crons extended June 12 → July 19 (two day-of-month ranges per
+  month). *`scripts/build_site.py`, `scripts/build_edition.py`, `.github/workflows/`.*
+
 ## Prediction model (`predict.py`)
 
 - **Knockout layer CALIBRATED to the historical frequency bands (2026-06-21; MODEL_IMPROVEMENTS §2.5).**

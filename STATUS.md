@@ -19,7 +19,7 @@ Plus this session's additions: **2026 tiebreaker fix**, the **knockout bracket**
 "as it stands" projector + cascade layout + winner projection through the tree), the
 **responsive Today slate**, and the **Dixon-Coles + knockout** model scaffolding (inert).
 
-Tests: **372 green**. Daily automation live (3 GitHub Actions workflows). Deploys via
+Tests: **544 green** (was 372; +172 for the knockout stage). Daily automation live (3 GitHub Actions workflows). Deploys via
 Cloudflare Pages on push.
 
 ## Open items
@@ -56,14 +56,28 @@ Cloudflare Pages on push.
 - **Tier 4 — deferred:** second sharp book for CLV benchmark; shot-level xG layer;
   automated injury/lineup adjustment.
 
-### Knockout bracket
-- **Daily-edition hook not yet landed** — the bracket is on the site (`docs/bracket.html`)
-  with winner projection, but `build_edition` doesn't yet embed it. `render_markdown` is
-  ready. *DECISIONS.md "Knockout bracket"; commit `5f02e5a` follow-up note.*
-- **Real knockout results** — `bracket.feed(results=…)` is the override hook; wire it once
-  knockout fixtures/results exist (the knockout **stage** is a separate later project per
-  CLAUDE.md; `fixtures.csv` is group-only).
-- **Per-host HFA in KO ties** — currently neutral venue (no KO venue→country map in repo).
+### Knockout stage — ✅ SHIPPED (knockout-stage branch)
+The full Round-of-32 → Final stage now runs end-to-end (group→knockout boundary handled):
+- **Data:** `data/knockout.csv` + `scripts/knockout.py` — fixed schedule (matches 73–104),
+  contract-safe loader/validator, R32+feeder team resolver (`--resolve`), penalty-aware
+  result entry (`--enter`). `fixtures.csv` stays the group SSOT.
+- **Results feed:** `fetch_ko_results.py` auto-enters decisive scores; level/penalty results
+  reported for manual entry. `bracket.feed(results=…)` propagates winners down the tree.
+- **Site:** phase-aware masthead/slate + bracket-elevating banner (no more June-28 dead-end);
+  per-tie knockout match pages with the advance Call (`predict.resolve_knockout`), the road
+  here, result, the Sonnet card, and the advance-odds section.
+- **Edition:** `build_edition` embeds the bracket + a cross-group "who qualified" recap.
+- **Cards:** `knockout_cards.py` — overnight Sonnet-grounded, auto-published to `cards/ko/`.
+- **Accountability:** 2-class advance Brier (`ledger.py log-ko/report-ko`, `ko_predictions_log.csv`).
+- **Betting:** 2-way **advance** market (`odds.py`), model-priced (8pp ceiling), penalty-aware settle.
+- **Automation:** daily-build + closing-odds crons extended through the July 19 final; new
+  knockout steps fail-soft + health-gated.
+
+Open follow-ups: per-host HFA in KO ties stays neutral (no KO venue→country map). The advance
+market isn't auto-fetched (The Odds API quotes 90-minute markets) — advance odds via manual
+`odds.py enter M.. advance H,A`, so it's "No bet" until a 2-way line is entered; revisit if a
+to-qualify API market is identified. ET-vs-regulation isn't distinguished by the API (decisive
+auto-entries record `regulation`; revise to `extra_time` by hand if needed).
 
 ### Odds (`odds.py`)
 - **Draw-no-bet** is computed (`predict.py` `dnb_a`) but not snapshotted/recorded.
@@ -93,5 +107,5 @@ Cloudflare Pages on push.
 
 ## How to pick up next session
 1. Read CLAUDE.md (contracts) → this file (where things stand) → ARCHITECTURE.md if you need the map.
-2. Run `python -m unittest discover -s tests` (expect 372 green).
+2. Run `python -m unittest discover -s tests` (expect 544 green).
 3. Check the recurring verification items above against today's date before publishing.
