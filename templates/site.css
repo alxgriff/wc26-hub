@@ -538,3 +538,28 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 .og-team-top{font-family:var(--mono);font-size:.55rem;color:var(--ink-soft);
   text-align:center;margin-bottom:3px;max-width:360px}
 @media(prefers-reduced-motion:reduce){.og-cell{transition:none}}
+
+/* ---- knockout stage ---- */
+.ko-banner{margin:0 0 22px}
+.ko-banner a{display:block;text-decoration:none;border:1px solid var(--green);background:var(--green-soft);padding:13px 18px;color:var(--ink);transition:background .15s,color .15s}
+.ko-banner a:hover,.ko-banner a:focus-visible{background:var(--green);color:var(--paper)}
+.ko-banner-k{display:block;font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--green)}
+.ko-banner a:hover .ko-banner-k,.ko-banner a:focus-visible .ko-banner-k{color:var(--paper)}
+.ko-banner b{font-family:var(--serif);font-size:1.2rem;font-weight:700;display:inline-block;margin-top:2px}
+.ko-banner-sub{display:block;font-size:.8rem;color:var(--ink-soft);margin-top:3px}
+.ko-banner a:hover .ko-banner-sub,.ko-banner a:focus-visible .ko-banner-sub{color:var(--paper)}
+.slate .ko-card .team.tbd{font-style:italic;color:var(--ink-soft);font-weight:500}
+.slate .ko-card .ko-decided{font-family:var(--mono);font-size:.58rem;color:var(--ink-soft);margin-left:4px;text-transform:uppercase;letter-spacing:.04em}
+.call-lead{font-family:var(--serif);font-size:1.15rem;margin:0 0 10px}
+.adv-bar{display:flex;height:30px;border:1px solid var(--hairline);overflow:hidden;font-family:var(--mono);font-size:.72rem;font-weight:700}
+.adv-seg{display:grid;place-items:center;color:var(--paper);overflow:hidden;white-space:nowrap;min-width:0}
+.adv-a{background:var(--verm)}
+.adv-b{background:var(--ink-soft)}
+.call-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.7rem;color:var(--ink-soft);margin:6px 0 0}
+.call-facts{font-size:.86rem;margin:10px 0 0}
+.call-src{font-size:.72rem;color:var(--ink-soft);font-style:italic;margin:6px 0 0}
+.ko-result p{font-family:var(--serif);font-size:1.1rem;margin:0}
+.ko-path p{margin:0 0 6px;font-size:.9rem}
+.ko-path a{color:var(--verm)}
+.ko-aet{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;vertical-align:middle}
+.page-mast h1 .tbd{font-style:italic;color:var(--ink-soft)}

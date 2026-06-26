@@ -44,6 +44,7 @@ import build_edition as be        # noqa: E402
 import site_content as sc         # noqa: E402
 import scenarios as scen          # noqa: E402
 import bracket as bk              # noqa: E402
+import knockout as ko             # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = REPO_ROOT / "templates"
@@ -1905,6 +1906,192 @@ def render_team_page(profile: "sc.TeamProfile", s: "st.Standings",
 
 # ---------------------------------------------------------------- assembly
 
+# ---------------------------------------------------------------- knockout stage
+
+_KO_ROUND_NAME = {"R32": "Round of 32", "R16": "Round of 16", "QF": "Quarter-final",
+                  "SF": "Semi-final", "3RD": "Third-place play-off", "Final": "Final"}
+
+
+def load_ko_call():
+    """Defensive adapter for knockout advance calls: (callable km->info, None) or
+    (None, reason). Routes a RESOLVED tie through predict.resolve_knockout (the 90'
+    consensus then extra time + a coin-flip shootout). Neutral venue — host HFA is not
+    applied in the knockout per DECISIONS.md. Any per-tie failure returns None
+    (placeholder), never a broken page; mirrors load_predictor."""
+    try:
+        import predict as pr
+        model = pr.load_ratings()
+    except Exception as e:                       # broad on purpose: never break the build
+        return None, f"prediction model unavailable ({e.__class__.__name__}: {e})"
+
+    def call(km) -> dict | None:
+        if not (km.team_a and km.team_b):
+            return None
+        try:
+            kp = pr.resolve_knockout(model, km.team_a, km.team_b)
+            reg = kp.reg
+            return {"p_adv_a": kp.p_advance_a, "p_adv_b": kp.p_advance_b,
+                    "p_reach_et": kp.p_reach_et, "p_reach_shootout": kp.p_reach_shootout,
+                    "modal_score": reg.modal_score, "total": reg.total}
+        except Exception:
+            return None
+    return call, None
+
+
+def _ko_when(km) -> str:
+    return " · ".join(p for p in [km.date_et, (f"{km.kickoff_et} ET" if km.kickoff_et else "")] if p)
+
+
+def _ko_venue(km) -> str:
+    return ", ".join(p for p in [km.stadium, km.city] if p)
+
+
+def _ko_row(km) -> dict:
+    """A minimal fixtures-row-shaped dict so the weather adapter (keyed on match_id) can
+    look a knockout match up; absent a weather row it returns the honest placeholder."""
+    return {"match_id": f"M{km.match_no}", "team_a": km.team_a, "team_b": km.team_b,
+            "stadium": km.stadium, "city": km.city, "kickoff_et": km.kickoff_et}
+
+
+def render_ko_call(info: dict | None, km, result: tuple | None = None) -> str:
+    """The advance call for one knockout tie. Resolved + scheduled -> the live model
+    read (who advances, via ET + shootout). Played -> the RESULT (who went through) — no
+    retroactive advance grade here (the knockout ledger owns that). Unresolved -> names
+    the two slot labels and waits. Never invents a number."""
+    ta, tb = km.team_a, km.team_b
+    if not (ta and tb):
+        la, lb = km.labels
+        return ('<div class="placeholder-slot">Matchup not set yet — this tie is '
+                f'<b>{_esc(la)}</b> vs <b>{_esc(lb)}</b>. The call appears once the '
+                'feeding games are played and both sides are known.</div>')
+    if result is not None:
+        sa, sb, winner, decided = result
+        tag = {"extra_time": " after extra time", "penalties": " on penalties"}.get(decided, "")
+        return (f'<div class="ko-result"><p><b>{_esc(winner)}</b> advanced — '
+                f'{_esc(ta)} {_esc(str(sa))}–{_esc(str(sb))} {_esc(tb)}{tag}.</p></div>')
+    if info is None:
+        return ('<div class="placeholder-slot">Model pending — no advance call for this '
+                'tie yet. Fills automatically once the ratings layer is available; no '
+                'numbers are invented.</div>')
+    pa = max(round(info["p_adv_a"] * 100), 1)
+    pb = max(round(info["p_adv_b"] * 100), 1)
+    fav, fav_p = (ta, pa) if pa >= pb else (tb, pb)
+    ms = info["modal_score"]
+    et = round(info["p_reach_et"] * 100)
+    so = round(info["p_reach_shootout"] * 100)
+    la_lbl = f"{pa}%" if pa >= 6 else ""
+    lb_lbl = f"{pb}%" if pb >= 6 else ""
+    return (
+        '<div class="call">'
+        f'<p class="call-lead"><b>{_esc(fav)}</b> to advance · <b>{fav_p}%</b></p>'
+        f'<div class="adv-bar" role="img" aria-label="{_esc(ta)} {pa}% to advance, '
+        f'{_esc(tb)} {pb}%">'
+        f'<span class="adv-seg adv-a" style="width:{pa}%">{la_lbl}</span>'
+        f'<span class="adv-seg adv-b" style="width:{pb}%">{lb_lbl}</span></div>'
+        f'<p class="call-scale"><span>{_esc(ta)} {pa}%</span>'
+        f'<span>{_esc(tb)} {pb}%</span></p>'
+        f'<p class="call-facts">most likely 90′ score <b>{ms[0]}–{ms[1]}</b> · '
+        f'~<b>{et}%</b> reach extra time · ~<b>{so}%</b> reach a shootout</p>'
+        '<p class="call-src">advance model: 90′ consensus (Elo+Futi) routed through '
+        'extra time + a coin-flip shootout · neutral venue</p>'
+        '</div>')
+
+
+def render_ko_slate(today_ko: list, root: str = "", calls: dict | None = None) -> str:
+    if not today_ko:
+        return '    <li class="empty">No knockout matches on this date.</li>'
+    calls = calls or {}
+    cards = []
+    for km in sorted(today_ko, key=lambda k: (k.kickoff_et_24h, k.match_no)):
+        mid = f"M{km.match_no}"
+        la, lb = km.labels
+        ta, tb = (km.team_a or la), (km.team_b or lb)
+        tv = (km.tv_us or "").strip() or "TV TBD"
+        venue = _ko_venue(km)
+        href = f'{root}matches/{mid}.html'
+        if km.is_played:
+            kick = '<p class="kick"><span class="ftbadge">Full time</span></p>'
+            tag = {"extra_time": " AET", "penalties": " pens"}.get(km.decided_by, "")
+            centre = (f'<span class="sc">{_esc(str(km.score_a))}–'
+                      f'{_esc(str(km.score_b))}</span>'
+                      + (f'<span class="ko-decided">{tag}</span>' if tag else ""))
+        else:
+            kick = f'<p class="kick">{_esc(km.kickoff_et)} ET</p>'
+            centre = '<span class="v">v</span>'
+        cls_a = "team ta" + ("" if km.team_a else " tbd")
+        cls_b = "team tb" + ("" if km.team_b else " tbd")
+        matchup = (f'<a class="matchup" href="{href}">'
+                   f'<span class="{cls_a}">{_esc(ta)}</span>{centre}'
+                   f'<span class="{cls_b}">{_esc(tb)}</span></a>')
+        callline = (f'<p class="pickline">{_esc(calls[mid])}</p>') if mid in calls else ""
+        cards.append(
+            f'    <li class="card ko-card">{kick}{matchup}'
+            f'<p class="meta">{mid} · {_esc(_KO_ROUND_NAME.get(km.round, km.round))} · '
+            f'{_esc(tv)} · {_esc(venue)} · <span class="pv">preview →</span></p>'
+            f'{callline}</li>')
+    return "\n".join(cards)
+
+
+def _ko_path_html(km, ko_by_no: dict) -> str:
+    """How a tie was reached: its slot labels, plus the feeder results for R16+."""
+    la, lb = km.labels
+    out = [f'<p>{_esc(_KO_ROUND_NAME.get(km.round, km.round))} · '
+           f'<b>{_esc(km.team_a or la)}</b> vs <b>{_esc(km.team_b or lb)}</b>.</p>']
+    if km.match_no in ko.bk.BRACKET_TREE:
+        for fno in ko.bk.BRACKET_TREE[km.match_no]:
+            fm = ko_by_no.get(fno)
+            if fm and fm.is_played and fm.winner_team:
+                out.append(
+                    f'<p>{_esc(fm.winner_team)} got here by winning '
+                    f'<a href="M{fno}.html">M{fno}</a> '
+                    f'({_esc(fm.team_a)} {_esc(str(fm.score_a))}–'
+                    f'{_esc(str(fm.score_b))} {_esc(fm.team_b)}).</p>')
+    elif km.match_no == ko.bk.THIRD_PLACE_MATCH:
+        out.append('<p>The third-place play-off is contested by the two beaten '
+                   'semi-finalists.</p>')
+    return '<div class="ko-path">' + "".join(out) + '</div>'
+
+
+def render_ko_match_page(km, call_html: str, path_html: str, sweat_html: str,
+                         card_html: str, odds_html: str, wire_html: str,
+                         css: str, template_dir: Path) -> str:
+    la, lb = km.labels
+    ta, tb = (km.team_a or la), (km.team_b or lb)
+
+    def team_h(team: str, label: str) -> str:
+        return (f'<a href="../teams/{sc.slugify(team)}.html">{_esc(team)}</a>' if team
+                else f'<span class="tbd">{_esc(label)}</span>')
+
+    title_html = (f'{team_h(km.team_a, la)}<span class="vs">v</span>'
+                  f'{team_h(km.team_b, lb)}')
+    scoreline_html = ""
+    if km.is_played:
+        tag = {"extra_time": ' <span class="ko-aet">AET</span>',
+               "penalties": ' <span class="ko-aet">pens</span>'}.get(km.decided_by, "")
+        scoreline_html = (f'<p class="scoreline"><b>{_esc(str(km.score_a))}–'
+                          f'{_esc(str(km.score_b))}</b>{tag}</p>')
+    deeper_html = ""
+    if km.team_a and km.team_b:
+        deeper_html = (
+            '<section aria-labelledby="teams-h"><div class="sec-head">'
+            '<span class="kicker">Go Deeper</span><h2 id="teams-h">Team cards</h2></div>'
+            '<div class="team-pair">'
+            f'<a href="../teams/{sc.slugify(km.team_a)}.html">{_esc(km.team_a)}'
+            '<span class="sub">squad · system · key players</span></a>'
+            f'<a href="../teams/{sc.slugify(km.team_b)}.html">{_esc(km.team_b)}'
+            '<span class="sub">squad · system · key players</span></a></div></section>')
+    tpl = Template((template_dir / "ko_match.html").read_text(encoding="utf-8"))
+    return tpl.safe_substitute(
+        site_css=css, match_id=f"M{km.match_no}",
+        round_name=_KO_ROUND_NAME.get(km.round, km.round),
+        title_text=_esc(f"{ta} vs {tb}"), title_html=title_html,
+        scoreline_html=scoreline_html, when=_esc(_ko_when(km)),
+        venue=_esc(_ko_venue(km)), tv=_esc((km.tv_us or "").strip() or "TV TBD"),
+        call_html=call_html, path_html=path_html, sweat_html=sweat_html,
+        card_html=card_html, wire_html=wire_html, odds_html=odds_html,
+        deeper_html=deeper_html, repo_url=REPO_URL)
+
+
 def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
                generated_at: str, template_path: Path = TEMPLATE_DIR / "page.html",
                editions_dir: Path = REPO_ROOT / "editions",
@@ -1914,17 +2101,59 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
                blurb_html: str = "",
                slate_picks: dict[str, str] | None = None,
                overnight_html: str = "",
-               fates: dict[str, str] | None = None) -> tuple[str, dict]:
+               fates: dict[str, str] | None = None,
+               knockout: list | None = None,
+               ko_calls: dict[str, str] | None = None,
+               last_group_date: date | None = None) -> tuple[str, dict]:
     """Render the index page. Returns (html, data_dict)."""
     s = st.compute_standings(matches, fair_play=fair_play)
     forms = form_by_team(matches)
     fates = fates or {}
+    knockout = knockout or []
     today = be.select_matches(rows, target)
     day_n = (target - be.TOURNAMENT_START).days + 1
 
+    # phase: the group stage hands off to the knockout once all 72 group games are
+    # played (or the slate date moves past the last group date). The masthead, progress
+    # bar and "Today" slate follow the phase so the site never dead-ends after June 27.
+    group_done = s.played == s.total and s.total > 0
+    today_ko = [km for km in knockout if km.date_et == target.isoformat()]
+    in_ko = group_done or bool(today_ko) or (
+        last_group_date is not None and target > last_group_date)
+
     n = len(today)
-    slate_title = (f"{target:%A, %B} {target.day} · "
-                   + (f"{n} match" + ("" if n == 1 else "es") if n else "rest day"))
+    if today:
+        slate_title = (f"{target:%A, %B} {target.day} · "
+                       + f"{n} match" + ("" if n == 1 else "es"))
+        slate_html = render_slate(today, picks=slate_picks)
+    elif today_ko:
+        k = len(today_ko)
+        slate_title = (f"{target:%A, %B} {target.day} · {k} knockout "
+                       + ("match" if k == 1 else "matches"))
+        slate_html = render_ko_slate(today_ko, calls=ko_calls)
+    else:
+        slate_title = (f"{target:%A, %B} {target.day} · "
+                       + ("no matches today" if in_ko else "rest day"))
+        slate_html = render_slate([])
+
+    if in_ko:
+        rounds_today = sorted({km.round for km in today_ko})
+        rname = _KO_ROUND_NAME.get(rounds_today[0]) if len(rounds_today) == 1 else None
+        eyebrow = "WC26 Daily Hub · Knockout Stage" + (f" · {rname}" if rname else "")
+        ko_played = sum(1 for km in knockout if km.is_played)
+        played_disp, total_disp, progress_label = ko_played, len(knockout), "knockout matches"
+        progress_pct = (100 * ko_played / len(knockout)) if knockout else 0
+        transition_html = (
+            '<section class="ko-banner" aria-label="Knockout stage">'
+            '<a href="bracket.html"><span class="ko-banner-k">Knockout stage</span>'
+            '<b>The bracket is live →</b><span class="ko-banner-sub">Round of 32 through '
+            'the Final · projected winners and advance odds, updated as results land'
+            '</span></a></section>')
+    else:
+        eyebrow = "WC26 Daily Hub · Group Stage · June 11–27"
+        played_disp, total_disp, progress_label = s.played, s.total, "group-stage matches"
+        progress_pct = (100 * s.played / s.total) if s.total else 0
+        transition_html = ""
 
     groups_html = "\n".join(
         render_group_card(s.groups[g], forms, i, fates=fates)
@@ -1946,12 +2175,15 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
         site_css=css if css is not None else _site_css(template_path.parent),
         edition_no=f"No. {day_n}" if day_n >= 1 else "Preview",
         pretty_date=f"{target:%A, %B} {target.day}, {target.year}",
-        played=s.played,
-        total=s.total,
-        progress_pct=f"{(100 * s.played / s.total) if s.total else 0:.1f}",
+        eyebrow=eyebrow,
+        transition_html=transition_html,
+        played=played_disp,
+        total=total_disp,
+        progress_label=progress_label,
+        progress_pct=f"{progress_pct:.1f}",
         group_nav_html=_group_nav(s.groups),
         slate_title=slate_title,
-        slate_html=render_slate(today, picks=slate_picks),
+        slate_html=slate_html,
         groups_html=groups_html,
         thirds_html=render_thirds(s, forms, fates=fates),
         archive_html=_archive(editions_dir),
@@ -1980,7 +2212,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                shadow_log: Path | None = None,
                now=None,
                predictor="auto", odds_engine="auto",
-               weather_engine="auto", knockout_resolver="auto") -> list[str]:
+               weather_engine="auto", knockout_resolver="auto",
+               knockout_path: Path | None = None) -> list[str]:
     """Render the whole site (index + team cards + match previews + data.json)
     into out_dir. Returns warnings. ``predictor`` and ``odds_engine`` are
     "auto" (load the real modules defensively), None (placeholder state), or
@@ -2006,6 +2239,26 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     wire = load_wire(news_dir)
     css = _site_css(template_dir)
 
+    # Knockout stage: discovered next to fixtures.csv (so a frozen-snapshot build with no
+    # knockout.csv stays group-only). Teams materialize from the live standings + any
+    # played knockout results; bracket.py owns the structure. Fail-soft — a missing file
+    # is the pre-knockout norm, a malformed one degrades to group-only with a warning.
+    ko_file = knockout_path or (fixtures.parent / "knockout.csv")
+    try:
+        knockout = ko.load_knockout(ko_file)
+    except ValueError as e:
+        warnings.append(f"Knockout schedule ignored (malformed {ko_file.name}): {e}")
+        knockout = []
+    if knockout:
+        try:
+            knockout = ko.materialize_teams(bk.project(s), knockout)
+        except (FileNotFoundError, ValueError) as e:
+            warnings.append(f"Knockout team resolution skipped: {e}")
+    last_group_date = None
+    group_dates = [r.get("date_et", "").strip() for r in rows if r.get("date_et", "").strip()]
+    if group_dates:
+        last_group_date = date.fromisoformat(max(group_dates))
+
     blurb_html = ""
     blurb_path = blurbs_dir / f"{target.isoformat()}.md"
     if blurb_path.exists():
@@ -2019,6 +2272,14 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         predictor, why = load_predictor()
         if why:
             warnings.append(f"The Call renders as placeholder: {why}")
+
+    # knockout advance-call adapter (only when a predictor is active, so injected-off
+    # tests stay deterministic and group-only builds skip the extra model load)
+    ko_call = None
+    if knockout and predictor is not None:
+        ko_call, ko_why = load_ko_call()
+        if ko_why:
+            warnings.append(f"Knockout calls render as placeholder: {ko_why}")
 
     if odds_engine == "auto":
         odds_call, ledger_line, odds_why = load_odds_engine(now=now)
@@ -2052,6 +2313,18 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                     f"{_sel_label(p['market'], p['selection'], p['line'], r['team_a'], r['team_b'])}"
                     f" {p['edge']:+.1%}{more}")
 
+    # advance-call one-liners for the knockout slate (resolved, not-yet-played ties only)
+    ko_slate_calls: dict[str, str] = {}
+    if ko_call:
+        for km in knockout:
+            if (km.date_et == target.isoformat() and km.participants_known
+                    and not km.is_played):
+                ci = ko_call(km)
+                if ci:
+                    pa, pb = round(ci["p_adv_a"] * 100), round(ci["p_adv_b"] * 100)
+                    fav, fp = (km.team_a, pa) if pa >= pb else (km.team_b, pb)
+                    ko_slate_calls[f"M{km.match_no}"] = f"▸ model: {fav} to advance {fp}%"
+
     ledger = _load_ledger(warnings, predictions_log, now)
     # as-it-stands knockout bracket — gated projection from the live standings.
     # Annex C is committed static data; a missing/corrupt table degrades to no
@@ -2075,9 +2348,10 @@ def build_site(out_dir: Path, target: date, generated_at: str,
             if knockout_resolver is None:
                 warnings.append("Bracket winners not projected: prediction model unavailable")
         if knockout_resolver:
-            # results=None: no knockout has been played yet (group stage only);
-            # actual results will override the model here once those fixtures exist
-            bracket_proj = bk.feed(bracket_proj, knockout_resolver)
+            # real played knockout results override the model and propagate down the
+            # tree; the model fills the rest of the projection (data/knockout.csv -> feed)
+            bracket_proj = bk.feed(bracket_proj, knockout_resolver,
+                                   results=ko.results_dict(knockout))
         # 'Projected finish' view: SIMULATE every remaining group game from the model's goal
         # rates, take each group's most-likely final standings (draws and all), resolve the
         # WHOLE bracket (12 groups final, thirds slotted), run it through.
@@ -2098,7 +2372,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                              blurb_html=blurb_html, slate_picks=slate_picks,
                              overnight_html=render_overnight(rows, target,
                                                              matches, ledger),
-                             fates=fates)
+                             fates=fates, knockout=knockout, ko_calls=ko_slate_calls,
+                             last_group_date=last_group_date)
     if bracket_proj is not None:
         data["bracket"] = bk.to_dict(bracket_proj)
     if bracket_full is not None:
@@ -2177,10 +2452,35 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         warnings.append("predictor loaded but produced no usable prediction for "
                         "any match — every Call rendered as placeholder")
 
+    # knockout match pages — one per tie (resolved matchup or still-abstract slot). The
+    # Call shows the live advance model for a resolved, not-yet-played tie; the result
+    # once played; a placeholder while the matchup is unknown. Card/odds slots fill in
+    # the overnight build (cards) and the knockout betting layer.
+    ko_by_no = ko.by_no(knockout)
+    for km in knockout:
+        mid = f"M{km.match_no}"
+        if km.is_played and km.winner_team:
+            call_html = render_ko_call(
+                None, km, result=(km.score_a, km.score_b, km.winner_team, km.decided_by))
+        elif ko_call:
+            call_html = render_ko_call(ko_call(km), km)
+        else:
+            call_html = render_ko_call(None, km)
+        sweat_info = wx_call(_ko_row(km)) if wx_call else None
+        page = render_ko_match_page(
+            km, call_html, _ko_path_html(km, ko_by_no),
+            render_sweat(sweat_info, km.team_a or "", km.team_b or ""),
+            '<div class="placeholder-slot">Tactical preview is generated in the overnight '
+            'build once the matchup is set.</div>',
+            render_market(None, km.team_a or "", km.team_b or "", None),
+            render_wire(wire.get(mid)), css, template_dir)
+        (out_dir / "matches" / f"{mid}.html").write_text(page, encoding="utf-8")
+
     # reconcile: a renamed slug or removed match_id must not leave a stale
     # page deployed under docs/
     expected = ({f"{sc.slugify(t)}.html" for t in fixture_teams},
-                {f"{r['match_id']}.html" for r in rows})
+                {f"{r['match_id']}.html" for r in rows}
+                | {f"M{km.match_no}.html" for km in knockout})
     for subdir, keep in zip(("teams", "matches"), expected):
         for f in (out_dir / subdir).glob("*.html"):
             if f.name not in keep:
@@ -2301,7 +2601,8 @@ def main(argv: list[str] | None = None) -> int:
     if not args.fixtures.exists():
         print(f"error: {args.fixtures} not found.", file=sys.stderr)
         return 1
-    for tname in ("page.html", "team.html", "match.html", "bracket.html", "site.css"):
+    for tname in ("page.html", "team.html", "match.html", "ko_match.html",
+                  "bracket.html", "site.css"):
         if not (args.template_dir / tname).exists():
             print(f"error: template {args.template_dir / tname} not found.", file=sys.stderr)
             return 1

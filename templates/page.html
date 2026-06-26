@@ -17,7 +17,7 @@ $site_css
 <div class="sheet">
 
 <header class="masthead">
-  <p class="eyebrow">WC26 Daily Hub · Group Stage · June 11–27</p>
+  <p class="eyebrow">$eyebrow</p>
   <h1>The <span class="num">26</span> Standings</h1>
   <div class="dateline">
     <span>Vol. I — $edition_no</span>
@@ -25,8 +25,8 @@ $site_css
     <span>One edition per ET date</span>
   </div>
   <div class="progress">
-    <div class="bar" role="img" aria-label="$played of $total group-stage matches played"><i style="width:$progress_pct%"></i></div>
-    <p class="lbl">$played of $total group-stage matches played</p>
+    <div class="bar" role="img" aria-label="$played of $total $progress_label played"><i style="width:$progress_pct%"></i></div>
+    <p class="lbl">$played of $total $progress_label played</p>
   </div>
   <nav class="gnav" aria-label="Jump to group">
 $group_nav_html
@@ -37,6 +37,7 @@ $group_nav_html
 </header>
 
 <main>
+$transition_html
 $overnight_html
 <section aria-labelledby="slate-h">
   <div class="sec-head">

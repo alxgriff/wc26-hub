@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>$match_id: $title_text — WC26 Daily Hub</title>
+<meta name="description" content="$title_text — $round_name knockout tie ($match_id): the model's advance call, the road here, and where it will be decided.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,500&family=Spline+Sans+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+$site_css
+</style>
+</head>
+<body>
+<a class="skip" href="#preview">Skip to the preview</a>
+<div class="sheet">
+
+<header class="page-mast">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="../index.html">The 26 Standings</a> · <a href="../bracket.html">The Bracket</a> · <span aria-current="page">$match_id</span>
+  </nav>
+  <p class="eyebrow">WC26 Daily Hub · Knockout · $round_name</p>
+  <h1>$title_html</h1>
+  $scoreline_html
+  <div class="metaline">
+    <span class="stamp">$match_id</span>
+    <span>$round_name</span>
+    <span>$when</span>
+    <span>$venue</span>
+    <span>$tv</span>
+  </div>
+</header>
+
+<main id="preview">
+
+<section aria-labelledby="call-h">
+  <div class="sec-head">
+    <span class="kicker">The Call</span>
+    <h2 id="call-h">Who goes through</h2>
+  </div>
+$call_html
+</section>
+
+<section aria-labelledby="path-h">
+  <div class="sec-head">
+    <span class="kicker">The Road</span>
+    <h2 id="path-h">How they got here</h2>
+  </div>
+$path_html
+</section>
+
+<section aria-labelledby="weather-h">
+  <div class="sec-head">
+    <span class="kicker">Sweat Factor</span>
+    <h2 id="weather-h">How the heat stacks up</h2>
+  </div>
+$sweat_html
+</section>
+
+<section aria-labelledby="card-h" class="read-grid">
+  <div class="sec-head">
+    <span class="kicker">The Read</span>
+    <h2 id="card-h">Tactical preview</h2>
+  </div>
+$card_html
+</section>
+
+$wire_html
+
+<section aria-labelledby="odds-h">
+  <div class="sec-head">
+    <span class="kicker">The Market</span>
+    <h2 id="odds-h">Odds &amp; best bet</h2>
+  </div>
+$odds_html
+</section>
+
+$deeper_html
+
+</main>
+
+<footer>
+  <p class="colophon">
+    Knockout matchups resolve from data/fixtures.csv standings via the FIFA bracket;
+    results from data/knockout.csv · the model's advance call routes the 90-minute
+    prediction through extra time + a coin-flip shootout · <a href="../bracket.html">the full bracket</a> ·
+    <a href="../index.html">all standings</a> · <a href="$repo_url">source &amp; data</a> ·
+    Weather by <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0)
+  </p>
+</footer>
+
+</div>
+</body>
+</html>

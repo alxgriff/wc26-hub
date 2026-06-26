@@ -294,5 +294,109 @@ class HumanizeOriginTests(unittest.TestCase):
         self.assertEqual(bs._humanize_origin("Mystery"), "Mystery")
 
 
+import knockout as ko  # noqa: E402
+
+
+def _km(no, **kw):
+    base = dict(match_no=no, round=ko.round_of(no), date_et="2026-06-28",
+                kickoff_et_24h="15:00", kickoff_et="3:00 PM", stadium="SoFi Stadium",
+                city="Inglewood", country="USA", tv_us="Fox", team_a="", team_b="",
+                score_a=None, score_b=None, decided_by="", winner="", status="scheduled",
+                notes="")
+    base.update(kw)
+    return ko.KnockoutMatch(**base)
+
+
+class KnockoutSlateTests(unittest.TestCase):
+    def test_scheduled_shows_teams_link_and_call(self):
+        html = bs.render_ko_slate([_km(73, team_a="France", team_b="Brazil")],
+                                  calls={"M73": "▸ model: France to advance 60%"})
+        self.assertIn("France", html)
+        self.assertIn("matches/M73.html", html)
+        self.assertIn("to advance 60%", html)
+        self.assertIn('class="v"', html)               # not played -> v disc
+
+    def test_unresolved_uses_labels_and_tbd(self):
+        html = bs.render_ko_slate([_km(74)])           # Winner E vs Best 3rd
+        self.assertIn("Winner E", html)
+        self.assertIn("tbd", html)
+
+    def test_played_shows_score_and_decided(self):
+        html = bs.render_ko_slate([_km(73, team_a="France", team_b="Brazil",
+                                       score_a=1, score_b=1, decided_by="penalties",
+                                       winner="B", status="played")])
+        self.assertIn("1–1", html)
+        self.assertIn("pens", html)
+        self.assertIn("Full time", html)
+
+
+class KnockoutCallTests(unittest.TestCase):
+    def test_unresolved_placeholder(self):
+        html = bs.render_ko_call(None, _km(74))
+        self.assertIn("Matchup not set yet", html)
+        self.assertIn("Winner E", html)
+
+    def test_scheduled_advance(self):
+        info = {"p_adv_a": 0.62, "p_adv_b": 0.38, "p_reach_et": 0.30,
+                "p_reach_shootout": 0.18, "modal_score": (1, 0), "total": 2.3}
+        html = bs.render_ko_call(info, _km(73, team_a="France", team_b="Brazil"))
+        self.assertIn("to advance", html)
+        self.assertIn("62%", html)
+        self.assertIn("reach a shootout", html)
+
+    def test_played_shows_result_not_grade(self):
+        km = _km(73, team_a="France", team_b="Brazil", score_a=2, score_b=1,
+                 decided_by="extra_time", winner="A", status="played")
+        html = bs.render_ko_call(None, km, result=(2, 1, "France", "extra_time"))
+        self.assertIn("advanced", html)
+        self.assertIn("after extra time", html)
+        self.assertNotIn("Brier", html)               # no retroactive advance grade
+
+
+class KnockoutPageTests(unittest.TestCase):
+    def setUp(self):
+        self.css = bs._site_css()
+        self.tdir = bs.TEMPLATE_DIR
+
+    def test_resolved_page_complete(self):
+        km = _km(73, team_a="France", team_b="Brazil")
+        html = bs.render_ko_match_page(km, "<p>call</p>", "<p>path</p>", "<p>sweat</p>",
+                                       "<p>card</p>", "<p>odds</p>", "", self.css, self.tdir)
+        self.assertIn("France vs Brazil", html)
+        self.assertIn("Round of 32", html)
+        self.assertIn("teams/france.html", html)       # deeper links present
+        self.assertNotIn("$", html)                    # every placeholder substituted
+
+    def test_unresolved_page_no_deeper(self):
+        html = bs.render_ko_match_page(_km(74), "c", "p", "s", "cd", "o", "",
+                                       self.css, self.tdir)
+        self.assertIn("Winner E", html)
+        self.assertNotIn("Go Deeper", html)            # no team-card section when unresolved
+        self.assertNotIn("$", html)
+
+
+class KnockoutPhaseTests(unittest.TestCase):
+    def test_knockout_phase_masthead_and_slate(self):
+        html, _ = bs.build_page(
+            nine_groups(), [], date(2026, 6, 28), "t",
+            knockout=[_km(73, team_a="France", team_b="Brazil")],
+            ko_calls={"M73": "▸ model: France to advance 60%"},
+            last_group_date=date(2026, 6, 27))
+        self.assertIn("Knockout Stage", html)
+        self.assertIn('class="ko-banner"', html)       # the banner element (not just the CSS rule)
+        self.assertIn("The bracket is live", html)
+        self.assertIn("matches/M73.html", html)        # KO slate, not "rest day"
+        self.assertNotIn("rest day", html)
+
+    def test_group_phase_unchanged(self):
+        gm = [st.Match("A1", "A", 1, "Alpha", "Beta", 1, 0, "played"),
+              st.Match("A2", "A", 1, "Gamma", "Delta", None, None, "scheduled")]
+        html, _ = bs.build_page(gm, [], date(2026, 6, 20), "t", knockout=[],
+                                last_group_date=date(2026, 6, 27))
+        self.assertIn("Group Stage · June 11", html)
+        self.assertNotIn('class="ko-banner"', html)    # banner element absent (CSS rule still inlined)
+        self.assertIn("group-stage matches", html)
+
+
 if __name__ == "__main__":
     unittest.main()
