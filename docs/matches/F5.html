@@ -262,14 +262,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
 .metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
 .scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
-.record-scoreboard{display:flex;align-items:center;gap:0;margin-top:16px;border:2px solid var(--ink)}
-.scoreboard-stat{display:flex;flex-direction:column;gap:2px;padding:10px 22px;min-width:110px}
-.scoreboard-label{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
-.scoreboard-value{font-family:var(--mono);font-size:1.45rem;font-weight:700;line-height:1.1}
-.scoreboard-value.units-up{color:#1a7a3f}
-.scoreboard-value.units-down{color:var(--verm)}
-.scoreboard-sub{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
-.scoreboard-divider{width:2px;background:var(--ink);align-self:stretch}
 
 .strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
 .strap b{color:var(--ink);font-weight:700}
@@ -310,17 +302,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
-.draw-flag{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin:10px 0 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.draw-flag-tag{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:1.5px solid var(--ink-soft);color:var(--ink);padding:2px 7px;white-space:nowrap}
 
 .mini-table{max-width:560px}
 .team-pair{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}
@@ -598,22 +580,11 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="factline">most likely score <b>1–0</b> · expected goals <b>2.96</b> · over 2.5 <b>57%</b> · both score <b>54%</b><br>single source: rating model (Elo+Futi)</p>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
-    <p class="sr-only">Structural (post-MD1 fitted) says Japan win 64 percent, draw 20 percent, Sweden win 15 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:64">64%</span><span class="pd" style="flex:20">20%</span><span class="pb" style="flex:15">15%</span></div>
-    <div class="scale" aria-hidden="true"><span>Japan 64%</span><span>draw 20%</span><span>Sweden 15%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
-    <p class="sr-only">100% Futi (post-MD1 fitted) says Japan win 60 percent, draw 21 percent, Sweden win 18 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:60">60%</span><span class="pd" style="flex:21">21%</span><span class="pb" style="flex:18">18%</span></div>
-    <div class="scale" aria-hidden="true"><span>Japan 60%</span><span>draw 21%</span><span>Sweden 18%</span></div>
-  </div>
+  <p class="sr-only">Japan win 64 percent, draw 20 percent, Sweden win 16 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:64">64%</span><span class="pd" style="flex:20">20%</span><span class="pb" style="flex:16">16%</span></div>
+  <div class="scale" aria-hidden="true"><span>Japan 64%</span><span>draw 20%</span><span>Sweden 16%</span></div>
+  <p class="factline">most likely score <b>2–0</b> · expected goals <b>3.00</b> · over 2.5 <b>58%</b> · both score <b>53%</b><br>single source: rating model (Elo+Futi)</p>
 </div>
-<p class="draw-flag"><span class="draw-flag-tag">≈ Draw live</span> Models average 21% chance of a draw — worth checking the price.</p>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> narrow margins; BTTS-tinged draw profile.</p></blockquote></div>
 </section>
 
@@ -627,14 +598,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <p class="scenario-intro">Final matchday — both Group F games kick off simultaneously: 9 possible outcomes. Anything that comes down to goal difference is flagged margin-dependent, never guessed.</p>
   <table>
     <caption class="sr-only">Finish distribution across all outcome combinations</caption>
-    <thead><tr><th class="lbl" scope="col">Team</th><th scope="col">Top 2</th><th scope="col">3rd</th><th scope="col">Out</th><th scope="col">Margin</th></tr></thead>
+    <thead><tr><th class="lbl" scope="col">Team</th><th scope="col">1st</th><th scope="col">2nd</th><th scope="col" title="through, but the 1st-vs-2nd seed rides on goal difference">Top&nbsp;2*</th><th scope="col">3rd</th><th scope="col">Out</th><th scope="col">Margin</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Japan</td><td>6</td><td>2</td><td>0</td><td>1</td></tr>
-      <tr><td class="lbl">Sweden</td><td>3</td><td>4</td><td>0</td><td>2</td></tr>
+      <tr><td class="lbl">Japan</td><td>3</td><td>1</td><td>2</td><td>2</td><td>0</td><td>1</td></tr>
+      <tr><td class="lbl">Sweden</td><td>2</td><td>1</td><td>0</td><td>6</td><td>0</td><td>0</td></tr>
     </tbody>
   </table>
-  <p class="scenario-team">Japan</p>  <ul class="scenario-stakes"><li>Win: through (top 2)</li><li>Draw: through (top 2)</li><li>Loss: 3rd — into the best-thirds race if Tunisia and Netherlands draw or Netherlands beat Tunisia; margin-dependent (goal difference/goals, then head-to-head, decide) if Tunisia beat Netherlands</li></ul>
-  <p class="scenario-team">Sweden</p>  <ul class="scenario-stakes"><li>Win: through (top 2)</li><li>Draw: 3rd — into the best-thirds race if Tunisia and Netherlands draw or Netherlands beat Tunisia; margin-dependent (goal difference/goals, then head-to-head, decide) if Tunisia beat Netherlands</li><li>Loss: 3rd — into the best-thirds race if Tunisia and Netherlands draw or Netherlands beat Tunisia; margin-dependent (goal difference/goals, then head-to-head, decide) if Tunisia beat Netherlands</li></ul>
+  <p class="scenario-team">Japan</p>  <ul class="scenario-stakes"><li>Win: win the group (1st — the easier Round-of-32 side) if Tunisia beat Netherlands or Tunisia and Netherlands draw; through, but 1st vs 2nd rides on goal difference if Netherlands beat Tunisia</li><li>Draw: win the group (1st — the easier Round-of-32 side) if Tunisia beat Netherlands; runners-up (2nd) if Netherlands beat Tunisia; through, but 1st vs 2nd rides on goal difference if Tunisia and Netherlands draw</li><li>Loss: 3rd — into the best-thirds race if Tunisia and Netherlands draw or Netherlands beat Tunisia; margin-dependent (goal difference/goals, then head-to-head, decide) if Tunisia beat Netherlands</li></ul>
+  <p class="scenario-team">Sweden</p>  <ul class="scenario-stakes"><li>Win: win the group (1st — the easier Round-of-32 side) if Tunisia beat Netherlands or Tunisia and Netherlands draw; runners-up (2nd) if Netherlands beat Tunisia</li><li>Draw: 3rd — into the best-thirds race</li><li>Loss: 3rd — into the best-thirds race</li></ul>
 </div>
   <div class="mini-table">
 <article class="card" id="group-f" style="--i:0" aria-labelledby="gh-f">
@@ -689,7 +660,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Sweat Factor</span>
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
-<div class="placeholder-slot">Sweat Factor forecast pending — this match is not yet within the 16-day Open-Meteo forecast window. The section fills automatically once available; no data is invented.</div>
+<p class="cond-ac">Indoors — climate-controlled. Heat not a factor.</p>
 </section>
 
 <section aria-labelledby="card-h" class="read-grid">
@@ -707,32 +678,48 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </div>
 </section>
 
-
+<section aria-labelledby="wire-h">
+  <div class="sec-head">
+    <span class="kicker">The Wire</span>
+    <h2 id="wire-h">What's being reported</h2>
+  </div>
+  <div class="wire">
+    <p class="wire-tag">Auto-gathered 2026-06-25 · every claim carries its source · relayed as reporting, not verified by the hub — click through before it bears weight.</p>
+<ul><li><strong>Japan — Takefusa Kubo (knee, OUT):</strong> Kubo (knee) has been officially ruled out of Japan's group stage finale against Sweden in Dallas on June 25 and will remain at the team's base camp in Nashville, the JFA confirmed, per Football Zone. (source: <a href="https://www.rotowire.com/soccer/headlines/takefusa-kubo-injury-ruled-out-against-sweden-520669" rel="nofollow">https://www.rotowire.com/soccer/headlines/takefusa-kubo-injury-ruled-out-against-sweden-520669</a>)</li></ul>
+<ul><li><strong>Japan — Details on Kubo's injury:</strong> Kubo sustained the knee injury after a collision in the second half of the match against the Netherlands, leaving the pitch in a wheelchair before undergoing thorough medical examinations the following day that confirmed a left knee injury. He did not travel with the squad for the Tunisia match in Monterrey, remaining at the base camp to continue his rehabilitation. (source: <a href="https://www.rotowire.com/soccer/headlines/takefusa-kubo-injury-ruled-out-against-sweden-520669" rel="nofollow">https://www.rotowire.com/soccer/headlines/takefusa-kubo-injury-ruled-out-against-sweden-520669</a>)</li></ul>
+<ul><li><strong>Japan — No suspensions; confirmed lineup indicators:</strong> Takefusa Kubo is ruled out through injury, and there are no suspensions listed. Ritsu Doan and Keito Nakamura are set to operate as wing-backs, with Kaishu Sano, Daichi Kamada, and Ao Tanaka in midfield. Junya Ito and Ayase Ueda complete the lineup. (source: <a href="https://www.goal.com/en/news/live-stream-online-tv-where-to-watch-japan-v-sweden/bltb2035b7a264609a1" rel="nofollow">https://www.goal.com/en/news/live-stream-online-tv-where-to-watch-japan-v-sweden/bltb2035b7a264609a1</a>)</li></ul>
+<ul><li><strong>Sweden — No confirmed injuries or suspensions:</strong> Graham Potter's Sweden head into the match without any confirmed injuries or suspensions. (source: <a href="https://www.goal.com/en/news/live-stream-online-tv-where-to-watch-japan-v-sweden/bltb2035b7a264609a1" rel="nofollow">https://www.goal.com/en/news/live-stream-online-tv-where-to-watch-japan-v-sweden/bltb2035b7a264609a1</a>)</li></ul>
+<ul><li><strong>Sweden — Probable starting XI:</strong> Kristoffer Nordfeldt starts in goal behind a back three of Victor Nilsson Lindelöf, Gustaf Lagerbielke, and Isak Hien. Yasin Ayari, Jesper Karlström, and Gabriel Gudmundsson fill the midfield, with Anthony Elanga and Benjamin Nygren in wider roles. Alexander Isak and Viktor Gyökeres lead the attack in a 3-5-2 shape. (source: <a href="https://www.goal.com/en-us/news/live-stream-japan-v-sweden-online-tv-channel/blt4219ea044b23fe93" rel="nofollow">https://www.goal.com/en-us/news/live-stream-japan-v-sweden-online-tv-channel/blt4219ea044b23fe93</a>)</li></ul>
+  </div>
+</section>
 
 <section aria-labelledby="odds-h">
   <div class="sec-head">
     <span class="kicker">The Market</span>
     <h2 id="odds-h">Odds &amp; best bet</h2>
   </div>
-<p class="odds-note">model projection: <b>2.96</b> total goals · over 1.5 <b>79%</b> · over 2.5 <b>57%</b> · over 3.5 <b>34%</b></p>
+<p class="odds-note">model projection: <b>3.00</b> total goals · over 1.5 <b>80%</b> · over 2.5 <b>58%</b> · over 3.5 <b>35%</b></p>
 <div class="edge-wrap">
   <table>
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.75 decimal">-132</td><td>55%</td><td>57%</td><td class="">+2.1%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.11 decimal">+111</td><td>45%</td><td>43%</td><td class="edge-neg">-2.1%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.75</td><td title="1.98 decimal">-102</td><td>48%</td><td>57%</td><td class="edge-pos">+8.4%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.75</td><td title="1.85 decimal">-118</td><td>52%</td><td>43%</td><td class="edge-neg">-8.4%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Japan -0.5</td><td title="1.89 decimal">-112</td><td>51%</td><td>61%</td><td class="edge-pos">+9.8%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Sweden +0.5</td><td title="1.95 decimal">-105</td><td>49%</td><td>39%</td><td class="edge-neg">-9.8%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Japan</td><td title="2.40 decimal">+140</td><td>40%</td><td>64%</td><td class="edge-pos">+23.5%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="3.45 decimal">+245</td><td>28%</td><td>20%</td><td class="edge-neg">-7.5%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Sweden</td><td title="3.00 decimal">+200</td><td>32%</td><td>16%</td><td class="edge-neg">-15.9%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.85 decimal">-118</td><td>52%</td><td>58%</td><td class="edge-pos">+5.8%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.00 decimal">+100</td><td>48%</td><td>42%</td><td class="edge-neg">-5.8%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Japan -0.5</td><td title="2.31 decimal">+131</td><td>42%</td><td>64%</td><td class="edge-pos">+21.7%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Sweden +0.5</td><td title="1.67 decimal">-150</td><td>58%</td><td>36%</td><td class="edge-neg">-21.7%</td></tr>
     </tbody>
   </table>
 </div>
-<p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
-<p class="verify-flag">totals over 2.75: model-priced edge +8.4% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads home -0.5: model-priced edge +9.8% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 24, 12:55 AM ET · DraftKings where quoted, else best of 6 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2.5</strong> (Total goals) @ -118, edge <strong>+5.8%</strong> — best price -110 (betmgm). Flat 1u, paper record.</p></div>
+<p class="odds-note">Logged pick: Over 2.5 @ -120 (bovada), edge 4.5pp · open.</p>
+<p class="odds-note">Logged pick: Japan @ -110 (draftkings), edge 13.0pp · open.</p>
+<p class="verify-flag">h2h home: edge +23.5% implausibly large — verify odds freshness and team news before trusting</p>
+<p class="verify-flag">spreads home -0.5: model-priced edge +21.7% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 25, 6:59 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -755,7 +742,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.9760,lb=0.9796,N=8,SHOW=6,i,j;
+  var la=2.0674,lb=0.9339,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

@@ -227,5 +227,56 @@ class ConfirmedSlotTests(unittest.TestCase):
                     self.assertEqual(clinched[slot[1]].get(e[side]), rank, (m, side))
 
 
+def _mk(mid, a, b, sa=None, sb=None):
+    return st.Match(mid, mid[0], (int(mid[1]) + 1) // 2, a, b, sa, sb,
+                    "played" if sa is not None else "scheduled")
+
+
+# Mirrors the Group-G case: leader L is on 4 pts and only needs a draw in its MD3 game vs
+# M; rival B is the strongest side but on 2 pts and plays the weak W. The decisive-chaining
+# projector forces L's near-even game to a loss and crowns B/M; the modal projector keeps L
+# (who controls its own fate) on top.
+GROUP_LEADER = [
+    _mk("A1", "L", "B", 1, 1), _mk("A2", "M", "W", 2, 2),
+    _mk("A3", "L", "W", 2, 0), _mk("A4", "M", "B", 0, 0),
+    _mk("A5", "L", "M"), _mk("A6", "B", "W"),
+]
+
+
+class ModalProjectionTests(unittest.TestCase):
+    """project_modal_standings: simulate remaining games, take each group's modal winner."""
+
+    def test_completes_every_group_and_is_deterministic(self):
+        matches = st.load_fixtures(LIVE)
+        a = bk.project_modal_standings(matches, lambda m: (1.5, 1.2), n_sims=500)
+        b = bk.project_modal_standings(matches, lambda m: (1.5, 1.2), n_sims=500)
+        self.assertEqual(len(a.groups), 12)
+        for gt in a.groups.values():                       # every remaining game projected
+            for r in gt.rows:
+                self.assertEqual(r.played, 3)
+        self.assertEqual([a.groups[g].rows[0].team for g in a.groups],
+                         [b.groups[g].rows[0].team for g in b.groups])   # seeded -> identical
+
+    def test_leader_who_only_needs_a_draw_keeps_top_spot(self):
+        # M is slightly favoured in the L-M decider, B dominant over W. The modal method keeps
+        # L on top (L only needs a point); the decisive-chaining method does NOT.
+        rates = lambda m: {"A5": (1.0, 1.3), "A6": (2.6, 0.3)}.get(m.match_id, (1.2, 1.2))
+        s = bk.project_modal_standings(GROUP_LEADER, rates, n_sims=3000)
+        self.assertEqual(s.groups["A"].rows[0].team, "L")
+
+        def decisive(m):
+            la, lb = rates(m)
+            return (1, 0) if la > lb else (0, 1) if lb > la else (1, 1)
+        dec = bk.project_final_standings(GROUP_LEADER, decisive)
+        self.assertNotEqual(dec.groups["A"].rows[0].team, "L")        # regression guard
+
+    def test_modal_projection_drives_a_resolvable_bracket(self):
+        s = bk.project_modal_standings(st.load_fixtures(LIVE), lambda m: (1.4, 1.1), n_sims=500)
+        proj = bk.feed(bk.project(s, resolve_provisional=True), _alpha_resolver)
+        self.assertTrue(proj["fully_projectable"])
+        self.assertTrue(proj["thirds_resolved"])
+        self.assertIsNotNone(proj.get("champion"))
+
+
 if __name__ == "__main__":
     unittest.main()

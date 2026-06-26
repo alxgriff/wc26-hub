@@ -415,9 +415,9 @@ class Md3IntegrationTests(unittest.TestCase):
         self.assertEqual(warnings, [])
         # scenario content is present...
         self.assertIn("kick off simultaneously", edition)
-        self.assertIn("| Team | Top 2 | 3rd | Out | Margin |", edition)
+        self.assertIn("| Team | 1st | 2nd | Top 2 (seed TBD) | 3rd | Out | Margin |", edition)
         self.assertIn("**Team Alpha:**", edition)
-        self.assertTrue(any(k in edition for k in ("Win:", "through (top 2)")))
+        self.assertTrue(any(k in edition for k in ("Win:", "win the group", "runners-up")))
         # ...and the non-MD3 factual one-liner is NOT used on this day
         self.assertNotIn("After 4 matches in Group A:", edition)
         # The Call / Odds slot in the md3 card is still untouched

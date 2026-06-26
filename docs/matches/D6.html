@@ -262,14 +262,6 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
 .metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
 .scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
-.record-scoreboard{display:flex;align-items:center;gap:0;margin-top:16px;border:2px solid var(--ink)}
-.scoreboard-stat{display:flex;flex-direction:column;gap:2px;padding:10px 22px;min-width:110px}
-.scoreboard-label{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
-.scoreboard-value{font-family:var(--mono);font-size:1.45rem;font-weight:700;line-height:1.1}
-.scoreboard-value.units-up{color:#1a7a3f}
-.scoreboard-value.units-down{color:var(--verm)}
-.scoreboard-sub{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
-.scoreboard-divider{width:2px;background:var(--ink);align-self:stretch}
 
 .strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
 .strap b{color:var(--ink);font-weight:700}
@@ -310,17 +302,7 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
-.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
-.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
-.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
-.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
-.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
-.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
-.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
-.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
-.draw-flag{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin:10px 0 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.draw-flag-tag{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:1.5px solid var(--ink-soft);color:var(--ink);padding:2px 7px;white-space:nowrap}
 
 .mini-table{max-width:560px}
 .team-pair{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}
@@ -598,22 +580,11 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="call-h">What the model says</h2>
   </div>
 <div class="probs">
-  <p class="factline">most likely score <b>1–1</b> · expected goals <b>2.12</b> · over 2.5 <b>36%</b> · both score <b>43%</b><br>single source: rating model (Elo+Futi)</p>
-  <div class="overlay-sep"><span class="overlay-sep-line"></span><span class="overlay-sep-label">Post-MD1 Fitted</span><span class="overlay-sep-line"></span></div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">Structural (post-MD1 fitted)</p>
-    <p class="sr-only">Structural (post-MD1 fitted) says Paraguay win 19 percent, draw 27 percent, Australia win 53 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:19">19%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:53">53%</span></div>
-    <div class="scale" aria-hidden="true"><span>Paraguay 19%</span><span>draw 27%</span><span>Australia 53%</span></div>
-  </div>
-  <div class="overlay-section">
-    <p class="overlay-bar-label">100% Futi (post-MD1 fitted)</p>
-    <p class="sr-only">100% Futi (post-MD1 fitted) says Paraguay win 17 percent, draw 27 percent, Australia win 57 percent.</p>
-    <div class="probbar overlay-probbar" aria-hidden="true"><span class="pa" style="flex:17">17%</span><span class="pd" style="flex:27">27%</span><span class="pb" style="flex:57">57%</span></div>
-    <div class="scale" aria-hidden="true"><span>Paraguay 17%</span><span>draw 27%</span><span>Australia 57%</span></div>
-  </div>
+  <p class="sr-only">Paraguay win 32 percent, draw 30 percent, Australia win 37 percent.</p>
+  <div class="probbar" aria-hidden="true"><span class="pa" style="flex:32">32%</span><span class="pd" style="flex:30">30%</span><span class="pb" style="flex:37">37%</span></div>
+  <div class="scale" aria-hidden="true"><span>Paraguay 32%</span><span>draw 30%</span><span>Australia 37%</span></div>
+  <p class="factline">most likely score <b>0–1</b> · expected goals <b>2.08</b> · over 2.5 <b>34%</b> · both score <b>42%</b><br>single source: rating model (Elo+Futi)</p>
 </div>
-<p class="draw-flag"><span class="draw-flag-tag">≈ Draw live</span> Models average 27% chance of a draw — worth checking the price.</p>
 <div class="prose"><blockquote><p><strong>Pre-baked lean (June 11):</strong> strongest under profile of June 25; draw-heavy.</p></blockquote></div>
 </section>
 
@@ -627,14 +598,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <p class="scenario-intro">Final matchday — both Group D games kick off simultaneously: 9 possible outcomes. Anything that comes down to goal difference is flagged margin-dependent, never guessed.</p>
   <table>
     <caption class="sr-only">Finish distribution across all outcome combinations</caption>
-    <thead><tr><th class="lbl" scope="col">Team</th><th scope="col">Top 2</th><th scope="col">3rd</th><th scope="col">Out</th><th scope="col">Margin</th></tr></thead>
+    <thead><tr><th class="lbl" scope="col">Team</th><th scope="col">1st</th><th scope="col">2nd</th><th scope="col" title="through, but the 1st-vs-2nd seed rides on goal difference">Top&nbsp;2*</th><th scope="col">3rd</th><th scope="col">Out</th><th scope="col">Margin</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Paraguay</td><td>3</td><td>5</td><td>1</td><td>0</td></tr>
-      <tr><td class="lbl">Australia</td><td>6</td><td>2</td><td>0</td><td>1</td></tr>
+      <tr><td class="lbl">Paraguay</td><td>0</td><td>3</td><td>0</td><td>6</td><td>0</td><td>0</td></tr>
+      <tr><td class="lbl">Australia</td><td>0</td><td>6</td><td>0</td><td>3</td><td>0</td><td>0</td></tr>
     </tbody>
   </table>
-  <p class="scenario-team">Paraguay</p>  <ul class="scenario-stakes"><li>Win: through (top 2)</li><li>Draw: 3rd — into the best-thirds race</li><li>Loss: 3rd — into the best-thirds race if Türkiye and United States draw or United States beat Türkiye; eliminated (4th) if Türkiye beat United States</li></ul>
-  <p class="scenario-team">Australia</p>  <ul class="scenario-stakes"><li>Win: through (top 2)</li><li>Draw: through (top 2)</li><li>Loss: 3rd — into the best-thirds race if Türkiye and United States draw or United States beat Türkiye; margin-dependent (goal difference/goals, then head-to-head, decide) if Türkiye beat United States</li></ul>
+  <p class="scenario-team">Paraguay</p>  <ul class="scenario-stakes"><li>Win: runners-up (2nd)</li><li>Draw: 3rd — into the best-thirds race</li><li>Loss: 3rd — into the best-thirds race</li></ul>
+  <p class="scenario-team">Australia</p>  <ul class="scenario-stakes"><li>Win: runners-up (2nd)</li><li>Draw: runners-up (2nd)</li><li>Loss: 3rd — into the best-thirds race</li></ul>
 </div>
   <div class="mini-table">
 <article class="card" id="group-d" style="--i:0" aria-labelledby="gh-d">
@@ -689,7 +660,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Sweat Factor</span>
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
-<div class="placeholder-slot">Sweat Factor forecast pending — this match is not yet within the 16-day Open-Meteo forecast window. The section fills automatically once available; no data is invented.</div>
+<div class="conditions">
+  <span class="cond-stamp">Forecast · as of 2026-06-25 07:54 ET</span>
+  <p class="cond-stats">~66°F · moderate humidity (58% RH) · WBGT 67.2°F</p>
+  <div class="cond-track" aria-label="Match heat index: Moderate (11/100)"><div class="cond-fill" style="width:11%"></div></div>
+  <p class="cond-sev cond-sev-moderate">Moderate</p>
+  <p class="cond-blurb">Warm out; Australia are +9°F outside their comfort zone while Paraguay are the better-acclimated side.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Paraguay</span><div class="cond-dis-track" aria-label="Heat disadvantage 0/100"><div class="cond-dis-fill" style="width:0%"></div></div><span class="cond-delta">-3.2°F vs home</span></div><div class="cond-team"><span class="cond-tname">Australia</span><div class="cond-dis-track" aria-label="Heat disadvantage 47/100"><div class="cond-dis-fill" style="width:47%"></div></div><span class="cond-delta">+8.5°F vs home</span></div></div>
+</div>
 </section>
 
 <section aria-labelledby="card-h" class="read-grid">
@@ -707,33 +685,50 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </div>
 </section>
 
-
+<section aria-labelledby="wire-h">
+  <div class="sec-head">
+    <span class="kicker">The Wire</span>
+    <h2 id="wire-h">What's being reported</h2>
+  </div>
+  <div class="wire">
+    <p class="wire-tag">Auto-gathered 2026-06-25 · every claim carries its source · relayed as reporting, not verified by the hub — click through before it bears weight.</p>
+<ul><li><strong>Paraguay — Miguel Almirón (RED CARD, suspended):</strong> Paraguay star Miguel Almirón is banned from his side's clash with Australia, a potentially damaging blow to their hopes of qualifying for the knockouts of the 2026 World Cup. The attacker is the leading scorer in the squad with 10 goals; his absence is due to the red card he received against Türkiye last time out. (source: <a href="https://www.sportsmole.co.uk/football/paraguay/world-cup-2026/predicted-lineups/who-replaces-almiron-predicted-paraguay-xi-vs-australia_599928.html" rel="nofollow">https://www.sportsmole.co.uk/football/paraguay/world-cup-2026/predicted-lineups/who-replaces-almiron-predicted-paraguay-xi-vs-australia_599928.html</a>)</li></ul>
+<ul><li><strong>Paraguay — Diego Gómez (fitness scare, reportedly fit):</strong> There were fears about the fitness of midfielder Diego Gómez, who was taken off against Türkiye, but he has reportedly overcome his discomfort in time for his side's final group game. (source: <a href="https://www.sportsmole.co.uk/football/paraguay/world-cup-2026/preview/paraguay-vs-australia-prediction-team-news-lineups_599899.html" rel="nofollow">https://www.sportsmole.co.uk/football/paraguay/world-cup-2026/preview/paraguay-vs-australia-prediction-team-news-lineups_599899.html</a>)</li></ul>
+<ul><li><strong>Australia — Mathew Leckie (muscle, doubtful):</strong> Australian winger Mathew Leckie suffered a muscle injury against the US, and while he has not been ruled out of his nation's third match, it may be safer for Cristian Volpato to come into the lineup. (source: <a href="https://www.sportsmole.co.uk/football/paraguay/world-cup-2026/preview/paraguay-vs-australia-prediction-team-news-lineups_599899.html" rel="nofollow">https://www.sportsmole.co.uk/football/paraguay/world-cup-2026/preview/paraguay-vs-australia-prediction-team-news-lineups_599899.html</a>)</li></ul>
+<ul><li><strong>Australia — Nestory Irankunda (possible start):</strong> Leckie is a major doubt after sustaining an injury in his last outing. The 35-year-old's absence gives coach Popovic an excuse to re-introduce Nestory Irankunda from the start. The 20-year-old Watford star was impressive against Türkiye, bagging a goal, but was then left out of the starting lineup against the USMNT. (source: <a href="https://www.si.com/soccer/paraguay-vs-australia-world-cup-preview-predictions-lineups-6-25-26" rel="nofollow">https://www.si.com/soccer/paraguay-vs-australia-world-cup-preview-predictions-lineups-6-25-26</a>)</li></ul>
+  </div>
+</section>
 
 <section aria-labelledby="odds-h">
   <div class="sec-head">
     <span class="kicker">The Market</span>
     <h2 id="odds-h">Odds &amp; best bet</h2>
   </div>
-<p class="odds-note">model projection: <b>2.12</b> total goals · over 1.5 <b>63%</b> · over 2.5 <b>36%</b> · over 3.5 <b>17%</b></p>
+<p class="odds-note">model projection: <b>2.08</b> total goals · over 1.5 <b>61%</b> · over 2.5 <b>34%</b> · over 3.5 <b>16%</b></p>
 <div class="edge-wrap">
   <table>
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 1.5</td><td title="1.61 decimal">-164</td><td>59%</td><td>63%</td><td class="edge-pos">+4.1%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 1.5</td><td title="2.27 decimal">+127</td><td>41%</td><td>37%</td><td class="edge-neg">-4.1%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 1.75</td><td title="1.83 decimal">-120</td><td>52%</td><td>63%</td><td class="edge-pos">+10.4%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 1.75</td><td title="2.00 decimal">+100</td><td>48%</td><td>37%</td><td class="edge-neg">-10.4%</td></tr>
-      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td title="2.28 decimal">+128</td><td>42%</td><td>49%</td><td class="edge-pos">+6.4%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td title="1.68 decimal">-147</td><td>58%</td><td>51%</td><td class="edge-neg">-6.4%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Paraguay -0.25</td><td title="2.28 decimal">+128</td><td>42%</td><td>40%</td><td class="edge-neg">-2.3%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Australia +0.25</td><td title="1.65 decimal">-154</td><td>58%</td><td>60%</td><td class="">+2.3%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Paraguay</td><td title="2.60 decimal">+160</td><td>37%</td><td>32%</td><td class="edge-neg">-4.3%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="2.25 decimal">+125</td><td>42%</td><td>30%</td><td class="edge-neg">-12.4%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Australia</td><td title="4.60 decimal">+360</td><td>21%</td><td>37%</td><td class="edge-pos">+16.6%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 1.5</td><td title="1.67 decimal">-149</td><td>57%</td><td>61%</td><td class="edge-pos">+4.5%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 1.5</td><td title="2.21 decimal">+121</td><td>43%</td><td>39%</td><td class="edge-neg">-4.5%</td></tr>
+      <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td title="2.39 decimal">+139</td><td>41%</td><td>47%</td><td class="edge-pos">+6.6%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td title="1.63 decimal">-159</td><td>59%</td><td>53%</td><td class="edge-neg">-6.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Paraguay -0.25</td><td title="2.05 decimal">+105</td><td>47%</td><td>38%</td><td class="edge-neg">-8.5%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Australia +0.25</td><td title="1.80 decimal">-125</td><td>53%</td><td>62%</td><td class="edge-pos">+8.5%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2</strong> (Total goals) @ +128, edge <strong>+6.4%</strong> — best price +130 (betus). Flat 1u, paper record.</p></div>
-<p class="verify-flag">totals over 1.75: model-priced edge +10.4% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 24, 12:55 AM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed · O/U 2 can push (P 27%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Over 2</strong> (Total goals) @ +139, edge <strong>+6.6%</strong> — best price +139 (betonlineag). Flat 1u, paper record.</p></div>
+<p class="odds-note">Logged pick: Over 2 @ +135 (betus), edge 5.3pp · open.</p>
+<p class="odds-note">Logged pick: Australia +0.25 @ -145 (bovada), edge 5.2pp · open.</p>
+<p class="odds-note">Logged pick: Australia @ +320 (draftkings), edge 14.6pp · open.</p>
+<p class="verify-flag">h2h away: edge +16.6% implausibly large — verify odds freshness and team news before trusting</p>
+<p class="verify-flag">spreads away 0.25: model-priced edge +8.5% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 25, 6:59 PM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 2 can push (P 27%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -756,7 +751,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.0356,lb=1.0884,N=8,SHOW=6,i,j;
+  var la=0.9909,lb=1.0867,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
