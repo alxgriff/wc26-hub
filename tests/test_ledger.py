@@ -157,5 +157,119 @@ class FileRoundTripTests(unittest.TestCase):
         self.assertEqual(lg.load_ledger(Path("nope") / "missing.csv"), [])
 
 
+import knockout as ko  # noqa: E402
+
+
+def km(no, team_a="", team_b="", sa=None, sb=None, decided="", winner="",
+       status="scheduled", date_et="2026-06-28", k24="15:00"):
+    return ko.KnockoutMatch(no, ko.round_of(no), date_et, k24, "3:00 PM", "SoFi Stadium",
+                            "Inglewood", "USA", "", team_a, team_b, sa, sb, decided,
+                            winner, status, "")
+
+
+def ko_pred(no, pa=0.6, pb=0.4, ts="2026-06-28T10:00:00-04:00",
+            team_a="France", team_b="Brazil"):
+    return {"match_no": str(no), "team_a": team_a, "team_b": team_b,
+            "p_advance_a": f"{pa:.4f}", "p_advance_b": f"{pb:.4f}", "timestamp": ts}
+
+
+class Brier2Tests(unittest.TestCase):
+    def test_certain_correct_zero(self):
+        self.assertAlmostEqual(lg.brier2((1.0, 0.0), 0), 0.0)
+
+    def test_certain_wrong_two(self):
+        self.assertAlmostEqual(lg.brier2((1.0, 0.0), 1), 2.0)
+
+    def test_coin_flip_half(self):
+        self.assertAlmostEqual(lg.brier2((0.5, 0.5), 0), 0.5)
+
+    def test_probs_valid2(self):
+        self.assertTrue(lg.probs_valid2((0.6, 0.4)))
+        self.assertFalse(lg.probs_valid2((0.6, 0.5)))       # sums to 1.1
+        self.assertFalse(lg.probs_valid2((0.6, 0.4, 0.0)))  # not length 2
+        self.assertFalse(lg.probs_valid2(("x", 0.4)))
+
+
+class KoUpsertTests(unittest.TestCase):
+    def test_idempotent_relog(self):
+        rows, c1 = lg.upsert_ko_prediction([], ko_pred(73), set(), False)
+        rows, c2 = lg.upsert_ko_prediction(rows, ko_pred(73), set(), False)
+        self.assertTrue(c1)
+        self.assertFalse(c2)
+        self.assertEqual(len(rows), 1)
+
+    def test_prekickoff_revision_updates(self):
+        rows, _ = lg.upsert_ko_prediction([], ko_pred(73, 0.6, 0.4), set(), False)
+        rows, ch = lg.upsert_ko_prediction(rows, ko_pred(73, 0.7, 0.3), set(), False)
+        self.assertTrue(ch)
+        self.assertEqual(rows[0]["p_advance_a"], "0.7000")
+
+    def test_post_kickoff_new_refused(self):
+        with self.assertRaises(lg.LedgerError):
+            lg.upsert_ko_prediction([], ko_pred(73), set(), True)
+
+    def test_played_tie_immutable(self):
+        rows, _ = lg.upsert_ko_prediction([], ko_pred(73), set(), False)
+        with self.assertRaises(lg.LedgerError):
+            lg.upsert_ko_prediction(rows, ko_pred(73, 0.9, 0.1), {"73"}, False)
+
+
+class KoGradeTests(unittest.TestCase):
+    def test_outcome_index_uses_winner_side(self):
+        self.assertEqual(lg.ko_outcome_index(
+            km(73, "France", "Brazil", 2, 1, "regulation", "A", "played")), 0)
+        self.assertEqual(lg.ko_outcome_index(
+            km(73, "France", "Brazil", 1, 1, "penalties", "B", "played")), 1)
+        self.assertIsNone(lg.ko_outcome_index(km(73, "France", "Brazil")))   # scheduled
+
+    def test_grade_and_cumulative(self):
+        matches = [km(73, "France", "Brazil", 2, 1, "regulation", "A", "played"),
+                   km(74, "Spain", "Italy", 1, 1, "penalties", "B", "played")]
+        rows = [ko_pred(73, 1.0, 0.0, team_a="France", team_b="Brazil"),    # correct -> 0
+                ko_pred(74, 1.0, 0.0, team_a="Spain", team_b="Italy")]      # B won -> 2
+        graded = lg.grade_ko(matches, rows)
+        self.assertEqual(set(graded), {73, 74})
+        self.assertAlmostEqual(graded[73]["brier"], 0.0)
+        self.assertTrue(graded[73]["correct"])
+        self.assertAlmostEqual(graded[74]["brier"], 2.0)
+        self.assertFalse(graded[74]["correct"])
+        line = lg.ko_cumulative_line(matches, rows)
+        self.assertIn("2 graded", line)
+        self.assertIn("1 correct", line)
+        self.assertIn("1.000", line)                     # mean of 0 and 2
+
+    def test_only_played_with_logged_row_graded(self):
+        matches = [km(73, "France", "Brazil", 2, 1, "regulation", "A", "played"),
+                   km(74, "Spain", "Italy")]             # scheduled
+        self.assertEqual(set(lg.grade_ko(matches, [ko_pred(73)])), {73})
+
+
+class KoLogCliTests(unittest.TestCase):
+    def _run(self, lines):
+        orig = lg.log_ko_slate
+        lg.log_ko_slate = lambda *a, **k: lines
+        try:
+            return lg.main(["log-ko", "2026-06-28"])
+        finally:
+            lg.log_ko_slate = orig
+
+    def test_missed_exits_nonzero(self):
+        self.assertEqual(self._run(
+            ["M73: MISSED — advance call not logged before kickoff (...)"]), 1)
+
+    def test_ok_exits_zero(self):
+        self.assertEqual(self._run(["M73 France vs Brazil: logged advance call"]), 0)
+
+
+class KoFileRoundTripTests(unittest.TestCase):
+    def test_save_and_load(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "ko.csv"
+            lg.save_ko_ledger([ko_pred(73)], p)
+            back = lg.load_ko_ledger(p)
+            self.assertEqual(len(back), 1)
+            self.assertEqual(back[0]["match_no"], "73")
+
+
 if __name__ == "__main__":
     unittest.main()

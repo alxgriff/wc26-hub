@@ -45,6 +45,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import standings as st      # noqa: E402
 import build_edition as be  # noqa: E402  (editorial-date slate selection)
 import predict as pr        # noqa: E402
+import bracket as bk        # noqa: E402  (resolve knockout matchups for the advance ledger)
+import knockout as ko       # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 LEDGER_PATH = REPO_ROOT / "data" / "predictions_log.csv"
@@ -264,37 +266,222 @@ def log_slate(editorial_date: date, fixtures_path: Path,
     return lines
 
 
+# ---------------------------------------------------------------- knockout advance ledger
+#
+# Single-elimination ties are 2-way (advance / out) — the group ledger above is UNCHANGED.
+# This is a parallel, knockout-only accountability trail keyed on the FIFA match number,
+# logging the model's pre-kickoff ADVANCE call (predict.resolve_knockout: 90' + extra time
+# + coin-flip shootout) and grading it against knockout.csv's authoritative winner side
+# with a 2-class Brier. Same leakage discipline: log strictly pre-kickoff, immutable once
+# played, never double-log.
+
+KO_LEDGER_PATH = REPO_ROOT / "data" / "ko_predictions_log.csv"
+KO_COLUMNS = ["match_no", "team_a", "team_b", "p_advance_a", "p_advance_b", "timestamp"]
+
+
+def brier2(p: tuple, outcome: int) -> float:
+    """Two-class Brier for an advance call: sum of squared errors of the 2-vector
+    (p_advance_a, p_advance_b) against the realized advance vector. Certain-correct 0;
+    certain-wrong 2; an even (0.5, 0.5) call on a binary outcome scores 0.5."""
+    return sum((p[i] - (1.0 if i == outcome else 0.0)) ** 2 for i in range(2))
+
+
+def probs_valid2(probs) -> bool:
+    """True iff an advance pair is finite, each in [0, 1], and sums to 1.0±0.001."""
+    try:
+        p = [float(x) for x in probs]
+    except (TypeError, ValueError):
+        return False
+    return (len(p) == 2
+            and all(math.isfinite(x) and 0.0 <= x <= 1.0 for x in p)
+            and abs(sum(p) - 1.0) <= 0.001)
+
+
+def load_ko_ledger(path: str | Path = KO_LEDGER_PATH) -> list[dict]:
+    path = Path(path)
+    if not path.exists():
+        return []
+    with path.open(encoding="utf-8-sig", newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def save_ko_ledger(rows: list[dict], path: str | Path = KO_LEDGER_PATH) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8-sig", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=KO_COLUMNS)
+        w.writeheader()
+        w.writerows({c: r.get(c, "") for c in KO_COLUMNS} for r in rows)
+
+
+def upsert_ko_prediction(rows: list[dict], row: dict, played_nos: set,
+                         kickoff_passed: bool) -> tuple[list[dict], bool]:
+    """Insert/update the advance call for a knockout match (keyed on match_no). Same
+    integrity as upsert_prediction: refuse to create OR revise a row once the tie is
+    played; refuse a new row after kickoff; identical re-logs are idempotent no-ops."""
+    no = str(row["match_no"])
+    existing = next((r for r in rows if str(r.get("match_no")) == no), None)
+    if no in played_nos:
+        raise LedgerError(f"M{no}: tie already played — advance calls are immutable")
+    if existing is None and kickoff_passed:
+        raise LedgerError(f"M{no}: kickoff has passed — refusing a post-hoc advance call")
+    if existing is not None:
+        if all(existing.get(k) == row.get(k) for k in ("p_advance_a", "p_advance_b")):
+            return rows, False
+        if kickoff_passed:
+            raise LedgerError(f"M{no}: kickoff has passed — refusing to revise the advance call")
+        existing.update(row)
+        return rows, True
+    return rows + [row], True
+
+
+def ko_kickoff_dt(km) -> datetime:
+    """Kickoff as an ET datetime from a KnockoutMatch (date_et + kickoff_et_24h)."""
+    d = date.fromisoformat(km.date_et.strip())
+    h, mnt = (int(x) for x in km.kickoff_et_24h.strip().split(":"))
+    return datetime(d.year, d.month, d.day, h, mnt, tzinfo=ET)
+
+
+def ko_outcome_index(km) -> int | None:
+    """0 if the listed-first side (team_a) advanced, 1 if team_b — from knockout.csv's
+    authoritative `winner` side (penalty wins included). None if not played."""
+    if not km.is_played or km.winner not in ("A", "B"):
+        return None
+    return 0 if km.winner == "A" else 1
+
+
+def log_ko_slate(editorial_date: date,
+                 fixtures_path: Path = REPO_ROOT / "data" / "fixtures.csv",
+                 knockout_path: Path = KO_LEDGER_PATH.parent / "knockout.csv",
+                 ledger_path: Path = KO_LEDGER_PATH,
+                 now: datetime | None = None) -> list[str]:
+    """Log the model's advance call for every RESOLVED knockout tie on the editorial
+    date, strictly pre-kickoff. Matchups are materialized from the current standings +
+    any played knockout results; abstract/unresolved ties are skipped (nothing to call)."""
+    now = now or now_et()
+    matches = ko.load_knockout(knockout_path)
+    if not matches:
+        return ["no knockout schedule yet — nothing to log"]
+    fixtures = st.load_fixtures(fixtures_path)
+    standings = st.compute_standings(fixtures, fair_play=st.load_discipline())
+    matches = ko.materialize_teams(bk.project(standings), matches)
+    today = [km for km in matches if km.date_et == editorial_date.isoformat()]
+    if not today:
+        return [f"no knockout ties on {editorial_date}"]
+
+    model = pr.load_ratings(fixtures=fixtures_path)
+    rows = load_ko_ledger(ledger_path)
+    played_nos = {str(km.match_no) for km in matches if km.is_played}
+    stamp = now.isoformat(timespec="seconds")
+    lines: list[str] = []
+    for km in today:
+        if not km.participants_known:
+            lines.append(f"M{km.match_no}: matchup not set — no advance call to log")
+            continue
+        passed = now >= ko_kickoff_dt(km)
+        kp = pr.resolve_knockout(model, km.team_a, km.team_b)   # neutral venue (no KO HFA)
+        row = {"match_no": str(km.match_no), "team_a": km.team_a, "team_b": km.team_b,
+               "p_advance_a": f"{kp.p_advance_a:.4f}", "p_advance_b": f"{kp.p_advance_b:.4f}",
+               "timestamp": stamp}
+        try:
+            rows, changed = upsert_ko_prediction(rows, row, played_nos, passed)
+            lines.append(f"M{km.match_no} {km.team_a} vs {km.team_b}: "
+                         + ("logged advance call" if changed else "already logged (unchanged)"))
+        except LedgerError as e:
+            lines.append(f"M{km.match_no}: MISSED — advance call not logged before kickoff ({e})")
+
+    save_ko_ledger(rows, ledger_path)
+    return lines
+
+
+def grade_ko(knockout_matches: list, ledger_rows: list[dict]) -> dict:
+    """Per-tie 2-class Brier for played, logged knockout ties.
+    {match_no: {"p": (pa, pb), "outcome": int, "brier": float, "correct": bool,
+                "advancer": team}}."""
+    by_no = {str(r.get("match_no")): r for r in ledger_rows}
+    out = {}
+    for km in knockout_matches:
+        o = ko_outcome_index(km)
+        key = str(km.match_no)
+        if o is None or key not in by_no:
+            continue
+        r = by_no[key]
+        try:
+            p = (float(r["p_advance_a"]), float(r["p_advance_b"]))
+        except (KeyError, ValueError):
+            continue
+        out[km.match_no] = {"p": p, "outcome": o, "brier": brier2(p, o),
+                            "correct": (p[0] >= p[1]) == (o == 0),
+                            "advancer": km.winner_team}
+    return out
+
+
+def ko_cumulative_line(knockout_matches: list, ledger_rows: list[dict]) -> str | None:
+    """One-line running summary across all graded knockout advance calls."""
+    graded = grade_ko(knockout_matches, ledger_rows)
+    if not graded:
+        return None
+    n = len(graded)
+    mean_b = sum(g["brier"] for g in graded.values()) / n
+    hits = sum(1 for g in graded.values() if g["correct"])
+    return (f"Knockout advance calls: {n} graded, {hits} correct, "
+            f"cumulative 2-class Brier {mean_b:.3f} "
+            f"(0 = clairvoyant, 0.5 = coin-flip baseline, 2 = max)")
+
+
 # ---------------------------------------------------------------- CLI
 
 def main(argv: list | None = None) -> int:
     ap = argparse.ArgumentParser(description="Prediction ledger: log a slate or report Brier.")
-    ap.add_argument("command", choices=["log", "report"])
-    ap.add_argument("date", nargs="?", help="editorial date YYYY-MM-DD (for `log`)")
+    ap.add_argument("command", choices=["log", "report", "log-ko", "report-ko"])
+    ap.add_argument("date", nargs="?", help="editorial date YYYY-MM-DD (for `log`/`log-ko`)")
     ap.add_argument("--fixtures", type=Path, default=REPO_ROOT / "data" / "fixtures.csv")
     ap.add_argument("--ledger", type=Path, default=LEDGER_PATH)
+    ap.add_argument("--ko-ledger", type=Path, default=KO_LEDGER_PATH)
+    ap.add_argument("--knockout", type=Path, default=REPO_ROOT / "data" / "knockout.csv")
     args = ap.parse_args(argv)
 
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8")
 
-    if args.command == "log":
+    if args.command in ("log", "log-ko"):
         if not args.date:
-            print("error: `log` needs an editorial date (YYYY-MM-DD)", file=sys.stderr)
+            print(f"error: `{args.command}` needs an editorial date (YYYY-MM-DD)", file=sys.stderr)
             return 2
         try:
             target = date.fromisoformat(args.date)
         except ValueError:
             print(f"error: bad date {args.date!r}", file=sys.stderr)
             return 2
-        lines = log_slate(target, args.fixtures, args.ledger)
+        if args.command == "log":
+            lines = log_slate(target, args.fixtures, args.ledger)
+            miss_word = "slate prediction"
+        else:
+            lines = log_ko_slate(target, args.fixtures, args.knockout, args.ko_ledger)
+            miss_word = "advance call"
         for line in lines:
             print(line)
         missed = [l for l in lines if "MISSED" in l]
         if missed:
-            print(f"::error::{len(missed)} slate prediction(s) not logged before "
+            print(f"::error::{len(missed)} {miss_word}(s) not logged before "
                   "kickoff — run the morning pipeline earlier", file=sys.stderr)
             return 1
+        return 0
+
+    if args.command == "report-ko":
+        matches = ko.load_knockout(args.knockout)
+        graded = grade_ko(matches, load_ko_ledger(args.ko_ledger))
+        if not graded:
+            print("no graded knockout advance calls yet")
+            return 0
+        print(f"{'tie':5s} {'advance call (A/B)':20s} {'advanced':9s} {'Brier':>6s}  ok")
+        for no, g in sorted(graded.items()):
+            p = "/".join(f"{x:.0%}" for x in g["p"])
+            print(f"M{no:<4d} {p:20s} {['A', 'B'][g['outcome']]:9s} "
+                  f"{g['brier']:6.3f}  {'✓' if g['correct'] else '✗'}")
+        print()
+        print(ko_cumulative_line(matches, load_ko_ledger(args.ko_ledger)))
         return 0
 
     matches = st.load_fixtures(args.fixtures)
