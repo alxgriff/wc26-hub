@@ -172,92 +172,103 @@ def _parse_score(value: str | None, no: int, col: str) -> int | None:
     return score
 
 
+def _validate_match(km: KnockoutMatch, venues: set | None = None,
+                    seen: set | None = None, warn: list | None = None) -> None:
+    """Validate one KnockoutMatch against the contract — the single source of the rules,
+    shared by the CSV loader and result entry so they can never drift. Operates on the
+    TYPED fields (ints / None), so it is safe for both paths. Raises ValueError on any
+    structural violation; appends soft issues (incomplete schedule) to ``warn``."""
+    no = km.match_no
+    if not (KO_MIN <= no <= KO_MAX):
+        raise ValueError(f"match_no {no} outside the knockout range {KO_MIN}-{KO_MAX}")
+    if seen is not None:
+        if no in seen:
+            raise ValueError(f"duplicate match_no {no}")
+        seen.add(no)
+    if km.round != round_of(no):
+        raise ValueError(f"M{no}: round {km.round!r} inconsistent with match_no "
+                         f"(expected {round_of(no)!r})")
+    if km.status not in ("scheduled", "played"):
+        raise ValueError(f"M{no}: status must be 'scheduled' or 'played', got {km.status!r}")
+    if km.team_a and km.team_b and km.team_a == km.team_b:
+        raise ValueError(f"M{no}: team_a and team_b are both {km.team_a!r}")
+    if km.stadium and venues is not None and km.stadium not in venues:
+        raise ValueError(
+            f"M{no}: stadium {km.stadium!r} is not in data/venues.csv canon "
+            "(Sweat Factor joins on the exact stadium string — normalise or add the venue)")
+    for col, val in (("score_a", km.score_a), ("score_b", km.score_b)):
+        if val is not None and val < 0:
+            raise ValueError(f"M{no}: {col} is negative: {val}")
+
+    if km.status == "scheduled":
+        if km.score_a is not None or km.score_b is not None:
+            raise ValueError(f"M{no}: status is 'scheduled' but a score is present")
+        if km.winner:
+            raise ValueError(f"M{no}: status is 'scheduled' but a winner is set")
+        if km.decided_by:
+            raise ValueError(f"M{no}: status is 'scheduled' but decided_by is set")
+    else:  # played
+        if km.score_a is None or km.score_b is None:
+            raise ValueError(f"M{no}: status is 'played' but scores are incomplete")
+        if not (km.team_a and km.team_b):
+            raise ValueError(f"M{no}: status is 'played' but the participants are not both known")
+        if km.winner not in WINNER_SIDES:
+            raise ValueError(f"M{no}: a played knockout match needs winner in {WINNER_SIDES}, "
+                             f"got {km.winner!r}")
+        if km.decided_by not in DECIDED_BY:
+            raise ValueError(f"M{no}: a played knockout match needs decided_by in {DECIDED_BY}, "
+                             f"got {km.decided_by!r}")
+        # A knockout match cannot end level: unequal => decided in regulation/ET on the
+        # higher side; equal => settled on penalties (winner is the shootout winner).
+        if km.score_a == km.score_b:
+            if km.decided_by != "penalties":
+                raise ValueError(f"M{no}: level after play ({km.score_a}–{km.score_b}) "
+                                 "must be decided_by 'penalties'")
+        else:
+            if km.decided_by == "penalties":
+                raise ValueError(f"M{no}: scores differ ({km.score_a}–{km.score_b}) so it "
+                                 "was not settled on penalties")
+            higher = "A" if km.score_a > km.score_b else "B"
+            if km.winner != higher:
+                raise ValueError(f"M{no}: winner {km.winner!r} contradicts the score "
+                                 f"{km.score_a}–{km.score_b} (the {higher} side won)")
+
+    if warn is not None and (not km.date_et or not km.stadium):
+        warn.append(f"M{no}: schedule incomplete (date_et/stadium missing)")
+
+
 def parse_knockout(rows, warnings: list | None = None) -> list[KnockoutMatch]:
-    """Validate + parse knockout rows. Raises on any structural / contract violation
-    (the same stop-and-report discipline as standings.parse_fixtures); appends soft
-    issues (incomplete schedule) to ``warnings`` if given."""
+    """Parse + validate knockout rows from CSV-shaped dicts. Raises on any structural /
+    contract violation (the same stop-and-report discipline as standings.parse_fixtures);
+    appends soft issues to ``warnings`` if given."""
     warn = warnings if warnings is not None else []
     venues = _venue_canon()
     out: list[KnockoutMatch] = []
     seen: set[int] = set()
     for raw in rows:
-        no_s = (raw.get("match_no") or "").strip()
+        no_s = str(raw.get("match_no") or "").strip()
         try:
             no = int(no_s)
         except ValueError:
             raise ValueError(f"bad match_no {no_s!r} (expected an integer {KO_MIN}-{KO_MAX})") from None
-        if not (KO_MIN <= no <= KO_MAX):
-            raise ValueError(f"match_no {no} outside the knockout range {KO_MIN}-{KO_MAX}")
-        if no in seen:
-            raise ValueError(f"duplicate match_no {no}")
-        seen.add(no)
-
-        rnd = (raw.get("round") or "").strip() or round_of(no)
-        if rnd != round_of(no):
-            raise ValueError(f"M{no}: round {rnd!r} inconsistent with match_no (expected {round_of(no)!r})")
-
-        status = (raw.get("status") or "").strip().lower()
-        if status not in ("scheduled", "played"):
-            raise ValueError(f"M{no}: status must be 'scheduled' or 'played', got {raw.get('status')!r}")
-
-        team_a = (raw.get("team_a") or "").strip()
-        team_b = (raw.get("team_b") or "").strip()
-        if team_a and team_b and team_a == team_b:
-            raise ValueError(f"M{no}: team_a and team_b are both {team_a!r}")
-
-        stadium = (raw.get("stadium") or "").strip()
-        if stadium and venues is not None and stadium not in venues:
-            raise ValueError(
-                f"M{no}: stadium {stadium!r} is not in data/venues.csv canon "
-                "(Sweat Factor joins on the exact stadium string — normalise or add the venue)")
-
-        score_a = _parse_score(raw.get("score_a"), no, "score_a")
-        score_b = _parse_score(raw.get("score_b"), no, "score_b")
-        decided_by = (raw.get("decided_by") or "").strip().lower()
-        winner = (raw.get("winner") or "").strip().upper()
-
-        if status == "scheduled":
-            if score_a is not None or score_b is not None:
-                raise ValueError(f"M{no}: status is 'scheduled' but a score is present")
-            if winner:
-                raise ValueError(f"M{no}: status is 'scheduled' but a winner is set")
-            if decided_by:
-                raise ValueError(f"M{no}: status is 'scheduled' but decided_by is set")
-        else:  # played
-            if score_a is None or score_b is None:
-                raise ValueError(f"M{no}: status is 'played' but scores are incomplete")
-            if not (team_a and team_b):
-                raise ValueError(f"M{no}: status is 'played' but the participants are not both known")
-            if winner not in WINNER_SIDES:
-                raise ValueError(f"M{no}: a played knockout match needs winner in {WINNER_SIDES}, got {winner!r}")
-            if decided_by not in DECIDED_BY:
-                raise ValueError(f"M{no}: a played knockout match needs decided_by in {DECIDED_BY}, got {decided_by!r}")
-            # A knockout match cannot end level: unequal score => decided in regulation/ET on the
-            # higher side; equal score => settled on penalties (winner is the shootout winner).
-            if score_a == score_b:
-                if decided_by != "penalties":
-                    raise ValueError(
-                        f"M{no}: level after play ({score_a}-{score_b}) must be decided_by 'penalties'")
-            else:
-                if decided_by == "penalties":
-                    raise ValueError(
-                        f"M{no}: scores differ ({score_a}-{score_b}) so it was not settled on penalties")
-                higher = "A" if score_a > score_b else "B"
-                if winner != higher:
-                    raise ValueError(
-                        f"M{no}: winner {winner!r} contradicts the score {score_a}-{score_b} "
-                        f"(the {higher} side won in normal/extra time)")
-
-        out.append(KnockoutMatch(
-            no, rnd, (raw.get("date_et") or "").strip(),
-            (raw.get("kickoff_et_24h") or "").strip(), (raw.get("kickoff_et") or "").strip(),
-            stadium, (raw.get("city") or "").strip(), (raw.get("country") or "").strip(),
-            (raw.get("tv_us") or "").strip(), team_a, team_b, score_a, score_b,
-            decided_by, winner, status, (raw.get("notes") or "").strip()))
-
-        if not (raw.get("date_et") or "").strip() or not stadium:
-            warn.append(f"M{no}: schedule incomplete (date_et/stadium missing)")
-
+        rnd = str(raw.get("round") or "").strip()
+        if not rnd and KO_MIN <= no <= KO_MAX:
+            rnd = round_of(no)
+        km = KnockoutMatch(
+            no, rnd, str(raw.get("date_et") or "").strip(),
+            str(raw.get("kickoff_et_24h") or "").strip(),
+            str(raw.get("kickoff_et") or "").strip(),
+            str(raw.get("stadium") or "").strip(), str(raw.get("city") or "").strip(),
+            str(raw.get("country") or "").strip(), str(raw.get("tv_us") or "").strip(),
+            str(raw.get("team_a") or "").strip(), str(raw.get("team_b") or "").strip(),
+            _parse_score(raw.get("score_a"), no, "score_a"),
+            _parse_score(raw.get("score_b"), no, "score_b"),
+            str(raw.get("decided_by") or "").strip().lower(),
+            str(raw.get("winner") or "").strip().upper(),
+            str(raw.get("status") or "").strip().lower(),
+            str(raw.get("notes") or "").strip())
+        _validate_match(km, venues=venues, seen=seen, warn=warn)
+        out.append(km)
     out.sort(key=lambda k: k.match_no)
     return out
 
@@ -329,26 +340,61 @@ def materialize_teams(proj: dict, matches: list[KnockoutMatch]) -> list[Knockout
     return out
 
 
+def _row_dict(k: KnockoutMatch) -> dict:
+    """A KnockoutMatch as a CSV row dict (COLUMNS order; None scores -> "")."""
+    return {
+        "match_no": k.match_no, "round": k.round, "date_et": k.date_et,
+        "kickoff_et_24h": k.kickoff_et_24h, "kickoff_et": k.kickoff_et,
+        "stadium": k.stadium, "city": k.city, "country": k.country, "tv_us": k.tv_us,
+        "team_a": k.team_a, "team_b": k.team_b,
+        "score_a": "" if k.score_a is None else k.score_a,
+        "score_b": "" if k.score_b is None else k.score_b,
+        "decided_by": k.decided_by, "winner": k.winner, "status": k.status, "notes": k.notes,
+    }
+
+
 def write_knockout(path: str | Path, matches: list[KnockoutMatch]) -> None:
     """Write the knockout table (sorted by match_no) with a UTF-8 BOM and the COLUMNS
     order — a deterministic, minimal-quote round-trip so machine updates (resolver,
     results feed) produce clean diffs."""
     path = Path(path)
-    rows = []
-    for k in sorted(matches, key=lambda m: m.match_no):
-        rows.append({
-            "match_no": k.match_no, "round": k.round, "date_et": k.date_et,
-            "kickoff_et_24h": k.kickoff_et_24h, "kickoff_et": k.kickoff_et,
-            "stadium": k.stadium, "city": k.city, "country": k.country, "tv_us": k.tv_us,
-            "team_a": k.team_a, "team_b": k.team_b,
-            "score_a": "" if k.score_a is None else k.score_a,
-            "score_b": "" if k.score_b is None else k.score_b,
-            "decided_by": k.decided_by, "winner": k.winner, "status": k.status, "notes": k.notes,
-        })
     with path.open("w", encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=list(COLUMNS))
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows(_row_dict(k) for k in sorted(matches, key=lambda m: m.match_no))
+
+
+def enter_ko_result(matches: list[KnockoutMatch], match_no: int, score_a: int, score_b: int,
+                    decided_by: str = "", winner: str = "",
+                    force: bool = False) -> tuple[list[KnockoutMatch], str]:
+    """Set a played result on a knockout match, contract-safe. Defaults: a decisive
+    scoreline infers winner (higher side) and decided_by='regulation' if unset; a level
+    scoreline REQUIRES decided_by='penalties' and an explicit winner (the shootout can't
+    be inferred from the score — never guessed). Refuses to overwrite a played match
+    unless ``force``; refuses if participants aren't resolved. Re-validates the candidate
+    row through parse_knockout so the loader's rules are the single source of truth.
+    Returns (updated_matches, message); raises ValueError on any violation."""
+    import dataclasses
+    by = by_no(matches)
+    if match_no not in by:
+        raise ValueError(f"M{match_no} is not in the knockout schedule")
+    km = by[match_no]
+    if km.is_played and not force:
+        raise ValueError(f"M{match_no} already played "
+                         f"({km.score_a}–{km.score_b}); pass force=True to overwrite")
+    if not km.participants_known:
+        raise ValueError(f"M{match_no} participants not resolved yet — cannot enter a result")
+    decided_by = (decided_by or "").strip().lower()
+    winner = (winner or "").strip().upper()
+    if score_a != score_b:                       # decisive: infer the unset fields
+        decided_by = decided_by or "regulation"
+        winner = winner or ("A" if score_a > score_b else "B")
+    cand = dataclasses.replace(km, score_a=int(score_a), score_b=int(score_b),
+                               decided_by=decided_by, winner=winner, status="played")
+    _validate_match(cand, venues=_venue_canon())    # raises on any contract violation
+    updated = [cand if m.match_no == match_no else m for m in matches]
+    return updated, (f"M{match_no}: entered {score_a}–{score_b} "
+                     f"({cand.decided_by}), {cand.winner_team} advance")
 
 
 def main(argv: list | None = None) -> int:
@@ -358,6 +404,14 @@ def main(argv: list | None = None) -> int:
     ap.add_argument("--fixtures", type=Path, default=REPO_ROOT / "data" / "fixtures.csv")
     ap.add_argument("--resolve", action="store_true",
                     help="materialize team_a/team_b from current standings + played results, then write")
+    ap.add_argument("--enter", type=int, metavar="MATCH_NO",
+                    help="enter a result for a knockout match (with --score)")
+    ap.add_argument("--score", metavar="A-B", help="score for --enter, e.g. 2-1")
+    ap.add_argument("--decided", choices=DECIDED_BY, default="",
+                    help="how it ended (default: regulation if decisive; penalties required if level)")
+    ap.add_argument("--winner", choices=("A", "B"), default="",
+                    help="advancing side for --enter (required for a level/penalty result)")
+    ap.add_argument("--force", action="store_true", help="overwrite an already-played result")
     args = ap.parse_args(argv)
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
@@ -377,6 +431,26 @@ def main(argv: list | None = None) -> int:
         write_knockout(args.knockout, matches)
         known = sum(1 for m in matches if m.participants_known)
         print(f"Resolved {known}/{len(matches)} knockout matchups into {args.knockout}", file=sys.stderr)
+
+    if args.enter is not None:
+        if not args.score or "-" not in args.score:
+            print("error: --enter requires --score A-B (e.g. 2-1)", file=sys.stderr)
+            return 2
+        try:
+            sa, sb = (int(x) for x in args.score.split("-", 1))
+        except ValueError:
+            print(f"error: bad --score {args.score!r} (expected A-B integers)", file=sys.stderr)
+            return 2
+        try:
+            matches, msg = enter_ko_result(matches, args.enter, sa, sb,
+                                           decided_by=args.decided, winner=args.winner,
+                                           force=args.force)
+        except ValueError as e:
+            print(f"error: {e}", file=sys.stderr)
+            return 1
+        write_knockout(args.knockout, matches)
+        print(msg)
+        return 0
     current = None
     for k in matches:
         if k.round != current:

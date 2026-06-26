@@ -256,6 +256,67 @@ class MaterializeTeamsTests(unittest.TestCase):
         self.assertEqual((m.team_a, m.team_b, m.winner_team), ("France", "Brazil", "France"))
 
 
+class EnterResultTests(unittest.TestCase):
+    def _resolved(self):
+        return ko.parse_knockout([row(73, team_a="France", team_b="Brazil")])
+
+    def test_decisive_infers_winner_and_regulation(self):
+        upd, msg = ko.enter_ko_result(self._resolved(), 73, 2, 1)
+        m = ko.by_no(upd)[73]
+        self.assertEqual((m.status, m.decided_by, m.winner, m.winner_team),
+                         ("played", "regulation", "A", "France"))
+        self.assertIn("France advance", msg)
+
+    def test_extra_time_preserved(self):
+        upd, _ = ko.enter_ko_result(self._resolved(), 73, 2, 1, decided_by="extra_time")
+        self.assertEqual(ko.by_no(upd)[73].decided_by, "extra_time")
+
+    def test_level_requires_penalties_and_winner(self):
+        with self.assertRaises(ValueError):
+            ko.enter_ko_result(self._resolved(), 73, 1, 1)                       # nothing set
+        with self.assertRaises(ValueError):
+            ko.enter_ko_result(self._resolved(), 73, 1, 1, decided_by="regulation", winner="A")
+        upd, _ = ko.enter_ko_result(self._resolved(), 73, 1, 1,
+                                    decided_by="penalties", winner="B")
+        self.assertEqual(ko.by_no(upd)[73].winner_team, "Brazil")
+
+    def test_winner_contradicting_score_rejected(self):
+        with self.assertRaises(ValueError):
+            ko.enter_ko_result(self._resolved(), 73, 2, 1, winner="B")
+
+    def test_overwrite_refused_without_force(self):
+        played, _ = ko.enter_ko_result(self._resolved(), 73, 2, 1)
+        with self.assertRaises(ValueError):
+            ko.enter_ko_result(played, 73, 1, 1, decided_by="penalties", winner="A")
+        again, _ = ko.enter_ko_result(played, 73, 3, 0, force=True)
+        self.assertEqual(ko.by_no(again)[73].score_a, 3)
+
+    def test_unresolved_participants_rejected(self):
+        with self.assertRaises(ValueError):
+            ko.enter_ko_result(ko.parse_knockout([row(73)]), 73, 2, 1)
+
+    def test_unknown_match_no_rejected(self):
+        with self.assertRaises(ValueError):
+            ko.enter_ko_result(self._resolved(), 999, 1, 0)
+
+
+class FetchKoMatcherTests(unittest.TestCase):
+    def test_matches_resolved_tie_by_team_set_order_independent(self):
+        import fetch_ko_results as fk
+        matches = ko.parse_knockout([row(73, team_a="France", team_b="Brazil"), row(74)])
+        km = fk._match_ko_event({"home_team": "Brazil", "away_team": "France",
+                                 "completed": True}, matches)
+        self.assertEqual(km.match_no, 73)
+
+    def test_unresolved_or_foreign_event_returns_none(self):
+        import fetch_ko_results as fk
+        matches = ko.parse_knockout([row(73, team_a="France", team_b="Brazil"), row(74)])
+        self.assertIsNone(fk._match_ko_event(
+            {"home_team": "Spain", "away_team": "Italy"}, matches))     # not a tie here
+        self.assertIsNone(fk._match_ko_event(
+            {"home_team": "Winner E", "away_team": "x"}, matches))       # 74 unresolved
+
+
 class CommittedScheduleTests(unittest.TestCase):
     """Smoke-guard the committed data/knockout.csv stays contract-valid all tournament."""
     def test_live_file_loads_and_is_complete(self):
