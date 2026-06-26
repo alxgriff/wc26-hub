@@ -712,17 +712,17 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.95 decimal">-105</td><td>48%</td><td>31%</td><td class="edge-neg">-17.7%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.83 decimal">-120</td><td>52%</td><td>69%</td><td class="edge-pos">+17.7%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">DR Congo -0.5</td><td title="1.74 decimal">-135</td><td>55%</td><td>36%</td><td class="edge-neg">-19.4%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Uzbekistan +0.5</td><td title="2.17 decimal">+117</td><td>45%</td><td>64%</td><td class="edge-pos">+19.4%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.99 decimal">-101</td><td>48%</td><td>31%</td><td class="edge-neg">-17.2%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.83 decimal">-120</td><td>52%</td><td>69%</td><td class="edge-pos">+17.2%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">DR Congo -0.5</td><td title="1.74 decimal">-135</td><td>55%</td><td>36%</td><td class="edge-neg">-19.1%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Uzbekistan +0.5</td><td title="2.15 decimal">+114</td><td>45%</td><td>64%</td><td class="edge-pos">+19.1%</td></tr>
     </tbody>
   </table>
 </div>
 <p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
-<p class="verify-flag">totals under 2.5: model-priced edge +17.7% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads away 0.5: model-priced edge +19.4% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 26, 7:54 AM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<p class="verify-flag">totals under 2.5: model-priced edge +17.2% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">spreads away 0.5: model-priced edge +19.1% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 26, 12:18 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -745,7 +745,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.0041,lb=0.9350,N=8,SHOW=6,i,j;
+  var la=1.0042,lb=0.9349,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
