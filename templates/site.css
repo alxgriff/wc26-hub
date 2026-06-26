@@ -563,3 +563,5 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 .ko-path a{color:var(--verm)}
 .ko-aet{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;vertical-align:middle}
 .page-mast h1 .tbd{font-style:italic;color:var(--ink-soft)}
+.ko-record{margin-top:22px;border-top:1px solid var(--hairline);padding-top:14px}
+.ko-record h3{font-family:var(--serif);font-size:1.05rem;margin:0 0 8px}

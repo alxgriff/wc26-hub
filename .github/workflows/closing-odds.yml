@@ -115,6 +115,12 @@ jobs:
         continue-on-error: true
         run: python scripts/odds.py evaluate "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
 
+      # Knockout advance edges intra-day (no-op unless a 2-way advance line was entered).
+      - name: Record knockout advance edges
+        id: ko_evaluate
+        continue-on-error: true
+        run: python scripts/odds.py evaluate-ko "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
+
       # Experimental edge-hypothesis tracker (deserved-result divergence). Fail-soft and
       # deliberately NOT in the health gate below — a tracker bug must never block the
       # publish. `log` appends qualifying upcoming picks priced off the fresh snapshot
@@ -169,6 +175,7 @@ jobs:
           [ "${{ steps.ko.outcome }}"       = "failure" ] && failed="$failed ko"
           [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"
           [ "${{ steps.evaluate.outcome }}" = "failure" ] && failed="$failed evaluate"
+          [ "${{ steps.ko_evaluate.outcome }}" = "failure" ] && failed="$failed ko_evaluate"
           [ "${{ steps.edition.outcome }}"  = "failure" ] && failed="$failed edition"
           if [ -n "$failed" ]; then
             echo "::error::Degraded data steps:$failed"

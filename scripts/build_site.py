@@ -45,6 +45,7 @@ import site_content as sc         # noqa: E402
 import scenarios as scen          # noqa: E402
 import bracket as bk              # noqa: E402
 import knockout as ko             # noqa: E402
+import knockout_cards as kc       # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = REPO_ROOT / "templates"
@@ -860,12 +861,14 @@ def render_outcome_grid(info: dict | None, team_a: str, team_b: str) -> str:
 
 
 _MARKET_LABELS = {"h2h": "1X2", "totals": "Total goals", "spreads": "Asian handicap",
-                  "btts": "Both teams to score"}
+                  "btts": "Both teams to score", "advance": "To qualify"}
 
 
 def _sel_label(market: str, sel: str, line: str, team_a: str, team_b: str) -> str:
     if market == "h2h":
         return {"home": team_a, "draw": "Draw", "away": team_b}.get(sel, sel)
+    if market == "advance":          # knockout 2-way: which side advances
+        return {"home": team_a, "away": team_b}.get(sel, sel)
     if market == "totals":
         return f"{sel.capitalize()} {line}"
     if market == "spreads":
@@ -941,7 +944,7 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
                      f'<b>{proj["total"]:.2f}</b> total goals · {ladder}</p>')
 
     rows_html = []
-    for market in ("h2h", "totals", "spreads", "btts"):
+    for market in ("h2h", "totals", "spreads", "btts", "advance"):
         for sel, line, odds_v, implied, our_p, edge in ev.get(market, []):
             is_pick = any(pk["market"] == market and pk["selection"] == sel
                           and str(pk["line"]) == str(line) for pk in picks)
@@ -1584,12 +1587,42 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
     )
 
 
+def render_record_ko_calls(knockout: list | None) -> str:
+    """Knockout advance-call accountability: each graded advance call + the cumulative
+    2-class Brier (0 best · 0.5 coin-flip · 2 worst). Empty until a knockout call is
+    logged AND graded, so it's invisible through the group stage."""
+    if not knockout:
+        return ""
+    try:
+        import ledger as lg
+        ko_rows = lg.load_ko_ledger()
+        grades = lg.grade_ko(knockout, ko_rows) if ko_rows else {}
+        cumulative = lg.ko_cumulative_line(knockout, ko_rows) if ko_rows else None
+    except Exception:                                # never break the record page
+        return ""
+    if not grades:
+        return ""
+    items = []
+    for no in sorted(grades):
+        g = grades[no]
+        adv_p = g["p"][g["outcome"]]
+        items.append(
+            f'<li><span class="mid">M{no}</span> {_hit_chip(g["correct"])} '
+            f'{_esc(g.get("advancer", ""))} advanced · the call had them at '
+            f'{adv_p:.0%} · 2-class Brier {g["brier"]:.3f}</li>')
+    head = f'<p class="cumulative">{_esc(cumulative)}</p>' if cumulative else ""
+    return ('<div class="ko-record"><h3>Knockout — advance calls</h3>' + head
+            + '<ul class="overnight">' + "".join(items) + '</ul></div>')
+
+
 def render_record_page(matches: "list[st.Match]", rows: list[dict],
                        ledger: dict | None, css: str, generated_at: str,
                        template_dir: Path = TEMPLATE_DIR,
                        picks_log: Path | None = None,
-                       shadow_log: Path | None = None) -> str:
+                       shadow_log: Path | None = None,
+                       knockout: list | None = None) -> str:
     calls_html, cumulative = render_record_calls(matches, rows, ledger)
+    calls_html += render_record_ko_calls(knockout)        # appended; empty in group stage
     bets_html, units_line = render_record_bets(rows, picks_log=picks_log)
     shadow_html, shadow_line = render_record_shadow(rows, shadow_log=shadow_log)
     tpl = Template((template_dir / "record.html").read_text(encoding="utf-8"))
@@ -2288,6 +2321,15 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     else:
         odds_call, ledger_line = odds_engine, None
 
+    # knockout odds adapter (advance market), gated on the group odds engine being active so
+    # injected-off tests stay deterministic; only the model-priced 'advance' edge records (8pp)
+    ko_odds_call = None
+    if knockout and odds_call is not None:
+        import odds as od
+        ko_odds_call, ko_odds_why = od.load_ko_odds_engine(now=now)
+        if ko_odds_why:
+            warnings.append(f"Knockout odds render as placeholder: {ko_odds_why}")
+
     if weather_engine == "auto":
         wx_call, wx_why = load_weather_engine()
         if wx_why:
@@ -2389,7 +2431,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
 
     (out_dir / "record.html").write_text(
         render_record_page(matches, rows, ledger, css, generated_at, template_dir,
-                           picks_log=picks_log, shadow_log=shadow_log),
+                           picks_log=picks_log, shadow_log=shadow_log, knockout=knockout),
         encoding="utf-8")
     if bracket_proj is not None:
         (out_dir / "bracket.html").write_text(
@@ -2467,13 +2509,18 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         else:
             call_html = render_ko_call(None, km)
         sweat_info = wx_call(_ko_row(km)) if wx_call else None
+        # tactical card: the overnight Sonnet-generated card if present (same parser as
+        # group cards), else the honest placeholder
+        card_md = kc.load_ko_card(km.match_no)
+        card_html = (render_card_sections(sc.parse_card(card_md)[1]) if card_md
+                     else '<div class="placeholder-slot">Tactical preview is generated in '
+                          'the overnight build once the matchup is set.</div>')
+        odds_html = render_market(ko_odds_call(km) if ko_odds_call else None,
+                                  km.team_a or "", km.team_b or "", None)
         page = render_ko_match_page(
             km, call_html, _ko_path_html(km, ko_by_no),
             render_sweat(sweat_info, km.team_a or "", km.team_b or ""),
-            '<div class="placeholder-slot">Tactical preview is generated in the overnight '
-            'build once the matchup is set.</div>',
-            render_market(None, km.team_a or "", km.team_b or "", None),
-            render_wire(wire.get(mid)), css, template_dir)
+            card_html, odds_html, render_wire(wire.get(mid)), css, template_dir)
         (out_dir / "matches" / f"{mid}.html").write_text(page, encoding="utf-8")
 
     # reconcile: a renamed slug or removed match_id must not leave a stale

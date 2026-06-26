@@ -104,6 +104,12 @@ jobs:
         continue-on-error: true
         run: python scripts/ledger.py log "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
 
+      # Log today's KNOCKOUT advance calls pre-kickoff too (no-op until ties resolve).
+      - name: Log knockout advance calls (pre-kickoff)
+        id: ko_ledger
+        continue-on-error: true
+        run: python scripts/ledger.py log-ko "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Enter overnight results (The Odds API)
         id: results
         continue-on-error: true
@@ -122,6 +128,13 @@ jobs:
         continue-on-error: true
         run: python scripts/fetch_ko_results.py | tee -a "$GITHUB_STEP_SUMMARY"
 
+      # Generate Sonnet-grounded cards for newly-resolved ties (skips already-generated;
+      # needs ANTHROPIC_API_KEY — fail-soft, the card slot placeholders without one).
+      - name: Generate knockout cards (Sonnet, grounded)
+        id: ko_cards
+        continue-on-error: true
+        run: python scripts/knockout_cards.py "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Settle yesterday's picks (units + CLV)
         id: settle
         continue-on-error: true
@@ -136,6 +149,13 @@ jobs:
         id: evaluate
         continue-on-error: true
         run: python scripts/odds.py evaluate "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Knockout advance edges (model-priced, 8pp ceiling). No-op unless a 2-way advance
+      # line was entered (odds.py enter M.. advance H,A) — no market => honest "No bet".
+      - name: Record knockout advance edges
+        id: ko_evaluate
+        continue-on-error: true
+        run: python scripts/odds.py evaluate-ko "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Weather forecast (Open-Meteo, no key needed)
         id: weather
@@ -179,7 +199,8 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           # explicit allowlist: only the artifacts the daily build owns, so a
           # stray working-tree file can never ride along in an automated commit
-          git add data docs editions
+          # (cards/ now includes generated knockout cards under cards/ko/)
+          git add data docs editions cards
           [ -d news ] && git add news || true
           if git diff --cached --quiet; then
             echo "No changes today." >> "$GITHUB_STEP_SUMMARY"
@@ -201,6 +222,9 @@ jobs:
           [ "${{ steps.results.outcome }}"  = "failure" ] && failed="$failed results"
           [ "${{ steps.ko_resolve.outcome }}" = "failure" ] && failed="$failed ko_resolve"
           [ "${{ steps.ko_results.outcome }}" = "failure" ] && failed="$failed ko_results"
+          [ "${{ steps.ko_ledger.outcome }}" = "failure" ] && failed="$failed ko_ledger"
+          [ "${{ steps.ko_cards.outcome }}" = "failure" ] && failed="$failed ko_cards"
+          [ "${{ steps.ko_evaluate.outcome }}" = "failure" ] && failed="$failed ko_evaluate"
           [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"
           [ "${{ steps.ledger.outcome }}"   = "failure" ] && failed="$failed ledger"
           [ "${{ steps.snapshot.outcome }}" = "failure" ] && failed="$failed snapshot"
