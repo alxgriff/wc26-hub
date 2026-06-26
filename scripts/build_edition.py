@@ -487,6 +487,44 @@ def _verify_callouts(today: list[dict]) -> list[str]:
     return out
 
 
+_KO_ROUND_NAME = {"R32": "Round of 32", "R16": "Round of 16", "QF": "Quarter-final",
+                  "SF": "Semi-final", "3RD": "Third-place play-off", "Final": "Final"}
+
+
+def _ko_slate_line(km) -> str:
+    """One knockout tie as a slate line: time, match number, round, teams (or slot
+    labels until resolved), TV/venue — or the result + who advanced once played."""
+    la, lb = km.labels
+    ta, tb = (km.team_a or f"*{la}*"), (km.team_b or f"*{lb}*")
+    tv = (km.tv_us or "").strip() or "TV TBD"
+    venue = ", ".join(p for p in [km.stadium, km.city] if p)
+    head = (f"- **{(km.kickoff_et or '').strip()} ET** · M{km.match_no} "
+            f"({_KO_ROUND_NAME.get(km.round, km.round)}) · ")
+    if km.is_played:
+        tag = {"extra_time": " (AET)", "penalties": " (pens)"}.get(km.decided_by, "")
+        return (head + f"{km.team_a} {km.score_a}–{km.score_b} {km.team_b}{tag} · "
+                f"**{km.winner_team} advance** · {venue}")
+    return head + f"{ta} vs {tb} · {tv} · {venue}"
+
+
+def _qualified_recap(standings: "st.Standings") -> str:
+    """A folded 'how the 32 qualified' reference: each group's winner + runner-up and the
+    eight best third-placed teams above the cutline. A pure read of the final standings."""
+    out = ["<details>", "<summary>How the 32 qualified</summary>", "",
+           "| Group | Winner | Runner-up |", "|:---|:---|:---|"]
+    for g in sorted(standings.groups):
+        rws = standings.groups[g].rows
+        w = rws[0].team if len(rws) > 0 else "—"
+        ru = rws[1].team if len(rws) > 1 else "—"
+        out.append(f"| {g} | {w} | {ru} |")
+    thirds = standings.third_place[:st.QUALIFYING_THIRDS]
+    if thirds:
+        names = ", ".join(f"{r.team} (Grp {r.group})" for r in thirds)
+        out += ["", f"**Best {st.QUALIFYING_THIRDS} third-placed teams through:** {names}."]
+    out += ["", "</details>"]
+    return "\n".join(out)
+
+
 def build_edition(target: date, rows: list[dict], standings: "st.Standings",
                   cards_dir: str | Path,
                   matches: "list[st.Match] | None" = None,
@@ -494,7 +532,9 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
                   graded: dict | None = None,
                   cumulative: str | None = None,
                   odds_bodies: "dict[str, str] | None" = None,
-                  conditions: "dict[str, str] | None" = None) -> tuple[str, list[str]]:
+                  conditions: "dict[str, str] | None" = None,
+                  knockout: "list | None" = None,
+                  bracket_md: str | None = None) -> tuple[str, list[str]]:
     """Render the full edition markdown for ``target``. Returns
     ``(markdown, warnings)``; warnings are data-integrity notes for stderr.
 
@@ -523,10 +563,35 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
     day_n = (target - TOURNAMENT_START).days + 1
     parts: list[str] = []
 
+    # Phase: the group stage hands off to the knockout once all 72 group games are
+    # played (or the editorial date moves past the last group date). Everything
+    # knockout is gated behind `in_ko` (which needs a knockout schedule), so a
+    # group-stage edition is byte-identical to before.
+    knockout = knockout or []
+    today_ko = sorted([km for km in knockout if km.date_et == target.isoformat()],
+                      key=lambda k: (k.kickoff_et_24h, k.match_no))
+    group_done = standings.played == standings.total and standings.total > 0
+    gdates = [(r.get("date_et") or "").strip() for r in rows if (r.get("date_et") or "").strip()]
+    last_group_date = date.fromisoformat(max(gdates)) if gdates else None
+    in_ko = bool(knockout) and (bool(today_ko) or group_done
+                                or (last_group_date is not None and target > last_group_date))
+
     # Masthead
     parts.append(f"# WC26 Daily — {target:%A, %B} {target.day}")
     parts.append("")
-    if today:
+    if in_ko:
+        rounds = sorted({km.round for km in today_ko})
+        rname = _KO_ROUND_NAME.get(rounds[0]) if len(rounds) == 1 else None
+        label = "Knockout stage" + (f" — {rname}" if rname else "")
+        if today_ko:
+            first = today_ko[0]
+            tv = (first.tv_us or "").strip()
+            kick = f"{(first.kickoff_et or '').strip()} ET" + (f" ({tv})" if tv else "")
+            count = f"{len(today_ko)} match" + ("" if len(today_ko) == 1 else "es")
+            parts.append(f"**{label}** · {count} · First kickoff {kick}")
+        else:
+            parts.append(f"**{label}** · no matches on this editorial date")
+    elif today:
         first = today[0]
         tv = (first.get("tv_us") or "").strip()
         kick = f"{(first.get('kickoff_et') or '').strip()} ET" + (f" ({tv})" if tv else "")
@@ -547,7 +612,13 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
     # Today's slate
     parts.append("## Today's slate")
     parts.append("")
-    if today:
+    if in_ko:
+        if today_ko:
+            for km in today_ko:
+                parts.append(_ko_slate_line(km))
+        else:
+            parts.append("_No knockout matches on this editorial date._")
+    elif today:
         for r in today:
             parts.append(_slate_line(r))
             cond = conditions.get(r["match_id"])
@@ -555,6 +626,19 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
     else:
         parts.append("_No matches today._")
     parts.append("")
+
+    # Knockout centerpiece: who qualified (folded reference) + the projected bracket.
+    if in_ko:
+        parts.append("## The bracket")
+        parts.append("")
+        if group_done:
+            parts.append(_qualified_recap(standings))
+            parts.append("")
+        if bracket_md:
+            parts.append(bracket_md.rstrip())
+        else:
+            parts.append("_Bracket projection unavailable — see the site's bracket page._")
+        parts.append("")
 
     # Standings snapshot
     full_md = st.render_markdown(standings)
@@ -574,6 +658,15 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
             parts.append("")
             parts.append(third)
             parts.append("")
+
+    # Knockout editions point to the per-tie previews on the site (auto-generated by
+    # the overnight build); the group-stage card machinery below does not apply.
+    if in_ko:
+        parts.append("## Match previews")
+        parts.append("")
+        parts.append("Per-tie previews — the model's advance call, the road here, and "
+                     "match conditions — are on each tie's page on the site.")
+        return "\n".join(parts).rstrip() + "\n", warnings
 
     # Match cards
     parts.append("## Match cards")
@@ -644,6 +737,27 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
 
 
 # ---------------------------------------------------------------- CLI
+
+def _ko_resolver():
+    """A predict-based knockout resolver(a, b) -> {winner, loser, p} for bracket.feed's
+    winner projection, or None if the model is unavailable. Neutral venue — host HFA is
+    not applied in the knockout (per DECISIONS.md); mirrors build_site.load_knockout_resolver."""
+    try:
+        import predict as pr
+        model = pr.load_ratings()
+    except Exception:
+        return None
+
+    def resolve(a, b):
+        try:
+            kp = pr.resolve_knockout(model, a, b)
+            if kp.p_advance_a >= kp.p_advance_b:
+                return {"winner": a, "loser": b, "p": kp.p_advance_a}
+            return {"winner": b, "loser": a, "p": kp.p_advance_b}
+        except Exception:
+            return None
+    return resolve
+
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
@@ -777,11 +891,31 @@ def main(argv: list[str] | None = None) -> int:
         print(f"warning: weather conditions unavailable ({e}) — slate lines show "
               "'forecast pending'", file=sys.stderr)
 
+    # Knockout stage (post-group): discovered next to fixtures so a group-only repo or a
+    # frozen-fixture build stays group-shaped. Fail-soft — any error yields a group edition.
+    knockout: list = []
+    bracket_md = None
+    try:
+        import knockout as ko
+        import bracket as bk
+        knockout = ko.load_knockout(args.fixtures.parent / "knockout.csv")
+        if knockout:
+            knockout = ko.materialize_teams(bk.project(standings), knockout)
+            bproj = bk.project(standings, resolve_provisional=True)
+            resolver = _ko_resolver()
+            if resolver is not None:
+                bproj = bk.feed(bproj, resolver, results=ko.results_dict(knockout))
+            bracket_md = bk.render_markdown(bproj)
+    except Exception as e:
+        print(f"warning: knockout stage unavailable ({e}) — group-shaped edition",
+              file=sys.stderr)
+
     edition, warnings = build_edition(target, rows, standings, args.cards_dir,
                                       matches=matches, calls=calls,
                                       graded=graded, cumulative=cumulative,
                                       odds_bodies=odds_bodies,
-                                      conditions=conditions)
+                                      conditions=conditions,
+                                      knockout=knockout, bracket_md=bracket_md)
     for w in warnings:
         print(f"warning: {w}", file=sys.stderr)
 
