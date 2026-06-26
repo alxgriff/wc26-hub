@@ -441,9 +441,9 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
    feeder draws a horizontal stub right (::after) to the next column's edge, and the
    top card of each pair draws the vertical bar (::before) joining the pair there.
    Cards are a fixed height with ellipsis so content can't break the math. */
-.bracket-wrap{--bmh:42px;--bgap:14px;--bgut:30px;--bu:calc(var(--bmh) + var(--bgap));--bline:var(--ink-soft);overflow-x:auto;padding-bottom:10px}
+.bracket-wrap{--bmh:48px;--bgap:16px;--bgut:34px;--bu:calc(var(--bmh) + var(--bgap));--bline:var(--ink-soft);overflow-x:auto;padding-bottom:10px}
 .bracket{list-style:none;display:flex;gap:var(--bgut);min-width:min-content;align-items:start}
-.bround{flex:0 0 auto;width:150px}
+.bround{flex:0 0 auto;width:168px}
 .bround h3{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--verm);border-bottom:2px solid var(--ink);padding-bottom:5px;margin-bottom:14px;white-space:nowrap}
 .bround ul{list-style:none;display:flex;flex-direction:column}
 .bround[data-r="0"] ul{gap:var(--bgap)}
@@ -451,27 +451,25 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bround[data-r="2"] ul{padding-top:calc(1.5*var(--bu));gap:calc(4*var(--bu) - var(--bmh))}
 .bround[data-r="3"] ul{padding-top:calc(3.5*var(--bu));gap:calc(8*var(--bu) - var(--bmh))}
 .bround[data-r="4"] ul{padding-top:calc(7.5*var(--bu))}
-.btie{position:relative;height:var(--bmh);display:flex;align-items:center}
-.bpair{display:flex;flex-direction:column;justify-content:center;gap:3px;width:100%;min-width:0}
-.bslot{display:flex;align-items:baseline;gap:5px;font-size:.8rem;line-height:1.35;font-weight:700}
+/* every tie is a card: two stacked team rows split by a hairline (March-Madness style) */
+.btie{position:relative;height:var(--bmh);display:flex;align-items:stretch;border:1px solid var(--ink);background:var(--paper-2);box-shadow:2px 2px 0 var(--hairline)}
+.bpair{display:flex;flex-direction:column;width:100%;min-width:0}
+.bslot{display:flex;align-items:center;gap:5px;font-size:.78rem;line-height:1.2;font-weight:600;padding:0 8px;flex:1 1 0;min-height:0}
+.bslot + .bslot{border-top:1px solid var(--hairline)}
 .bn{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bp{flex:0 0 auto;font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);letter-spacing:.02em}
 .bslot a{text-decoration:none}
 .bslot a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
 .bslot.tbd{font-weight:500;font-style:italic;color:var(--ink-soft)}
-/* provisional: a concrete team whose group position isn't sealed — dashed underline so it
-   reads "tentative", and still works under the green winner / muted loser colour states */
+/* provisional: a concrete team whose group position isn't sealed yet — dashed underline */
 .bslot.prov .bn{border-bottom:1.5px dashed var(--ink-soft)}
-/* confirmed: this exact seed is mathematically secured — solid green underline + a ✓ mark,
-   the visual opposite of the dashed provisional state (the two classes never co-occur) */
-.bslot.conf .bn{border-bottom:1.5px solid var(--green)}
-.bmark{flex:0 0 auto;font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);line-height:1}
-/* projected advancer (bracket.feed): the winning slot in green; the other reads muted */
-.bslot.win .bn{color:var(--green)}
-.btie:has(.win) .bslot:not(.win) .bn{color:var(--ink-soft);font-weight:500}
-/* R32 cards are boxed (they carry names); downstream cards are open fill-in lines */
-.bround[data-r="0"] .btie{border:1px solid var(--ink);background:var(--paper-2);box-shadow:2px 2px 0 var(--hairline);padding:3px 8px}
-.bround:not([data-r="0"]) .bslot{min-height:1.15em;border-bottom:1px dotted var(--hairline)}
+/* a played tie's WINNER is highlighted and advances; the loser is struck out (eliminated).
+   In the projected view the winner additionally carries its advance % (.bp). No ✓ marks. */
+.bslot.win{background:var(--verm-soft)}
+.bslot.win .bn{color:var(--ink);font-weight:800}
+.bslot.win .bn::before{content:"\25b8\00a0";color:var(--verm);font-weight:900}
+.btie:has(.win) .bslot:not(.win){color:var(--ink-soft)}
+.btie:has(.win) .bslot:not(.win) .bn{text-decoration:line-through;font-weight:500}
 /* connectors: horizontal stub out of every feeder to the next column edge */
 .bround:not([data-r="4"]) .btie::after{content:"";position:absolute;left:100%;top:calc(50% - .5px);width:var(--bgut);height:1px;background:var(--bline)}
 /* vertical bar on the top card of each pair, at the next column edge, spanning the pair pitch */
@@ -484,8 +482,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bracket-third h3{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--hairline);padding-bottom:5px;margin-bottom:4px}
 .bthird-sub{font-style:italic;color:var(--ink-soft);font-size:.78rem;margin-bottom:10px}
 .bracket-third ul{list-style:none}
-.bracket-third .btie{border:1px solid var(--hairline);background:var(--paper-2);padding:3px 8px;height:auto}
-.bracket-third .bslot{min-height:1.15em;border-bottom:1px dotted var(--hairline)}
+.bracket-third .btie{height:auto;border-color:var(--hairline)}
 .bnotes{list-style:none;margin:14px 0 0;font-family:var(--mono);font-size:.72rem;color:var(--amber);line-height:1.6}
 .bnotes li{padding-left:1.1em;text-indent:-1.1em}
 /* CSS-only bracket view toggle (no JS): radios precede the views so `:checked ~ .view` works */
@@ -550,6 +547,33 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   text-align:center;margin-bottom:3px;max-width:360px}
 @media(prefers-reduced-motion:reduce){.og-cell{transition:none}}
 
+/* ---- knockout stage ---- */
+.ko-banner{margin:0 0 22px}
+.ko-banner a{display:block;text-decoration:none;border:1px solid var(--green);background:var(--green-soft);padding:13px 18px;color:var(--ink);transition:background .15s,color .15s}
+.ko-banner a:hover,.ko-banner a:focus-visible{background:var(--green);color:var(--paper)}
+.ko-banner-k{display:block;font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--green)}
+.ko-banner a:hover .ko-banner-k,.ko-banner a:focus-visible .ko-banner-k{color:var(--paper)}
+.ko-banner b{font-family:var(--serif);font-size:1.2rem;font-weight:700;display:inline-block;margin-top:2px}
+.ko-banner-sub{display:block;font-size:.8rem;color:var(--ink-soft);margin-top:3px}
+.ko-banner a:hover .ko-banner-sub,.ko-banner a:focus-visible .ko-banner-sub{color:var(--paper)}
+.slate .ko-card .team.tbd{font-style:italic;color:var(--ink-soft);font-weight:500}
+.slate .ko-card .ko-decided{font-family:var(--mono);font-size:.58rem;color:var(--ink-soft);margin-left:4px;text-transform:uppercase;letter-spacing:.04em}
+.call-lead{font-family:var(--serif);font-size:1.15rem;margin:0 0 10px}
+.adv-bar{display:flex;height:30px;border:1px solid var(--hairline);overflow:hidden;font-family:var(--mono);font-size:.72rem;font-weight:700}
+.adv-seg{display:grid;place-items:center;color:var(--paper);overflow:hidden;white-space:nowrap;min-width:0}
+.adv-a{background:var(--verm)}
+.adv-b{background:var(--ink-soft)}
+.call-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.7rem;color:var(--ink-soft);margin:6px 0 0}
+.call-facts{font-size:.86rem;margin:10px 0 0}
+.call-src{font-size:.72rem;color:var(--ink-soft);font-style:italic;margin:6px 0 0}
+.ko-result p{font-family:var(--serif);font-size:1.1rem;margin:0}
+.ko-path p{margin:0 0 6px;font-size:.9rem}
+.ko-path a{color:var(--verm)}
+.ko-aet{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;vertical-align:middle}
+.page-mast h1 .tbd{font-style:italic;color:var(--ink-soft)}
+.ko-record{margin-top:22px;border-top:1px solid var(--hairline);padding-top:14px}
+.ko-record h3{font-family:var(--serif);font-size:1.05rem;margin:0 0 8px}
+
 </style>
 </head>
 <body>
@@ -594,7 +618,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Brier</span>
     <h2 id="calls-h">The Calls</h2>
   </div>
-  <p class="standfirst">Ledger to date: 55 graded predictions, 35 correct calls, cumulative Brier 0.531 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max), RPS 0.163 (0 = perfect, 1 = worst — rewards near-misses on the W-D-L order)</p>
+  <p class="standfirst">Ledger to date: 57 graded predictions, 35 correct calls, cumulative Brier 0.539 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max), RPS 0.166 (0 = perfect, 1 = worst — rewards near-misses on the W-D-L order)</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">Every logged call graded: probabilities, result, hit or miss, Brier score</caption>
@@ -1022,6 +1046,22 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       </tr>
       <tr class="subtotal"><td colspan="4">June 24 — 6 graded</td><td>5/6</td><td>0.363</td></tr>
       <tr>
+        <td class="lbl"><a href="matches/D5.html">Türkiye v United States</a></td>
+        <td>29%/23%/48% (1-1)</td>
+        <td>3–2</td>
+        <td>home</td>
+        <td><span class="hit hit-n" aria-hidden="true">✗</span><span class="sr-only">missed</span></td>
+        <td class="pts">0.789</td>
+      </tr>
+      <tr>
+        <td class="lbl"><a href="matches/D6.html">Paraguay v Australia</a></td>
+        <td>32%/30%/37% (0-1)</td>
+        <td>0–0</td>
+        <td>draw</td>
+        <td><span class="hit hit-n" aria-hidden="true">✗</span><span class="sr-only">missed</span></td>
+        <td class="pts">0.734</td>
+      </tr>
+      <tr>
         <td class="lbl"><a href="matches/E5.html">Curaçao v Côte d&#x27;Ivoire</a></td>
         <td>5%/14%/81% (0-2)</td>
         <td>0–2</td>
@@ -1053,7 +1093,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td><span class="hit hit-y" aria-hidden="true">✓</span><span class="sr-only">correct call</span></td>
         <td class="pts">0.055</td>
       </tr>
-      <tr class="subtotal"><td colspan="4">June 25 — 4 graded</td><td>2/4</td><td>0.510</td></tr>
+      <tr class="subtotal"><td colspan="4">June 25 — 6 graded</td><td>2/6</td><td>0.594</td></tr>
     </tbody>
   </table>
 </div>
@@ -1064,7 +1104,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Units &amp; CLV</span>
     <h2 id="bets-h">The Bets</h2>
   </div>
-  <p class="standfirst">Picks: 79 settled (39W-38L-2P), -0.07u at flat 1u stakes; avg CLV +0.2pp over 68 closing line(s) 6 open picks, 6u at risk.</p>
+  <p class="standfirst">Picks: 85 settled (43W-40L-2P), +3.12u at flat 1u stakes; avg CLV +0.2pp over 74 closing line(s) 10 open picks, 10u at risk.</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">Every recorded pick: selection, price, edge at record, settlement, units, closing line value</caption>
@@ -1902,9 +1942,9 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td title="1.74 decimal">-135</td>
         <td class="lbl">betonlineag</td>
         <td>4.1pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
+        <td class="lbl status-won">won</td>
+        <td class="pts">+0.74</td>
+        <td>+2.3pp</td>
       </tr>
       <tr>
         <td class="lbl">Jun 25</td>
@@ -1913,9 +1953,9 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td title="2.01 decimal">+101</td>
         <td class="lbl">betonlineag</td>
         <td>4.1pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
+        <td class="lbl status-won">won</td>
+        <td class="pts">+1.01</td>
+        <td>+3.5pp</td>
       </tr>
       <tr>
         <td class="lbl">Jun 25</td>
@@ -1924,9 +1964,9 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td title="4.10 decimal">+310</td>
         <td class="lbl">draftkings</td>
         <td>5.4pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
+        <td class="lbl status-won">won</td>
+        <td class="pts">+3.10</td>
+        <td>+3.5pp</td>
       </tr>
       <tr>
         <td class="lbl">Jun 25</td>
@@ -1935,9 +1975,9 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td title="2.35 decimal">+135</td>
         <td class="lbl">betus</td>
         <td>5.3pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
+        <td class="lbl status-lost">lost</td>
+        <td class="pts">-1.00</td>
+        <td>-7.8pp</td>
       </tr>
       <tr>
         <td class="lbl">Jun 25</td>
@@ -1946,9 +1986,9 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td title="1.69 decimal">-145</td>
         <td class="lbl">bovada</td>
         <td>5.2pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
+        <td class="lbl status-half-won">half-won</td>
+        <td class="pts">+0.34</td>
+        <td>-2.7pp</td>
       </tr>
       <tr>
         <td class="lbl">Jun 25</td>
@@ -1957,9 +1997,9 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td title="4.20 decimal">+320</td>
         <td class="lbl">draftkings</td>
         <td>14.6pp</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
-        <td>—</td>
+        <td class="lbl status-lost">lost</td>
+        <td class="pts">-1.00</td>
+        <td>-0.1pp</td>
       </tr>
       <tr>
         <td class="lbl">Jun 25</td>
@@ -2005,6 +2045,116 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td class="pts">-1.00</td>
         <td>+2.6pp</td>
       </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/G5.html">Egypt v Iran</a></td>
+        <td class="lbl">Iran <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
+        <td title="3.80 decimal">+280</td>
+        <td class="lbl">draftkings</td>
+        <td>13.9pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/G5.html">Egypt v Iran</a></td>
+        <td class="lbl">Iran +0.5</td>
+        <td title="1.61 decimal">-164</td>
+        <td class="lbl">betus</td>
+        <td>7.7pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/G6.html">New Zealand v Belgium</a></td>
+        <td class="lbl">Belgium <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
+        <td title="1.19 decimal">-526</td>
+        <td class="lbl">draftkings</td>
+        <td>7.6pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/G6.html">New Zealand v Belgium</a></td>
+        <td class="lbl">Belgium -2</td>
+        <td title="1.77 decimal">-130</td>
+        <td class="lbl">betonlineag</td>
+        <td>5.1pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/H5.html">Cape Verde v Saudi Arabia</a></td>
+        <td class="lbl">Under 2.5</td>
+        <td title="1.77 decimal">-130</td>
+        <td class="lbl">betus</td>
+        <td>6.9pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/H6.html">Uruguay v Spain</a></td>
+        <td class="lbl">Spain <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
+        <td title="1.62 decimal">-161</td>
+        <td class="lbl">draftkings</td>
+        <td>9.8pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/I5.html">Norway v France</a></td>
+        <td class="lbl">Under 3.5</td>
+        <td title="1.61 decimal">-164</td>
+        <td class="lbl">betmgm</td>
+        <td>5.3pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/I5.html">Norway v France</a></td>
+        <td class="lbl">France -1</td>
+        <td title="2.08 decimal">+108</td>
+        <td class="lbl">betonlineag</td>
+        <td>5.2pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/I5.html">Norway v France</a></td>
+        <td class="lbl">France <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr></td>
+        <td title="1.65 decimal">-154</td>
+        <td class="lbl">draftkings</td>
+        <td>4.9pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/I6.html">Senegal v Iraq</a></td>
+        <td class="lbl">Draw</td>
+        <td title="6.50 decimal">+550</td>
+        <td class="lbl">draftkings</td>
+        <td>6.0pp</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+        <td>—</td>
+      </tr>
     </tbody>
   </table>
 </div>
@@ -2016,7 +2166,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Risky · model vs market</span>
     <h2 id="shadow-h">The Shadow Book</h2>
   </div>
-  <p class="standfirst">57 settled, 24W-27L, -3.65u paper (flat 1u, not staked); 1X2 2W-5L -3.49u; model-priced 22W-22L -0.16u 4 awaiting result.</p>
+  <p class="standfirst">61 settled, 26W-29L, -4.38u paper (flat 1u, not staked); 1X2 2W-6L -4.49u; model-priced 24W-23L +0.11u 8 awaiting result.</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">The shadow book: risky calls above the sanity ceiling (severe model–market disagreement), tracked on paper but too risky to stake, with hypothetical flat-1u units</caption>
@@ -2519,8 +2669,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td>-115</td>
         <td>8.5pp</td>
         <td>60%</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
+        <td class="lbl status-won">won</td>
+        <td class="pts">+0.87</td>
       </tr>
       <tr>
         <td class="lbl">Jun 25</td>
@@ -2529,8 +2679,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td>-118</td>
         <td>9.8pp</td>
         <td>61%</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
+        <td class="lbl status-lost">lost</td>
+        <td class="pts">-1.00</td>
       </tr>
       <tr>
         <td class="lbl">Jun 25</td>
@@ -2539,8 +2689,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td>-125</td>
         <td>8.5pp</td>
         <td>62%</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
+        <td class="lbl status-half-won">half-won</td>
+        <td class="pts">+0.40</td>
       </tr>
       <tr>
         <td class="lbl">Jun 25</td>
@@ -2549,8 +2699,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td>+340</td>
         <td>15.5pp</td>
         <td>37%</td>
-        <td class="lbl status-open">open</td>
-        <td class="pts">—</td>
+        <td class="lbl status-lost">lost</td>
+        <td class="pts">-1.00</td>
       </tr>
       <tr>
         <td class="lbl">Jun 25</td>
@@ -2632,6 +2782,86 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
         <td class="lbl status-won">won</td>
         <td class="pts">+0.98</td>
       </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/G5.html">Egypt v Iran</a></td>
+        <td class="lbl">Over 1.75</td>
+        <td>-130</td>
+        <td>8.9pp</td>
+        <td>63%</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/G6.html">New Zealand v Belgium</a></td>
+        <td class="lbl">Under 3.5</td>
+        <td>+104</td>
+        <td>14.8pp</td>
+        <td>62%</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/H5.html">Cape Verde v Saudi Arabia</a></td>
+        <td class="lbl">Under 2.25</td>
+        <td>-112</td>
+        <td>12.3pp</td>
+        <td>63%</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/H6.html">Uruguay v Spain</a></td>
+        <td class="lbl">Spain -1</td>
+        <td>+117</td>
+        <td>12.3pp</td>
+        <td>57%</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/H6.html">Uruguay v Spain</a></td>
+        <td class="lbl">Under 2.25</td>
+        <td>-108</td>
+        <td>10.1pp</td>
+        <td>60%</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/I5.html">Norway v France</a></td>
+        <td class="lbl">Under 3.25</td>
+        <td>-125</td>
+        <td>11.3pp</td>
+        <td>64%</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/I6.html">Senegal v Iraq</a></td>
+        <td class="lbl">Under 3</td>
+        <td>+106</td>
+        <td>24.5pp</td>
+        <td>71%</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+      </tr>
+      <tr>
+        <td class="lbl">Jun 26</td>
+        <td class="lbl"><a href="matches/I6.html">Senegal v Iraq</a></td>
+        <td class="lbl">Iraq +2</td>
+        <td>-122</td>
+        <td>19.9pp</td>
+        <td>73%</td>
+        <td class="lbl status-open">open</td>
+        <td class="pts">—</td>
+      </tr>
     </tbody>
   </table>
 </div>
@@ -2643,7 +2873,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 
 <footer>
   <p class="colophon">
-    Generated 2026-06-26 01:26 · calls graded from data/predictions_log.csv (logged
+    Generated 2026-06-26 12:05 · calls graded from data/predictions_log.csv (logged
     pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
     at fresh prices, revisions explicit, settled rows immutable) · Brier: 0 best ·
     0.667 coin-flip · 2 worst · CLV = closing implied minus our implied at record ·

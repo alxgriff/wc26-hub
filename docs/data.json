@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "played": 58,
+ "played": 60,
  "total": 72,
  "groups": {
   "A": {
@@ -196,13 +196,13 @@
      "pos": 1,
      "team": "United States",
      "group": "D",
-     "p": 2,
+     "p": 3,
      "w": 2,
      "d": 0,
-     "l": 0,
-     "gf": 6,
-     "ga": 1,
-     "gd": 5,
+     "l": 1,
+     "gf": 8,
+     "ga": 4,
+     "gd": 4,
      "pts": 6,
      "fate": "through"
     },
@@ -210,42 +210,42 @@
      "pos": 2,
      "team": "Australia",
      "group": "D",
-     "p": 2,
+     "p": 3,
      "w": 1,
-     "d": 0,
+     "d": 1,
      "l": 1,
      "gf": 2,
      "ga": 2,
      "gd": 0,
-     "pts": 3,
-     "fate": null
+     "pts": 4,
+     "fate": "through"
     },
     {
      "pos": 3,
      "team": "Paraguay",
      "group": "D",
-     "p": 2,
+     "p": 3,
      "w": 1,
-     "d": 0,
+     "d": 1,
      "l": 1,
      "gf": 2,
      "ga": 4,
      "gd": -2,
-     "pts": 3,
+     "pts": 4,
      "fate": null
     },
     {
      "pos": 4,
      "team": "Türkiye",
      "group": "D",
-     "p": 2,
-     "w": 0,
+     "p": 3,
+     "w": 1,
      "d": 0,
      "l": 2,
-     "gf": 0,
-     "ga": 3,
-     "gd": -3,
-     "pts": 0,
+     "gf": 3,
+     "ga": 5,
+     "gd": -2,
+     "pts": 3,
      "fate": "out"
     }
    ],
@@ -804,6 +804,21 @@
    },
    {
     "pos": 4,
+    "team": "Paraguay",
+    "group": "D",
+    "p": 3,
+    "w": 1,
+    "d": 1,
+    "l": 1,
+    "gf": 2,
+    "ga": 4,
+    "gd": -2,
+    "pts": 4,
+    "qualifying": true,
+    "fate": null
+   },
+   {
+    "pos": 5,
     "team": "Croatia",
     "group": "L",
     "p": 2,
@@ -818,7 +833,7 @@
     "fate": null
    },
    {
-    "pos": 5,
+    "pos": 6,
     "team": "South Korea",
     "group": "A",
     "p": 3,
@@ -833,24 +848,9 @@
     "fate": null
    },
    {
-    "pos": 6,
+    "pos": 7,
     "team": "Algeria",
     "group": "J",
-    "p": 2,
-    "w": 1,
-    "d": 0,
-    "l": 1,
-    "gf": 2,
-    "ga": 4,
-    "gd": -2,
-    "pts": 3,
-    "qualifying": true,
-    "fate": null
-   },
-   {
-    "pos": 7,
-    "team": "Paraguay",
-    "group": "D",
     "p": 2,
     "w": 1,
     "d": 0,
@@ -938,16 +938,14 @@
     "fate": null
    }
   ],
-  "notes": [
-   "⚠️ Third-place ranking: Algeria / Paraguay level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically."
-  ]
+  "notes": []
  },
  "warnings": [],
- "generated_at": "2026-06-26 01:26",
- "slate_date": "2026-06-25",
+ "generated_at": "2026-06-26 12:05",
+ "slate_date": "2026-06-26",
  "bracket": {
   "schema": 1,
-  "as_of_matches_played": 58,
+  "as_of_matches_played": 60,
   "fully_projectable": true,
   "thirds_resolved": true,
   "r32": {
@@ -1063,7 +1061,7 @@
     "away_label": "3rd B",
     "provisional": true,
     "half": "top",
-    "home_provisional": true,
+    "home_provisional": false,
     "away_provisional": true,
     "home_confirmed": true,
     "away_confirmed": false
@@ -1154,9 +1152,9 @@
     "away_label": "Runner-up G",
     "provisional": true,
     "half": "bottom",
-    "home_provisional": true,
+    "home_provisional": false,
     "away_provisional": true,
-    "home_confirmed": false,
+    "home_confirmed": true,
     "away_confirmed": false
    }
   },
@@ -1223,9 +1221,7 @@
    ]
   },
   "third_place_match": 103,
-  "warnings": [
-   "Third-place cutline has ties broken deterministically (FIFA World Ranking isn't modelled, so the standings' order decides) — the qualifying thirds and their slots are provisional and may change."
-  ],
+  "warnings": [],
   "winners": {
    "73": {
     "team": "Canada",

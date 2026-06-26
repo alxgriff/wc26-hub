@@ -21,8 +21,8 @@ D1,D,1,2026-06-12,21:00,9:00 PM,United States,Paraguay,SoFi Stadium,Inglewood,US
 D2,D,1,2026-06-14,00:00,12:00 AM,Australia,Türkiye,BC Place,Vancouver,Canada,FS1,2,0,played,Kicks off 9:00 PM June 13 local (Pacific); belongs to the June 13 evening slate. Confirmed via Football Australia and Destination Vancouver
 D3,D,2,2026-06-19,15:00,3:00 PM,United States,Australia,Lumen Field,Seattle,USA,Fox,2,0,played,
 D4,D,2,2026-06-19,23:00,11:00 PM,Türkiye,Paraguay,Levi's Stadium,Santa Clara,USA,FS1,0,1,played,
-D5,D,3,2026-06-25,22:00,10:00 PM,Türkiye,United States,SoFi Stadium,Inglewood,USA,Fox,,,scheduled,"Simultaneous with D6 (matchday 3 rule)"
-D6,D,3,2026-06-25,22:00,10:00 PM,Paraguay,Australia,Levi's Stadium,Santa Clara,USA,FS1,,,scheduled,"Simultaneous with D5 (matchday 3 rule)"
+D5,D,3,2026-06-25,22:00,10:00 PM,Türkiye,United States,SoFi Stadium,Inglewood,USA,Fox,3,2,played,Simultaneous with D6 (matchday 3 rule)
+D6,D,3,2026-06-25,22:00,10:00 PM,Paraguay,Australia,Levi's Stadium,Santa Clara,USA,FS1,0,0,played,Simultaneous with D5 (matchday 3 rule)
 E1,E,1,2026-06-14,13:00,1:00 PM,Germany,Curaçao,NRG Stadium,Houston,USA,Fox,7,1,played,
 E2,E,1,2026-06-14,19:00,7:00 PM,Côte d'Ivoire,Ecuador,Lincoln Financial Field,Philadelphia,USA,FS1,1,0,played,
 E3,E,2,2026-06-20,16:00,4:00 PM,Germany,Côte d'Ivoire,BMO Field,Toronto,Canada,Fox,2,1,played,

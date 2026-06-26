@@ -441,9 +441,9 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
    feeder draws a horizontal stub right (::after) to the next column's edge, and the
    top card of each pair draws the vertical bar (::before) joining the pair there.
    Cards are a fixed height with ellipsis so content can't break the math. */
-.bracket-wrap{--bmh:42px;--bgap:14px;--bgut:30px;--bu:calc(var(--bmh) + var(--bgap));--bline:var(--ink-soft);overflow-x:auto;padding-bottom:10px}
+.bracket-wrap{--bmh:48px;--bgap:16px;--bgut:34px;--bu:calc(var(--bmh) + var(--bgap));--bline:var(--ink-soft);overflow-x:auto;padding-bottom:10px}
 .bracket{list-style:none;display:flex;gap:var(--bgut);min-width:min-content;align-items:start}
-.bround{flex:0 0 auto;width:150px}
+.bround{flex:0 0 auto;width:168px}
 .bround h3{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--verm);border-bottom:2px solid var(--ink);padding-bottom:5px;margin-bottom:14px;white-space:nowrap}
 .bround ul{list-style:none;display:flex;flex-direction:column}
 .bround[data-r="0"] ul{gap:var(--bgap)}
@@ -451,27 +451,25 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bround[data-r="2"] ul{padding-top:calc(1.5*var(--bu));gap:calc(4*var(--bu) - var(--bmh))}
 .bround[data-r="3"] ul{padding-top:calc(3.5*var(--bu));gap:calc(8*var(--bu) - var(--bmh))}
 .bround[data-r="4"] ul{padding-top:calc(7.5*var(--bu))}
-.btie{position:relative;height:var(--bmh);display:flex;align-items:center}
-.bpair{display:flex;flex-direction:column;justify-content:center;gap:3px;width:100%;min-width:0}
-.bslot{display:flex;align-items:baseline;gap:5px;font-size:.8rem;line-height:1.35;font-weight:700}
+/* every tie is a card: two stacked team rows split by a hairline (March-Madness style) */
+.btie{position:relative;height:var(--bmh);display:flex;align-items:stretch;border:1px solid var(--ink);background:var(--paper-2);box-shadow:2px 2px 0 var(--hairline)}
+.bpair{display:flex;flex-direction:column;width:100%;min-width:0}
+.bslot{display:flex;align-items:center;gap:5px;font-size:.78rem;line-height:1.2;font-weight:600;padding:0 8px;flex:1 1 0;min-height:0}
+.bslot + .bslot{border-top:1px solid var(--hairline)}
 .bn{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bp{flex:0 0 auto;font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);letter-spacing:.02em}
 .bslot a{text-decoration:none}
 .bslot a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
 .bslot.tbd{font-weight:500;font-style:italic;color:var(--ink-soft)}
-/* provisional: a concrete team whose group position isn't sealed — dashed underline so it
-   reads "tentative", and still works under the green winner / muted loser colour states */
+/* provisional: a concrete team whose group position isn't sealed yet — dashed underline */
 .bslot.prov .bn{border-bottom:1.5px dashed var(--ink-soft)}
-/* confirmed: this exact seed is mathematically secured — solid green underline + a ✓ mark,
-   the visual opposite of the dashed provisional state (the two classes never co-occur) */
-.bslot.conf .bn{border-bottom:1.5px solid var(--green)}
-.bmark{flex:0 0 auto;font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);line-height:1}
-/* projected advancer (bracket.feed): the winning slot in green; the other reads muted */
-.bslot.win .bn{color:var(--green)}
-.btie:has(.win) .bslot:not(.win) .bn{color:var(--ink-soft);font-weight:500}
-/* R32 cards are boxed (they carry names); downstream cards are open fill-in lines */
-.bround[data-r="0"] .btie{border:1px solid var(--ink);background:var(--paper-2);box-shadow:2px 2px 0 var(--hairline);padding:3px 8px}
-.bround:not([data-r="0"]) .bslot{min-height:1.15em;border-bottom:1px dotted var(--hairline)}
+/* a played tie's WINNER is highlighted and advances; the loser is struck out (eliminated).
+   In the projected view the winner additionally carries its advance % (.bp). No ✓ marks. */
+.bslot.win{background:var(--verm-soft)}
+.bslot.win .bn{color:var(--ink);font-weight:800}
+.bslot.win .bn::before{content:"\25b8\00a0";color:var(--verm);font-weight:900}
+.btie:has(.win) .bslot:not(.win){color:var(--ink-soft)}
+.btie:has(.win) .bslot:not(.win) .bn{text-decoration:line-through;font-weight:500}
 /* connectors: horizontal stub out of every feeder to the next column edge */
 .bround:not([data-r="4"]) .btie::after{content:"";position:absolute;left:100%;top:calc(50% - .5px);width:var(--bgut);height:1px;background:var(--bline)}
 /* vertical bar on the top card of each pair, at the next column edge, spanning the pair pitch */
@@ -484,8 +482,7 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .bracket-third h3{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--hairline);padding-bottom:5px;margin-bottom:4px}
 .bthird-sub{font-style:italic;color:var(--ink-soft);font-size:.78rem;margin-bottom:10px}
 .bracket-third ul{list-style:none}
-.bracket-third .btie{border:1px solid var(--hairline);background:var(--paper-2);padding:3px 8px;height:auto}
-.bracket-third .bslot{min-height:1.15em;border-bottom:1px dotted var(--hairline)}
+.bracket-third .btie{height:auto;border-color:var(--hairline)}
 .bnotes{list-style:none;margin:14px 0 0;font-family:var(--mono);font-size:.72rem;color:var(--amber);line-height:1.6}
 .bnotes li{padding-left:1.1em;text-indent:-1.1em}
 /* CSS-only bracket view toggle (no JS): radios precede the views so `:checked ~ .view` works */
@@ -549,6 +546,33 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 .og-team-top{font-family:var(--mono);font-size:.55rem;color:var(--ink-soft);
   text-align:center;margin-bottom:3px;max-width:360px}
 @media(prefers-reduced-motion:reduce){.og-cell{transition:none}}
+
+/* ---- knockout stage ---- */
+.ko-banner{margin:0 0 22px}
+.ko-banner a{display:block;text-decoration:none;border:1px solid var(--green);background:var(--green-soft);padding:13px 18px;color:var(--ink);transition:background .15s,color .15s}
+.ko-banner a:hover,.ko-banner a:focus-visible{background:var(--green);color:var(--paper)}
+.ko-banner-k{display:block;font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--green)}
+.ko-banner a:hover .ko-banner-k,.ko-banner a:focus-visible .ko-banner-k{color:var(--paper)}
+.ko-banner b{font-family:var(--serif);font-size:1.2rem;font-weight:700;display:inline-block;margin-top:2px}
+.ko-banner-sub{display:block;font-size:.8rem;color:var(--ink-soft);margin-top:3px}
+.ko-banner a:hover .ko-banner-sub,.ko-banner a:focus-visible .ko-banner-sub{color:var(--paper)}
+.slate .ko-card .team.tbd{font-style:italic;color:var(--ink-soft);font-weight:500}
+.slate .ko-card .ko-decided{font-family:var(--mono);font-size:.58rem;color:var(--ink-soft);margin-left:4px;text-transform:uppercase;letter-spacing:.04em}
+.call-lead{font-family:var(--serif);font-size:1.15rem;margin:0 0 10px}
+.adv-bar{display:flex;height:30px;border:1px solid var(--hairline);overflow:hidden;font-family:var(--mono);font-size:.72rem;font-weight:700}
+.adv-seg{display:grid;place-items:center;color:var(--paper);overflow:hidden;white-space:nowrap;min-width:0}
+.adv-a{background:var(--verm)}
+.adv-b{background:var(--ink-soft)}
+.call-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.7rem;color:var(--ink-soft);margin:6px 0 0}
+.call-facts{font-size:.86rem;margin:10px 0 0}
+.call-src{font-size:.72rem;color:var(--ink-soft);font-style:italic;margin:6px 0 0}
+.ko-result p{font-family:var(--serif);font-size:1.1rem;margin:0}
+.ko-path p{margin:0 0 6px;font-size:.9rem}
+.ko-path a{color:var(--verm)}
+.ko-aet{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;vertical-align:middle}
+.page-mast h1 .tbd{font-style:italic;color:var(--ink-soft)}
+.ko-record{margin-top:22px;border-top:1px solid var(--hairline);padding-top:14px}
+.ko-record h3{font-family:var(--serif);font-size:1.05rem;margin:0 0 8px}
 
 </style>
 </head>
@@ -649,7 +673,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
 <div class="conditions">
-  <span class="cond-stamp">Actual · as of 2026-06-25 07:54 ET</span>
+  <span class="cond-stamp">Actual · as of 2026-06-26 07:54 ET</span>
   <p class="cond-stats">~82°F · dry (38% RH) · WBGT 77.0°F</p>
   <div class="cond-track" aria-label="Match heat index: High (50/100)"><div class="cond-fill" style="width:50%"></div></div>
   <p class="cond-sev cond-sev-high">High</p>
