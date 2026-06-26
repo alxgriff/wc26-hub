@@ -379,7 +379,8 @@ def log_ko_slate(editorial_date: date,
             lines.append(f"M{km.match_no}: matchup not set — no advance call to log")
             continue
         passed = now >= ko_kickoff_dt(km)
-        kp = pr.resolve_knockout(model, km.team_a, km.team_b)   # neutral venue (no KO HFA)
+        hfa = pr.host_hfa(km.country, km.team_a, km.team_b)     # host at home in the KO
+        kp = pr.resolve_knockout(model, km.team_a, km.team_b, hfa_team=hfa)
         row = {"match_no": str(km.match_no), "team_a": km.team_a, "team_b": km.team_b,
                "p_advance_a": f"{kp.p_advance_a:.4f}", "p_advance_b": f"{kp.p_advance_b:.4f}",
                "timestamp": stamp}

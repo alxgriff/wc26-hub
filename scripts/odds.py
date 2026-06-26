@@ -510,7 +510,7 @@ def evaluate_match(match_id: str, odds_rows: list, ledger_rows: list,
 
 
 def evaluate_ko_match(match_no: int, team_a: str, team_b: str,
-                      odds_rows: list, model) -> dict:
+                      odds_rows: list, model, country: str = "") -> dict:
     """Edge table for a resolved knockout tie. The bettable market is ADVANCE (to
     qualify): model-priced from predict.resolve_knockout (the 90' consensus routed
     through extra time + a coin-flip shootout), de-vigged against a 2-way 'advance'
@@ -527,7 +527,8 @@ def evaluate_ko_match(match_no: int, team_a: str, team_b: str,
         out["missing"].append("matchup not resolved yet — no advance call")
         return out
     mid = f"M{match_no}"
-    kp = pr.resolve_knockout(model, team_a, team_b)
+    kp = pr.resolve_knockout(model, team_a, team_b,
+                             hfa_team=pr.host_hfa(country, team_a, team_b))  # host at home in KO
     adv = latest_market(odds_rows, mid, KO_ADVANCE_MARKET)
     if adv and ("home", "") in adv and ("away", "") in adv:
         o = [adv[("home", "")][0], adv[("away", "")][0]]
@@ -858,7 +859,7 @@ def load_ko_odds_engine(now=None):
                           if r["match_id"] == mid and r["phase"] == "snapshot"]
             if not match_rows:
                 return None
-            ev = evaluate_ko_match(km.match_no, km.team_a, km.team_b, odds_rows, model)
+            ev = evaluate_ko_match(km.match_no, km.team_a, km.team_b, odds_rows, model, km.country)
             if not ev.get("advance"):
                 return None                      # snapshot exists but no 2-way advance market
             match_picks, flags = best_bets(ev)
@@ -1309,7 +1310,7 @@ def cmd_evaluate_ko(target: date, fixtures: Path, knockout_path: Path, threshold
     now = lg.now_et()
     for km in slate:
         mid = f"M{km.match_no}"
-        ev = evaluate_ko_match(km.match_no, km.team_a, km.team_b, odds_rows, model)
+        ev = evaluate_ko_match(km.match_no, km.team_a, km.team_b, odds_rows, model, km.country)
         picks, flags = best_bets(ev)
         bp = _best_prices(odds_rows, mid)
         print(f"\n### {mid} {km.team_a} vs {km.team_b} ({km.round})\n")

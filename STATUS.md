@@ -73,7 +73,8 @@ The full Round-of-32 → Final stage now runs end-to-end (group→knockout bound
 - **Automation:** daily-build + closing-odds crons extended through the July 19 final; new
   knockout steps fail-soft + health-gated.
 
-Open follow-ups: per-host HFA in KO ties stays neutral (no KO venue→country map). The advance
+Open follow-ups: host HFA now applies in KO ties at a host's own venue (knockout.csv carries
+the venue country; `predict.host_hfa`). The advance
 market isn't auto-fetched (The Odds API quotes 90-minute markets) — advance odds via manual
 `odds.py enter M.. advance H,A`, so it's "No bet" until a 2-way line is entered; revisit if a
 to-qualify API market is identified. ET-vs-regulation isn't distinguished by the API (decisive

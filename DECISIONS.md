@@ -26,11 +26,14 @@ you make a non-obvious call, add it here.*
   groups render abstract ("Winner E", "Best 3rd of …"); the eight winner-vs-third ties
   resolve only once all 12 groups have a standing and the cutline isn't provisional.
   *`scripts/bracket.py`; commits `03e460b`, `5f02e5a`.*
-- **Winner projection runs through the tree at a NEUTRAL venue.** `bracket.feed`
-  propagates the model's projected advancer down the tree (model injected, so `bracket.py`
-  stays model-agnostic; real results can override). The knockout resolver deliberately
-  does **not** apply host HFA — knockout venues aren't modelled in-repo. The shown `%` is
-  the winner's 90'+ET+shootout advance probability. *`scripts/build_site.py` (`load_knockout_resolver`); commits `2ddd01f`, `1828533`.*
+- **Winner projection runs through the tree; host HFA applies at a host's own venue.**
+  `bracket.feed` propagates the model's projected advancer down the tree (model injected, so
+  `bracket.py` stays model-agnostic; real results can override). **Updated 2026-06-25:** now
+  that `data/knockout.csv` carries each tie's venue + country, a US/Mexican/Canadian host
+  playing in its OWN country gets the standard home bonus (`predict.host_hfa` → `resolve_knockout(hfa_team=…)`),
+  applied to the displayed advance Call, the logged advance call, the betting price, AND the
+  bracket projection (via a team-set→country map for resolved ties; purely-projected ties stay
+  neutral). The shown `%` is the winner's 90'+ET+shootout advance probability. *`scripts/build_site.py` (`load_knockout_resolver`, `load_ko_call`); `scripts/predict.py` (`host_hfa`); commits `2ddd01f`, `1828533`.*
 
 ## Knockout stage (the live tournament, R32→Final — `knockout-stage` branch)
 

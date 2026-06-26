@@ -351,22 +351,28 @@ def load_predictor(fixtures: Path | None = None):
     return call, None
 
 
-def load_knockout_resolver():
+def load_knockout_resolver(knockout: list | None = None):
     """Defensive adapter for projecting knockout ties (companion to load_predictor).
     Returns resolver(team_a, team_b) -> {"winner","loser","p"} | None, or None if
     predict.py is unavailable — in which case the bracket stays structural (blank
-    downstream). Neutral venue: host HFA is NOT applied, because knockout venues
-    aren't modelled in-repo. ``p`` is the winner's probability of advancing (90' +
-    extra time + shootout, per predict.resolve_knockout)."""
+    downstream). Host HFA IS applied when a resolved tie is at the host's own venue: a
+    team-set -> venue-country map (built from the resolved knockout matches) lets the
+    resolver give a US/Mexican/Canadian host its home bonus; purely-projected ties (teams
+    not yet in knockout.csv) stay neutral. ``p`` is the winner's 90'+ET+shootout advance
+    probability (predict.resolve_knockout)."""
     try:
         import predict as pr
         model = pr.load_ratings()
     except Exception:
         return None
 
+    country_by_pair = {frozenset((km.team_a, km.team_b)): km.country
+                       for km in (knockout or []) if km.participants_known}
+
     def resolve(a: str, b: str):
         try:
-            kp = pr.resolve_knockout(model, a, b)        # neutral (no hfa_team)
+            hfa = pr.host_hfa(country_by_pair.get(frozenset((a, b)), ""), a, b)
+            kp = pr.resolve_knockout(model, a, b, hfa_team=hfa)
             if kp.p_advance_a >= kp.p_advance_b:
                 return {"winner": a, "loser": b, "p": kp.p_advance_a}
             return {"winner": b, "loser": a, "p": kp.p_advance_b}
@@ -1961,7 +1967,8 @@ def load_ko_call():
         if not (km.team_a and km.team_b):
             return None
         try:
-            kp = pr.resolve_knockout(model, km.team_a, km.team_b)
+            hfa = pr.host_hfa(km.country, km.team_a, km.team_b)   # host at home in the KO
+            kp = pr.resolve_knockout(model, km.team_a, km.team_b, hfa_team=hfa)
             reg = kp.reg
             return {"p_adv_a": kp.p_advance_a, "p_adv_b": kp.p_advance_b,
                     "p_reach_et": kp.p_reach_et, "p_reach_shootout": kp.p_reach_shootout,
@@ -2386,7 +2393,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         warnings.append(f"Bracket page skipped: {e}")
     if bracket_proj is not None:
         if knockout_resolver == "auto":
-            knockout_resolver = load_knockout_resolver()
+            knockout_resolver = load_knockout_resolver(knockout)
             if knockout_resolver is None:
                 warnings.append("Bracket winners not projected: prediction model unavailable")
         if knockout_resolver:
