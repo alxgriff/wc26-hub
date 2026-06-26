@@ -815,5 +815,104 @@ class AmericanOddsTests(unittest.TestCase):
             self.assertEqual(bs._american_odds(dec), od.american_odds(dec), f"decimal {dec}")
 
 
+import knockout as ko  # noqa: E402
+
+
+def _km(no=73, team_a="France", team_b="Brazil", **kw):
+    base = dict(match_no=no, round=ko.round_of(no), date_et="2026-06-28",
+                kickoff_et_24h="15:00", kickoff_et="3:00 PM", stadium="SoFi Stadium",
+                city="Inglewood", country="USA", tv_us="Fox", team_a=team_a, team_b=team_b,
+                score_a=None, score_b=None, decided_by="", winner="", status="scheduled",
+                notes="")
+    base.update(kw)
+    return ko.KnockoutMatch(**base)
+
+
+def fake_kp(pa=0.62, pb=0.38):
+    return pr.KnockoutPrediction("France", "Brazil", None, pa, pb, fake_pred(),
+                                 (0.4, 0.3, 0.3), 0.30, 0.18)
+
+
+def pick_row(mid, market, sel, odds, our_p, implied_p, line="", status="open"):
+    return {"match_id": mid, "market": market, "selection": sel, "line": line,
+            "odds": f"{odds:.2f}", "book": "draftkings", "edge_pp": "5.0",
+            "our_p": f"{our_p:.4f}", "implied_p": f"{implied_p:.4f}", "stake": "1",
+            "timestamp": TS, "status": status, "units": "", "clv_pp": ""}
+
+
+class KnockoutAdvanceTests(unittest.TestCase):
+    def test_advance_devig_sums_to_one_and_edge(self):
+        rows = [odds_row("M73", "advance", "home", 1.80),
+                odds_row("M73", "advance", "away", 2.10)]
+        with mock.patch.object(od.pr, "resolve_knockout", return_value=fake_kp(0.62, 0.38)):
+            ev = od.evaluate_ko_match(73, "France", "Brazil", rows, object())
+        self.assertEqual(len(ev["advance"]), 2)
+        self.assertAlmostEqual(sum(r[3] for r in ev["advance"]), 1.0, places=9)
+        home = next(r for r in ev["advance"] if r[0] == "home")
+        self.assertAlmostEqual(home[4], 0.62)                 # our_p = p_advance_a
+        self.assertAlmostEqual(home[5], 0.62 - home[3])       # edge = our − implied
+
+    def test_no_advance_market_is_no_bet(self):
+        with mock.patch.object(od.pr, "resolve_knockout", return_value=fake_kp()):
+            ev = od.evaluate_ko_match(73, "France", "Brazil", [], object())
+        self.assertEqual(ev["advance"], [])
+        self.assertTrue(any("to qualify" in m for m in ev["missing"]))
+        self.assertEqual(od.best_bets(ev)[0], [])
+
+    def test_advance_is_model_priced_8pp_ceiling(self):
+        rows = [odds_row("M73", "advance", "home", 2.0),
+                odds_row("M73", "advance", "away", 2.0)]
+        with mock.patch.object(od.pr, "resolve_knockout", return_value=fake_kp(0.80, 0.20)):
+            ev = od.evaluate_ko_match(73, "France", "Brazil", rows, object())
+        picks, flags = od.best_bets(ev)
+        self.assertEqual(picks, [])                            # 30pp edge >= 8pp -> flagged
+        self.assertTrue(any("advance" in f and "8%" in f for f in flags))
+
+    def test_advance_recordable_band(self):
+        rows = [odds_row("M73", "advance", "home", 2.0),
+                odds_row("M73", "advance", "away", 2.0)]      # implied 0.50/0.50
+        with mock.patch.object(od.pr, "resolve_knockout", return_value=fake_kp(0.56, 0.44)):
+            ev = od.evaluate_ko_match(73, "France", "Brazil", rows, object())
+        picks, _ = od.best_bets(ev)                            # 6pp edge in [4%,8%)
+        self.assertEqual(len(picks), 1)
+        self.assertEqual((picks[0]["market"], picks[0]["selection"]), ("advance", "home"))
+
+    def test_market_keys_advance(self):
+        self.assertEqual(od._market_keys("advance", "home", ""),
+                         [("home", ""), ("away", "")])
+
+    def _settle_one(self, km, pick):
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "picks.csv"
+            od._save([pick], p, od.PICK_COLUMNS)
+            od.settle_picks([], [], picks_path=p, knockout=[km])
+            return od.load_picks(p)[0]
+
+    def test_settle_advance_winner_side(self):
+        km = _km(score_a=2, score_b=1, decided_by="regulation", winner="A", status="played")
+        s = self._settle_one(km, pick_row("M73", "advance", "home", 1.80, 0.62, 0.55))
+        self.assertEqual(s["status"], "won")
+        self.assertAlmostEqual(float(s["units"]), 0.80, places=2)
+
+    def test_settle_advance_penalty_winner(self):
+        # level after play, settled on penalties, team_b (away) advances
+        km = _km(score_a=1, score_b=1, decided_by="penalties", winner="B", status="played")
+        s = self._settle_one(km, pick_row("M73", "advance", "away", 2.10, 0.40, 0.45))
+        self.assertEqual(s["status"], "won")
+        self.assertAlmostEqual(float(s["units"]), 1.10, places=2)
+
+    def test_settle_advance_loser(self):
+        km = _km(score_a=2, score_b=1, decided_by="regulation", winner="A", status="played")
+        s = self._settle_one(km, pick_row("M73", "advance", "away", 2.10, 0.40, 0.45))
+        self.assertEqual(s["status"], "lost")
+        self.assertEqual(s["units"], "-1.00")
+
+    def test_group_picks_untouched_by_knockout_settle(self):
+        # a group h2h pick must not be settled by the knockout path (no group match given)
+        s = self._settle_one(_km(status="scheduled"),
+                             pick_row("A1", "h2h", "home", 1.9, 0.6, 0.55))
+        self.assertEqual(s["status"], "open")
+
+
 if __name__ == "__main__":
     unittest.main()

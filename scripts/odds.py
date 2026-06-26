@@ -98,9 +98,13 @@ SANITY_EDGE = 0.15         # corroborated 1X2 (vs consensus): flag above this
 # one; see the module docstring) — so a large edge is far more likely model error
 # than market error. They clear a STRICTER sanity ceiling (user-set June 14):
 # flagged above MODEL_PRICED_SANITY, recordable only in [RECORD_THRESHOLD, this).
-MODEL_PRICED_MARKETS = ("totals", "spreads", "btts")
+MODEL_PRICED_MARKETS = ("totals", "spreads", "btts", "advance")
 MODEL_PRICED_SANITY = 0.08
 H2H_SELECTIONS = ("home", "draw", "away")
+KO_ADVANCE_MARKET = "advance"   # knockout 2-way: home = team_a advances, away = team_b
+                                # advances. Model-priced (predict.resolve_knockout); the
+                                # ONLY knockout market we record, because it settles
+                                # cleanly + penalty-aware from knockout.csv's winner side.
 
 # Prefer-book sourcing (June 14 single-book → June 16 prefer-else-fallback): fetch the
 # whole US region and PREFER this book per selection (the one the user bets) so the
@@ -505,6 +509,40 @@ def evaluate_match(match_id: str, odds_rows: list, ledger_rows: list,
     return out
 
 
+def evaluate_ko_match(match_no: int, team_a: str, team_b: str,
+                      odds_rows: list, model) -> dict:
+    """Edge table for a resolved knockout tie. The bettable market is ADVANCE (to
+    qualify): model-priced from predict.resolve_knockout (the 90' consensus routed
+    through extra time + a coin-flip shootout), de-vigged against a 2-way 'advance'
+    market when one is quoted. Returns the evaluate_match shape (all market keys present
+    so render_market stays safe), with edges only in 'advance'.
+
+    Advance-only by design: the standard odds-API soccer market is the 90-MINUTE 3-way
+    result, which (a) has no consensus ledger for knockouts and (b) cannot be settled
+    from the post-extra-time score in knockout.csv. Advance settles cleanly + penalty-
+    aware from the winner side, so it is the only knockout market we record (a 90' market,
+    if present, is the caller's to display — never recorded here)."""
+    out = {"h2h": [], "totals": [], "spreads": [], "btts": [], "advance": [], "missing": []}
+    if not (team_a and team_b):
+        out["missing"].append("matchup not resolved yet — no advance call")
+        return out
+    mid = f"M{match_no}"
+    kp = pr.resolve_knockout(model, team_a, team_b)
+    adv = latest_market(odds_rows, mid, KO_ADVANCE_MARKET)
+    if adv and ("home", "") in adv and ("away", "") in adv:
+        o = [adv[("home", "")][0], adv[("away", "")][0]]
+        implied = devig(o)                       # 2-way multiplicative de-vig (Σ implied = 1)
+        for i, (sel, p) in enumerate((("home", kp.p_advance_a), ("away", kp.p_advance_b))):
+            out["advance"].append((sel, "", o[i], implied[i], p, p - implied[i]))
+    elif adv:
+        out["missing"].append("incomplete advance market (need both sides)")
+    else:
+        out["missing"].append(
+            "no 'to qualify' (advance) market quoted — the model's advance call is shown "
+            "on the card, but with no market to price against, nothing is bet")
+    return out
+
+
 RECORD_THRESHOLD = 0.04    # picks must clear a higher bar than table display.
                            # Lowered 0.05->0.04 (user, June 14) to gather more model-
                            # performance data once the Maher fix left the model well-
@@ -533,7 +571,7 @@ def best_bets(evaluation: dict, threshold: float = RECORD_THRESHOLD,
     self-priced market is far more likely our miscalibration than market error."""
     flags = []
     per_market: dict = {}
-    for market in ("h2h", "totals", "spreads", "btts"):
+    for market in ("h2h", "totals", "spreads", "btts", "advance"):
         ceiling = _market_sanity(market, sanity, model_sanity)
         for sel, line, odds, implied, our_p, edge in evaluation.get(market, []):
             if edge >= ceiling:   # inclusive: an edge AT the ceiling is the case the rule targets
@@ -645,6 +683,8 @@ def _market_keys(market: str, selection: str, line: str) -> list:
         return [(s, "") for s in H2H_SELECTIONS]
     if market == "btts":
         return [("yes", ""), ("no", "")]
+    if market == KO_ADVANCE_MARKET:
+        return [("home", ""), ("away", "")]
     line = _fmt_line(line)
     if market == "totals":
         return [("over", line), ("under", line)]
@@ -675,24 +715,71 @@ def _closing_is_timely(odds_rows: list, pick: dict, kickoff) -> bool:
     return timedelta(0) <= (kickoff - t) <= CLOSING_WINDOW
 
 
+def _ko_fixture_row(km) -> dict:
+    """A fixtures-row-shaped dict for a knockout match so ledger.kickoff_dt can derive
+    its kickoff for the CLV timeliness window."""
+    return {"match_id": f"M{km.match_no}", "date_et": km.date_et,
+            "kickoff_et_24h": km.kickoff_et_24h, "kickoff_et": km.kickoff_et,
+            "team_a": km.team_a, "team_b": km.team_b}
+
+
+def _settle_clv_line(p: dict, odds_rows: list, kickoff_by_mid: dict) -> str:
+    """Compute CLV for a freshly-graded pick — mutating p['clv_pp'] only when a TRUE
+    closing line exists (within CLOSING_WINDOW of kickoff) — and return its status line.
+    Shared by the group and knockout settle paths so they de-vig CLV identically."""
+    closing = latest_market(odds_rows, p["match_id"], p["market"], phase="closing")
+    keys = _market_keys(p["market"], p["selection"], p["line"])
+    if (closing and all(k in closing for k in keys)
+            and _closing_is_timely(odds_rows, p, kickoff_by_mid.get(p["match_id"]))):
+        implied = devig([closing[k][0] for k in keys])
+        idx = [k[0] for k in keys].index(p["selection"])
+        clv = implied[idx] - float(p["implied_p"])
+        p["clv_pp"] = f"{clv * 100:+.1f}"
+    return (f"{p['match_id']} {p['market']} {p['selection']}: "
+            f"{p['status']} {p['units']}u"
+            + (f", CLV {p['clv_pp']}pp" if p["clv_pp"] else ", CLV n/a"))
+
+
 def settle_picks(matches: list, odds_rows: list,
                  picks_path: Path = PICKS_LOG,
-                 fixtures_rows: list | None = None) -> list:
+                 fixtures_rows: list | None = None,
+                 knockout: list | None = None) -> list:
     """Grade open picks whose match is played: units (odds−1 won, −1 lost) and
-    CLV vs the closing snapshot when a TRUE one exists. ``fixtures_rows`` supply
-    kickoff times so a row tagged 'closing' but logged far from kickoff is
-    rejected for CLV; without them CLV cannot be verified and is left blank."""
+    CLV vs the closing snapshot when a TRUE one exists. Group picks settle from
+    ``matches`` (fixtures); knockout ADVANCE picks settle from ``knockout``
+    (data/knockout.csv) by the winner side — penalty-aware, since the winner is
+    authoritative even when the score is level. ``fixtures_rows`` supply kickoff times so
+    a row tagged 'closing' but logged far from kickoff is rejected for CLV; knockout
+    kickoffs are derived from the knockout rows."""
     picks = load_picks(picks_path)
     by_mid = {m.match_id: m for m in matches if m.is_played}
+    ko_by_mid = {f"M{km.match_no}": km for km in (knockout or []) if km.is_played}
     kickoff_by_mid = {}
     for row in (fixtures_rows or []):
         try:
             kickoff_by_mid[row["match_id"]] = lg.kickoff_dt(row)
         except (KeyError, ValueError):
             continue
+    for km in (knockout or []):
+        try:
+            kickoff_by_mid[f"M{km.match_no}"] = lg.kickoff_dt(_ko_fixture_row(km))
+        except Exception:
+            pass                                 # CLV stays blank if the kickoff is unknown
     lines = []
     for p in picks:
-        if p["status"] != "open" or p["match_id"] not in by_mid:
+        if p["status"] != "open":
+            continue
+        if p["market"] == KO_ADVANCE_MARKET:
+            km = ko_by_mid.get(p["match_id"])
+            if km is None:
+                continue
+            won = ((p["selection"] == "home" and km.winner == "A")
+                   or (p["selection"] == "away" and km.winner == "B"))
+            p["status"] = "won" if won else "lost"
+            p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
+            lines.append(_settle_clv_line(p, odds_rows, kickoff_by_mid))
+            continue
+        if p["match_id"] not in by_mid:
             continue
         m = by_mid[p["match_id"]]
         if p["market"] == "h2h":
@@ -723,17 +810,7 @@ def settle_picks(matches: list, odds_rows: list,
             p["status"] = "won" if won else "lost"
             p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
 
-        closing = latest_market(odds_rows, p["match_id"], p["market"], phase="closing")
-        keys = _market_keys(p["market"], p["selection"], p["line"])
-        if (closing and all(k in closing for k in keys)
-                and _closing_is_timely(odds_rows, p, kickoff_by_mid.get(p["match_id"]))):
-            implied = devig([closing[k][0] for k in keys])
-            idx = [k[0] for k in keys].index(p["selection"])
-            clv = implied[idx] - float(p["implied_p"])
-            p["clv_pp"] = f"{clv * 100:+.1f}"
-        lines.append(f"{p['match_id']} {p['market']} {p['selection']}: "
-                     f"{p['status']} {p['units']}u"
-                     + (f", CLV {p['clv_pp']}pp" if p["clv_pp"] else ", CLV n/a"))
+        lines.append(_settle_clv_line(p, odds_rows, kickoff_by_mid))
     _save(picks, picks_path, PICK_COLUMNS)
     return lines
 
@@ -753,6 +830,57 @@ def units_summary(picks: list) -> str | None:
     if clvs:
         out += f"; avg CLV {statistics.mean(clvs):+.1f}pp over {len(clvs)} closing line(s)"
     return out
+
+
+def load_ko_odds_engine(now=None):
+    """Defensive adapter for the knockout ADVANCE market: returns (callable, None) or
+    (None, reason). The callable maps a resolved KnockoutMatch -> the render_market
+    odds_info dict (same shape as build_site.load_odds_engine produces), or None when
+    there's no advance snapshot for that tie (placeholder state, per contract). Neutral
+    venue — host HFA is not applied in the knockout (DECISIONS.md). Mirrors the group
+    load_odds_engine so build_site can render KO odds through the existing render_market."""
+    try:
+        odds_rows = load_odds()
+        if not odds_rows:
+            return None, "odds_log.csv is empty — no snapshots yet"
+        picks = load_picks()
+        model = pr.load_ratings()
+        _now = now or lg.now_et()
+    except Exception as e:                       # broad on purpose: never break the build
+        return None, f"knockout odds engine unavailable ({e.__class__.__name__}: {e})"
+
+    def call(km) -> dict | None:
+        try:
+            if not (km.team_a and km.team_b):
+                return None
+            mid = f"M{km.match_no}"
+            match_rows = [r for r in odds_rows
+                          if r["match_id"] == mid and r["phase"] == "snapshot"]
+            if not match_rows:
+                return None
+            ev = evaluate_ko_match(km.match_no, km.team_a, km.team_b, odds_rows, model)
+            if not ev.get("advance"):
+                return None                      # snapshot exists but no 2-way advance market
+            match_picks, flags = best_bets(ev)
+            stale = {m for m in {p["market"] for p in match_picks}
+                     if (age := _snapshot_age_hours(odds_rows, mid, _now, m)) is None
+                     or age > MAX_SNAPSHOT_AGE_HOURS}
+            return {
+                "evaluation": ev, "picks": match_picks,
+                "pick": match_picks[0] if match_picks else None,   # back-compat
+                "flags": flags, "stale_markets": stale,
+                "max_age_h": MAX_SNAPSHOT_AGE_HOURS,
+                "best_prices": _best_prices(odds_rows, mid),
+                "recorded": [p for p in picks if p["match_id"] == mid],
+                "threshold": EDGE_THRESHOLD, "record_threshold": RECORD_THRESHOLD,
+                "model_sanity": MODEL_PRICED_SANITY, "sanity": SANITY_EDGE,
+                "source_label": snapshot_source_label(odds_rows, mid),
+                "snapshot_ts": max(r["timestamp"] for r in match_rows),
+            }
+        except Exception:
+            return None
+
+    return call, None
 
 
 def load_shadow_picks(path: Path = SHADOW_PICKS_LOG) -> list:
@@ -800,7 +928,8 @@ def render_odds_section(match_id: str, evaluation: dict, pick,
     labelled = ([("1X2", r) for r in evaluation["h2h"]]
                 + [(f"O/U {r[1]}", r) for r in evaluation["totals"]]
                 + [(f"AH {float(r[1]):+g}", r) for r in evaluation.get("spreads", [])]
-                + [("BTTS", r) for r in evaluation.get("btts", [])])
+                + [("BTTS", r) for r in evaluation.get("btts", [])]
+                + [("Advance", r) for r in evaluation.get("advance", [])])
     rows = [r for _, r in labelled]
     if rows:
         lines += ["| Market | Sel | Odds | Implied | Ours | Edge |",
@@ -1127,6 +1256,82 @@ def cmd_evaluate(target: date, fixtures: Path, threshold: float,
     return 0
 
 
+def _load_resolved_knockout(matches: list) -> list:
+    """Load + materialize the knockout schedule for settling/evaluation; [] (fail-soft)
+    if there's no schedule or the bracket can't be projected yet."""
+    try:
+        import knockout as ko
+        import bracket as bk
+        kos = ko.load_knockout()
+        if not kos:
+            return []
+        standings = st.compute_standings(matches, fair_play=st.load_discipline())
+        return ko.materialize_teams(bk.project(standings), kos)
+    except Exception:
+        return []
+
+
+def cmd_evaluate_ko(target: date, fixtures: Path, knockout_path: Path, threshold: float,
+                    record: bool = False, revise: bool = False,
+                    record_any_date: bool = False,
+                    max_snapshot_age: float = MAX_SNAPSHOT_AGE_HOURS) -> int:
+    """Edges + (optional) recording for the knockout ADVANCE market on a date. Only
+    resolved, not-yet-played ties are considered; recording obeys the same day-of +
+    fresh-snapshot gate as the group evaluate."""
+    import knockout as ko
+    import bracket as bk
+    kos = ko.load_knockout(knockout_path)
+    if not kos:
+        print("no knockout schedule — nothing to evaluate")
+        return 0
+    matches = st.load_fixtures(fixtures)
+    standings = st.compute_standings(matches, fair_play=st.load_discipline())
+    try:
+        kos = ko.materialize_teams(bk.project(standings), kos)
+    except (FileNotFoundError, ValueError) as e:
+        print(f"error: cannot resolve knockout matchups: {e}", file=sys.stderr)
+        return 1
+    slate = [km for km in kos if km.date_et == target.isoformat()
+             and km.participants_known and not km.is_played]
+    if not slate:
+        print(f"no resolved, unplayed knockout ties on {target}")
+        return 0
+    odds_rows = load_odds()
+    if record and target != lg.now_et().date() and not record_any_date:
+        print(f"--record refused: {target} is not today's date "
+              f"({lg.now_et().date()}) — pass --record-any-date to override")
+        record = False
+    try:
+        model = pr.load_ratings(fixtures=fixtures)
+    except ValueError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+    now = lg.now_et()
+    for km in slate:
+        mid = f"M{km.match_no}"
+        ev = evaluate_ko_match(km.match_no, km.team_a, km.team_b, odds_rows, model)
+        picks, flags = best_bets(ev)
+        bp = _best_prices(odds_rows, mid)
+        print(f"\n### {mid} {km.team_a} vs {km.team_b} ({km.round})\n")
+        print(render_odds_section(mid, ev, picks, flags, bp, threshold,
+                                  source_label=snapshot_source_label(odds_rows, mid)))
+        for pick in picks if record else []:
+            passed = now >= lg.kickoff_dt(_ko_fixture_row(km))
+            age = _snapshot_age_hours(odds_rows, mid, now, market=pick["market"])
+            if age is None or age > max_snapshot_age:
+                print(f"→ NOT recorded ({pick['market']}): snapshot "
+                      f"{'missing' if age is None else f'{age:.1f}h old'}")
+            else:
+                price = bp.get((pick["market"], pick["selection"], str(pick["line"])),
+                               (pick["odds"], "median"))
+                try:
+                    print("→ " + record_pick(mid, pick, price, now, passed,
+                                             allow_revise=revise))
+                except OddsError as e:
+                    print(f"→ NOT recorded: {e}")
+    return 0
+
+
 def main(argv: list | None = None) -> int:
     ap = argparse.ArgumentParser(description="Odds snapshots, edges, best bets, CLV.")
     sub = ap.add_subparsers(dest="command", required=True)
@@ -1146,10 +1351,11 @@ def main(argv: list | None = None) -> int:
 
     p_enter = sub.add_parser("enter", help="manually enter odds")
     p_enter.add_argument("match_id")
-    p_enter.add_argument("market", choices=["h2h", "totals", "spreads", "btts"])
+    p_enter.add_argument("market", choices=["h2h", "totals", "spreads", "btts", "advance"])
     p_enter.add_argument("values", nargs="+",
                          help="h2h: H,D,A — totals: LINE OVER,UNDER — "
-                              "spreads: HOME_LINE HOME,AWAY — btts: YES,NO")
+                              "spreads: HOME_LINE HOME,AWAY — btts: YES,NO — "
+                              "advance: HOME,AWAY (knockout to-qualify, 2-way)")
     p_enter.add_argument("--source", default="manual")
     p_enter.add_argument("--phase", choices=["snapshot", "closing"], default="snapshot")
 
@@ -1168,10 +1374,23 @@ def main(argv: list | None = None) -> int:
                         default=MAX_SNAPSHOT_AGE_HOURS,
                         help="oldest snapshot (hours) picks may be recorded against")
 
+    p_eval_ko = sub.add_parser("evaluate-ko",
+                               help="knockout advance edges + record for a date")
+    p_eval_ko.add_argument("date")
+    p_eval_ko.add_argument("--threshold", type=float, default=EDGE_THRESHOLD)
+    p_eval_ko.add_argument("--record", action="store_true",
+                           help="record qualifying advance picks (day-of + fresh only)")
+    p_eval_ko.add_argument("--revise", action="store_true")
+    p_eval_ko.add_argument("--record-any-date", action="store_true")
+    p_eval_ko.add_argument("--max-snapshot-age", type=float,
+                           default=MAX_SNAPSHOT_AGE_HOURS)
+    p_eval_ko.add_argument("--knockout", type=Path,
+                           default=REPO_ROOT / "data" / "knockout.csv")
+
     sub.add_parser("settle", help="grade open picks + CLV")
     sub.add_parser("report", help="units/CLV summary")
 
-    for p in (p_fetch, p_enter, p_eval):
+    for p in (p_fetch, p_enter, p_eval, p_eval_ko):
         p.add_argument("--fixtures", type=Path,
                        default=REPO_ROOT / "data" / "fixtures.csv")
     args = ap.parse_args(argv)
@@ -1260,6 +1479,15 @@ def main(argv: list | None = None) -> int:
                         "line": _fmt_line(l), "odds": f"{o:.3f}", "source": args.source,
                         "phase": args.phase, "timestamp": now}
                        for s, l, o in (("home", h_line, ha[0]), ("away", -h_line, ha[1]))]
+            elif args.market == "advance":
+                ha = [float(x) for x in args.values[0].split(",")]
+                if len(ha) != 2:
+                    raise OddsError("advance needs two odds: home,away (team_a,team_b to qualify)")
+                devig(ha)
+                new = [{"match_id": args.match_id, "market": "advance", "selection": s,
+                        "line": "", "odds": f"{o:.3f}", "source": args.source,
+                        "phase": args.phase, "timestamp": now}
+                       for s, o in zip(("home", "away"), ha)]
             else:  # btts
                 yn = [float(x) for x in args.values[0].split(",")]
                 if len(yn) != 2:
@@ -1292,14 +1520,27 @@ def main(argv: list | None = None) -> int:
                             record_any_date=args.record_any_date,
                             max_snapshot_age=args.max_snapshot_age)
 
+    if args.command == "evaluate-ko":
+        try:
+            target = date.fromisoformat(args.date)
+        except ValueError:
+            print(f"error: bad date {args.date!r}", file=sys.stderr)
+            return 2
+        return cmd_evaluate_ko(target, args.fixtures, args.knockout, args.threshold,
+                               record=args.record, revise=args.revise,
+                               record_any_date=args.record_any_date,
+                               max_snapshot_age=args.max_snapshot_age)
+
     matches = st.load_fixtures(REPO_ROOT / "data" / "fixtures.csv")
     if args.command == "settle":
         fixtures_rows = be.read_rows(REPO_ROOT / "data" / "fixtures.csv")
-        for line in settle_picks(matches, load_odds(), fixtures_rows=fixtures_rows):
+        knockout = _load_resolved_knockout(matches)
+        for line in settle_picks(matches, load_odds(), fixtures_rows=fixtures_rows,
+                                 knockout=knockout):
             print(line)
         # the shadow ledger settles the same way but stays OUT of the units record
         for line in settle_picks(matches, load_odds(), picks_path=SHADOW_PICKS_LOG,
-                                 fixtures_rows=fixtures_rows):
+                                 fixtures_rows=fixtures_rows, knockout=knockout):
             print(f"[shadow] {line}")
         print(units_summary(load_picks()) or "no settled picks yet")
         sh = shadow_summary(load_shadow_picks())
