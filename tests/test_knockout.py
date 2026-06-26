@@ -187,6 +187,75 @@ class HelperTests(unittest.TestCase):
         self.assertEqual(ko.by_no(again)[104].status, "scheduled")
 
 
+def _locked(home, away):
+    return {"home": home, "away": away, "home_provisional": False, "away_provisional": False}
+
+
+def _proj(overrides):
+    """A minimal bracket.project-shaped dict: all 16 R32 slots blank/provisional by
+    default, plus the real winner-of tree, with `overrides` merged onto named R32 slots."""
+    r32 = {m: {"home": None, "away": None, "home_provisional": True,
+               "away_provisional": True, "match": m} for m in range(73, 89)}
+    for m, e in overrides.items():
+        r32[m].update(e)
+    return {"r32": r32, "tree": {m: list(p) for m, p in ko.bk.BRACKET_TREE.items()},
+            "third_place_match": ko.bk.THIRD_PLACE_MATCH, "warnings": []}
+
+
+class MaterializeTeamsTests(unittest.TestCase):
+    def test_r32_locked_sides_fill(self):
+        proj = _proj({73: _locked("France", "Brazil")})
+        out = ko.materialize_teams(proj, ko.parse_knockout([row(73)]))
+        m = ko.by_no(out)[73]
+        self.assertEqual((m.team_a, m.team_b), ("France", "Brazil"))
+
+    def test_r32_provisional_side_stays_blank(self):
+        # home locked, away a concrete-but-unsealed team -> only the locked side is written
+        proj = _proj({74: {"home": "Spain", "away": "Portugal",
+                           "home_provisional": False, "away_provisional": True}})
+        out = ko.materialize_teams(proj, ko.parse_knockout([row(74)]))
+        m = ko.by_no(out)[74]
+        self.assertEqual((m.team_a, m.team_b), ("Spain", ""))
+
+    def test_r32_unstarted_blank(self):
+        out = ko.materialize_teams(_proj({}), ko.parse_knockout([row(75)]))
+        m = ko.by_no(out)[75]
+        self.assertEqual((m.team_a, m.team_b), ("", ""))
+
+    def test_r16_fills_from_played_feeders(self):
+        # M89 = winners of M74 & M77; both feeders played -> M89's participants resolve
+        proj = _proj({74: _locked("France", "Brazil"), 77: _locked("Spain", "Italy")})
+        rows = [
+            row(74, team_a="France", team_b="Brazil", score_a=2, score_b=1,
+                decided_by="regulation", winner="A", status="played"),
+            row(77, team_a="Spain", team_b="Italy", score_a=2, score_b=0,
+                decided_by="regulation", winner="A", status="played"),
+            row(89),
+        ]
+        out = ko.materialize_teams(proj, ko.parse_knockout(rows))
+        m89 = ko.by_no(out)[89]
+        self.assertEqual((m89.team_a, m89.team_b), ("France", "Spain"))
+
+    def test_r16_one_feeder_unplayed_stays_blank(self):
+        proj = _proj({74: _locked("France", "Brazil"), 77: _locked("Spain", "Italy")})
+        rows = [
+            row(74, team_a="France", team_b="Brazil", score_a=2, score_b=1,
+                decided_by="regulation", winner="A", status="played"),
+            row(89),
+        ]
+        out = ko.materialize_teams(proj, ko.parse_knockout(rows))
+        self.assertEqual((ko.by_no(out)[89].team_a, ko.by_no(out)[89].team_b), ("", ""))
+
+    def test_played_rows_untouched(self):
+        # a played row keeps its recorded participants even if the projection disagrees
+        proj = _proj({73: _locked("Germany", "Argentina")})
+        rows = [row(73, team_a="France", team_b="Brazil", score_a=1, score_b=0,
+                    decided_by="regulation", winner="A", status="played")]
+        out = ko.materialize_teams(proj, ko.parse_knockout(rows))
+        m = ko.by_no(out)[73]
+        self.assertEqual((m.team_a, m.team_b, m.winner_team), ("France", "Brazil", "France"))
+
+
 class CommittedScheduleTests(unittest.TestCase):
     """Smoke-guard the committed data/knockout.csv stays contract-valid all tournament."""
     def test_live_file_loads_and_is_complete(self):

@@ -289,6 +289,46 @@ def by_no(matches: list[KnockoutMatch]) -> dict[int, KnockoutMatch]:
     return {k.match_no: k for k in matches}
 
 
+def _no_winner(_a, _b):
+    """A feed resolver that decides nothing — used to propagate PARTICIPANTS through the
+    tree from actual results only (no model projection), so team-materialization is
+    fact-driven, never speculative."""
+    return None
+
+
+def materialize_teams(proj: dict, matches: list[KnockoutMatch]) -> list[KnockoutMatch]:
+    """Fill team_a/team_b on each SCHEDULED knockout match from FACTS, returning a new
+    list (idempotent; played rows are never touched — their participants are history):
+
+      - R32 (73-88): from locked group positions — a side is written only when its
+        group slot is non-provisional (the group is complete / the third-place set is
+        settled), so a not-yet-sealed position stays blank rather than guessing.
+      - R16+ (89-104): from the winners of already-PLAYED feeder matches, propagated by
+        bracket.feed using only real results. A round fills the moment both its feeders
+        are decided; until then it stays blank.
+
+    `proj` is a bracket.project(...) dict; bracket.py remains the deriving authority and
+    this only materializes its output into the self-contained knockout.csv rows."""
+    import dataclasses
+    r32 = {int(k): v for k, v in proj["r32"].items()}
+    fed = bk.feed(proj, _no_winner, results=results_dict(matches))
+    participants = {int(k): v for k, v in fed.get("participants", {}).items()}
+    out: list[KnockoutMatch] = []
+    for k in matches:
+        if k.is_played:
+            out.append(k)
+            continue
+        if k.match_no in r32:
+            e = r32[k.match_no]
+            ta = e["home"] if (e.get("home") and not e.get("home_provisional")) else ""
+            tb = e["away"] if (e.get("away") and not e.get("away_provisional")) else ""
+        else:
+            pair = participants.get(k.match_no)
+            ta, tb = (pair[0], pair[1]) if pair else ("", "")
+        out.append(dataclasses.replace(k, team_a=ta or "", team_b=tb or ""))
+    return out
+
+
 def write_knockout(path: str | Path, matches: list[KnockoutMatch]) -> None:
     """Write the knockout table (sorted by match_no) with a UTF-8 BOM and the COLUMNS
     order — a deterministic, minimal-quote round-trip so machine updates (resolver,
@@ -315,6 +355,9 @@ def main(argv: list | None = None) -> int:
     import argparse
     ap = argparse.ArgumentParser(description="Load + summarise the WC26 knockout schedule.")
     ap.add_argument("--knockout", type=Path, default=KNOCKOUT_CSV)
+    ap.add_argument("--fixtures", type=Path, default=REPO_ROOT / "data" / "fixtures.csv")
+    ap.add_argument("--resolve", action="store_true",
+                    help="materialize team_a/team_b from current standings + played results, then write")
     args = ap.parse_args(argv)
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
@@ -324,6 +367,16 @@ def main(argv: list | None = None) -> int:
     if not matches:
         print(f"No knockout schedule yet at {args.knockout} (group stage in progress).")
         return 0
+
+    if args.resolve:
+        import standings as st
+        fixtures = st.load_fixtures(args.fixtures)
+        standings = st.compute_standings(fixtures, fair_play=st.load_discipline())
+        proj = bk.project(standings)
+        matches = materialize_teams(proj, matches)
+        write_knockout(args.knockout, matches)
+        known = sum(1 for m in matches if m.participants_known)
+        print(f"Resolved {known}/{len(matches)} knockout matchups into {args.knockout}", file=sys.stderr)
     current = None
     for k in matches:
         if k.round != current:
