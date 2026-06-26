@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WC26 Daily Hub — Group Stage Standings</title>
-<meta name="description" content="2026 World Cup group-stage standings: all twelve groups and the third-place race, updated daily.">
+<title>$page_title</title>
+<meta name="description" content="$page_desc">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,500&family=Spline+Sans+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@ $site_css
 </style>
 </head>
 <body>
-<a class="skip" href="#groups">Skip to the group tables</a>
+<a class="skip" href="#content">Skip to the main content</a>
 <div class="sheet">
 
 <header class="masthead">
@@ -28,15 +28,12 @@ $site_css
     <div class="bar" role="img" aria-label="$played of $total $progress_label played"><i style="width:$progress_pct%"></i></div>
     <p class="lbl">$played of $total $progress_label played</p>
   </div>
-  <nav class="gnav" aria-label="Jump to group">
-$group_nav_html
-    <a class="wide" href="#thirds">3rd place</a>
-    <a class="wide" href="bracket.html">the bracket</a>
-    <a class="wide" href="record.html">the record</a>
+  <nav class="gnav" aria-label="Section navigation">
+$nav_html
   </nav>
 </header>
 
-<main>
+<main id="content">
 $transition_html
 $overnight_html
 <section aria-labelledby="slate-h">
@@ -50,27 +47,7 @@ $slate_html
   </ul>
 </section>
 
-<section id="groups" aria-labelledby="groups-h">
-  <div class="sec-head">
-    <span class="kicker">The Tables</span>
-    <h2 id="groups-h">Twelve Groups</h2>
-  </div>
-  <p class="standfirst">Top two in each group advance. Shaded zones read the table as it stands — nothing is decided until the math says so.</p>
-  <div class="grid">
-$groups_html
-  </div>
-</section>
-
-<section id="thirds" aria-labelledby="thirds-h">
-  <div class="sec-head">
-    <span class="kicker">The Cutline</span>
-    <h2 id="thirds-h">Third-Place Race</h2>
-  </div>
-  <p class="standfirst">The best eight third-placed teams also advance to the Round of 32. The dashed line is the cut.</p>
-  <div class="thirds-wrap" tabindex="0" role="region" aria-label="Third-place ranking table, scrollable">
-$thirds_html
-  </div>
-</section>
+$body_sections_html
 </main>
 
 <footer>

@@ -152,7 +152,7 @@ class PageTests(unittest.TestCase):
         # the third-place table is still a horizontal scroll region; the slate is
         # now a responsive grid (no longer a scroll region)
         self.assertEqual(self.page.count('tabindex="0"'), 1)
-        self.assertIn("<main>", self.page)
+        self.assertIn('<main id="content">', self.page)
 
 
 class CliTests(unittest.TestCase):
