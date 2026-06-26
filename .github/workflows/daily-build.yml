@@ -13,11 +13,11 @@ name: daily-build
 
 on:
   schedule:
-    # 07:00 ET (EDT), June 12-28 ONLY — June 28 is the final settlement run
-    # (grades the June 27 picks/predictions), after which the group-stage
-    # project is complete and the cron stops firing. Knockouts are a future
-    # project; re-derive these crons if DST assumptions ever change.
-    - cron: "0 11 12-28 6 *"
+    # 07:00 ET (EDT). The whole tournament: group stage + knockout, June 12
+    # through the July 19 final. Two ranges because a cron day-of-month field
+    # can't span across the June/July boundary. Re-derive if DST assumptions change.
+    - cron: "0 11 12-30 6 *"   # June 12-30 (group stage + R32 start June 28)
+    - cron: "0 11 1-19 7 *"    # July 1-19 (R16 -> Final July 19)
   workflow_dispatch:
     inputs:
       date:
@@ -109,6 +109,19 @@ jobs:
         continue-on-error: true
         run: python scripts/fetch_results.py | tee -a "$GITHUB_STEP_SUMMARY"
 
+      # Knockout stage (no-op while data/knockout.csv has no resolved ties): materialize
+      # R32/feeder matchups from the freshly-updated standings, then pull any completed
+      # knockout scores. Level/penalty results are reported for manual entry, never guessed.
+      - name: Resolve knockout matchups (standings -> knockout.csv)
+        id: ko_resolve
+        continue-on-error: true
+        run: python scripts/knockout.py --resolve | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Enter knockout results (The Odds API)
+        id: ko_results
+        continue-on-error: true
+        run: python scripts/fetch_ko_results.py | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Settle yesterday's picks (units + CLV)
         id: settle
         continue-on-error: true
@@ -186,6 +199,8 @@ jobs:
           [ "${{ steps.elo.outcome }}"      = "failure" ] && failed="$failed elo"
           [ "${{ steps.sdk.outcome }}"      = "failure" ] && failed="$failed sdk"
           [ "${{ steps.results.outcome }}"  = "failure" ] && failed="$failed results"
+          [ "${{ steps.ko_resolve.outcome }}" = "failure" ] && failed="$failed ko_resolve"
+          [ "${{ steps.ko_results.outcome }}" = "failure" ] && failed="$failed ko_results"
           [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"
           [ "${{ steps.ledger.outcome }}"   = "failure" ] && failed="$failed ledger"
           [ "${{ steps.snapshot.outcome }}" = "failure" ] && failed="$failed snapshot"
