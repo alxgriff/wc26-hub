@@ -326,6 +326,10 @@ def load_predictor(fixtures: Path | None = None):
         overlay = pr.load_match_overlay()
     except Exception as e:                      # broad on purpose: never break the build
         return None, f"prediction model unavailable ({e.__class__.__name__}: {e})"
+    try:
+        import struct_variant as sv_mod
+    except Exception:
+        sv_mod = None
 
     def call(row: dict) -> dict | None:
         try:
@@ -335,7 +339,7 @@ def load_predictor(fixtures: Path | None = None):
             p = pr.predict_match(model, a, b, hfa_team=hfa)
             o = overlay.get(row["match_id"])
             pa, pd_, pb = pr.blend_wdl(p, o) if o else (p.p_a, p.p_draw, p.p_b)
-            return {
+            info = {
                 "p_a": pa, "p_draw": pd_, "p_b": pb,
                 "modal_score": p.modal_score, "total": p.total,
                 "over25": p.over.get(2.5), "btts": p.btts,
@@ -343,6 +347,17 @@ def load_predictor(fixtures: Path | None = None):
                 "source": (o or {}).get("source", ""),
                 "lambda_a": p.lambda_a, "lambda_b": p.lambda_b,
             }
+            if sv_mod is not None:
+                try:
+                    sp_list = sv_mod.tuned_predict(model, a, b, hfa_team=hfa)
+                    if sp_list:
+                        info["struct_variants"] = [{"p_a": sp.p_a, "p_draw": sp.p_draw,
+                                                    "p_b": sp.p_b, "source": sp.source,
+                                                    "group": sp.group}
+                                                   for sp in sp_list]
+                except Exception:
+                    pass
+            return info
         except Exception:
             return None
 
@@ -475,18 +490,78 @@ def render_call(info: dict | None, team_a: str, team_b: str,
         # in-bar labels are dropped under 6% (they would clip); the scale row
         # below always carries all three numbers
         la, ld, lb = (f"{w}%" if w >= 6 else "" for w in (wa, wd, wb))
-        parts.append(
-            '<div class="probs">\n'
-            f'  <p class="sr-only">{_esc(team_a)} win {wa} percent, draw {wd} percent, '
-            f'{_esc(team_b)} win {wb} percent.</p>\n'
-            f'  <div class="probbar" aria-hidden="true">'
-            f'<span class="pa" style="flex:{wa}">{la}</span>'
-            f'<span class="pd" style="flex:{wd}">{ld}</span>'
-            f'<span class="pb" style="flex:{wb}">{lb}</span></div>\n'
-            f'  <div class="scale" aria-hidden="true"><span>{_esc(team_a)} {wa}%</span>'
-            f'<span>draw {wd}%</span><span>{_esc(team_b)} {wb}%</span></div>\n'
-            f'  <p class="factline">{" · ".join(facts)}<br>{srcline}{hfa}{graded}</p>\n'
-            '</div>')
+        overlay_html = ""
+        # Structural-variant overlays — one bar per entry in struct_variants[].
+        # Scheduled matches only, same honesty rule. Inert unless
+        # data/calibration/struct_variant.json is present (list format supported).
+        if not logged:
+            post_md1_variants = [sv for sv in info.get("struct_variants", [])
+                                 if sv.get("group") == "post-md1"]
+            if post_md1_variants:
+                overlay_html += (
+                    '\n  <div class="overlay-sep">'
+                    '<span class="overlay-sep-line"></span>'
+                    '<span class="overlay-sep-label">Post-MD1 Fitted</span>'
+                    '<span class="overlay-sep-line"></span>'
+                    '</div>'
+                )
+            for sv in post_md1_variants:
+                sa_, sd_, sb_ = (max(round(sv[k] * 100), 1)
+                                 for k in ("p_a", "p_draw", "p_b"))
+                lsa, lsd, lsb = (f"{w}%" if w >= 6 else "" for w in (sa_, sd_, sb_))
+                svlabel = _esc(sv.get("source", "Structural (tuned)"))
+                overlay_html += (
+                    '\n  <div class="overlay-section">\n'
+                    f'    <p class="overlay-bar-label">{svlabel}</p>\n'
+                    f'    <p class="sr-only">{svlabel} says {_esc(team_a)} '
+                    f'win {sa_} percent, draw {sd_} percent, {_esc(team_b)} win '
+                    f'{sb_} percent.</p>\n'
+                    f'    <div class="probbar overlay-probbar" aria-hidden="true">'
+                    f'<span class="pa" style="flex:{sa_}">{lsa}</span>'
+                    f'<span class="pd" style="flex:{sd_}">{lsd}</span>'
+                    f'<span class="pb" style="flex:{sb_}">{lsb}</span></div>\n'
+                    f'    <div class="scale" aria-hidden="true">'
+                    f'<span>{_esc(team_a)} {sa_}%</span>'
+                    f'<span>draw {sd_}%</span>'
+                    f'<span>{_esc(team_b)} {sb_}%</span></div>\n'
+                    '  </div>'
+                )
+        # When post-MD1 fitted variants are available, suppress the raw
+        # incumbent bar — the variants are the intended output on this branch.
+        has_post_md1 = bool(overlay_html) and not logged
+        if has_post_md1:
+            parts.append(
+                '<div class="probs">\n'
+                f'  <p class="factline">{" · ".join(facts)}<br>{srcline}{hfa}{graded}</p>'
+                f'{overlay_html}\n'
+                '</div>')
+        else:
+            parts.append(
+                '<div class="probs">\n'
+                f'  <p class="sr-only">{_esc(team_a)} win {wa} percent, draw {wd} percent, '
+                f'{_esc(team_b)} win {wb} percent.</p>\n'
+                f'  <div class="probbar" aria-hidden="true">'
+                f'<span class="pa" style="flex:{wa}">{la}</span>'
+                f'<span class="pd" style="flex:{wd}">{ld}</span>'
+                f'<span class="pb" style="flex:{wb}">{lb}</span></div>\n'
+                f'  <div class="scale" aria-hidden="true"><span>{_esc(team_a)} {wa}%</span>'
+                f'<span>draw {wd}%</span><span>{_esc(team_b)} {wb}%</span></div>\n'
+                f'  <p class="factline">{" · ".join(facts)}<br>{srcline}{hfa}{graded}</p>'
+                f'{overlay_html}\n'
+                '</div>')
+        # Draw-live flag: shown on scheduled matches when the displayed model(s)
+        # average ≥20% draw probability — a signal that a draw is a live outcome.
+        if not logged and result is None and not kicked_off:
+            if has_post_md1 and post_md1_variants:
+                draw_p = sum(sv["p_draw"] for sv in post_md1_variants) / len(post_md1_variants)
+            else:
+                draw_p = info.get("p_draw", 0.0)
+            if draw_p >= 0.20:
+                draw_pct = round(draw_p * 100)
+                parts.append(
+                    f'<p class="draw-flag"><span class="draw-flag-tag">≈ Draw live</span>'
+                    f' Models average {draw_pct}% chance of a draw — worth checking the price.</p>'
+                )
     if prebaked_lean:
         parts.append('<div class="prose"><blockquote><p><strong>Pre-baked lean '
                      f'(June 11):</strong> {sc._inline(prebaked_lean)}</p></blockquote></div>')
@@ -1587,21 +1662,57 @@ def render_record_page(matches: "list[st.Match]", rows: list[dict],
                        ledger: dict | None, css: str, generated_at: str,
                        template_dir: Path = TEMPLATE_DIR,
                        picks_log: Path | None = None,
-                       shadow_log: Path | None = None) -> str:
+                       shadow_log: Path | None = None,
+                       model_lab_link: str = "",
+                       model_lab_header: str = "") -> str:
     calls_html, cumulative = render_record_calls(matches, rows, ledger)
     bets_html, units_line = render_record_bets(rows, picks_log=picks_log)
     shadow_html, shadow_line = render_record_shadow(rows, shadow_log=shadow_log)
+
+    # Scorecard stats for the header
+    calls_wl = calls_graded = ""
+    if ledger:
+        grades = ledger["grade"](matches, ledger["rows"])
+        if grades:
+            n = len(grades)
+            hits = sum(1 for g in grades.values() if g["correct"])
+            calls_wl = f"{hits}W &middot; {n - hits}L"
+            calls_graded = f"{n} graded"
+    try:
+        import odds as od
+        _picks = od.load_picks(picks_log) if picks_log else od.load_picks()
+        settled = [p for p in _picks if p["status"] not in ("", "open")]
+        if settled:
+            _u = sum(float(p["units"]) for p in settled)
+            _w = sum(1 for p in settled if p["status"] in ("won", "half-won"))
+            _l = sum(1 for p in settled if p["status"] in ("lost", "half-lost"))
+            _push = len(settled) - _w - _l
+            picks_record = f"{_w}W &middot; {_l}L" + (f" &middot; {_push}P" if _push else "")
+            units_display = f"{_u:+.2f}u"
+            units_cls = "units-up" if _u >= 0 else "units-down"
+        else:
+            picks_record = units_display = units_cls = ""
+    except Exception:
+        picks_record = units_display = units_cls = ""
+
     tpl = Template((template_dir / "record.html").read_text(encoding="utf-8"))
     return tpl.safe_substitute(
         site_css=css,
         calls_html=calls_html,
         cumulative_line=_esc(cumulative),
+        calls_wl=calls_wl,
+        calls_graded=calls_graded,
+        picks_record=picks_record,
+        units_display=units_display,
+        units_cls=units_cls,
         bets_html=bets_html,
         units_line=_esc(units_line),
         shadow_html=shadow_html,
         shadow_line=_esc(shadow_line),
         generated_at=_esc(generated_at),
         repo_url=REPO_URL,
+        model_lab_link=model_lab_link,
+        model_lab_header=model_lab_header,
     )
 
 
@@ -1914,7 +2025,9 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
                blurb_html: str = "",
                slate_picks: dict[str, str] | None = None,
                overnight_html: str = "",
-               fates: dict[str, str] | None = None) -> tuple[str, dict]:
+               fates: dict[str, str] | None = None,
+               model_lab_link: str = "",
+               model_lab_nav_item: str = "") -> tuple[str, dict]:
     """Render the index page. Returns (html, data_dict)."""
     s = st.compute_standings(matches, fair_play=fair_play)
     forms = form_by_team(matches)
@@ -1957,6 +2070,8 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
         archive_html=_archive(editions_dir),
         generated_at=_esc(generated_at),
         repo_url=REPO_URL,
+        model_lab_link=model_lab_link,
+        model_lab_nav_item=model_lab_nav_item,
         data_json=data_json,
         ledger_html=(f'<p class="ledger-line">{_esc(ledger_line)}</p>'
                      if ledger_line else ""),
@@ -2091,6 +2206,17 @@ def build_site(out_dir: Path, target: date, generated_at: str,
             except (FileNotFoundError, ValueError) as e:
                 warnings.append(f"Projected-finish bracket skipped: {e}")
 
+    # Optional "Model Lab" footer link — appears only when the (locally generated,
+    # experimental) model-lab.html exists in the output dir. Conditional so the
+    # link is never dead, and durable across rebuilds (unlike a hand-edit of the
+    # generated HTML). See scripts/build_model_lab.py.
+    _lab_exists = (out_dir / "model-lab.html").exists()
+    model_lab_link = '<a href="model-lab.html">🧪 Model Lab</a> · ' if _lab_exists else ""
+    model_lab_nav_item = ('<a class="wide" href="model-lab.html">🧪 Model Lab</a>'
+                          if _lab_exists else "")
+    model_lab_header = ('<a class="lab-nav-btn" href="model-lab.html">🧪 Model Lab</a>'
+                        if _lab_exists else "")
+
     index, data = build_page(matches, rows, target, generated_at,
                              template_path=template_dir / "page.html",
                              editions_dir=editions_dir, css=css,
@@ -2098,7 +2224,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                              blurb_html=blurb_html, slate_picks=slate_picks,
                              overnight_html=render_overnight(rows, target,
                                                              matches, ledger),
-                             fates=fates)
+                             fates=fates, model_lab_link=model_lab_link,
+                             model_lab_nav_item=model_lab_nav_item)
     if bracket_proj is not None:
         data["bracket"] = bk.to_dict(bracket_proj)
     if bracket_full is not None:
@@ -2114,7 +2241,9 @@ def build_site(out_dir: Path, target: date, generated_at: str,
 
     (out_dir / "record.html").write_text(
         render_record_page(matches, rows, ledger, css, generated_at, template_dir,
-                           picks_log=picks_log, shadow_log=shadow_log),
+                           picks_log=picks_log, shadow_log=shadow_log,
+                           model_lab_link=model_lab_link,
+                           model_lab_header=model_lab_header),
         encoding="utf-8")
     if bracket_proj is not None:
         (out_dir / "bracket.html").write_text(

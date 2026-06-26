@@ -262,6 +262,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
 .metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
 .scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
+.record-scoreboard{display:flex;align-items:center;gap:0;margin-top:16px;border:2px solid var(--ink)}
+.scoreboard-stat{display:flex;flex-direction:column;gap:2px;padding:10px 22px;min-width:110px}
+.scoreboard-label{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.scoreboard-value{font-family:var(--mono);font-size:1.45rem;font-weight:700;line-height:1.1}
+.scoreboard-value.units-up{color:#1a7a3f}
+.scoreboard-value.units-down{color:var(--verm)}
+.scoreboard-sub{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
+.scoreboard-divider{width:2px;background:var(--ink);align-self:stretch}
 
 .strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
 .strap b{color:var(--ink);font-weight:700}
@@ -302,7 +310,17 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
+.draw-flag{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin:10px 0 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.draw-flag-tag{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:1.5px solid var(--ink-soft);color:var(--ink);padding:2px 7px;white-space:nowrap}
 
 .mini-table{max-width:560px}
 .team-pair{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}
@@ -566,6 +584,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span>Every call logged before kickoff, graded after</span>
     <span>Every pick on paper at flat 1u</span>
   </div>
+  <a class="lab-nav-btn" href="model-lab.html">🧪 Model Lab</a>
 </header>
 
 <main>
@@ -594,7 +613,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Brier</span>
     <h2 id="calls-h">The Calls</h2>
   </div>
-  <p class="standfirst">Ledger to date: 53 graded predictions, 34 correct calls, cumulative Brier 0.530 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max), RPS 0.165 (0 = perfect, 1 = worst — rewards near-misses on the W-D-L order)</p>
+  <p class="standfirst">Ledger to date: 53 graded predictions, 34 correct calls, cumulative Brier 0.529 (0 = clairvoyant, 0.667 = coin-flip baseline, 2 = max), RPS 0.165 (0 = perfect, 1 = worst — rewards near-misses on the W-D-L order)</p>
 <div class="record-wrap">
   <table>
     <caption class="sr-only">Every logged call graded: probabilities, result, hit or miss, Brier score</caption>
@@ -842,37 +861,37 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr class="subtotal"><td colspan="4">June 19 — 4 graded</td><td>3/4</td><td>0.411</td></tr>
       <tr>
         <td class="lbl"><a href="matches/E3.html">Germany v Côte d&#x27;Ivoire</a></td>
-        <td>68%/20%/13% (2-0)</td>
+        <td>70%/19%/11% (2-0)</td>
         <td>2–1</td>
         <td>home</td>
         <td><span class="hit hit-y" aria-hidden="true">✓</span><span class="sr-only">correct call</span></td>
-        <td class="pts">0.159</td>
+        <td class="pts">0.138</td>
       </tr>
       <tr>
         <td class="lbl"><a href="matches/E4.html">Ecuador v Curaçao</a></td>
-        <td>89%/10%/2% (2-0)</td>
+        <td>89%/9%/2% (2-0)</td>
         <td>0–0</td>
         <td>draw</td>
         <td><span class="hit hit-n" aria-hidden="true">✗</span><span class="sr-only">missed</span></td>
-        <td class="pts">1.604</td>
+        <td class="pts">1.620</td>
       </tr>
       <tr>
         <td class="lbl"><a href="matches/F3.html">Netherlands v Sweden</a></td>
-        <td>69%/17%/14% (2-1)</td>
+        <td>72%/16%/12% (2-0)</td>
         <td>5–1</td>
         <td>home</td>
         <td><span class="hit hit-y" aria-hidden="true">✓</span><span class="sr-only">correct call</span></td>
-        <td class="pts">0.145</td>
+        <td class="pts">0.120</td>
       </tr>
       <tr>
         <td class="lbl"><a href="matches/F4.html">Tunisia v Japan</a></td>
-        <td>10%/21%/70% (0-1)</td>
+        <td>11%/22%/68% (0-1)</td>
         <td>0–4</td>
         <td>away</td>
         <td><span class="hit hit-y" aria-hidden="true">✓</span><span class="sr-only">correct call</span></td>
-        <td class="pts">0.146</td>
+        <td class="pts">0.163</td>
       </tr>
-      <tr class="subtotal"><td colspan="4">June 20 — 4 graded</td><td>3/4</td><td>0.513</td></tr>
+      <tr class="subtotal"><td colspan="4">June 20 — 4 graded</td><td>3/4</td><td>0.510</td></tr>
       <tr>
         <td class="lbl"><a href="matches/G3.html">Belgium v Iran</a></td>
         <td>63%/21%/16% (1-0)</td>
@@ -1047,6 +1066,13 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
   <div class="sec-head">
     <span class="kicker">Units &amp; CLV</span>
     <h2 id="bets-h">The Bets</h2>
+  </div>
+  <div class="record-scoreboard">
+    <div class="scoreboard-stat">
+      <span class="scoreboard-label">Picks</span>
+      <span class="scoreboard-value units-up">+2.93u</span>
+      <span class="scoreboard-sub">39W &middot; 35L &middot; 2P</span>
+    </div>
   </div>
   <p class="standfirst">Picks: 76 settled (39W-35L-2P), +2.93u at flat 1u stakes; avg CLV +0.3pp over 65 closing line(s) 9 open picks, 9u at risk.</p>
 <div class="record-wrap">
@@ -2627,13 +2653,13 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 
 <footer>
   <p class="colophon">
-    Generated 2026-06-25 22:59 · calls graded from data/predictions_log.csv (logged
+    Generated 2026-06-25 20:19 · calls graded from data/predictions_log.csv (logged
     pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
     at fresh prices, revisions explicit, settled rows immutable) · Brier: 0 best ·
     0.667 coin-flip · 2 worst · CLV = closing implied minus our implied at record ·
     shadow book from data/shadow_picks_log.csv (severe model–market disagreements,
     too risky to bet, paper-only, excluded from the units record) ·
-    <a href="index.html">all standings</a> · <a href="https://github.com/alxgriff/wc26-hub">source &amp; data</a>
+    <a href="index.html">all standings</a> · <a href="model-lab.html">🧪 Model Lab</a> · <a href="https://github.com/alxgriff/wc26-hub">source &amp; data</a>
   </p>
 </footer>
 

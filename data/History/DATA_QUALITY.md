@@ -54,3 +54,47 @@ scaling.** Built the host-aware structure instead: `Config.hfa_by_host` (optiona
 FITTING per-host values against actual results as the tournament runs (or setting
 crowd-context values deliberately) over guessing — `data/calibration.json` can carry
 `hfa` / `hfa_by_host` to activate. Not written, so the model is unchanged.
+
+## Result of the hybrid fit (2026-06-15)
+`scripts/fit_hybrid.py` trained a Groll-style XGBoost overlay (200 trees,
+depth 4, η=0.05, multi:softprob, τ=1.5y time-decay sample weights) on the same
+10,756 curated competitive matches (2010-01-01..2026-06-14), train/holdout split
+at 2023-01-01. Features: structural outputs (p_a/p_draw/p_b/lam_a/lam_b/total/
+sup/texture) + rolling Elo + context (tournament_weight, is_neutral,
+home_advantage_side). Booster artifact (XGBoost native binary) would have lived
+at `data/calibration/hybrid.ubj` + `hybrid.meta.json`.
+
+Holdout (n=2686 competitive; n=95 deployment-slice = WC/Euro/Copa):
+
+| slice               |   n  | RPS struct → hybrid | logloss | Brier   |
+|---------------------|------|---------------------|---------|---------|
+| all competitive     | 2686 | 0.1716 → 0.1776 (+3.5%) | 0.871 → 0.897 | 0.511 → 0.525 |
+| major tournaments   |   95 | 0.1961 → 0.2055 (+4.8%) | 1.027 → 1.061 | 0.615 → 0.637 |
+
+The overlay **made things worse**, not better, on every slice and every metric.
+Per-year on the deployment slice: 2024 (n=83) +0.0086 RPS, 2026 (n=12) +0.0149
+RPS. Per-year noise σ ≈ 0.00444; the observed margin (+0.0094) is ~2σ in the
+WRONG direction.
+
+Likely causes: (a) the structural triple `p_a/p_draw/p_b` is already an
+near-sufficient statistic of what the consensus-Elo+Futi model "thinks", leaving
+no signal for tree boosters to recover beyond what they overfit to; (b) τ=1.5y
+decays pre-2018 matches to negligible weight, so effective training data is
+~2,500 matches with 14 mostly-redundant features (a known XGBoost overfit
+regime); (c) tree boosters typically produce peakier probabilities than a
+well-calibrated structural baseline, and the wc26 structural model is already
+well-calibrated (the predict.py audit notes ~26% draw at even strength,
+historically consistent).
+
+**Decision: hybrid is NOT activated** (no `data/calibration/hybrid.ubj` is
+written, so predict.py output stays bit-for-bit identical to the structural-only
+behavior). The `--hybrid` CLI flag is implemented and inert (silent stderr note),
+ready to activate if a v2 fit clears the bar. The same "data rejected it"
+discipline as ρ — the validation gate (correctly) refused to ship an overlay
+that doesn't help.
+
+Plausible v2 directions if revisited: longer τ (5–10y, larger effective sample);
+drop the redundant `p_a/p_draw/p_b/lam_a/lam_b` features and keep only `sup`
++ Elo + context (force the booster to learn from raw rather than digested
+inputs); add information the structural model lacks (Transfermarkt squad value,
+form lags, H2H); calibrate the booster output (isotonic / Platt) post-fit.

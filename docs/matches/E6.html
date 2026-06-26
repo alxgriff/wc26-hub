@@ -262,6 +262,14 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
 .metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
 .scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
+.record-scoreboard{display:flex;align-items:center;gap:0;margin-top:16px;border:2px solid var(--ink)}
+.scoreboard-stat{display:flex;flex-direction:column;gap:2px;padding:10px 22px;min-width:110px}
+.scoreboard-label{font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.scoreboard-value{font-family:var(--mono);font-size:1.45rem;font-weight:700;line-height:1.1}
+.scoreboard-value.units-up{color:#1a7a3f}
+.scoreboard-value.units-down{color:var(--verm)}
+.scoreboard-sub{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
+.scoreboard-divider{width:2px;background:var(--ink);align-self:stretch}
 
 .strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
 .strap b{color:var(--ink);font-weight:700}
@@ -302,7 +310,17 @@ footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1p
 .probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
 .probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
 .probs .factline b{color:var(--ink)}
+.lab-nav-btn{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:.8rem;font-weight:700;text-decoration:none;padding:6px 16px;border:1px solid var(--ink);letter-spacing:.08em}
+.lab-nav-btn:hover{background:var(--ink);color:var(--paper)}
+.probs .overlay-section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--ink-soft)}
+.probs .overlay-bar-label{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4px}
+.probs .overlay-probbar{height:22px;font-size:.66rem;margin:4px 0 4px;border-color:var(--ink-soft)}
+.probs .overlay-sep{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.probs .overlay-sep-line{flex:1;border-top:2px solid var(--ink)}
+.probs .overlay-sep-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);white-space:nowrap;padding:0 2px}
 .placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
+.draw-flag{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin:10px 0 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.draw-flag-tag{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:1.5px solid var(--ink-soft);color:var(--ink);padding:2px 7px;white-space:nowrap}
 
 .mini-table{max-width:560px}
 .team-pair{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}
@@ -649,12 +667,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
 <div class="conditions">
-  <span class="cond-stamp">Forecast · as of 2026-06-25 07:54 ET</span>
-  <p class="cond-stats">~85°F · dry (36% RH) · WBGT 79.3°F</p>
-  <div class="cond-track" aria-label="Match heat index: Severe (59/100)"><div class="cond-fill" style="width:59%"></div></div>
+  <span class="cond-stamp">Forecast · as of 2026-06-25 21:19 ET</span>
+  <p class="cond-stats">~83°F · moderate humidity (42% RH) · WBGT 79.5°F</p>
+  <div class="cond-track" aria-label="Match heat index: Severe (60/100)"><div class="cond-fill" style="width:60%"></div></div>
   <p class="cond-sev cond-sev-severe">Severe</p>
-  <p class="cond-blurb">Severe heat, and Ecuador carry the bigger burden: +21°F above their home baseline vs +10°F for Germany.</p>
-  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Ecuador</span><div class="cond-dis-track" aria-label="Heat disadvantage 100/100"><div class="cond-dis-fill cond-dis-hot" style="width:100%"></div></div><span class="cond-delta">+20.5°F vs home</span></div><div class="cond-team"><span class="cond-tname">Germany</span><div class="cond-dis-track" aria-label="Heat disadvantage 58/100"><div class="cond-dis-fill cond-dis-hot" style="width:58%"></div></div><span class="cond-delta">+10.4°F vs home</span></div></div>
+  <p class="cond-blurb">Severe heat, and Ecuador carry the bigger burden: +21°F above their home baseline vs +11°F for Germany.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Ecuador</span><div class="cond-dis-track" aria-label="Heat disadvantage 100/100"><div class="cond-dis-fill cond-dis-hot" style="width:100%"></div></div><span class="cond-delta">+20.7°F vs home</span></div><div class="cond-team"><span class="cond-tname">Germany</span><div class="cond-dis-track" aria-label="Heat disadvantage 59/100"><div class="cond-dis-fill cond-dis-hot" style="width:59%"></div></div><span class="cond-delta">+10.6°F vs home</span></div></div>
 </div>
 </section>
 
@@ -705,8 +723,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.36 decimal">+136</td><td>41%</td><td>57%</td><td class="edge-pos">+16.1%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td title="2.05 decimal">+105</td><td>47%</td><td>28%</td><td class="edge-neg">-18.7%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td title="1.80 decimal">-125</td><td>53%</td><td>72%</td><td class="edge-pos">+18.7%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Ecuador +1</td><td title="1.85 decimal">-118</td><td>52%</td><td>74%</td><td class="edge-pos">+21.9%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Germany -1</td><td title="1.98 decimal">-102</td><td>48%</td><td>26%</td><td class="edge-neg">-21.9%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Ecuador +1</td><td title="1.85 decimal">-118</td><td>52%</td><td>75%</td><td class="edge-pos">+23.2%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Germany -1</td><td title="1.98 decimal">-102</td><td>48%</td><td>25%</td><td class="edge-neg">-23.2%</td></tr>
     </tbody>
   </table>
 </div>
@@ -714,7 +732,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 <p class="odds-note">Logged pick: Draw @ +390 (draftkings), edge 7.1pp · settled <b>lost</b> for -1.00u · CLV +1.0pp.</p>
 <p class="verify-flag">totals under 2.5: model-priced edge +16.1% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="verify-flag">totals under 3: model-priced edge +18.7% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads home 1: model-priced edge +21.9% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">spreads home 1: model-priced edge +23.2% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 25, 12:19 PM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 3 can push (P 21%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
@@ -738,7 +756,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.0541,lb=1.3477,N=8,SHOW=6,i,j;
+  var la=1.0798,lb=1.3219,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
