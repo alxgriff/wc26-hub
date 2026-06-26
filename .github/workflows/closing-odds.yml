@@ -26,12 +26,19 @@ name: closing-odds
 
 on:
   schedule:
-    # June only — no closing lines / intra-day settle needed after the last group
-    # game (Jun 27); the late-UTC crons run 13-28 to cover prev-ET-day evenings.
-    - cron: "30 15 12-27 6 *"
-    - cron: "30 22 12-27 6 *"
-    - cron: "30 0 13-28 6 *"
-    - cron: "30 3 13-28 6 *"
+    # Whole tournament (group + knockout), June 12 through the July 19 final. The
+    # same-ET-day captures (11:30 AM / 6:30 PM ET) run on the calendar date; the late
+    # captures (8:30 / 11:30 PM ET) fall on the NEXT UTC day, so their ranges start and
+    # end one day later (through July 20 for the July 19 final's evening). Two ranges
+    # each because a cron day-of-month field can't cross the June/July boundary.
+    - cron: "30 15 12-30 6 *"   # 11:30 AM ET, June
+    - cron: "30 15 1-19 7 *"    # 11:30 AM ET, July
+    - cron: "30 22 12-30 6 *"   #  6:30 PM ET, June
+    - cron: "30 22 1-19 7 *"    #  6:30 PM ET, July
+    - cron: "30 0 13-30 6 *"    #  8:30 PM ET (prev ET day), June
+    - cron: "30 0 1-20 7 *"     #  8:30 PM ET (prev ET day), July
+    - cron: "30 3 13-30 6 *"    # 11:30 PM ET (prev ET day), June
+    - cron: "30 3 1-20 7 *"     # 11:30 PM ET (prev ET day), July
   workflow_dispatch:
 
 permissions:
@@ -63,7 +70,10 @@ jobs:
         run: |
           DATE="$(TZ=America/New_York date +%F)"
           echo "date=$DATE" >> "$GITHUB_OUTPUT"
-          echo "Editorial date: $DATE" >> "$GITHUB_STEP_SUMMARY"
+          # knockout gate (R32 starts 2026-06-28): KO steps dormant through the group stage
+          KO=$([[ "$DATE" > "2026-06-27" ]] && echo true || echo false)
+          echo "ko=$KO" >> "$GITHUB_OUTPUT"
+          echo "Editorial date: $DATE (knockout=$KO)" >> "$GITHUB_STEP_SUMMARY"
 
       # ONE API call, tagged BOTH snapshot (feeds intra-day recording below) and
       # closing (feeds CLV). Single-book DraftKings posts the moneyline early but
@@ -77,6 +87,17 @@ jobs:
         id: results
         continue-on-error: true
         run: python scripts/fetch_results.py | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Knockout stage (no-op until ties resolve): refresh matchups from the standings
+      # just updated, then enter any completed knockout scores so the bracket + record
+      # update same-day. Level/penalty results are reported for manual entry.
+      - name: Resolve + enter knockout results
+        id: ko
+        if: ${{ steps.ed.outputs.ko == 'true' }}
+        continue-on-error: true
+        run: |
+          python scripts/knockout.py --resolve | tee -a "$GITHUB_STEP_SUMMARY"
+          python scripts/fetch_ko_results.py | tee -a "$GITHUB_STEP_SUMMARY"
 
       # Roll Elo forward through the results just entered, so this run's re-recorded edges
       # and rebuilt previews use current Elo. Fail-soft (model falls back to VERIFIED).
@@ -97,6 +118,13 @@ jobs:
         id: evaluate
         continue-on-error: true
         run: python scripts/odds.py evaluate "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Knockout advance edges intra-day (no-op unless a 2-way advance line was entered).
+      - name: Record knockout advance edges
+        id: ko_evaluate
+        if: ${{ steps.ed.outputs.ko == 'true' }}
+        continue-on-error: true
+        run: python scripts/odds.py evaluate-ko "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
 
       # Experimental edge-hypothesis tracker (deserved-result divergence). Fail-soft and
       # deliberately NOT in the health gate below — a tracker bug must never block the
@@ -149,8 +177,10 @@ jobs:
           [ "${{ steps.elo.outcome }}"      = "failure" ] && failed="$failed elo"
           [ "${{ steps.snapshot.outcome }}" = "failure" ] && failed="$failed snapshot"
           [ "${{ steps.results.outcome }}"  = "failure" ] && failed="$failed results"
+          [ "${{ steps.ko.outcome }}"       = "failure" ] && failed="$failed ko"
           [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"
           [ "${{ steps.evaluate.outcome }}" = "failure" ] && failed="$failed evaluate"
+          [ "${{ steps.ko_evaluate.outcome }}" = "failure" ] && failed="$failed ko_evaluate"
           [ "${{ steps.edition.outcome }}"  = "failure" ] && failed="$failed edition"
           if [ -n "$failed" ]; then
             echo "::error::Degraded data steps:$failed"

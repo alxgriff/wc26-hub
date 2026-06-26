@@ -12,7 +12,9 @@ This file (CLAUDE.md) holds the **data contracts and rules** — they override e
 
 Daily 2026 World Cup group-stage guide + game predictor. One edition per ET
 date (June 11–27), built from pre-baked match cards + computed standings +
-model predictions. Group stage only; knockout stage is a later project.
+model predictions. Group stage **and** knockout: the knockout stage (Round of 32 →
+Final, matches 73–104) ships as `data/knockout.csv` + `scripts/knockout.py` and takes
+over the site/edition once the groups finish (see the knockout data contract below).
 
 ## Data contracts (do not violate)
 
@@ -40,6 +42,24 @@ scripts/predict.py converts rating gaps to W/D/L probabilities via a
 Poisson layer (rating gap → expected goals per side → score matrix → W/D/L).
 Aggregation across sources: simple average of probabilities unless the user
 specifies weights. Probabilities must sum to 1.0 ± 0.001 per match.
+
+### data/knockout.csv — knockout stage (matches 73–104); fixtures.csv stays the GROUP SSOT
+Columns: match_no, round, date_et, kickoff_et_24h, kickoff_et, stadium, city, country,
+tv_us, team_a, team_b, score_a, score_b, decided_by, winner, status, notes
+- match_no: the FIFA/bracket number 73–104 (R32 73–88, R16 89–96, QF 97–100, SF
+  101–102, third-place 103, Final 104) — the SAME numbering `scripts/bracket.py` uses.
+  Knockout fixtures CANNOT live in fixtures.csv (its match_id is locked to A1–L6).
+- The SCHEDULE columns are static (entered once from the FIFA calendar; all stadiums
+  join `venues.csv` canon). team_a/team_b are a MATERIALIZED VIEW of the bracket: blank
+  until a tie resolves, then filled by `knockout.py --resolve` (R32 from locked group
+  positions, later rounds from played feeders). `bracket.py` owns the structure; a guard
+  test forbids drift. Never hand-edit match_no/schedule without explicit ask.
+- A knockout match cannot end level: unequal score ⇒ `decided_by` regulation|extra_time
+  on the higher side; equal score ⇒ `decided_by` penalties with `winner` (A|B) the
+  shootout winner — a shootout winner is NEVER inferred from the score. `winner` is
+  authoritative for advancement (`bracket.feed` and the ledger read it, not the score).
+- Results: `fetch_ko_results.py` auto-enters DECISIVE results; level/penalty results are
+  reported for manual `knockout.py --enter`. Same exact-canon join + never-invent rules.
 
 ## Tournament rules (encoded in standings/scenario scripts)
 - 12 groups of 4, single round-robin. Top 2 per group + 8 best third-placed
@@ -120,6 +140,20 @@ specifies weights. Probabilities must sum to 1.0 ± 0.001 per match.
   stakes unless told otherwise) and CLV alongside Brier in recaps.
 - Never invent odds. If no snapshot was provided/fetched, the section stays
   in placeholder state.
+- **Knockout betting (matches 73–104):** the market is **advance** ("to qualify"), 2-way
+  (no draw). The model price is `predict.resolve_knockout`'s p_advance (incl. extra time +
+  a coin-flip shootout). The Odds API carries **no** to-qualify market, so the market price
+  is **auto-derived from the fetched 90-minute 3-way h2h** (the same one US-region pull):
+  de-vig the 90' h/d/a, then route the draw mass through the SAME ET+shootout layer —
+  `market_adv_a = q_h90 + q_d90·(et_a + et_d·0.5)`. This is a **model-vs-market READ** (a
+  vig-free fair probability, NOT a price you can take), shown on the card but **NEVER
+  recorded**: the ET layer is the model's on both sides, so the edge is just the 90'
+  disagreement on the advance axis, and with no real line there's no CLV. (A genuinely
+  quoted 2-way advance line, via manual `odds.py enter M.. advance H,A`, WOULD be recorded —
+  model-priced, 8pp ceiling, settled from `knockout.csv`'s `winner`, penalty-aware.)
+  Accountability is separate: pre-kickoff advance calls are logged to
+  `data/ko_predictions_log.csv` and graded with a **2-class Brier** (0 best · 0.5 coin-flip
+  · 2 worst) against the advancing side.
 
 ## Phase 7 — Sweat Factor data contracts
 

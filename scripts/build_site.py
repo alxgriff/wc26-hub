@@ -44,6 +44,8 @@ import build_edition as be        # noqa: E402
 import site_content as sc         # noqa: E402
 import scenarios as scen          # noqa: E402
 import bracket as bk              # noqa: E402
+import knockout as ko             # noqa: E402
+import knockout_cards as kc       # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = REPO_ROOT / "templates"
@@ -349,22 +351,28 @@ def load_predictor(fixtures: Path | None = None):
     return call, None
 
 
-def load_knockout_resolver():
+def load_knockout_resolver(knockout: list | None = None):
     """Defensive adapter for projecting knockout ties (companion to load_predictor).
     Returns resolver(team_a, team_b) -> {"winner","loser","p"} | None, or None if
     predict.py is unavailable — in which case the bracket stays structural (blank
-    downstream). Neutral venue: host HFA is NOT applied, because knockout venues
-    aren't modelled in-repo. ``p`` is the winner's probability of advancing (90' +
-    extra time + shootout, per predict.resolve_knockout)."""
+    downstream). Host HFA IS applied when a resolved tie is at the host's own venue: a
+    team-set -> venue-country map (built from the resolved knockout matches) lets the
+    resolver give a US/Mexican/Canadian host its home bonus; purely-projected ties (teams
+    not yet in knockout.csv) stay neutral. ``p`` is the winner's 90'+ET+shootout advance
+    probability (predict.resolve_knockout)."""
     try:
         import predict as pr
         model = pr.load_ratings()
     except Exception:
         return None
 
+    country_by_pair = {frozenset((km.team_a, km.team_b)): km.country
+                       for km in (knockout or []) if km.participants_known}
+
     def resolve(a: str, b: str):
         try:
-            kp = pr.resolve_knockout(model, a, b)        # neutral (no hfa_team)
+            hfa = pr.host_hfa(country_by_pair.get(frozenset((a, b)), ""), a, b)
+            kp = pr.resolve_knockout(model, a, b, hfa_team=hfa)
             if kp.p_advance_a >= kp.p_advance_b:
                 return {"winner": a, "loser": b, "p": kp.p_advance_a}
             return {"winner": b, "loser": a, "p": kp.p_advance_b}
@@ -859,12 +867,14 @@ def render_outcome_grid(info: dict | None, team_a: str, team_b: str) -> str:
 
 
 _MARKET_LABELS = {"h2h": "1X2", "totals": "Total goals", "spreads": "Asian handicap",
-                  "btts": "Both teams to score"}
+                  "btts": "Both teams to score", "advance": "To qualify"}
 
 
 def _sel_label(market: str, sel: str, line: str, team_a: str, team_b: str) -> str:
     if market == "h2h":
         return {"home": team_a, "draw": "Draw", "away": team_b}.get(sel, sel)
+    if market == "advance":          # knockout 2-way: which side advances
+        return {"home": team_a, "away": team_b}.get(sel, sel)
     if market == "totals":
         return f"{sel.capitalize()} {line}"
     if market == "spreads":
@@ -940,16 +950,19 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
                      f'<b>{proj["total"]:.2f}</b> total goals · {ladder}</p>')
 
     rows_html = []
-    for market in ("h2h", "totals", "spreads", "btts"):
+    for market in ("h2h", "totals", "spreads", "btts", "advance"):
         for sel, line, odds_v, implied, our_p, edge in ev.get(market, []):
             is_pick = any(pk["market"] == market and pk["selection"] == sel
                           and str(pk["line"]) == str(line) for pk in picks)
             cls = ' class="pick-row"' if is_pick else ""
             edge_cls = "edge-pos" if edge >= threshold else ("edge-neg" if edge < 0 else "")
+            odds_cell = (f'<td title="{odds_v:.2f} decimal">{_american_odds(odds_v)}</td>'
+                         if odds_v is not None else
+                         '<td title="no quoted price — implied from the 90′ line">—</td>')
             rows_html.append(
                 f'      <tr{cls}><td class="lbl">{_esc(_MARKET_LABELS[market])}</td>'
                 f'<td class="lbl">{_esc(_sel_label(market, sel, line, team_a, team_b))}</td>'
-                f'<td title="{odds_v:.2f} decimal">{_american_odds(odds_v)}</td>'
+                f'{odds_cell}'
                 f'<td>{implied:.0%}</td><td>{our_p:.0%}</td>'
                 f'<td class="{edge_cls}">{edge:+.1%}</td></tr>')
     if rows_html:
@@ -1534,7 +1547,7 @@ def _bracket_view(proj: dict, view_cls: str, champ_label: str, sub: str) -> str:
 
 def render_bracket_page(proj: dict, css: str, generated_at: str,
                         template_dir: Path = TEMPLATE_DIR,
-                        projected: "dict | None" = None) -> str:
+                        projected: "dict | None" = None, real_results: bool = True) -> str:
     n = proj["as_of_matches_played"]
     resolved = ("All eight group-winner-vs-best-third matches are projected from "
                 "the current third-place race." if proj["thirds_resolved"] else
@@ -1544,13 +1557,22 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
     notes_html = "".join(f'<li>{_esc(w)}</li>' for w in proj["warnings"])
     notes_html = f'<ul class="bnotes">{notes_html}</ul>' if notes_html else ""
 
-    now_view = _bracket_view(
-        proj, "view-now", "Projected to lift the trophy",
-        "Drawn all the way out from the standings as they stand — every group winner, runner-up "
-        "and the eight best thirds (slotted by the FIFA Annex C logic). A green ✓ marks a seed "
-        "already mathematically secured; a dashed underline marks a provisional position (not yet "
-        "sealed — it shifts with each result); abstract slots remain only where a group hasn't "
-        "kicked off. Hover any slot to see how a team reached it.")
+    if real_results:               # knockout phase: as-it-stands advances only actual results
+        now_view = _bracket_view(
+            proj, "view-now", "Champions",
+            "Real results only. Every group winner, runner-up and the eight best thirds (slotted by "
+            "the FIFA Annex C logic) drop into their fixed slots; then a winner is highlighted and "
+            "advances the moment its tie is actually played, with the loser struck out. Unplayed ties "
+            "show both sides, and the rounds beyond fill in as games finish — nothing here is "
+            "projected. For the model's run of the whole bracket, switch to the projected finish.")
+    else:                          # group phase: keep the current clinch-aware model projection
+        now_view = _bracket_view(
+            proj, "view-now", "Projected to lift the trophy",
+            "Drawn from the standings as they stand — every group winner, runner-up and the eight "
+            "best thirds (slotted by the FIFA Annex C logic). A green ✓ marks a seed already "
+            "mathematically secured; a dashed underline marks a provisional position (it shifts "
+            "with each result); the run beyond the R32 is the model's projected advancer, in green "
+            "with its chance to advance. Switch to the projected finish to play every group out.")
     if projected is not None:
         proj_view = _bracket_view(
             projected, "view-proj", "Projected champion",
@@ -1583,12 +1605,55 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
     )
 
 
+def render_group_stage_page(s: "st.Standings", forms: dict, fates: dict, css: str,
+                            generated_at: str, template_dir: Path = TEMPLATE_DIR) -> str:
+    """The dedicated Group-stage page: all 12 group tables + the third-place race. Linked from
+    the knockout-phase index's 'Group stage' label, and a permanent archive of the final tables."""
+    groups_html = "\n".join(render_group_card(s.groups[g], forms, i, fates=fates)
+                            for i, g in enumerate(sorted(s.groups)))
+    tpl = Template((template_dir / "group-stage.html").read_text(encoding="utf-8"))
+    return tpl.safe_substitute(
+        site_css=css, groups_html=groups_html,
+        thirds_html=render_thirds(s, forms, fates=fates),
+        played=s.played, total=s.total, generated_at=_esc(generated_at), repo_url=REPO_URL)
+
+
+def render_record_ko_calls(knockout: list | None) -> str:
+    """Knockout advance-call accountability: each graded advance call + the cumulative
+    2-class Brier (0 best · 0.5 coin-flip · 2 worst). Empty until a knockout call is
+    logged AND graded, so it's invisible through the group stage."""
+    if not knockout:
+        return ""
+    try:
+        import ledger as lg
+        ko_rows = lg.load_ko_ledger()
+        grades = lg.grade_ko(knockout, ko_rows) if ko_rows else {}
+        cumulative = lg.ko_cumulative_line(knockout, ko_rows) if ko_rows else None
+    except Exception:                                # never break the record page
+        return ""
+    if not grades:
+        return ""
+    items = []
+    for no in sorted(grades):
+        g = grades[no]
+        adv_p = g["p"][g["outcome"]]
+        items.append(
+            f'<li><span class="mid">M{no}</span> {_hit_chip(g["correct"])} '
+            f'{_esc(g.get("advancer", ""))} advanced · the call had them at '
+            f'{adv_p:.0%} · 2-class Brier {g["brier"]:.3f}</li>')
+    head = f'<p class="cumulative">{_esc(cumulative)}</p>' if cumulative else ""
+    return ('<div class="ko-record"><h3>Knockout — advance calls</h3>' + head
+            + '<ul class="overnight">' + "".join(items) + '</ul></div>')
+
+
 def render_record_page(matches: "list[st.Match]", rows: list[dict],
                        ledger: dict | None, css: str, generated_at: str,
                        template_dir: Path = TEMPLATE_DIR,
                        picks_log: Path | None = None,
-                       shadow_log: Path | None = None) -> str:
+                       shadow_log: Path | None = None,
+                       knockout: list | None = None) -> str:
     calls_html, cumulative = render_record_calls(matches, rows, ledger)
+    calls_html += render_record_ko_calls(knockout)        # appended; empty in group stage
     bets_html, units_line = render_record_bets(rows, picks_log=picks_log)
     shadow_html, shadow_line = render_record_shadow(rows, shadow_log=shadow_log)
     tpl = Template((template_dir / "record.html").read_text(encoding="utf-8"))
@@ -1905,6 +1970,193 @@ def render_team_page(profile: "sc.TeamProfile", s: "st.Standings",
 
 # ---------------------------------------------------------------- assembly
 
+# ---------------------------------------------------------------- knockout stage
+
+_KO_ROUND_NAME = {"R32": "Round of 32", "R16": "Round of 16", "QF": "Quarter-final",
+                  "SF": "Semi-final", "3RD": "Third-place play-off", "Final": "Final"}
+
+
+def load_ko_call():
+    """Defensive adapter for knockout advance calls: (callable km->info, None) or
+    (None, reason). Routes a RESOLVED tie through predict.resolve_knockout (the 90'
+    consensus then extra time + a coin-flip shootout). Neutral venue — host HFA is not
+    applied in the knockout per DECISIONS.md. Any per-tie failure returns None
+    (placeholder), never a broken page; mirrors load_predictor."""
+    try:
+        import predict as pr
+        model = pr.load_ratings()
+    except Exception as e:                       # broad on purpose: never break the build
+        return None, f"prediction model unavailable ({e.__class__.__name__}: {e})"
+
+    def call(km) -> dict | None:
+        if not (km.team_a and km.team_b):
+            return None
+        try:
+            hfa = pr.host_hfa(km.country, km.team_a, km.team_b)   # host at home in the KO
+            kp = pr.resolve_knockout(model, km.team_a, km.team_b, hfa_team=hfa)
+            reg = kp.reg
+            return {"p_adv_a": kp.p_advance_a, "p_adv_b": kp.p_advance_b,
+                    "p_reach_et": kp.p_reach_et, "p_reach_shootout": kp.p_reach_shootout,
+                    "modal_score": reg.modal_score, "total": reg.total}
+        except Exception:
+            return None
+    return call, None
+
+
+def _ko_when(km) -> str:
+    return " · ".join(p for p in [km.date_et, (f"{km.kickoff_et} ET" if km.kickoff_et else "")] if p)
+
+
+def _ko_venue(km) -> str:
+    return ", ".join(p for p in [km.stadium, km.city] if p)
+
+
+def _ko_row(km) -> dict:
+    """A minimal fixtures-row-shaped dict so the weather adapter (keyed on match_id) can
+    look a knockout match up; absent a weather row it returns the honest placeholder."""
+    return {"match_id": f"M{km.match_no}", "team_a": km.team_a, "team_b": km.team_b,
+            "stadium": km.stadium, "city": km.city, "kickoff_et": km.kickoff_et}
+
+
+def render_ko_call(info: dict | None, km, result: tuple | None = None) -> str:
+    """The advance call for one knockout tie. Resolved + scheduled -> the live model
+    read (who advances, via ET + shootout). Played -> the RESULT (who went through) — no
+    retroactive advance grade here (the knockout ledger owns that). Unresolved -> names
+    the two slot labels and waits. Never invents a number."""
+    ta, tb = km.team_a, km.team_b
+    if not (ta and tb):
+        la, lb = km.labels
+        return ('<div class="placeholder-slot">Matchup not set yet — this tie is '
+                f'<b>{_esc(la)}</b> vs <b>{_esc(lb)}</b>. The call appears once the '
+                'feeding games are played and both sides are known.</div>')
+    if result is not None:
+        sa, sb, winner, decided = result
+        tag = {"extra_time": " after extra time", "penalties": " on penalties"}.get(decided, "")
+        return (f'<div class="ko-result"><p><b>{_esc(winner)}</b> advanced — '
+                f'{_esc(ta)} {_esc(str(sa))}–{_esc(str(sb))} {_esc(tb)}{tag}.</p></div>')
+    if info is None:
+        return ('<div class="placeholder-slot">Model pending — no advance call for this '
+                'tie yet. Fills automatically once the ratings layer is available; no '
+                'numbers are invented.</div>')
+    pa = max(round(info["p_adv_a"] * 100), 1)
+    pb = max(round(info["p_adv_b"] * 100), 1)
+    fav, fav_p = (ta, pa) if pa >= pb else (tb, pb)
+    ms = info["modal_score"]
+    et = round(info["p_reach_et"] * 100)
+    so = round(info["p_reach_shootout"] * 100)
+    la_lbl = f"{pa}%" if pa >= 6 else ""
+    lb_lbl = f"{pb}%" if pb >= 6 else ""
+    return (
+        '<div class="call">'
+        f'<p class="call-lead"><b>{_esc(fav)}</b> to advance · <b>{fav_p}%</b></p>'
+        f'<div class="adv-bar" role="img" aria-label="{_esc(ta)} {pa}% to advance, '
+        f'{_esc(tb)} {pb}%">'
+        f'<span class="adv-seg adv-a" style="width:{pa}%">{la_lbl}</span>'
+        f'<span class="adv-seg adv-b" style="width:{pb}%">{lb_lbl}</span></div>'
+        f'<p class="call-scale"><span>{_esc(ta)} {pa}%</span>'
+        f'<span>{_esc(tb)} {pb}%</span></p>'
+        f'<p class="call-facts">most likely 90′ score <b>{ms[0]}–{ms[1]}</b> · '
+        f'~<b>{et}%</b> reach extra time · ~<b>{so}%</b> reach a shootout</p>'
+        '<p class="call-src">advance model: 90′ consensus (Elo+Futi) routed through '
+        'extra time + a coin-flip shootout · neutral venue</p>'
+        '</div>')
+
+
+def render_ko_slate(today_ko: list, root: str = "", calls: dict | None = None) -> str:
+    if not today_ko:
+        return '    <li class="empty">No knockout matches on this date.</li>'
+    calls = calls or {}
+    cards = []
+    for km in sorted(today_ko, key=lambda k: (k.kickoff_et_24h, k.match_no)):
+        mid = f"M{km.match_no}"
+        la, lb = km.labels
+        ta, tb = (km.team_a or la), (km.team_b or lb)
+        tv = (km.tv_us or "").strip() or "TV TBD"
+        venue = _ko_venue(km)
+        href = f'{root}matches/{mid}.html'
+        if km.is_played:
+            kick = '<p class="kick"><span class="ftbadge">Full time</span></p>'
+            tag = {"extra_time": " AET", "penalties": " pens"}.get(km.decided_by, "")
+            centre = (f'<span class="sc">{_esc(str(km.score_a))}–'
+                      f'{_esc(str(km.score_b))}</span>'
+                      + (f'<span class="ko-decided">{tag}</span>' if tag else ""))
+        else:
+            kick = f'<p class="kick">{_esc(km.kickoff_et)} ET</p>'
+            centre = '<span class="v">v</span>'
+        cls_a = "team ta" + ("" if km.team_a else " tbd")
+        cls_b = "team tb" + ("" if km.team_b else " tbd")
+        matchup = (f'<a class="matchup" href="{href}">'
+                   f'<span class="{cls_a}">{_esc(ta)}</span>{centre}'
+                   f'<span class="{cls_b}">{_esc(tb)}</span></a>')
+        callline = (f'<p class="pickline">{_esc(calls[mid])}</p>') if mid in calls else ""
+        cards.append(
+            f'    <li class="card ko-card">{kick}{matchup}'
+            f'<p class="meta">{mid} · {_esc(_KO_ROUND_NAME.get(km.round, km.round))} · '
+            f'{_esc(tv)} · {_esc(venue)} · <span class="pv">preview →</span></p>'
+            f'{callline}</li>')
+    return "\n".join(cards)
+
+
+def _ko_path_html(km, ko_by_no: dict) -> str:
+    """How a tie was reached: its slot labels, plus the feeder results for R16+."""
+    la, lb = km.labels
+    out = [f'<p>{_esc(_KO_ROUND_NAME.get(km.round, km.round))} · '
+           f'<b>{_esc(km.team_a or la)}</b> vs <b>{_esc(km.team_b or lb)}</b>.</p>']
+    if km.match_no in ko.bk.BRACKET_TREE:
+        for fno in ko.bk.BRACKET_TREE[km.match_no]:
+            fm = ko_by_no.get(fno)
+            if fm and fm.is_played and fm.winner_team:
+                out.append(
+                    f'<p>{_esc(fm.winner_team)} got here by winning '
+                    f'<a href="M{fno}.html">M{fno}</a> '
+                    f'({_esc(fm.team_a)} {_esc(str(fm.score_a))}–'
+                    f'{_esc(str(fm.score_b))} {_esc(fm.team_b)}).</p>')
+    elif km.match_no == ko.bk.THIRD_PLACE_MATCH:
+        out.append('<p>The third-place play-off is contested by the two beaten '
+                   'semi-finalists.</p>')
+    return '<div class="ko-path">' + "".join(out) + '</div>'
+
+
+def render_ko_match_page(km, call_html: str, path_html: str, sweat_html: str,
+                         card_html: str, odds_html: str, wire_html: str,
+                         css: str, template_dir: Path) -> str:
+    la, lb = km.labels
+    ta, tb = (km.team_a or la), (km.team_b or lb)
+
+    def team_h(team: str, label: str) -> str:
+        return (f'<a href="../teams/{sc.slugify(team)}.html">{_esc(team)}</a>' if team
+                else f'<span class="tbd">{_esc(label)}</span>')
+
+    title_html = (f'{team_h(km.team_a, la)}<span class="vs">v</span>'
+                  f'{team_h(km.team_b, lb)}')
+    scoreline_html = ""
+    if km.is_played:
+        tag = {"extra_time": ' <span class="ko-aet">AET</span>',
+               "penalties": ' <span class="ko-aet">pens</span>'}.get(km.decided_by, "")
+        scoreline_html = (f'<p class="scoreline"><b>{_esc(str(km.score_a))}–'
+                          f'{_esc(str(km.score_b))}</b>{tag}</p>')
+    deeper_html = ""
+    if km.team_a and km.team_b:
+        deeper_html = (
+            '<section aria-labelledby="teams-h"><div class="sec-head">'
+            '<span class="kicker">Go Deeper</span><h2 id="teams-h">Team cards</h2></div>'
+            '<div class="team-pair">'
+            f'<a href="../teams/{sc.slugify(km.team_a)}.html">{_esc(km.team_a)}'
+            '<span class="sub">squad · system · key players</span></a>'
+            f'<a href="../teams/{sc.slugify(km.team_b)}.html">{_esc(km.team_b)}'
+            '<span class="sub">squad · system · key players</span></a></div></section>')
+    tpl = Template((template_dir / "ko_match.html").read_text(encoding="utf-8"))
+    return tpl.safe_substitute(
+        site_css=css, match_id=f"M{km.match_no}",
+        round_name=_KO_ROUND_NAME.get(km.round, km.round),
+        title_text=_esc(f"{ta} vs {tb}"), title_html=title_html,
+        scoreline_html=scoreline_html, when=_esc(_ko_when(km)),
+        venue=_esc(_ko_venue(km)), tv=_esc((km.tv_us or "").strip() or "TV TBD"),
+        call_html=call_html, path_html=path_html, sweat_html=sweat_html,
+        card_html=card_html, wire_html=wire_html, odds_html=odds_html,
+        deeper_html=deeper_html, repo_url=REPO_URL)
+
+
 def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
                generated_at: str, template_path: Path = TEMPLATE_DIR / "page.html",
                editions_dir: Path = REPO_ROOT / "editions",
@@ -1914,21 +2166,111 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
                blurb_html: str = "",
                slate_picks: dict[str, str] | None = None,
                overnight_html: str = "",
-               fates: dict[str, str] | None = None) -> tuple[str, dict]:
+               fates: dict[str, str] | None = None,
+               knockout: list | None = None,
+               ko_calls: dict[str, str] | None = None,
+               last_group_date: date | None = None,
+               bracket_proj: dict | None = None) -> tuple[str, dict]:
     """Render the index page. Returns (html, data_dict)."""
     s = st.compute_standings(matches, fair_play=fair_play)
     forms = form_by_team(matches)
     fates = fates or {}
+    knockout = knockout or []
     today = be.select_matches(rows, target)
     day_n = (target - be.TOURNAMENT_START).days + 1
 
+    # phase: the group stage hands off to the knockout once all 72 group games are
+    # played (or the slate date moves past the last group date). The masthead, progress
+    # bar and "Today" slate follow the phase so the site never dead-ends after June 27.
+    group_done = len(s.groups) == 12 and s.played == s.total and s.total > 0
+    today_ko = [km for km in knockout if km.date_et == target.isoformat()]
+    in_ko = group_done or bool(today_ko) or (
+        last_group_date is not None and target > last_group_date)
+
     n = len(today)
-    slate_title = (f"{target:%A, %B} {target.day} · "
-                   + (f"{n} match" + ("" if n == 1 else "es") if n else "rest day"))
+    if today:
+        slate_title = (f"{target:%A, %B} {target.day} · "
+                       + f"{n} match" + ("" if n == 1 else "es"))
+        slate_html = render_slate(today, picks=slate_picks)
+    elif today_ko:
+        k = len(today_ko)
+        slate_title = (f"{target:%A, %B} {target.day} · {k} knockout "
+                       + ("match" if k == 1 else "matches"))
+        slate_html = render_ko_slate(today_ko, calls=ko_calls)
+    else:
+        slate_title = (f"{target:%A, %B} {target.day} · "
+                       + ("no matches today" if in_ko else "rest day"))
+        slate_html = render_slate([])
+
+    if in_ko:
+        rounds_today = sorted({km.round for km in today_ko})
+        rname = _KO_ROUND_NAME.get(rounds_today[0]) if len(rounds_today) == 1 else None
+        eyebrow = "WC26 Daily Hub · Knockout Stage" + (f" · {rname}" if rname else "")
+        ko_played = sum(1 for km in knockout if km.is_played)
+        played_disp, total_disp, progress_label = ko_played, len(knockout), "knockout matches"
+        progress_pct = (100 * ko_played / len(knockout)) if knockout else 0
+        transition_html = (
+            '<section class="ko-banner" aria-label="Knockout stage">'
+            '<a href="bracket.html"><span class="ko-banner-k">Knockout stage</span>'
+            '<b>The bracket is live →</b><span class="ko-banner-sub">Round of 32 through '
+            'the Final · projected winners and advance odds, updated as results land'
+            '</span></a></section>')
+    else:
+        eyebrow = "WC26 Daily Hub · Group Stage · June 11–27"
+        played_disp, total_disp, progress_label = s.played, s.total, "group-stage matches"
+        progress_pct = (100 * s.played / s.total) if s.total else 0
+        transition_html = ""
 
     groups_html = "\n".join(
         render_group_card(s.groups[g], forms, i, fates=fates)
         for i, g in enumerate(sorted(s.groups)))
+    thirds_html = render_thirds(s, forms, fates=fates)
+
+    # phase-aware nav + main body. Knockout phase: the bracket is the centerpiece and the group
+    # tables + third-place race move to group-stage.html behind a 'Group stage' link. Group
+    # phase: the group tables stay the front page (the bracket is still one click away).
+    if in_ko:
+        bracket_inner = (render_bracket_html(bracket_proj) if bracket_proj is not None
+                         else '<p class="standfirst">The bracket fills in once the groups '
+                              'finish.</p>')
+        body_sections_html = (
+            '<section id="bracket" aria-labelledby="bracket-h">\n'
+            '  <div class="sec-head"><span class="kicker">R32 → Final</span>'
+            '<h2 id="bracket-h">The Bracket</h2></div>\n'
+            '  <p class="standfirst">As it stands — a winner is highlighted and advances the '
+            'moment its tie is played. <a href="bracket.html">See the model’s projected finish →</a></p>\n'
+            '  <div class="bracket-wrap" tabindex="0" role="region" '
+            f'aria-label="Knockout bracket, scrollable">{bracket_inner}</div>\n</section>')
+        nav_html = ('    <a class="wide" href="#bracket">the bracket</a>\n'
+                    '    <a class="wide" href="group-stage.html">group stage</a>\n'
+                    '    <a class="wide" href="record.html">the record</a>')
+        page_title = "WC26 Daily Hub — The Knockout Bracket"
+        page_desc = ("The 2026 World Cup knockout bracket, Round of 32 to the Final — winners "
+                     "advance as games are played, updated daily.")
+    else:
+        groups_section = (
+            '<section id="groups" aria-labelledby="groups-h">\n'
+            '  <div class="sec-head"><span class="kicker">The Tables</span>'
+            '<h2 id="groups-h">Twelve Groups</h2></div>\n'
+            '  <p class="standfirst">Top two in each group advance. Shaded zones read the '
+            'table as it stands — nothing is decided until the math says so.</p>\n'
+            f'  <div class="grid">\n{groups_html}\n  </div>\n</section>')
+        thirds_section = (
+            '<section id="thirds" aria-labelledby="thirds-h">\n'
+            '  <div class="sec-head"><span class="kicker">The Cutline</span>'
+            '<h2 id="thirds-h">Third-Place Race</h2></div>\n'
+            '  <p class="standfirst">The best eight third-placed teams also advance to the '
+            'Round of 32. The dashed line is the cut.</p>\n'
+            '  <div class="thirds-wrap" tabindex="0" role="region" '
+            f'aria-label="Third-place ranking table, scrollable">\n{thirds_html}\n  </div>\n</section>')
+        body_sections_html = groups_section + "\n\n" + thirds_section
+        nav_html = (_group_nav(s.groups)
+                    + '\n    <a class="wide" href="#thirds">3rd place</a>'
+                    + '\n    <a class="wide" href="bracket.html">the bracket</a>'
+                    + '\n    <a class="wide" href="record.html">the record</a>')
+        page_title = "WC26 Daily Hub — Group Stage Standings"
+        page_desc = ("2026 World Cup group-stage standings: all twelve groups and the "
+                     "third-place race, updated daily.")
 
     data = st.to_dict(s)
     for gd in data["groups"].values():
@@ -1944,16 +2286,20 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
 
     page = Template(template_path.read_text(encoding="utf-8")).safe_substitute(
         site_css=css if css is not None else _site_css(template_path.parent),
+        page_title=page_title,
+        page_desc=page_desc,
         edition_no=f"No. {day_n}" if day_n >= 1 else "Preview",
         pretty_date=f"{target:%A, %B} {target.day}, {target.year}",
-        played=s.played,
-        total=s.total,
-        progress_pct=f"{(100 * s.played / s.total) if s.total else 0:.1f}",
-        group_nav_html=_group_nav(s.groups),
+        eyebrow=eyebrow,
+        transition_html=transition_html,
+        played=played_disp,
+        total=total_disp,
+        progress_label=progress_label,
+        progress_pct=f"{progress_pct:.1f}",
+        nav_html=nav_html,
         slate_title=slate_title,
-        slate_html=render_slate(today, picks=slate_picks),
-        groups_html=groups_html,
-        thirds_html=render_thirds(s, forms, fates=fates),
+        slate_html=slate_html,
+        body_sections_html=body_sections_html,
         archive_html=_archive(editions_dir),
         generated_at=_esc(generated_at),
         repo_url=REPO_URL,
@@ -1980,7 +2326,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                shadow_log: Path | None = None,
                now=None,
                predictor="auto", odds_engine="auto",
-               weather_engine="auto", knockout_resolver="auto") -> list[str]:
+               weather_engine="auto", knockout_resolver="auto",
+               knockout_path: Path | None = None) -> list[str]:
     """Render the whole site (index + team cards + match previews + data.json)
     into out_dir. Returns warnings. ``predictor`` and ``odds_engine`` are
     "auto" (load the real modules defensively), None (placeholder state), or
@@ -2006,6 +2353,35 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     wire = load_wire(news_dir)
     css = _site_css(template_dir)
 
+    # Knockout stage: discovered next to fixtures.csv (so a frozen-snapshot build with no
+    # knockout.csv stays group-only). Teams materialize from the live standings + any
+    # played knockout results; bracket.py owns the structure. Fail-soft — a missing file
+    # is the pre-knockout norm, a malformed one degrades to group-only with a warning.
+    ko_file = knockout_path or (fixtures.parent / "knockout.csv")
+    try:
+        knockout = ko.load_knockout(ko_file)
+    except ValueError as e:
+        warnings.append(f"Knockout schedule ignored (malformed {ko_file.name}): {e}")
+        knockout = []
+    if knockout:
+        try:
+            knockout = ko.materialize_teams(bk.project(s), knockout)
+        except (FileNotFoundError, ValueError) as e:
+            warnings.append(f"Knockout team resolution skipped: {e}")
+    last_group_date = None
+    group_dates = [r.get("date_et", "").strip() for r in rows if r.get("date_et", "").strip()]
+    if group_dates:
+        last_group_date = date.fromisoformat(max(group_dates))
+
+    # Knockout-phase gate (same predicate as build_page). The whole knockout experience —
+    # bracket-as-centerpiece, the March-Madness real-results bracket, the per-tie KO pages, the
+    # Group-stage page — activates ONLY once the group stage is over (all 12 groups played, or
+    # the slate has a knockout match, or the date is past the last group date). Before that the
+    # site is byte-for-byte the current group-stage site, so a merge is a no-op until the R32.
+    group_done = len(s.groups) == 12 and s.played == s.total and s.total > 0
+    in_ko = (group_done or any(km.date_et == target.isoformat() for km in knockout)
+             or (last_group_date is not None and target > last_group_date))
+
     blurb_html = ""
     blurb_path = blurbs_dir / f"{target.isoformat()}.md"
     if blurb_path.exists():
@@ -2020,12 +2396,29 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         if why:
             warnings.append(f"The Call renders as placeholder: {why}")
 
+    # knockout advance-call adapter (only when a predictor is active, so injected-off
+    # tests stay deterministic and group-only builds skip the extra model load)
+    ko_call = None
+    if knockout and predictor is not None:
+        ko_call, ko_why = load_ko_call()
+        if ko_why:
+            warnings.append(f"Knockout calls render as placeholder: {ko_why}")
+
     if odds_engine == "auto":
         odds_call, ledger_line, odds_why = load_odds_engine(now=now)
         if odds_why:
             warnings.append(f"Odds sections render as placeholder: {odds_why}")
     else:
         odds_call, ledger_line = odds_engine, None
+
+    # knockout odds adapter (advance market), gated on the group odds engine being active so
+    # injected-off tests stay deterministic; only the model-priced 'advance' edge records (8pp)
+    ko_odds_call = None
+    if knockout and odds_call is not None:
+        import odds as od
+        ko_odds_call, ko_odds_why = od.load_ko_odds_engine(now=now)
+        if ko_odds_why:
+            warnings.append(f"Knockout odds render as placeholder: {ko_odds_why}")
 
     if weather_engine == "auto":
         wx_call, wx_why = load_weather_engine()
@@ -2052,6 +2445,18 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                     f"{_sel_label(p['market'], p['selection'], p['line'], r['team_a'], r['team_b'])}"
                     f" {p['edge']:+.1%}{more}")
 
+    # advance-call one-liners for the knockout slate (resolved, not-yet-played ties only)
+    ko_slate_calls: dict[str, str] = {}
+    if ko_call:
+        for km in knockout:
+            if (km.date_et == target.isoformat() and km.participants_known
+                    and not km.is_played):
+                ci = ko_call(km)
+                if ci:
+                    pa, pb = round(ci["p_adv_a"] * 100), round(ci["p_adv_b"] * 100)
+                    fav, fp = (km.team_a, pa) if pa >= pb else (km.team_b, pb)
+                    ko_slate_calls[f"M{km.match_no}"] = f"▸ model: {fav} to advance {fp}%"
+
     ledger = _load_ledger(warnings, predictions_log, now)
     # as-it-stands knockout bracket — gated projection from the live standings.
     # Annex C is committed static data; a missing/corrupt table degrades to no
@@ -2059,35 +2464,34 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     bracket_proj = None
     bracket_full = None
     try:
-        # resolve_provisional: slot the thirds via Annex C using the standings' deterministic
-        # order even when the cutline is provisional (FIFA ranking unmodelled) — so the
-        # as-it-stands bracket shows the real third-place logic, honestly flagged, rather than
-        # abstract "Best 3rd of …" pools. Still gated on all 12 groups having STARTED.
-        # clinched: which exact seeds are mathematically secured (full 2026 tiebreakers, incl.
-        # head-to-head) — drives the confirmed (✓) vs provisional (dashed) per-side marks.
-        clinched = {g: scen.clinched_ranks(g, matches) for g in s.groups}
+        # resolve_provisional: slot the thirds via Annex C even when the cutline is provisional.
+        # KNOCKOUT phase: no `clinched` map (no ✓ marks — every R32 seed is in). GROUP phase:
+        # keep the current clinch-aware view, so a merge changes nothing on the live site yet.
+        clinched = None if in_ko else {g: scen.clinched_ranks(g, matches) for g in s.groups}
         bracket_proj = bk.project(s, resolve_provisional=True, clinched=clinched)
     except (FileNotFoundError, ValueError) as e:
         warnings.append(f"Bracket page skipped: {e}")
     if bracket_proj is not None:
         if knockout_resolver == "auto":
-            knockout_resolver = load_knockout_resolver()
+            knockout_resolver = load_knockout_resolver(knockout)
             if knockout_resolver is None:
-                warnings.append("Bracket winners not projected: prediction model unavailable")
-        if knockout_resolver:
-            # results=None: no knockout has been played yet (group stage only);
-            # actual results will override the model here once those fixtures exist
-            bracket_proj = bk.feed(bracket_proj, knockout_resolver)
-        # 'Projected finish' view: SIMULATE every remaining group game from the model's goal
-        # rates, take each group's most-likely final standings (draws and all), resolve the
-        # WHOLE bracket (12 groups final, thirds slotted), run it through.
+                warnings.append("Projected bracket not computed: prediction model unavailable")
+        ko_results = ko.results_dict(knockout)
+        # AS IT STANDS — KNOCKOUT phase: advance ONLY actual results (March-Madness; a winner is
+        # highlighted and moves on as games are played; no projected champion here). GROUP phase:
+        # the current model-projected view, so the live site is unchanged until the R32.
+        if in_ko:
+            bracket_proj = bk.feed(bracket_proj, lambda a, b: None, results=ko_results)
+        elif knockout_resolver:
+            bracket_proj = bk.feed(bracket_proj, knockout_resolver, results=ko_results)
+        # PROJECTED FINISH (both phases): simulate the remaining group games, resolve the WHOLE
+        # bracket through the model (real results override), surface the projected champion.
         rates_fn = load_group_rates()
-        if rates_fn is not None:
+        if rates_fn is not None and knockout_resolver:
             try:
                 s_full = bk.project_modal_standings(matches, rates_fn)
                 bracket_full = bk.project(s_full, resolve_provisional=True)
-                if knockout_resolver:
-                    bracket_full = bk.feed(bracket_full, knockout_resolver)
+                bracket_full = bk.feed(bracket_full, knockout_resolver, results=ko_results)
             except (FileNotFoundError, ValueError) as e:
                 warnings.append(f"Projected-finish bracket skipped: {e}")
 
@@ -2098,7 +2502,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                              blurb_html=blurb_html, slate_picks=slate_picks,
                              overnight_html=render_overnight(rows, target,
                                                              matches, ledger),
-                             fates=fates)
+                             fates=fates, knockout=knockout, ko_calls=ko_slate_calls,
+                             last_group_date=last_group_date, bracket_proj=bracket_proj)
     if bracket_proj is not None:
         data["bracket"] = bk.to_dict(bracket_proj)
     if bracket_full is not None:
@@ -2114,12 +2519,18 @@ def build_site(out_dir: Path, target: date, generated_at: str,
 
     (out_dir / "record.html").write_text(
         render_record_page(matches, rows, ledger, css, generated_at, template_dir,
-                           picks_log=picks_log, shadow_log=shadow_log),
+                           picks_log=picks_log, shadow_log=shadow_log, knockout=knockout),
         encoding="utf-8")
+    # the group tables + third-place race as a standalone page — only in the knockout phase,
+    # where the index links here behind 'Group stage' (in the group phase the index IS the tables)
+    if in_ko:
+        (out_dir / "group-stage.html").write_text(
+            render_group_stage_page(s, forms, fates, css, generated_at, template_dir),
+            encoding="utf-8")
     if bracket_proj is not None:
         (out_dir / "bracket.html").write_text(
             render_bracket_page(bracket_proj, css, generated_at, template_dir,
-                                projected=bracket_full),
+                                projected=bracket_full, real_results=in_ko),
             encoding="utf-8")
 
     fixture_teams = sorted({m.team_a for m in matches} | {m.team_b for m in matches})
@@ -2177,10 +2588,40 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         warnings.append("predictor loaded but produced no usable prediction for "
                         "any match — every Call rendered as placeholder")
 
+    # knockout match pages — one per tie (resolved matchup or still-abstract slot), but ONLY in
+    # the knockout phase (gated, so they don't appear on the live group-stage site). The Call
+    # shows the live advance model for a resolved not-yet-played tie; the result once played;
+    # a placeholder while the matchup is unknown. Card/odds slots fill via the overnight build.
+    ko_by_no = ko.by_no(knockout)
+    for km in (knockout if in_ko else []):
+        mid = f"M{km.match_no}"
+        if km.is_played and km.winner_team:
+            call_html = render_ko_call(
+                None, km, result=(km.score_a, km.score_b, km.winner_team, km.decided_by))
+        elif ko_call:
+            call_html = render_ko_call(ko_call(km), km)
+        else:
+            call_html = render_ko_call(None, km)
+        sweat_info = wx_call(_ko_row(km)) if wx_call else None
+        # tactical card: the overnight Sonnet-generated card if present (same parser as
+        # group cards), else the honest placeholder
+        card_md = kc.load_ko_card(km.match_no)
+        card_html = (render_card_sections(sc.parse_card(card_md)[1]) if card_md
+                     else '<div class="placeholder-slot">Tactical preview is generated in '
+                          'the overnight build once the matchup is set.</div>')
+        odds_html = render_market(ko_odds_call(km) if ko_odds_call else None,
+                                  km.team_a or "", km.team_b or "", None)
+        page = render_ko_match_page(
+            km, call_html, _ko_path_html(km, ko_by_no),
+            render_sweat(sweat_info, km.team_a or "", km.team_b or ""),
+            card_html, odds_html, render_wire(wire.get(mid)), css, template_dir)
+        (out_dir / "matches" / f"{mid}.html").write_text(page, encoding="utf-8")
+
     # reconcile: a renamed slug or removed match_id must not leave a stale
     # page deployed under docs/
     expected = ({f"{sc.slugify(t)}.html" for t in fixture_teams},
-                {f"{r['match_id']}.html" for r in rows})
+                {f"{r['match_id']}.html" for r in rows}
+                | ({f"M{km.match_no}.html" for km in knockout} if in_ko else set()))
     for subdir, keep in zip(("teams", "matches"), expected):
         for f in (out_dir / subdir).glob("*.html"):
             if f.name not in keep:
@@ -2301,7 +2742,8 @@ def main(argv: list[str] | None = None) -> int:
     if not args.fixtures.exists():
         print(f"error: {args.fixtures} not found.", file=sys.stderr)
         return 1
-    for tname in ("page.html", "team.html", "match.html", "bracket.html", "site.css"):
+    for tname in ("page.html", "team.html", "match.html", "ko_match.html",
+                  "bracket.html", "group-stage.html", "site.css"):
         if not (args.template_dir / tname).exists():
             print(f"error: template {args.template_dir / tname} not found.", file=sys.stderr)
             return 1

@@ -13,11 +13,11 @@ name: daily-build
 
 on:
   schedule:
-    # 07:00 ET (EDT), June 12-28 ONLY — June 28 is the final settlement run
-    # (grades the June 27 picks/predictions), after which the group-stage
-    # project is complete and the cron stops firing. Knockouts are a future
-    # project; re-derive these crons if DST assumptions ever change.
-    - cron: "0 11 12-28 6 *"
+    # 07:00 ET (EDT). The whole tournament: group stage + knockout, June 12
+    # through the July 19 final. Two ranges because a cron day-of-month field
+    # can't span across the June/July boundary. Re-derive if DST assumptions change.
+    - cron: "0 11 12-30 6 *"   # June 12-30 (group stage + R32 start June 28)
+    - cron: "0 11 1-19 7 *"    # July 1-19 (R16 -> Final July 19)
   workflow_dispatch:
     inputs:
       date:
@@ -66,7 +66,11 @@ jobs:
             echo "::error::bad date input '$DATE' (need YYYY-MM-DD)"; exit 1
           fi
           echo "date=$DATE" >> "$GITHUB_OUTPUT"
-          echo "Editorial date: $DATE" >> "$GITHUB_STEP_SUMMARY"
+          # knockout-stage gate: the R32 starts 2026-06-28. Knockout steps below only run from
+          # then on, so the whole knockout stack stays dormant through the group stage.
+          KO=$([[ "$DATE" > "2026-06-27" ]] && echo true || echo false)
+          echo "ko=$KO" >> "$GITHUB_OUTPUT"
+          echo "Editorial date: $DATE (knockout=$KO)" >> "$GITHUB_STEP_SUMMARY"
 
       # HARD GATE — runs on the PRISTINE checkout, before any step below mutates
       # the working tree. It guards against CODE regressions deterministically
@@ -104,10 +108,40 @@ jobs:
         continue-on-error: true
         run: python scripts/ledger.py log "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
 
+      # Log today's KNOCKOUT advance calls pre-kickoff too (no-op until ties resolve).
+      - name: Log knockout advance calls (pre-kickoff)
+        id: ko_ledger
+        if: ${{ steps.ed.outputs.ko == 'true' }}
+        continue-on-error: true
+        run: python scripts/ledger.py log-ko "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Enter overnight results (The Odds API)
         id: results
         continue-on-error: true
         run: python scripts/fetch_results.py | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Knockout stage (no-op while data/knockout.csv has no resolved ties): materialize
+      # R32/feeder matchups from the freshly-updated standings, then pull any completed
+      # knockout scores. Level/penalty results are reported for manual entry, never guessed.
+      - name: Resolve knockout matchups (standings -> knockout.csv)
+        id: ko_resolve
+        if: ${{ steps.ed.outputs.ko == 'true' }}
+        continue-on-error: true
+        run: python scripts/knockout.py --resolve | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Enter knockout results (The Odds API)
+        id: ko_results
+        if: ${{ steps.ed.outputs.ko == 'true' }}
+        continue-on-error: true
+        run: python scripts/fetch_ko_results.py | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Generate Sonnet-grounded cards for newly-resolved ties (skips already-generated;
+      # needs ANTHROPIC_API_KEY — fail-soft, the card slot placeholders without one).
+      - name: Generate knockout cards (Sonnet, grounded)
+        id: ko_cards
+        if: ${{ steps.ed.outputs.ko == 'true' }}
+        continue-on-error: true
+        run: python scripts/knockout_cards.py "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Settle yesterday's picks (units + CLV)
         id: settle
@@ -123,6 +157,14 @@ jobs:
         id: evaluate
         continue-on-error: true
         run: python scripts/odds.py evaluate "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Knockout advance edges (model-priced, 8pp ceiling). No-op unless a 2-way advance
+      # line was entered (odds.py enter M.. advance H,A) — no market => honest "No bet".
+      - name: Record knockout advance edges
+        id: ko_evaluate
+        if: ${{ steps.ed.outputs.ko == 'true' }}
+        continue-on-error: true
+        run: python scripts/odds.py evaluate-ko "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Weather forecast (Open-Meteo, no key needed)
         id: weather
@@ -166,7 +208,8 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           # explicit allowlist: only the artifacts the daily build owns, so a
           # stray working-tree file can never ride along in an automated commit
-          git add data docs editions
+          # (cards/ now includes generated knockout cards under cards/ko/)
+          git add data docs editions cards
           [ -d news ] && git add news || true
           if git diff --cached --quiet; then
             echo "No changes today." >> "$GITHUB_STEP_SUMMARY"
@@ -186,6 +229,11 @@ jobs:
           [ "${{ steps.elo.outcome }}"      = "failure" ] && failed="$failed elo"
           [ "${{ steps.sdk.outcome }}"      = "failure" ] && failed="$failed sdk"
           [ "${{ steps.results.outcome }}"  = "failure" ] && failed="$failed results"
+          [ "${{ steps.ko_resolve.outcome }}" = "failure" ] && failed="$failed ko_resolve"
+          [ "${{ steps.ko_results.outcome }}" = "failure" ] && failed="$failed ko_results"
+          [ "${{ steps.ko_ledger.outcome }}" = "failure" ] && failed="$failed ko_ledger"
+          [ "${{ steps.ko_cards.outcome }}" = "failure" ] && failed="$failed ko_cards"
+          [ "${{ steps.ko_evaluate.outcome }}" = "failure" ] && failed="$failed ko_evaluate"
           [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"
           [ "${{ steps.ledger.outcome }}"   = "failure" ] && failed="$failed ledger"
           [ "${{ steps.snapshot.outcome }}" = "failure" ] && failed="$failed snapshot"

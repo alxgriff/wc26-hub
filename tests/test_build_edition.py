@@ -546,5 +546,89 @@ class OvernightGradingTests(unittest.TestCase):
         self.assertIn("No matches on the previous editorial date", out)
 
 
+import itertools  # noqa: E402
+import knockout as ko  # noqa: E402
+
+
+def _km(no=73, **kw):
+    base = dict(match_no=no, round="R32", date_et="2026-06-28", kickoff_et_24h="15:00",
+                kickoff_et="3:00 PM", stadium="SoFi Stadium", city="Inglewood",
+                country="USA", tv_us="", team_a="France", team_b="Brazil",
+                score_a=None, score_b=None, decided_by="", winner="", status="scheduled",
+                notes="")
+    base.update(kw)
+    return ko.KnockoutMatch(**base)
+
+
+def _grow(mid, g, date_et, a, b):
+    r = {"match_id": mid, "group": g, "matchday": mid[1], "date_et": date_et,
+         "kickoff_et_24h": "15:00", "kickoff_et": "3:00 PM", "team_a": a, "team_b": b,
+         "stadium": "BMO Field", "city": "Toronto", "country": "Canada", "tv_us": "",
+         "score_a": "", "score_b": "", "status": "scheduled", "notes": ""}
+    r["_late_cap"] = False
+    r["_editorial"] = be.editorial_date_of(date_et, "15:00", mid)
+    return r
+
+
+class KnockoutEditionTests(unittest.TestCase):
+    def setUp(self):
+        self._d = tempfile.TemporaryDirectory()
+        self.cards = Path(self._d.name)
+        self.matches = [st.Match("A1", "A", 1, "Alpha", "Beta", 1, 0, "played"),
+                        st.Match("A2", "A", 1, "Gamma", "Delta", None, None, "scheduled")]
+        self.standings = st.compute_standings(self.matches)            # incomplete -> not done
+        self.rows = [_grow("A1", "A", "2026-06-27", "Alpha", "Beta"),
+                     _grow("A2", "A", "2026-06-27", "Gamma", "Delta")]
+
+    def tearDown(self):
+        self._d.cleanup()
+
+    def test_knockout_phase_renders_slate_and_bracket(self):
+        md, _ = be.build_edition(date(2026, 6, 28), self.rows, self.standings, self.cards,
+                                 knockout=[_km()], bracket_md="BRACKET-MARKER-XYZ")
+        self.assertIn("Knockout stage — Round of 32", md)            # masthead
+        self.assertIn("M73 (Round of 32) · France vs Brazil", md)    # KO slate line
+        self.assertIn("## The bracket", md)
+        self.assertIn("BRACKET-MARKER-XYZ", md)                      # embedded bracket
+        self.assertIn("## Match previews", md)                       # not group cards
+        self.assertNotIn("## Match cards", md)
+
+    def test_played_tie_shows_result_and_advancer(self):
+        km = _km(score_a=1, score_b=1, decided_by="penalties", winner="B", status="played")
+        md, _ = be.build_edition(date(2026, 6, 28), self.rows, self.standings, self.cards,
+                                 knockout=[km], bracket_md="x")
+        self.assertIn("France 1–1 Brazil (pens)", md)
+        self.assertIn("**Brazil advance**", md)
+
+    def test_unresolved_tie_uses_slot_labels(self):
+        km = _km(74, round="R32", team_a="", team_b="")              # Winner E vs Best 3rd
+        md, _ = be.build_edition(date(2026, 6, 28), self.rows, self.standings, self.cards,
+                                 knockout=[km], bracket_md="x")
+        self.assertIn("Winner E", md)
+
+    def test_group_edition_has_no_knockout_sections(self):
+        md, _ = be.build_edition(date(2026, 6, 20), self.rows, self.standings, self.cards,
+                                 knockout=[])
+        self.assertNotIn("## The bracket", md)
+        self.assertNotIn("Knockout stage", md)
+        self.assertIn("group stage", md)
+
+    def test_default_knockout_is_byte_identical(self):
+        a, _ = be.build_edition(date(2026, 6, 20), self.rows, self.standings, self.cards)
+        b, _ = be.build_edition(date(2026, 6, 20), self.rows, self.standings, self.cards,
+                                knockout=[], bracket_md=None)
+        self.assertEqual(a, b)
+
+    def test_qualified_recap_when_group_complete(self):
+        teams = ["Aa", "Ab", "Ac", "Ad"]
+        complete = [st.Match(f"A{i+1}", "A", 1, x, y, 2, 0, "played")
+                    for i, (x, y) in enumerate(itertools.combinations(teams, 2))]
+        s = st.compute_standings(complete)                            # 6/6 -> group_done
+        md, _ = be.build_edition(date(2026, 6, 28), self.rows, s, self.cards,
+                                 knockout=[_km()], bracket_md="x")
+        self.assertIn("How the 32 qualified", md)
+        self.assertIn("Winner", md)                                  # recap table header
+
+
 if __name__ == "__main__":
     unittest.main()

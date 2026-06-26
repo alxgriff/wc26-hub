@@ -26,11 +26,53 @@ you make a non-obvious call, add it here.*
   groups render abstract ("Winner E", "Best 3rd of …"); the eight winner-vs-third ties
   resolve only once all 12 groups have a standing and the cutline isn't provisional.
   *`scripts/bracket.py`; commits `03e460b`, `5f02e5a`.*
-- **Winner projection runs through the tree at a NEUTRAL venue.** `bracket.feed`
-  propagates the model's projected advancer down the tree (model injected, so `bracket.py`
-  stays model-agnostic; real results can override). The knockout resolver deliberately
-  does **not** apply host HFA — knockout venues aren't modelled in-repo. The shown `%` is
-  the winner's 90'+ET+shootout advance probability. *`scripts/build_site.py` (`load_knockout_resolver`); commits `2ddd01f`, `1828533`.*
+- **Winner projection runs through the tree; host HFA applies at a host's own venue.**
+  `bracket.feed` propagates the model's projected advancer down the tree (model injected, so
+  `bracket.py` stays model-agnostic; real results can override). **Updated 2026-06-25:** now
+  that `data/knockout.csv` carries each tie's venue + country, a US/Mexican/Canadian host
+  playing in its OWN country gets the standard home bonus (`predict.host_hfa` → `resolve_knockout(hfa_team=…)`),
+  applied to the displayed advance Call, the logged advance call, the betting price, AND the
+  bracket projection (via a team-set→country map for resolved ties; purely-projected ties stay
+  neutral). The shown `%` is the winner's 90'+ET+shootout advance probability. *`scripts/build_site.py` (`load_knockout_resolver`, `load_ko_call`); `scripts/predict.py` (`host_hfa`); commits `2ddd01f`, `1828533`.*
+
+## Knockout stage (the live tournament, R32→Final — `knockout-stage` branch)
+
+- **Knockout fixtures live in a SEPARATE `data/knockout.csv`, not `fixtures.csv`.** `standings`
+  locks `fixtures.csv`'s `match_id` to the `A1–L6` form, and CLAUDE.md names it the GROUP
+  single source of truth — so the knockout stage (matches 73–104, the FIFA/bracket numbering)
+  gets its own contract file. team_a/team_b are a **materialized view of `bracket.py`** (the
+  structural authority — no second implementation to drift), filled by `knockout.py --resolve`:
+  R32 from locked group positions, later rounds from played feeders. *`scripts/knockout.py`.*
+- **A shootout winner is NEVER inferred from the score.** A level knockout result is recorded
+  with `decided_by=penalties` and an explicit `winner` side (A|B), which is authoritative for
+  advancement (`bracket.feed` + the ledger read `winner`, not the score). `fetch_ko_results.py`
+  auto-enters only DECISIVE results and reports level ones for manual `--enter` — the API can't
+  say who won a shootout, so we don't guess. (The API also doesn't flag extra time, so a decisive
+  auto-entry records `regulation`; revise to `extra_time` by hand if needed.) *`scripts/knockout.py`, `scripts/fetch_ko_results.py`.*
+- **Knockout cards are auto-generated AND auto-published (user-chosen).** Sonnet writes the
+  tactical sections grounded STRICTLY in the two teams' KB profiles + computed facts + the Wire,
+  injuries tagged "(verify before use)", fail-soft to a placeholder (never fabricates) — the same
+  grounding contract as `stakes_blurb.py`. Matchups aren't known until a round resolves, so cards
+  can't be pre-baked; they generate in the overnight build. *`scripts/knockout_cards.py`.*
+- **Knockout betting is a 2-way ADVANCE market, AUTO-derived from the 90' line (2026-06-25).**
+  "To qualify" (advance, incl. ET + a coin-flip shootout) is priced from `predict.resolve_knockout`.
+  Research confirmed The Odds API carries **no** to-qualify market (only `outrights` = tournament
+  futures; a knockout `h2h` is the 90-minute 3-way). Rather than require manual odds entry, the
+  market price is **derived from the fetched 90' h2h**: de-vig h/d/a, then route the draw mass
+  through the same ET+shootout layer — `market_adv_a = q_h90 + q_d90·(et_a + et_d·0.5)`. Because
+  that ET layer is the model's on BOTH sides, the edge is just the 90' disagreement on the advance
+  axis (a self-priced quantity), so it is shown as a **model-vs-market READ — display only, NEVER
+  recorded** (no quoted price, no CLV); `best_bets` skips it (`advance_derived` flag), the odds cell
+  shows "—", and the card reads "No bet". A genuinely quoted 2-way line (manual `odds.py enter …
+  advance`) WOULD record (model-priced, 8pp ceiling, settled penalty-aware from `winner`). Rejected
+  alternatives for a *real* to-qualify line: API-Football (no-license terms, sparse coverage) and
+  Betfair (£299+ live key, US-geo-blocked). Accountability stays a **2-class advance Brier** (0 best
+  / 0.5 coin-flip / 2 worst). *`scripts/odds.py` (`evaluate_ko_match`, `best_bets`), `scripts/ledger.py`.*
+- **The site/edition flip to the knockout phase by data, not date.** When the group stage
+  completes (or the slate date passes the last group date), the masthead/progress/slate switch to
+  knockout and a banner elevates the bracket — so the most-trafficked moment (the R32) never lands
+  on a frozen "rest day" page. Crons extended June 12 → July 19 (two day-of-month ranges per
+  month). *`scripts/build_site.py`, `scripts/build_edition.py`, `.github/workflows/`.*
 
 ## Prediction model (`predict.py`)
 

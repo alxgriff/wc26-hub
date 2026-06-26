@@ -287,5 +287,22 @@ class RealDataTests(unittest.TestCase):
             self.assertEqual(len(ranks), 1, f"tied odds {odds} got multiple ranks {ranks}")
 
 
+class HostHfaTests(unittest.TestCase):
+    def test_host_hfa_mapping(self):
+        self.assertEqual(pr.host_hfa("Mexico", "Mexico", "Saudi Arabia"), "Mexico")
+        self.assertEqual(pr.host_hfa("USA", "United States", "Wales"), "United States")
+        self.assertEqual(pr.host_hfa("Canada", "Canada", "Belgium"), "Canada")
+        # a host playing OUTSIDE its own country gets nothing (Mexico at a US venue)
+        self.assertIsNone(pr.host_hfa("USA", "Mexico", "Brazil"))
+        self.assertIsNone(pr.host_hfa("Qatar", "Mexico", "Brazil"))   # non-host venue country
+        self.assertIsNone(pr.host_hfa("", "Mexico", "Brazil"))
+
+    def test_knockout_hfa_lifts_host_advance(self):
+        m = pr.load_ratings()
+        neutral = pr.resolve_knockout(m, "Mexico", "Saudi Arabia")
+        home = pr.resolve_knockout(m, "Mexico", "Saudi Arabia", hfa_team="Mexico")
+        self.assertGreater(home.p_advance_a, neutral.p_advance_a)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -96,6 +96,15 @@ ALIAS = {
 # host nation (by fixtures `country`) that receives home advantage at home venues
 HOST_BY_COUNTRY = {"Mexico": "Mexico", "USA": "United States", "Canada": "Canada"}
 
+
+def host_hfa(country: str | None, team_a: str, team_b: str) -> str | None:
+    """The host nation among (team_a, team_b) that is playing in its OWN country (so it
+    gets the home bonus), or None. ``country`` is the venue's country; HOST_BY_COUNTRY
+    maps it to that host's canon team name. Used for both group fixtures and knockout
+    ties (a knockout at a US/Mexican/Canadian venue is a home tie for that host)."""
+    host = HOST_BY_COUNTRY.get((country or "").strip())
+    return host if host in (team_a, team_b) else None
+
 ELO_FILE = "Elo_Ratings_World_Cup_2026_VERIFIED.csv"   # NOT the corrupted original
 # Pre-tournament VERIFIED is the committed ANCHOR. update_elo.py rolls it forward through
 # played WC results (K=60) into CURRENT (gitignored, regenerated each nightly build);

@@ -396,8 +396,7 @@ class BracketRenderTests(unittest.TestCase):
         self.assertIn('class="bp">60%</span>', html)        # advance probability shown
         self.assertIn(f'>{bs._esc(proj["champion"])}<', html)  # downstream filled, not blank
         page = bs.render_bracket_page(proj, "", "t")
-        self.assertIn("Projected to lift the trophy", page)
-        self.assertIn(proj["champion"], page)
+        self.assertIn(proj["champion"], page)              # champion banner present when resolved
 
     def test_unfed_projection_stays_blank_downstream(self):
         import standings as st
