@@ -140,16 +140,20 @@ tv_us, team_a, team_b, score_a, score_b, decided_by, winner, status, notes
   stakes unless told otherwise) and CLV alongside Brier in recaps.
 - Never invent odds. If no snapshot was provided/fetched, the section stays
   in placeholder state.
-- **Knockout betting (matches 73–104):** the bettable market is **advance** ("to
-  qualify"), a 2-way (no draw) market model-priced from `predict.resolve_knockout`
-  (p_advance incl. extra time + a coin-flip shootout). Model-priced ⇒ it clears the
-  **stricter 8pp sanity ceiling**. De-vig is the same multiplicative method over 2
-  outcomes. Picks settle from `knockout.csv`'s `winner` side (penalty-aware), CLV
-  identical. **Assumption to revisit:** The Odds API's standard markets are 90-minute, so
-  no "to qualify" line is auto-fetched — advance odds are entered manually (`odds.py enter
-  M.. advance HOME,AWAY`); absent a market the honest output is **"No bet."** Accountability:
-  pre-kickoff advance calls are logged to `data/ko_predictions_log.csv` and graded with a
-  **2-class Brier** (0 best · 0.5 coin-flip · 2 worst) against the advancing side.
+- **Knockout betting (matches 73–104):** the market is **advance** ("to qualify"), 2-way
+  (no draw). The model price is `predict.resolve_knockout`'s p_advance (incl. extra time +
+  a coin-flip shootout). The Odds API carries **no** to-qualify market, so the market price
+  is **auto-derived from the fetched 90-minute 3-way h2h** (the same one US-region pull):
+  de-vig the 90' h/d/a, then route the draw mass through the SAME ET+shootout layer —
+  `market_adv_a = q_h90 + q_d90·(et_a + et_d·0.5)`. This is a **model-vs-market READ** (a
+  vig-free fair probability, NOT a price you can take), shown on the card but **NEVER
+  recorded**: the ET layer is the model's on both sides, so the edge is just the 90'
+  disagreement on the advance axis, and with no real line there's no CLV. (A genuinely
+  quoted 2-way advance line, via manual `odds.py enter M.. advance H,A`, WOULD be recorded —
+  model-priced, 8pp ceiling, settled from `knockout.csv`'s `winner`, penalty-aware.)
+  Accountability is separate: pre-kickoff advance calls are logged to
+  `data/ko_predictions_log.csv` and graded with a **2-class Brier** (0 best · 0.5 coin-flip
+  · 2 worst) against the advancing side.
 
 ## Phase 7 — Sweat Factor data contracts
 

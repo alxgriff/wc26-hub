@@ -74,10 +74,10 @@ The full Round-of-32 → Final stage now runs end-to-end (group→knockout bound
   knockout steps fail-soft + health-gated.
 
 Open follow-ups: host HFA now applies in KO ties at a host's own venue (knockout.csv carries
-the venue country; `predict.host_hfa`). The advance
-market isn't auto-fetched (The Odds API quotes 90-minute markets) — advance odds via manual
-`odds.py enter M.. advance H,A`, so it's "No bet" until a 2-way line is entered; revisit if a
-to-qualify API market is identified. ET-vs-regulation isn't distinguished by the API (decisive
+the venue country; `predict.host_hfa`). The advance market price is **auto-derived from the
+fetched 90' h2h** (route its draw mass through the model's ET+shootout) and shown as a
+model-vs-market read — NEVER recorded (no quoted to-qualify line ⇒ no CLV); a real 2-way
+line (manual `odds.py enter … advance`) would be recordable. ET-vs-regulation isn't distinguished by the API (decisive
 auto-entries record `regulation`; revise to `extra_time` by hand if needed).
 
 ### Odds (`odds.py`)

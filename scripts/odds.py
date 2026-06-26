@@ -531,16 +531,35 @@ def evaluate_ko_match(match_no: int, team_a: str, team_b: str,
                              hfa_team=pr.host_hfa(country, team_a, team_b))  # host at home in KO
     adv = latest_market(odds_rows, mid, KO_ADVANCE_MARKET)
     if adv and ("home", "") in adv and ("away", "") in adv:
+        # a REAL, quoted 2-way to-qualify line (rare — via manual `enter advance`): recordable
         o = [adv[("home", "")][0], adv[("away", "")][0]]
         implied = devig(o)                       # 2-way multiplicative de-vig (Σ implied = 1)
         for i, (sel, p) in enumerate((("home", kp.p_advance_a), ("away", kp.p_advance_b))):
             out["advance"].append((sel, "", o[i], implied[i], p, p - implied[i]))
-    elif adv:
+        return out
+    if adv:
         out["missing"].append("incomplete advance market (need both sides)")
-    else:
+        return out
+    # No quoted to-qualify market (the norm — The Odds API carries none). DERIVE the market's
+    # advance probability from the fetched 90' 3-way h2h, routing its draw mass through the SAME
+    # extra-time + coin-flip-shootout layer the model uses. This is a model-vs-market READ
+    # (vig-free fair probability, not a price you can take) — shown, but NEVER recorded: the ET
+    # layer is ours on both sides, so the edge is just the 90' h2h disagreement on the advance
+    # axis (a self-priced quantity, hence the model-priced 8pp framing — and no real line/CLV).
+    h = latest_market(odds_rows, mid, "h2h")
+    if h and all((sel, "") in h for sel in ("home", "draw", "away")):
+        q = devig([h[("home", "")][0], h[("draw", "")][0], h[("away", "")][0]])  # 90' h/d/a
+        et_a, et_d, _et_b = kp.et_wdl                       # model's ET conditional W/D/L
+        madv_a = q[0] + q[1] * (et_a + et_d * 0.5)          # route draw mass; 0.5 = flat shootout
+        madv = (madv_a, 1.0 - madv_a)
+        for i, (sel, p) in enumerate((("home", kp.p_advance_a), ("away", kp.p_advance_b))):
+            out["advance"].append((sel, "", None, madv[i], p, p - madv[i]))  # None odds = no quoted price
+        out["advance_derived"] = True
         out["missing"].append(
-            "no 'to qualify' (advance) market quoted — the model's advance call is shown "
-            "on the card, but with no market to price against, nothing is bet")
+            "advance edge derived from the 90' market (no quoted 'to qualify' line) — a "
+            "model-vs-market read, not a recorded bet")
+    else:
+        out["missing"].append("no market snapshot for this tie yet — advance call shown, nothing priced")
     return out
 
 
@@ -573,6 +592,10 @@ def best_bets(evaluation: dict, threshold: float = RECORD_THRESHOLD,
     flags = []
     per_market: dict = {}
     for market in ("h2h", "totals", "spreads", "btts", "advance"):
+        # a knockout advance edge DERIVED from the 90' line is a display-only model-vs-market
+        # read (no quoted to-qualify price, no CLV) — shown, never recorded.
+        if market == "advance" and evaluation.get("advance_derived"):
+            continue
         ceiling = _market_sanity(market, sanity, model_sanity)
         for sel, line, odds, implied, our_p, edge in evaluation.get(market, []):
             if edge >= ceiling:   # inclusive: an edge AT the ceiling is the case the rule targets
@@ -861,7 +884,7 @@ def load_ko_odds_engine(now=None):
                 return None
             ev = evaluate_ko_match(km.match_no, km.team_a, km.team_b, odds_rows, model, km.country)
             if not ev.get("advance"):
-                return None                      # snapshot exists but no 2-way advance market
+                return None                      # snapshot exists but no h2h to derive advance from
             match_picks, flags = best_bets(ev)
             stale = {m for m in {p["market"] for p in match_picks}
                      if (age := _snapshot_age_hours(odds_rows, mid, _now, m)) is None
@@ -939,7 +962,8 @@ def render_odds_section(match_id: str, evaluation: dict, pick,
         for mk, (sel, line, odds, implied, our_p, edge) in labelled:
             clears = edge >= threshold
             actionable += int(clears)
-            lines.append(f"| {mk} | {sel} | {american_odds(odds)} | {implied:.0%} | "
+            odds_str = american_odds(odds) if odds is not None else "—"   # derived line: no price
+            lines.append(f"| {mk} | {sel} | {odds_str} | {implied:.0%} | "
                          f"{our_p:.0%} | {edge:+.1%}{' ✓' if clears else ''} |")
         if actionable:
             lines.append("")
@@ -954,6 +978,9 @@ def render_odds_section(match_id: str, evaluation: dict, pick,
         if source_label:
             lines.append("")
             lines.append(f"_Odds source: {source_label}, de-vigged multiplicatively._")
+        for n in evaluation.get("missing", []):
+            lines.append("")
+            lines.append(f"_{n}._")
         lines.append("")
     if picks:
         for i, pk in enumerate(picks, 1):

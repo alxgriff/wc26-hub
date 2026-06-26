@@ -956,10 +956,13 @@ def render_market(odds_info: dict | None, team_a: str, team_b: str,
                           and str(pk["line"]) == str(line) for pk in picks)
             cls = ' class="pick-row"' if is_pick else ""
             edge_cls = "edge-pos" if edge >= threshold else ("edge-neg" if edge < 0 else "")
+            odds_cell = (f'<td title="{odds_v:.2f} decimal">{_american_odds(odds_v)}</td>'
+                         if odds_v is not None else
+                         '<td title="no quoted price — implied from the 90′ line">—</td>')
             rows_html.append(
                 f'      <tr{cls}><td class="lbl">{_esc(_MARKET_LABELS[market])}</td>'
                 f'<td class="lbl">{_esc(_sel_label(market, sel, line, team_a, team_b))}</td>'
-                f'<td title="{odds_v:.2f} decimal">{_american_odds(odds_v)}</td>'
+                f'{odds_cell}'
                 f'<td>{implied:.0%}</td><td>{our_p:.0%}</td>'
                 f'<td class="{edge_cls}">{edge:+.1%}</td></tr>')
     if rows_html:

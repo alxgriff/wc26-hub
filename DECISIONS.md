@@ -54,12 +54,20 @@ you make a non-obvious call, add it here.*
   injuries tagged "(verify before use)", fail-soft to a placeholder (never fabricates) — the same
   grounding contract as `stakes_blurb.py`. Matchups aren't known until a round resolves, so cards
   can't be pre-baked; they generate in the overnight build. *`scripts/knockout_cards.py`.*
-- **Knockout betting is a 2-way model-priced ADVANCE market.** "To qualify" (advance, incl. ET +
-  a coin-flip shootout) priced from `predict.resolve_knockout`; model-priced ⇒ the stricter **8pp**
-  sanity ceiling. Settled penalty-aware from `knockout.csv`'s `winner`. **Assumption (flagged for
-  review):** The Odds API quotes 90-minute markets, not "to qualify", so advance odds are entered
-  manually (`odds.py enter … advance H,A`) — absent a 2-way line the honest output is "No bet".
-  Accountability is a **2-class advance Brier** (0 best / 0.5 coin-flip / 2 worst). *`scripts/odds.py`, `scripts/ledger.py`.*
+- **Knockout betting is a 2-way ADVANCE market, AUTO-derived from the 90' line (2026-06-25).**
+  "To qualify" (advance, incl. ET + a coin-flip shootout) is priced from `predict.resolve_knockout`.
+  Research confirmed The Odds API carries **no** to-qualify market (only `outrights` = tournament
+  futures; a knockout `h2h` is the 90-minute 3-way). Rather than require manual odds entry, the
+  market price is **derived from the fetched 90' h2h**: de-vig h/d/a, then route the draw mass
+  through the same ET+shootout layer — `market_adv_a = q_h90 + q_d90·(et_a + et_d·0.5)`. Because
+  that ET layer is the model's on BOTH sides, the edge is just the 90' disagreement on the advance
+  axis (a self-priced quantity), so it is shown as a **model-vs-market READ — display only, NEVER
+  recorded** (no quoted price, no CLV); `best_bets` skips it (`advance_derived` flag), the odds cell
+  shows "—", and the card reads "No bet". A genuinely quoted 2-way line (manual `odds.py enter …
+  advance`) WOULD record (model-priced, 8pp ceiling, settled penalty-aware from `winner`). Rejected
+  alternatives for a *real* to-qualify line: API-Football (no-license terms, sparse coverage) and
+  Betfair (£299+ live key, US-geo-blocked). Accountability stays a **2-class advance Brier** (0 best
+  / 0.5 coin-flip / 2 worst). *`scripts/odds.py` (`evaluate_ko_match`, `best_bets`), `scripts/ledger.py`.*
 - **The site/edition flip to the knockout phase by data, not date.** When the group stage
   completes (or the slate date passes the last group date), the masthead/progress/slate switch to
   knockout and a banner elevates the bracket — so the most-trafficked moment (the R32) never lands

@@ -852,12 +852,28 @@ class KnockoutAdvanceTests(unittest.TestCase):
         self.assertAlmostEqual(home[4], 0.62)                 # our_p = p_advance_a
         self.assertAlmostEqual(home[5], 0.62 - home[3])       # edge = our − implied
 
-    def test_no_advance_market_is_no_bet(self):
+    def test_no_snapshot_is_no_bet(self):
         with mock.patch.object(od.pr, "resolve_knockout", return_value=fake_kp()):
             ev = od.evaluate_ko_match(73, "France", "Brazil", [], object())
         self.assertEqual(ev["advance"], [])
-        self.assertTrue(any("to qualify" in m for m in ev["missing"]))
+        self.assertTrue(any("nothing priced" in m for m in ev["missing"]))
         self.assertEqual(od.best_bets(ev)[0], [])
+
+    def test_advance_derived_from_90min_is_display_only(self):
+        # no quoted to-qualify line, but a 90' 3-way h2h IS snapshotted -> derive the
+        # market's advance probability and SHOW it, but never record it (no real line/CLV).
+        rows = [{"match_id": "M73", "market": "h2h", "selection": s, "line": "",
+                 "odds": o, "phase": "snapshot", "source": "median/3books",
+                 "timestamp": "2026-06-28T10:00:00-04:00"}
+                for s, o in (("home", "1.80"), ("draw", "3.60"), ("away", "4.50"))]
+        with mock.patch.object(od.pr, "resolve_knockout", return_value=fake_kp()):
+            ev = od.evaluate_ko_match(73, "France", "Brazil", rows, object())
+        self.assertTrue(ev["advance_derived"])
+        self.assertEqual(len(ev["advance"]), 2)               # home/away advance, derived
+        self.assertIsNone(ev["advance"][0][2])                # no quoted price (odds is None)
+        self.assertAlmostEqual(ev["advance"][0][3] + ev["advance"][1][3], 1.0)  # 2-way implied sums to 1
+        self.assertTrue(any("derived" in m for m in ev["missing"]))
+        self.assertEqual(od.best_bets(ev)[0], [])             # display-only — never a recorded pick
 
     def test_advance_is_model_priced_8pp_ceiling(self):
         rows = [odds_row("M73", "advance", "home", 2.0),
