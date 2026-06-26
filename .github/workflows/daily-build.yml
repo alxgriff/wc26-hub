@@ -66,7 +66,11 @@ jobs:
             echo "::error::bad date input '$DATE' (need YYYY-MM-DD)"; exit 1
           fi
           echo "date=$DATE" >> "$GITHUB_OUTPUT"
-          echo "Editorial date: $DATE" >> "$GITHUB_STEP_SUMMARY"
+          # knockout-stage gate: the R32 starts 2026-06-28. Knockout steps below only run from
+          # then on, so the whole knockout stack stays dormant through the group stage.
+          KO=$([[ "$DATE" > "2026-06-27" ]] && echo true || echo false)
+          echo "ko=$KO" >> "$GITHUB_OUTPUT"
+          echo "Editorial date: $DATE (knockout=$KO)" >> "$GITHUB_STEP_SUMMARY"
 
       # HARD GATE — runs on the PRISTINE checkout, before any step below mutates
       # the working tree. It guards against CODE regressions deterministically
@@ -107,6 +111,7 @@ jobs:
       # Log today's KNOCKOUT advance calls pre-kickoff too (no-op until ties resolve).
       - name: Log knockout advance calls (pre-kickoff)
         id: ko_ledger
+        if: ${{ steps.ed.outputs.ko == 'true' }}
         continue-on-error: true
         run: python scripts/ledger.py log-ko "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
 
@@ -120,11 +125,13 @@ jobs:
       # knockout scores. Level/penalty results are reported for manual entry, never guessed.
       - name: Resolve knockout matchups (standings -> knockout.csv)
         id: ko_resolve
+        if: ${{ steps.ed.outputs.ko == 'true' }}
         continue-on-error: true
         run: python scripts/knockout.py --resolve | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Enter knockout results (The Odds API)
         id: ko_results
+        if: ${{ steps.ed.outputs.ko == 'true' }}
         continue-on-error: true
         run: python scripts/fetch_ko_results.py | tee -a "$GITHUB_STEP_SUMMARY"
 
@@ -132,6 +139,7 @@ jobs:
       # needs ANTHROPIC_API_KEY — fail-soft, the card slot placeholders without one).
       - name: Generate knockout cards (Sonnet, grounded)
         id: ko_cards
+        if: ${{ steps.ed.outputs.ko == 'true' }}
         continue-on-error: true
         run: python scripts/knockout_cards.py "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
 
@@ -154,6 +162,7 @@ jobs:
       # line was entered (odds.py enter M.. advance H,A) — no market => honest "No bet".
       - name: Record knockout advance edges
         id: ko_evaluate
+        if: ${{ steps.ed.outputs.ko == 'true' }}
         continue-on-error: true
         run: python scripts/odds.py evaluate-ko "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
 

@@ -1547,7 +1547,7 @@ def _bracket_view(proj: dict, view_cls: str, champ_label: str, sub: str) -> str:
 
 def render_bracket_page(proj: dict, css: str, generated_at: str,
                         template_dir: Path = TEMPLATE_DIR,
-                        projected: "dict | None" = None) -> str:
+                        projected: "dict | None" = None, real_results: bool = True) -> str:
     n = proj["as_of_matches_played"]
     resolved = ("All eight group-winner-vs-best-third matches are projected from "
                 "the current third-place race." if proj["thirds_resolved"] else
@@ -1557,13 +1557,22 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
     notes_html = "".join(f'<li>{_esc(w)}</li>' for w in proj["warnings"])
     notes_html = f'<ul class="bnotes">{notes_html}</ul>' if notes_html else ""
 
-    now_view = _bracket_view(
-        proj, "view-now", "Champions",
-        "Real results only. Every group winner, runner-up and the eight best thirds (slotted by "
-        "the FIFA Annex C logic) drop into their fixed slots; then a winner is highlighted and "
-        "advances the moment its tie is actually played, with the loser struck out. Unplayed ties "
-        "show both sides, and the rounds beyond fill in as games finish — nothing here is "
-        "projected. For the model's run of the whole bracket, switch to the projected finish.")
+    if real_results:               # knockout phase: as-it-stands advances only actual results
+        now_view = _bracket_view(
+            proj, "view-now", "Champions",
+            "Real results only. Every group winner, runner-up and the eight best thirds (slotted by "
+            "the FIFA Annex C logic) drop into their fixed slots; then a winner is highlighted and "
+            "advances the moment its tie is actually played, with the loser struck out. Unplayed ties "
+            "show both sides, and the rounds beyond fill in as games finish — nothing here is "
+            "projected. For the model's run of the whole bracket, switch to the projected finish.")
+    else:                          # group phase: keep the current clinch-aware model projection
+        now_view = _bracket_view(
+            proj, "view-now", "Projected to lift the trophy",
+            "Drawn from the standings as they stand — every group winner, runner-up and the eight "
+            "best thirds (slotted by the FIFA Annex C logic). A green ✓ marks a seed already "
+            "mathematically secured; a dashed underline marks a provisional position (it shifts "
+            "with each result); the run beyond the R32 is the model's projected advancer, in green "
+            "with its chance to advance. Switch to the projected finish to play every group out.")
     if projected is not None:
         proj_view = _bracket_view(
             projected, "view-proj", "Projected champion",
@@ -2364,6 +2373,15 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     if group_dates:
         last_group_date = date.fromisoformat(max(group_dates))
 
+    # Knockout-phase gate (same predicate as build_page). The whole knockout experience —
+    # bracket-as-centerpiece, the March-Madness real-results bracket, the per-tie KO pages, the
+    # Group-stage page — activates ONLY once the group stage is over (all 12 groups played, or
+    # the slate has a knockout match, or the date is past the last group date). Before that the
+    # site is byte-for-byte the current group-stage site, so a merge is a no-op until the R32.
+    group_done = len(s.groups) == 12 and s.played == s.total and s.total > 0
+    in_ko = (group_done or any(km.date_et == target.isoformat() for km in knockout)
+             or (last_group_date is not None and target > last_group_date))
+
     blurb_html = ""
     blurb_path = blurbs_dir / f"{target.isoformat()}.md"
     if blurb_path.exists():
@@ -2446,12 +2464,11 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     bracket_proj = None
     bracket_full = None
     try:
-        # resolve_provisional: slot the thirds via Annex C using the standings' deterministic
-        # order even when the cutline is provisional — so the bracket shows the real third-place
-        # logic rather than abstract "Best 3rd of …" pools. Gated on all 12 groups having STARTED.
-        # NO `clinched` map: the as-it-stands bracket carries no ✓ confirmed marks (once the
-        # knockout is under way every R32 seed is in — the marks add nothing).
-        bracket_proj = bk.project(s, resolve_provisional=True)
+        # resolve_provisional: slot the thirds via Annex C even when the cutline is provisional.
+        # KNOCKOUT phase: no `clinched` map (no ✓ marks — every R32 seed is in). GROUP phase:
+        # keep the current clinch-aware view, so a merge changes nothing on the live site yet.
+        clinched = None if in_ko else {g: scen.clinched_ranks(g, matches) for g in s.groups}
+        bracket_proj = bk.project(s, resolve_provisional=True, clinched=clinched)
     except (FileNotFoundError, ValueError) as e:
         warnings.append(f"Bracket page skipped: {e}")
     if bracket_proj is not None:
@@ -2460,12 +2477,15 @@ def build_site(out_dir: Path, target: date, generated_at: str,
             if knockout_resolver is None:
                 warnings.append("Projected bracket not computed: prediction model unavailable")
         ko_results = ko.results_dict(knockout)
-        # AS IT STANDS: advance ONLY actual results — no model projection of unplayed ties. A
-        # winner is highlighted and moves on as games are really played (March-Madness style);
-        # the projected champion does NOT live here (the final is only filled once it's won).
-        bracket_proj = bk.feed(bracket_proj, lambda a, b: None, results=ko_results)
-        # PROJECTED FINISH: simulate every remaining group game, resolve the WHOLE bracket through
-        # the model (real results override), and surface the projected champion — only on this view.
+        # AS IT STANDS — KNOCKOUT phase: advance ONLY actual results (March-Madness; a winner is
+        # highlighted and moves on as games are played; no projected champion here). GROUP phase:
+        # the current model-projected view, so the live site is unchanged until the R32.
+        if in_ko:
+            bracket_proj = bk.feed(bracket_proj, lambda a, b: None, results=ko_results)
+        elif knockout_resolver:
+            bracket_proj = bk.feed(bracket_proj, knockout_resolver, results=ko_results)
+        # PROJECTED FINISH (both phases): simulate the remaining group games, resolve the WHOLE
+        # bracket through the model (real results override), surface the projected champion.
         rates_fn = load_group_rates()
         if rates_fn is not None and knockout_resolver:
             try:
@@ -2501,15 +2521,16 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         render_record_page(matches, rows, ledger, css, generated_at, template_dir,
                            picks_log=picks_log, shadow_log=shadow_log, knockout=knockout),
         encoding="utf-8")
-    # the group tables + third-place race as a standalone page (the knockout-phase index links
-    # here behind 'Group stage'; always generated so the link works + as a final-tables archive)
-    (out_dir / "group-stage.html").write_text(
-        render_group_stage_page(s, forms, fates, css, generated_at, template_dir),
-        encoding="utf-8")
+    # the group tables + third-place race as a standalone page — only in the knockout phase,
+    # where the index links here behind 'Group stage' (in the group phase the index IS the tables)
+    if in_ko:
+        (out_dir / "group-stage.html").write_text(
+            render_group_stage_page(s, forms, fates, css, generated_at, template_dir),
+            encoding="utf-8")
     if bracket_proj is not None:
         (out_dir / "bracket.html").write_text(
             render_bracket_page(bracket_proj, css, generated_at, template_dir,
-                                projected=bracket_full),
+                                projected=bracket_full, real_results=in_ko),
             encoding="utf-8")
 
     fixture_teams = sorted({m.team_a for m in matches} | {m.team_b for m in matches})
@@ -2567,12 +2588,12 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         warnings.append("predictor loaded but produced no usable prediction for "
                         "any match — every Call rendered as placeholder")
 
-    # knockout match pages — one per tie (resolved matchup or still-abstract slot). The
-    # Call shows the live advance model for a resolved, not-yet-played tie; the result
-    # once played; a placeholder while the matchup is unknown. Card/odds slots fill in
-    # the overnight build (cards) and the knockout betting layer.
+    # knockout match pages — one per tie (resolved matchup or still-abstract slot), but ONLY in
+    # the knockout phase (gated, so they don't appear on the live group-stage site). The Call
+    # shows the live advance model for a resolved not-yet-played tie; the result once played;
+    # a placeholder while the matchup is unknown. Card/odds slots fill via the overnight build.
     ko_by_no = ko.by_no(knockout)
-    for km in knockout:
+    for km in (knockout if in_ko else []):
         mid = f"M{km.match_no}"
         if km.is_played and km.winner_team:
             call_html = render_ko_call(
@@ -2600,7 +2621,7 @@ def build_site(out_dir: Path, target: date, generated_at: str,
     # page deployed under docs/
     expected = ({f"{sc.slugify(t)}.html" for t in fixture_teams},
                 {f"{r['match_id']}.html" for r in rows}
-                | {f"M{km.match_no}.html" for km in knockout})
+                | ({f"M{km.match_no}.html" for km in knockout} if in_ko else set()))
     for subdir, keep in zip(("teams", "matches"), expected):
         for f in (out_dir / subdir).glob("*.html"):
             if f.name not in keep:

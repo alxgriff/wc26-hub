@@ -70,7 +70,10 @@ jobs:
         run: |
           DATE="$(TZ=America/New_York date +%F)"
           echo "date=$DATE" >> "$GITHUB_OUTPUT"
-          echo "Editorial date: $DATE" >> "$GITHUB_STEP_SUMMARY"
+          # knockout gate (R32 starts 2026-06-28): KO steps dormant through the group stage
+          KO=$([[ "$DATE" > "2026-06-27" ]] && echo true || echo false)
+          echo "ko=$KO" >> "$GITHUB_OUTPUT"
+          echo "Editorial date: $DATE (knockout=$KO)" >> "$GITHUB_STEP_SUMMARY"
 
       # ONE API call, tagged BOTH snapshot (feeds intra-day recording below) and
       # closing (feeds CLV). Single-book DraftKings posts the moneyline early but
@@ -90,6 +93,7 @@ jobs:
       # update same-day. Level/penalty results are reported for manual entry.
       - name: Resolve + enter knockout results
         id: ko
+        if: ${{ steps.ed.outputs.ko == 'true' }}
         continue-on-error: true
         run: |
           python scripts/knockout.py --resolve | tee -a "$GITHUB_STEP_SUMMARY"
@@ -118,6 +122,7 @@ jobs:
       # Knockout advance edges intra-day (no-op unless a 2-way advance line was entered).
       - name: Record knockout advance edges
         id: ko_evaluate
+        if: ${{ steps.ed.outputs.ko == 'true' }}
         continue-on-error: true
         run: python scripts/odds.py evaluate-ko "${{ steps.ed.outputs.date }}" --record | tee -a "$GITHUB_STEP_SUMMARY"
 
