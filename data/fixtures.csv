@@ -45,8 +45,8 @@ H1,H,1,2026-06-15,12:00,12:00 PM,Spain,Cape Verde,Mercedes-Benz Stadium,Atlanta,
 H2,H,1,2026-06-15,18:00,6:00 PM,Saudi Arabia,Uruguay,Hard Rock Stadium,Miami Gardens,USA,FS1,1,1,played,
 H3,H,2,2026-06-21,12:00,12:00 PM,Spain,Saudi Arabia,Mercedes-Benz Stadium,Atlanta,USA,Fox,4,0,played,
 H4,H,2,2026-06-21,18:00,6:00 PM,Uruguay,Cape Verde,Hard Rock Stadium,Miami Gardens,USA,FS1,2,2,played,
-H5,H,3,2026-06-26,20:00,8:00 PM,Cape Verde,Saudi Arabia,NRG Stadium,Houston,USA,FS1,,,scheduled,"Simultaneous with H6 (matchday 3 rule)"
-H6,H,3,2026-06-26,20:00,8:00 PM,Uruguay,Spain,Estadio Akron,Guadalajara,Mexico,Fox,,,scheduled,"Simultaneous with H5 (matchday 3 rule)"
+H5,H,3,2026-06-26,20:00,8:00 PM,Cape Verde,Saudi Arabia,NRG Stadium,Houston,USA,FS1,0,0,played,Simultaneous with H6 (matchday 3 rule)
+H6,H,3,2026-06-26,20:00,8:00 PM,Uruguay,Spain,Estadio Akron,Guadalajara,Mexico,Fox,0,1,played,Simultaneous with H5 (matchday 3 rule)
 I1,I,1,2026-06-16,15:00,3:00 PM,France,Senegal,MetLife Stadium,East Rutherford,USA,Fox,3,1,played,
 I2,I,1,2026-06-16,18:00,6:00 PM,Iraq,Norway,Gillette Stadium,Foxborough,USA,Fox,1,4,played,
 I3,I,2,2026-06-22,17:00,5:00 PM,France,Iraq,Lincoln Financial Field,Philadelphia,USA,Fox,3,0,played,
