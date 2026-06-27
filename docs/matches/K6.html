@@ -712,17 +712,24 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.99 decimal">-101</td><td>48%</td><td>31%</td><td class="edge-neg">-17.2%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.83 decimal">-120</td><td>52%</td><td>69%</td><td class="edge-pos">+17.2%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">DR Congo -0.5</td><td title="1.70 decimal">-143</td><td>57%</td><td>36%</td><td class="edge-neg">-20.8%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Uzbekistan +0.5</td><td title="2.25 decimal">+125</td><td>43%</td><td>64%</td><td class="edge-pos">+20.8%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">DR Congo</td><td title="1.69 decimal">-145</td><td>56%</td><td>36%</td><td class="edge-neg">-20.3%</td></tr>
+      <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="3.90 decimal">+290</td><td>24%</td><td>31%</td><td class="edge-pos">+6.9%</td></tr>
+      <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">Uzbekistan</td><td title="5.00 decimal">+400</td><td>19%</td><td>32%</td><td class="edge-pos">+13.4%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.25</td><td title="1.93 decimal">-108</td><td>49%</td><td>31%</td><td class="edge-neg">-18.8%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.25</td><td title="1.89 decimal">-112</td><td>51%</td><td>69%</td><td class="edge-pos">+18.8%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.20 decimal">+120</td><td>44%</td><td>31%</td><td class="edge-neg">-13.1%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.72 decimal">-140</td><td>56%</td><td>69%</td><td class="edge-pos">+13.1%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">DR Congo -0.5</td><td title="1.69 decimal">-145</td><td>57%</td><td>36%</td><td class="edge-neg">-21.2%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Uzbekistan +0.5</td><td title="2.27 decimal">+127</td><td>43%</td><td>64%</td><td class="edge-pos">+21.2%</td></tr>
     </tbody>
   </table>
 </div>
-<p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
-<p class="verify-flag">totals under 2.5: model-priced edge +17.2% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads away 0.5: model-priced edge +20.8% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 27, 12:49 AM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · no logged consensus prediction — 1X2 edge not computed.</p>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Uzbekistan</strong> (1X2) @ +400, edge <strong>+13.4%</strong> — best price +400 (draftkings). Flat 1u, paper record.</p><p class="odds-note warn">⚠ the model under-prices draws (June-20 audit: p_draw ≈19% vs ≈36% realised), which inflates favourite-side 1X2 (moneyline) edges — treat win-side moneyline picks with extra caution until the draw calibration is re-checked after MD3.</p></div>
+<p class="odds-note">Logged pick: Uzbekistan @ +400 (draftkings), edge 13.4pp · open.</p>
+<p class="verify-flag">totals under 2.25: model-priced edge +18.8% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">totals under 2.5: model-priced edge +13.1% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">spreads away 0.5: model-priced edge +21.2% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 27, 11:54 AM ET · DraftKings where quoted, else best of 6 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
 <div class="outcome-grid-inner">
@@ -745,7 +752,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.0046,lb=0.9345,N=8,SHOW=6,i,j;
+  var la=1.0047,lb=0.9344,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
