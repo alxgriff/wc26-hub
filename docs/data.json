@@ -938,7 +938,7 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-28 13:31",
+ "generated_at": "2026-06-28 17:52",
  "slate_date": "2026-06-28",
  "bracket": {
   "schema": 1,
@@ -1218,9 +1218,7 @@
    ]
   },
   "third_place_match": 103,
-  "warnings": [
-   "Third-place cutline has ties broken deterministically (FIFA World Ranking isn't modelled, so the standings' order decides) — the qualifying thirds and their slots are provisional and may change."
-  ],
+  "warnings": [],
   "winners": {},
   "participants": {
    "73": [
@@ -1568,9 +1566,7 @@
    ]
   },
   "third_place_match": 103,
-  "warnings": [
-   "Third-place cutline has ties broken deterministically (FIFA World Ranking isn't modelled, so the standings' order decides) — the qualifying thirds and their slots are provisional and may change."
-  ],
+  "warnings": [],
   "winners": {
    "73": {
     "team": "Canada",
@@ -1609,9 +1605,9 @@
     "source": "model"
    },
    "79": {
-    "team": "Ecuador",
-    "loser": "Mexico",
-    "p": 0.5362275730646962,
+    "team": "Mexico",
+    "loser": "Ecuador",
+    "p": 0.5473762997865325,
     "source": "model"
    },
    "80": {
@@ -1623,7 +1619,7 @@
    "81": {
     "team": "United States",
     "loser": "Bosnia and Herzegovina",
-    "p": 0.7562096266570429,
+    "p": 0.8192130733025296,
     "source": "model"
    },
    "82": {
@@ -1688,8 +1684,8 @@
    },
    "92": {
     "team": "England",
-    "loser": "Ecuador",
-    "p": 0.7134835131239439,
+    "loser": "Mexico",
+    "p": 0.7689569387048867,
     "source": "model"
    },
    "93": {
@@ -1843,7 +1839,7 @@
     "Norway"
    ],
    "92": [
-    "Ecuador",
+    "Mexico",
     "England"
    ],
    "93": [
