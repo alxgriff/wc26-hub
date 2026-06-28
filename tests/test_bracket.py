@@ -34,6 +34,19 @@ def _full_groups() -> list:
     return matches
 
 
+def _all_draws_groups() -> list:
+    """Every group game a 1-1 draw: all 48 teams finish level on points, GD and goals, so the
+    third-place cutline is genuinely ambiguous everywhere (the 8th/9th boundary is a tie).
+    Hermetic stand-in for 'a fully provisional cutline' — independent of the live results."""
+    matches = []
+    pairs = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)]
+    for g in "ABCDEFGHIJKL":
+        t = [f"{g}1", f"{g}2", f"{g}3", f"{g}4"]
+        for no, (a, b) in enumerate(pairs, 1):
+            matches.append(st.Match(f"{g}{no}", g, (no + 1) // 2, t[a], t[b], 1, 1, "played"))
+    return matches
+
+
 def _partial_groups() -> list:
     """All 12 groups MID-stage: matchdays 1-2 played, matchday 3 still scheduled — so every
     team has played 2 of 3 and NO group position is sealed. Hermetic stand-in for 'the live
@@ -185,10 +198,26 @@ class ProjectedFinishTests(unittest.TestCase):
         self.assertIsNotNone(proj.get("champion"))
 
     def test_resolve_provisional_breaks_the_cutline(self):
-        # all draws => every team level => the third-place cutline is provisional everywhere
-        s = bk.project_final_standings(st.load_fixtures(LIVE), lambda m: (1, 1))
+        # a GENUINELY ambiguous cutline (all draws => every third level, the 8th/9th boundary
+        # is a tie) is gated by default and broken deterministically by resolve_provisional
+        s = st.compute_standings(_all_draws_groups())
         self.assertFalse(bk.project(s)["thirds_resolved"])                 # gated by default
         self.assertTrue(bk.project(s, resolve_provisional=True)["thirds_resolved"])
+
+    def test_order_only_tie_inside_top8_does_not_gate(self):
+        # the real-world case: a tie WITHIN the top 8 (both qualify) must NOT gate the bracket —
+        # only a tie straddling the 8th/9th boundary changes the qualifying SET Annex C reads.
+        def tr(g, gd, gf):                       # a third-place TeamRow with a given (gd, gf), 3 pts
+            return st.TeamRow(f"{g}3", g, played=3, won=1, drawn=0, lost=2, gf=gf, ga=gf - gd)
+        # ranks 1..7 distinct; 3rd & 4th tied (order-only, both in); 8th strictly ahead of 9th
+        thirds = [tr("K", 4, 6), tr("F", 3, 6), tr("E", 2, 4), tr("L", 2, 4),  # E/L tie, both top-8
+                  tr("B", 1, 5), tr("J", 0, 5), tr("D", 0, 4),                  # 7th
+                  tr("I", 2, 8),                                                # 8th — clearly in
+                  tr("G", 0, 3), tr("A", -1, 2)]                               # 9th — clearly out
+        self.assertFalse(bk._cutline_ambiguous(thirds))                        # boundary determined
+        # and a boundary straddle (8th & 9th level on pts/gd/gf) IS ambiguous
+        straddle = thirds[:7] + [tr("I", 1, 4), tr("G", 1, 4), tr("A", -2, 1)]
+        self.assertTrue(bk._cutline_ambiguous(straddle))
 
     def test_per_side_provisional_flags(self):
         # hermetic: a synthetic MID-group-stage set (MD1-2 played, MD3 open) — not the live

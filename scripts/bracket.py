@@ -97,6 +97,22 @@ def _group_started(gt: "st.GroupTable") -> bool:
     return any(r.played > 0 for r in gt.rows)
 
 
+def _cutline_ambiguous(third_place: "list[st.TeamRow]") -> bool:
+    """Is the SET of 8 qualifying thirds genuinely undecided? Only when a tie straddles the
+    8th/9th boundary — i.e. the 8th and 9th teams are level on the PRIMARY modelled criteria
+    (points, GD, goals scored), so which of them takes the last slot is unresolved (it falls to
+    the unmodelled FIFA ranking). A tie ENTIRELY inside the top 8 (both qualify) or entirely
+    below it (neither qualifies) doesn't change the set, so it must not gate the bracket. With
+    fewer than 9 thirds there is no boundary to straddle. (Conservative on the rare fair-play
+    edge: if the 8th/9th are level on points/GD/goals but fair-play separates them, this still
+    reports ambiguous — the safe direction, never a wrong resolve.)"""
+    if len(third_place) <= st.QUALIFYING_THIRDS:
+        return False
+    a = third_place[st.QUALIFYING_THIRDS - 1]      # 8th — last in
+    b = third_place[st.QUALIFYING_THIRDS]          # 9th — first out
+    return (a.points, a.gd, a.gf) == (b.points, b.gd, b.gf)
+
+
 def _slot_label(kind: str, g: str) -> str:
     return {"W": f"Winner {g}", "RU": f"Runner-up {g}"}[kind]
 
@@ -139,8 +155,11 @@ def project(standings: "st.Standings", annex: dict | None = None,
 
     # --- can the 8 third-hosting matches be resolved?
     all_started = len(groups) == 12 and all(_group_started(gt) for gt in groups.values())
-    cutline_provisional = any("provisional" in n or "FIFA World Ranking" in n
-                              for n in standings.third_place_notes)
+    # The bracket depends ONLY on the SET of 8 qualifying thirds (Annex C keys on the set of
+    # group letters, not their order). So gate on whether a tie STRADDLES the 8th/9th boundary
+    # — not on any provisional note: an order-only tie WITHIN the top 8 (both teams qualify
+    # regardless of who's ranked ahead) leaves the set, and thus the whole bracket, determined.
+    cutline_provisional = _cutline_ambiguous(standings.third_place)
     third_assign: dict[int, str] = {}
     thirds_resolved = False
     if all_started and len(standings.third_place) >= st.QUALIFYING_THIRDS:
