@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Group stage — WC26 Daily Hub</title>
+<meta name="description" content="2026 World Cup group stage: all twelve group tables and the third-place race.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,500&family=Spline+Sans+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f5f1e6;
+  --paper-2:#efe9da;
+  --ink:#1b1812;
+  --ink-soft:#615a4b;
+  --hairline:rgba(27,24,18,.16);
+  --green:#1c6b35;
+  --green-soft:rgba(28,107,53,.10);
+  --verm:#a83018;
+  --verm-soft:rgba(168,48,24,.08);
+  --crimson:#7a0c0c;
+  --amber:#8a5a00;
+  --amber-soft:rgba(138,90,0,.14);
+  --serif:"Fraunces",Georgia,"Times New Roman",serif;
+  --mono:"Spline Sans Mono","Cascadia Code",Consolas,"Courier New",monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#16140e;
+    --paper-2:#1d1a12;
+    --ink:#ece5d2;
+    --ink-soft:#a59c86;
+    --hairline:rgba(236,229,210,.18);
+    --green:#62b97e;
+    --green-soft:rgba(98,185,126,.12);
+    --verm:#e8765a;
+    --verm-soft:rgba(232,118,90,.10);
+    --crimson:#c41a1a;
+    --amber:#d9a948;
+    --amber-soft:rgba(217,169,72,.12);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+html,body{overflow-x:clip}
+body{
+  background:var(--paper);
+  background-image:radial-gradient(var(--hairline) .5px,transparent .5px);
+  background-size:4px 4px;
+  color:var(--ink);
+  font-family:var(--serif);
+  font-weight:500;
+  line-height:1.45;
+  padding:clamp(14px,3.5vw,40px) clamp(14px,4vw,48px) 56px;
+}
+.sheet{max-width:1140px;margin:0 auto}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+a{color:inherit}
+main{display:block}
+a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--verm);outline-offset:2px}
+.thirds-wrap,.bracket-wrap{scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
+.thirds-wrap::-webkit-scrollbar,.bracket-wrap::-webkit-scrollbar{height:8px}
+.thirds-wrap::-webkit-scrollbar-thumb,.bracket-wrap::-webkit-scrollbar-thumb{background:var(--hairline)}
+.skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:var(--paper);padding:8px 14px;font-family:var(--mono);font-size:.8rem;z-index:9}
+.skip:focus{left:8px;top:8px}
+
+/* ---------- masthead ---------- */
+.masthead{text-align:center;animation:settle .6s cubic-bezier(.2,.7,.3,1) both}
+.eyebrow{
+  font-family:var(--mono);font-size:.68rem;font-weight:500;letter-spacing:.32em;
+  text-transform:uppercase;color:var(--ink-soft);
+}
+.masthead h1{
+  font-size:clamp(2.3rem,8.5vw,4.8rem);
+  font-weight:900;letter-spacing:-.015em;line-height:1.02;
+  margin:.12em 0 .18em;
+  font-variation-settings:"opsz" 144;
+  text-wrap:balance;
+}
+.masthead h1 .num{color:var(--verm)}
+.dateline{
+  display:flex;justify-content:center;flex-wrap:wrap;column-gap:1.4em;row-gap:2px;
+  border-top:3px solid var(--ink);border-bottom:1px solid var(--ink);
+  padding:7px 4px;position:relative;
+  font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+}
+.dateline::before{content:"";position:absolute;left:0;right:0;top:2px;border-top:1px solid var(--ink)}
+.progress{margin:14px auto 0;max-width:430px}
+.progress .bar{height:4px;background:var(--hairline);position:relative}
+.progress .bar i{position:absolute;inset:0;right:auto;background:var(--verm);min-width:2px}
+.progress .lbl{font-family:var(--mono);font-size:.68rem;color:var(--ink-soft);margin-top:5px;letter-spacing:.06em}
+
+/* ---------- group letter nav ---------- */
+.gnav{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin:22px 0 4px}
+.gnav a{
+  font-family:var(--mono);font-size:.78rem;font-weight:700;text-decoration:none;
+  width:32px;height:32px;display:grid;place-items:center;
+  border:1px solid var(--ink);
+}
+.gnav a:hover{background:var(--ink);color:var(--paper)}
+.gnav a.wide{width:auto;padding:0 12px;letter-spacing:.1em}
+
+/* ---------- section headers ---------- */
+section{margin-top:46px}
+.sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:18px}
+.sec-head h2{font-size:clamp(1.45rem,3.4vw,1.9rem);font-weight:900;letter-spacing:-.01em}
+.sec-head .kicker{font-family:var(--mono);font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:var(--verm);font-weight:700;white-space:nowrap}
+.standfirst{font-style:italic;color:var(--ink-soft);font-size:.95rem;margin:-8px 0 18px}
+
+/* ---------- today's slate (fixture-board cards in a responsive grid) ----------
+   1 column on phones -> 2 on tablets -> up to 3 on wide screens (auto-fill keeps a
+   lone card from stretching). Each card is a symmetrical matchup: the two sides
+   flank a vermillion "v" disc that becomes the scoreline once the game is played. */
+.slate{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px;align-items:start}
+.slate .card{position:relative;border:1px solid var(--ink);background:var(--paper-2);box-shadow:3px 3px 0 var(--hairline);padding:13px 14px 12px;text-align:center}
+@media (hover:hover){.slate .card{transition:transform .18s ease,box-shadow .18s ease}.slate .card:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--hairline)}}
+.slate .kick{font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.slate .kick .moon{color:var(--amber)}
+.slate .kick .ftbadge{color:var(--verm)}
+.slate .matchup{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin:11px 0 9px;text-decoration:none;color:inherit}
+/* stretched link: the lone <a> in each card covers the whole box, so a click
+   anywhere (kickoff, meta, "preview →", padding) opens the preview. Keeps one
+   link per card — valid HTML + a single screen-reader target. Don't add a 2nd
+   interactive element inside .card without giving it position+z-index above this. */
+.slate .card{cursor:pointer}
+.slate .matchup::after{content:"";position:absolute;inset:0;z-index:1}
+.slate .team{font-family:var(--serif);font-weight:900;font-size:1.05rem;line-height:1.1;letter-spacing:-.01em}
+.slate .matchup:hover .team,.slate .matchup:focus-visible .team{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
+.slate .ta{text-align:right}
+.slate .tb{text-align:left}
+.slate .v{width:30px;height:30px;border-radius:50%;background:var(--verm);color:var(--paper);display:grid;place-items:center;font-family:var(--serif);font-style:italic;font-weight:700;font-size:.92rem;margin:0 auto}
+.slate .sc{min-width:46px;font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.slate .meta{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;border-top:1px solid var(--hairline);padding-top:8px}
+.slate .pv{color:var(--verm);font-weight:700}
+.slate .pickline{margin-top:8px;display:inline-block;font-family:var(--mono);font-size:.66rem;color:var(--green);background:var(--green-soft);font-weight:700;padding:2px 8px;letter-spacing:.02em}
+.slate .empty{grid-column:1/-1;font-style:italic;color:var(--ink-soft);border:1px dashed var(--hairline);padding:14px;text-align:center}
+
+/* ---------- group cards ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(310px,100%),1fr));gap:20px}
+.card{
+  border:1px solid var(--ink);background:var(--paper-2);
+  box-shadow:4px 4px 0 var(--hairline);
+  padding:13px 14px 11px;
+  animation:rise .55s cubic-bezier(.2,.7,.3,1) both;
+  animation-delay:calc(var(--i)*45ms);
+}
+@media (hover:hover){
+  .card{transition:transform .18s ease,box-shadow .18s ease}
+  .card:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--hairline)}
+}
+.card h3{
+  display:flex;align-items:center;gap:9px;
+  font-size:1rem;font-weight:900;letter-spacing:.02em;text-transform:uppercase;
+  border-bottom:2px solid var(--ink);padding-bottom:7px;margin-bottom:2px;
+}
+.card h3 .stamp{
+  font-family:var(--mono);font-weight:700;font-size:.95rem;
+  width:26px;height:26px;display:grid;place-items:center;flex:0 0 auto;
+  background:var(--ink);color:var(--paper);
+}
+.card h3 .played-tag{margin-left:auto;font-family:var(--mono);font-weight:500;font-size:.62rem;letter-spacing:.12em;color:var(--ink-soft)}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.84rem;font-variant-numeric:tabular-nums}
+.card table{table-layout:fixed}
+th,td{text-align:right;padding:7px 4px;border-bottom:1px solid var(--hairline);white-space:nowrap}
+th.num{width:2.4rem}
+thead th{
+  font-size:.66rem;font-weight:500;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--ink-soft);padding-top:9px;padding-bottom:4px;
+}
+tbody tr:last-child th,tbody tr:last-child td{border-bottom:0}
+td.pos,th.pos{width:1.8em;color:var(--ink-soft);text-align:left;padding-left:7px}
+th.team{text-align:left}
+tbody th.team{
+  font-family:var(--serif);font-weight:700;font-size:.92rem;
+  max-width:1px;width:99%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+tbody th.team .dag{color:var(--verm);font-family:var(--mono);font-size:.75em;font-weight:500}
+td.pts{font-weight:700;font-size:.95rem}
+.card tbody tr:nth-child(2) th,.card tbody tr:nth-child(2) td{border-bottom:2px solid var(--ink)}
+.card tbody tr.zone-top{background:var(--green-soft)}
+.card tbody tr.zone-top td.pos{box-shadow:inset 3px 0 0 var(--green)}
+.card tbody tr.zone-third td.pos{box-shadow:inset 3px 0 0 var(--amber)}
+.card tbody tr.zone-third{background:var(--amber-soft)}
+/* fate-* hooks are wired by scenarios.py output (Phase 3+). When emitting them,
+   build_site must also add sr-only text — the ::after ✓ is visual-only.
+   zone-out (4th place) is intentionally unstyled: neutral is the default. */
+tr.fate-through th.team::after{content:" ✓";color:var(--green);font-family:var(--mono)}
+tr.fate-out{color:var(--ink-soft)}
+tr.fate-out th.team{text-decoration:line-through;text-decoration-thickness:1px;text-decoration-color:var(--ink-soft)}
+
+/* form pips */
+td.form,th.form{white-space:nowrap;text-align:center}
+th.form{width:62px}
+.pip{
+  display:inline-grid;place-items:center;width:16px;height:16px;
+  font-size:.58rem;font-weight:700;margin:0 1px;vertical-align:middle;
+  border:1px solid var(--hairline);color:var(--ink-soft);
+}
+.pip-w{background:var(--green);border-color:var(--green);color:var(--paper)}
+.pip-d{border-color:var(--ink-soft);color:var(--ink)}
+.pip-l{background:var(--verm-soft);border-color:var(--verm);color:var(--verm)}
+@media (prefers-color-scheme:dark){.pip-w{color:#10130c}}
+
+/* notes */
+.notes{list-style:none;margin-top:9px;font-family:var(--mono);font-size:.68rem;line-height:1.5;color:var(--ink-soft)}
+.notes li{padding-left:1.2em;text-indent:-1.2em;margin-top:3px}
+.notes .dag{color:var(--verm)}
+.notes li.warn{color:var(--amber)}
+
+/* ---------- third-place race ---------- */
+.thirds-wrap{border:1px solid var(--ink);background:var(--paper-2);box-shadow:4px 4px 0 var(--hairline);padding:6px 16px 12px;overflow-x:auto;max-width:768px;margin-inline:auto}
+.thirds-wrap table{min-width:560px}
+.thirds-wrap tbody tr.q{background:var(--green-soft)}
+.thirds-wrap tbody tr.q td.pos{box-shadow:inset 3px 0 0 var(--green)}
+.thirds-wrap tbody tr.below{color:var(--ink-soft)}
+.thirds-wrap tbody tr.below th.team{font-weight:500}
+td.grp{font-weight:700}
+td.in{color:var(--green);font-weight:700;text-align:center}
+tr.cut td{
+  border-bottom:0;border-top:2px dashed var(--verm);
+  padding:5px 0 6px;text-align:center;
+  font-size:.64rem;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--verm);
+}
+tr.cut .scissors{font-size:.9rem;letter-spacing:0;vertical-align:-1px}
+
+/* ---------- footer ---------- */
+footer{margin-top:52px;border-top:3px solid var(--ink);padding-top:8px;position:relative}
+footer::before{content:"";position:absolute;left:0;right:0;top:5px;border-top:1px solid var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 26px;font-family:var(--mono);font-size:.68rem;color:var(--ink-soft);margin-top:10px}
+.legend .pip{vertical-align:-3px}
+.legend .swatch{display:inline-block;width:12px;height:12px;vertical-align:-1px;border:1px solid var(--hairline)}
+.legend .swatch.g{background:var(--green-soft);border-left:3px solid var(--green)}
+.legend .swatch.a{background:var(--amber-soft);border-left:3px solid var(--amber)}
+.archive{margin-top:16px;font-family:var(--mono);font-size:.72rem}
+.archive h2{font-family:var(--serif);font-size:.95rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+.archive ul{list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:6px}
+.colophon{margin-top:18px;font-family:var(--mono);font-size:.64rem;color:var(--ink-soft);letter-spacing:.04em;line-height:1.7;max-width:72ch}
+.moon{color:var(--amber);font-family:var(--serif)}
+
+@keyframes rise{from{opacity:0;transform:translateY(12px)}}
+@keyframes settle{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+@media (max-width:480px){
+  th,td{padding:7px 3px}
+  .card{padding:11px 10px 9px}
+}
+
+/* ---------- subpages: team cards & matchup previews ---------- */
+.crumbs{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:18px}
+.crumbs a{text-decoration:none}
+.crumbs a:hover{text-decoration:underline}
+.page-mast{border-bottom:3px solid var(--ink);padding-bottom:14px;margin-bottom:8px;position:relative}
+.page-mast::after{content:"";position:absolute;left:0;right:0;bottom:3px;border-bottom:1px solid var(--ink)}
+.page-mast .eyebrow{margin-bottom:2px}
+.page-mast h1{font-size:clamp(1.9rem,6vw,3.3rem);font-weight:900;letter-spacing:-.015em;line-height:1.05;text-wrap:balance;font-variation-settings:"opsz" 144}
+.page-mast h1 a{text-decoration:none}
+.page-mast h1 a:hover{text-decoration:underline;text-decoration-thickness:3px;text-decoration-color:var(--verm)}
+.page-mast h1 .vs{font-size:.45em;font-weight:500;font-style:italic;color:var(--ink-soft);margin:0 .35em}
+.metaline{font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 18px}
+.metaline .stamp{font-weight:700;background:var(--ink);color:var(--paper);padding:1px 7px}
+.scoreline{font-family:var(--mono);font-weight:700;font-size:1.5rem;margin-top:8px}
+
+.strap{display:flex;flex-wrap:wrap;gap:6px 26px;font-family:var(--mono);font-size:.74rem;margin:14px 0 4px;color:var(--ink-soft)}
+.strap b{color:var(--ink);font-weight:700}
+
+.prose{max-width:72ch;font-size:.98rem;line-height:1.62}
+.prose p{margin:0 0 1em}
+.prose ul{margin:0 0 1em 1.2em}
+.prose li{margin-bottom:.45em}
+.prose blockquote{border-left:3px solid var(--amber);padding:2px 0 2px 14px;color:var(--ink-soft);font-style:italic;margin:0 0 1em}
+.prose strong{font-weight:700}
+
+.callout{border:1px solid var(--ink);background:var(--paper-2);box-shadow:3px 3px 0 var(--hairline);padding:12px 15px;margin:0 0 14px}
+.callout .tag{display:block;font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--verm);margin-bottom:5px}
+.callout p{margin:0;font-size:.92rem;line-height:1.55}
+.callout-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:14px;margin:18px 0}
+.callout-grid .callout{margin:0}
+
+.squad{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:2px 28px;margin:10px 0 6px}
+.squad div{padding:7px 0;border-bottom:1px solid var(--hairline)}
+.squad dt{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:2px}
+.squad dd{margin:0;font-size:.88rem;line-height:1.5}
+
+.fixture-list{list-style:none;margin:8px 0}
+.fixture-list li{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;border-bottom:1px solid var(--hairline);padding:9px 2px;font-family:var(--mono);font-size:.82rem}
+.fixture-list .md{color:var(--ink-soft);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;flex:0 0 3.2em}
+.fixture-list .fx{font-family:var(--serif);font-weight:700;font-size:.95rem}
+.fixture-list .fx a{text-decoration:none}
+.fixture-list .fx a:hover{text-decoration:underline}
+.fixture-list .res{font-weight:700}
+.fixture-list .when{color:var(--ink-soft);margin-left:auto;font-size:.7rem;letter-spacing:.05em;text-transform:uppercase}
+
+.probs{border:1px solid var(--ink);background:var(--paper-2);box-shadow:4px 4px 0 var(--hairline);padding:14px 16px;margin:6px 0 16px;max-width:680px}
+.probbar{display:flex;height:30px;border:1px solid var(--ink);font-family:var(--mono);font-size:.7rem;font-weight:700;margin:10px 0 4px}
+.probbar span{display:grid;place-items:center;overflow:hidden;white-space:nowrap;min-width:0;padding:0 3px}
+.probbar .pa{background:var(--green-soft);color:var(--ink);border-right:1px solid var(--ink)}
+.probbar .pd{color:var(--ink);border-right:1px solid var(--ink)}
+.probbar .pb{background:var(--verm-soft);color:var(--ink)}
+.probs .scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em}
+.probs .factline{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);margin-top:8px;line-height:1.7}
+.probs .factline b{color:var(--ink)}
+.placeholder-slot{border:1px dashed var(--ink-soft);padding:11px 14px;font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:6px 0 16px;max-width:680px}
+
+.mini-table{max-width:560px}
+.team-pair{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}
+.team-pair a{flex:1 1 240px;border:1px solid var(--ink);background:var(--paper-2);box-shadow:3px 3px 0 var(--hairline);padding:11px 14px;text-decoration:none;font-weight:700;font-size:1.02rem}
+@media (hover:hover){
+  .team-pair a{transition:transform .18s ease,box-shadow .18s ease}
+  .team-pair a:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--hairline)}
+}
+.team-pair a .sub{display:block;font-family:var(--mono);font-weight:500;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-top:3px}
+.verify-flag{border-left:3px solid var(--amber);background:var(--amber-soft);padding:9px 13px;font-family:var(--mono);font-size:.72rem;color:var(--ink);margin:0 0 14px;max-width:72ch}
+
+.callout ul{margin:2px 0 0 1.1em;font-size:.92rem;line-height:1.55}
+.callout li{margin-bottom:.35em}
+tbody th.team a{text-decoration:none}
+tbody th.team a:hover{text-decoration:underline;text-decoration-color:var(--verm)}
+
+/* ---------- odds & best bet ---------- */
+.edge-wrap{max-width:680px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent}
+.edge-wrap::-webkit-scrollbar{height:8px}
+.edge-wrap::-webkit-scrollbar-thumb{background:var(--hairline)}
+.edge-wrap table{margin-bottom:4px}
+.edge-wrap td.lbl,.edge-wrap th.lbl{text-align:left}
+.edge-wrap tbody td.lbl{font-family:var(--serif);font-weight:700;font-size:.92rem}
+td.edge-pos{color:var(--green);font-weight:700}
+td.edge-neg{color:var(--ink-soft)}
+tr.pick-row{background:var(--verm-soft)}
+tr.pick-row td:first-child{box-shadow:inset 3px 0 0 var(--verm)}
+.bet-callout{border:2px solid var(--verm);background:var(--paper-2);box-shadow:4px 4px 0 var(--hairline);padding:12px 15px;margin:12px 0;max-width:680px}
+.bet-callout .tag{display:block;font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--verm);margin-bottom:5px}
+.bet-callout p{margin:0;font-size:.95rem;line-height:1.5}
+.no-bet{font-family:var(--mono);font-size:.78rem;margin:10px 0;max-width:680px}
+.no-bet b{letter-spacing:.06em}
+.odds-note{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.7;max-width:680px}
+.odds-note.warn{color:var(--amber)}
+.caut{cursor:help;color:var(--amber);text-decoration:none;font-weight:700}
+.ledger-line{font-family:var(--mono);font-size:.74rem;font-weight:700;margin-top:14px}
+
+/* ---------- morning-line blurb ---------- */
+.blurb{max-width:72ch;margin:-4px 0 20px;font-size:1.04rem;line-height:1.6}
+.blurb p{margin:0 0 .7em}
+.blurb .blurb-tag{font-family:var(--mono);font-size:.64rem;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase;margin:0}
+
+/* ---------- overnight + the record ---------- */
+.overnight{list-style:none;max-width:72ch}
+.overnight li{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;border-bottom:1px solid var(--hairline);padding:9px 2px;font-size:1rem}
+.overnight .mid{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.1em;color:var(--ink-soft);flex:0 0 2.2em}
+.overnight a{font-weight:700;text-decoration:none}
+.overnight a:hover{text-decoration:underline;text-decoration-color:var(--verm)}
+.overnight .grade{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
+.overnight .grade.warn{color:var(--amber)}
+.hit{display:inline-grid;place-items:center;width:15px;height:15px;font-size:.62rem;font-weight:700;vertical-align:-2px}
+.hit-y{background:var(--green-soft);color:var(--green);border:1px solid var(--green)}
+.hit-n{background:var(--verm-soft);color:var(--verm);border:1px solid var(--verm)}
+.record-wrap{border:1px solid var(--ink);background:var(--paper-2);box-shadow:4px 4px 0 var(--hairline);padding:6px 16px 12px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--ink-soft) transparent;max-width:880px}
+.record-wrap::-webkit-scrollbar{height:8px}
+.record-wrap::-webkit-scrollbar-thumb{background:var(--hairline)}
+.record-wrap table{min-width:560px}
+.record-wrap td.lbl,.record-wrap th.lbl{text-align:left}
+.record-wrap tbody td.lbl a{text-decoration:none;font-family:var(--serif);font-weight:700;font-size:.92rem}
+.record-wrap tbody td.lbl a:hover{text-decoration:underline;text-decoration-color:var(--verm)}
+tr.subtotal td{font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);border-bottom:2px solid var(--ink);text-align:left}
+tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
+.status-won{color:var(--green);font-weight:700}
+.status-lost{color:var(--verm);font-weight:700}
+.status-open{color:var(--ink-soft)}
+
+/* ---------- MD3 scenarios ---------- */
+.scenario{border:1px solid var(--ink);background:var(--paper-2);box-shadow:4px 4px 0 var(--hairline);padding:12px 16px 14px;margin:0 0 18px;max-width:680px}
+.scenario-intro{font-style:italic;color:var(--ink-soft);font-size:.9rem;margin-bottom:4px}
+.scenario table{margin:4px 0 10px}
+.scenario td.lbl,.scenario th.lbl{text-align:left}
+.scenario tbody td.lbl{font-family:var(--serif);font-weight:700;font-size:.92rem}
+.scenario-team{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--verm);margin:10px 0 3px}
+.scenario-stakes{list-style:none;font-size:.92rem;line-height:1.55}
+.scenario-stakes li{padding-left:1.1em;text-indent:-1.1em;margin-bottom:4px}
+
+.overnight-more{font-style:italic;color:var(--ink-soft);font-size:.95rem;margin:14px 0 0}
+.overnight-more a{text-decoration:none}
+.overnight-more a:hover{text-decoration:underline;text-decoration-color:var(--verm)}
+
+/* ---------- the wire (auto-gathered, attributed news) ---------- */
+.wire{border:1px dashed var(--amber);background:var(--amber-soft);padding:14px 17px;max-width:72ch}
+.wire-tag{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase;line-height:1.7;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed var(--amber)}
+.wire p{margin:0 0 .7em;font-size:.95rem;line-height:1.55}
+.wire ul{margin:0 0 .7em 1.2em;font-size:.95rem;line-height:1.55}
+.wire li{margin-bottom:.45em}
+.wire a{word-break:break-all}
+
+/* ---------- sweat factor / conditions meter ---------- */
+.conditions{margin:.2rem 0 .4rem}
+.cond-stamp{display:block;font-family:var(--mono);font-size:.67rem;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.55rem}
+.cond-stats{font-size:.9rem;margin-bottom:.35rem}
+.cond-track{height:8px;background:var(--hairline);border-radius:4px;margin:.2rem 0 .25rem;position:relative;overflow:hidden}
+.cond-fill{position:absolute;inset:0;right:auto;border-radius:4px;background:var(--verm)}
+.cond-sev{font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--verm);margin:.1rem 0 .8rem}
+.cond-teams{display:grid;gap:.5rem;margin-top:.2rem}
+.cond-team{display:grid;grid-template-columns:minmax(8rem,auto) 1fr auto;align-items:center;gap:.5rem;font-size:.85rem}
+.cond-tname{font-weight:700}
+.cond-dis-track{height:4px;background:var(--hairline);border-radius:2px;position:relative;overflow:hidden}
+.cond-dis-fill{position:absolute;inset:0;right:auto;border-radius:2px;background:var(--amber)}
+.cond-dis-hot{background:var(--crimson)}
+.cond-delta{color:var(--ink-soft);font-family:var(--mono);font-size:.7rem;white-space:nowrap;text-align:right}
+.cond-ac{font-family:var(--mono);font-size:.82rem;color:var(--ink-soft);margin:.2rem 0}
+/* severity colour overrides */
+.cond-sev-severe{color:var(--verm)}
+.cond-sev-high{color:var(--amber)}
+.cond-sev-moderate{color:var(--amber)}
+.cond-sev-mild{color:var(--ink-soft)}
+.cond-sev-indoors{color:var(--ink-soft)}
+.cond-blurb{font-size:.9rem;color:var(--ink-soft);font-style:italic;margin:.35rem 0 .6rem}
+
+/* ---------- match pages: article column + margin-notes rail ----------
+   Print idiom: the whole article (call, stakes, read, wire, market) flows
+   as one measured column while the key-duel / watch-for / selection /
+   margin-notes boxes rail down the right margin alongside it — following
+   sections rise to fill the space beside the rail instead of waiting below
+   it. The .read-grid section dissolves (display:contents) so its children
+   join the page grid; modern browsers keep its labeled-region semantics.
+   Below 1020px everything is one column and the callout grid reflows
+   itself (auto-fit): 2-up on tablets, 1-up on phones. */
+@media (min-width:1020px){
+  main#preview{display:grid;grid-template-columns:minmax(0,1fr) 380px;column-gap:46px;align-items:start;grid-auto-flow:row}
+  main#preview>section{grid-column:1}
+  main#preview>.read-grid{display:contents}
+  .read-grid>.sec-head{grid-column:1;margin-top:46px}
+  .read-grid>.prose,.read-grid>.placeholder-slot,.read-grid>.verify-flag{grid-column:1}
+  .read-grid>.callout-grid{grid-column:2;grid-row:span 9;grid-template-columns:1fr;margin:18px 0 0}
+}
+
+/* ---------- knockout bracket (as-it-stands) ----------
+   Traditional left-to-right cascade. Each round is a fixed-height column; a match
+   in round r sits exactly between its two feeders in round r-1, so progression is
+   implied by position (no match numbers). Geometry is deterministic: every card is
+   --bmh tall, the R32 pitch is --bu (=card+gap), and round r has pitch 2^r·--bu —
+   so the per-round top offset and inner gap are pure calc(). Connector lines: each
+   feeder draws a horizontal stub right (::after) to the next column's edge, and the
+   top card of each pair draws the vertical bar (::before) joining the pair there.
+   Cards are a fixed height with ellipsis so content can't break the math. */
+.bracket-wrap{--bmh:48px;--bgap:16px;--bgut:34px;--bu:calc(var(--bmh) + var(--bgap));--bline:var(--ink-soft);overflow-x:auto;padding-bottom:10px}
+.bracket{list-style:none;display:flex;gap:var(--bgut);min-width:min-content;align-items:start}
+.bround{flex:0 0 auto;width:168px}
+.bround h3{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--verm);border-bottom:2px solid var(--ink);padding-bottom:5px;margin-bottom:14px;white-space:nowrap}
+.bround ul{list-style:none;display:flex;flex-direction:column}
+.bround[data-r="0"] ul{gap:var(--bgap)}
+.bround[data-r="1"] ul{padding-top:calc(.5*var(--bu));gap:calc(2*var(--bu) - var(--bmh))}
+.bround[data-r="2"] ul{padding-top:calc(1.5*var(--bu));gap:calc(4*var(--bu) - var(--bmh))}
+.bround[data-r="3"] ul{padding-top:calc(3.5*var(--bu));gap:calc(8*var(--bu) - var(--bmh))}
+.bround[data-r="4"] ul{padding-top:calc(7.5*var(--bu))}
+/* every tie is a card: two stacked team rows split by a hairline (March-Madness style) */
+.btie{position:relative;height:var(--bmh);display:flex;align-items:stretch;border:1px solid var(--ink);background:var(--paper-2);box-shadow:2px 2px 0 var(--hairline)}
+.bpair{display:flex;flex-direction:column;width:100%;min-width:0}
+.bslot{display:flex;align-items:center;gap:5px;font-size:.78rem;line-height:1.2;font-weight:600;padding:0 8px;flex:1 1 0;min-height:0}
+.bslot + .bslot{border-top:1px solid var(--hairline)}
+.bn{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bp{flex:0 0 auto;font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--green);letter-spacing:.02em}
+.bslot a{text-decoration:none}
+.bslot a:hover{text-decoration:underline;text-decoration-color:var(--verm);text-decoration-thickness:2px}
+.bslot.tbd{font-weight:500;font-style:italic;color:var(--ink-soft)}
+/* provisional: a concrete team whose group position isn't sealed yet — dashed underline */
+.bslot.prov .bn{border-bottom:1.5px dashed var(--ink-soft)}
+/* a played tie's WINNER is highlighted and advances; the loser is struck out (eliminated).
+   In the projected view the winner additionally carries its advance % (.bp). No ✓ marks. */
+.bslot.win{background:var(--verm-soft)}
+.bslot.win .bn{color:var(--ink);font-weight:800}
+.bslot.win .bn::before{content:"\25b8\00a0";color:var(--verm);font-weight:900}
+.btie:has(.win) .bslot:not(.win){color:var(--ink-soft)}
+.btie:has(.win) .bslot:not(.win) .bn{text-decoration:line-through;font-weight:500}
+/* connectors: horizontal stub out of every feeder to the next column edge */
+.bround:not([data-r="4"]) .btie::after{content:"";position:absolute;left:100%;top:calc(50% - .5px);width:var(--bgut);height:1px;background:var(--bline)}
+/* vertical bar on the top card of each pair, at the next column edge, spanning the pair pitch */
+.bround:not([data-r="4"]) .btie:nth-child(odd)::before{content:"";position:absolute;left:calc(100% + var(--bgut) - 1px);top:50%;width:1px;background:var(--bline)}
+.bround[data-r="0"] .btie:nth-child(odd)::before{height:var(--bu)}
+.bround[data-r="1"] .btie:nth-child(odd)::before{height:calc(2*var(--bu))}
+.bround[data-r="2"] .btie:nth-child(odd)::before{height:calc(4*var(--bu))}
+.bround[data-r="3"] .btie:nth-child(odd)::before{height:calc(8*var(--bu))}
+.bracket-third{margin-top:26px;max-width:230px}
+.bracket-third h3{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--hairline);padding-bottom:5px;margin-bottom:4px}
+.bthird-sub{font-style:italic;color:var(--ink-soft);font-size:.78rem;margin-bottom:10px}
+.bracket-third ul{list-style:none}
+.bracket-third .btie{height:auto;border-color:var(--hairline)}
+.bnotes{list-style:none;margin:14px 0 0;font-family:var(--mono);font-size:.72rem;color:var(--amber);line-height:1.6}
+.bnotes li{padding-left:1.1em;text-indent:-1.1em}
+/* CSS-only bracket view toggle (no JS): radios precede the views so `:checked ~ .view` works */
+.bview-radio{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.bview-tabs{display:inline-flex;margin:0 0 14px;border:1px solid var(--ink);background:var(--paper-2)}
+.bview-tabs label{padding:7px 16px;cursor:pointer;font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.bview-tabs label:first-child{border-right:1px solid var(--hairline)}
+#bv-now:checked ~ .bview-tabs label[for="bv-now"],
+#bv-proj:checked ~ .bview-tabs label[for="bv-proj"]{background:var(--ink);color:var(--paper)}
+.bview-radio:focus-visible ~ .bview-tabs{outline:2px solid var(--verm);outline-offset:2px}
+.bview{display:none}
+#bv-now:checked ~ .view-now,#bv-proj:checked ~ .view-proj{display:block}
+.bview-sub{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);line-height:1.6;margin:0 0 10px;max-width:680px}
+.bnotes li::before{content:"⚠ "}
+/* projected champion banner (only once the whole bracket resolves) */
+.bchamp{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:2px solid var(--green);background:var(--green-soft);padding:12px 18px;margin:18px 0 0}
+.bchamp .lbl{font-family:var(--mono);font-size:.64rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--green)}
+.bchamp strong{font-size:1.5rem;font-weight:900;letter-spacing:-.01em}
+@media (max-width:640px){.bracket-wrap{--bmh:38px;--bgap:10px;--bgut:22px}.bround{width:124px}.bslot{font-size:.74rem}}
+
+/* ---------- outcome grid (score matrix toggle) ---------- */
+.outcome-grid-wrap{margin:1.4rem 0 .4rem}
+.outcome-grid-toggle{
+  display:inline-flex;align-items:center;gap:.35em;list-style:none;
+  font-family:var(--mono);font-size:.74rem;font-weight:500;letter-spacing:.03em;
+  color:var(--ink-soft);cursor:pointer;
+  padding:.4em .85em;border:1px solid var(--hairline);border-radius:3px;
+  background:var(--paper-2);
+}
+.outcome-grid-toggle::-webkit-details-marker{display:none}
+.outcome-grid-toggle::before{content:"▸ ";font-size:.7em}
+details[open] .outcome-grid-toggle::before{content:"▾ "}
+.outcome-grid-toggle:hover{color:var(--ink);border-color:var(--ink-soft)}
+.outcome-grid-inner{margin-top:.9rem}
+.og-qbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.og-q{font-family:var(--mono);font-size:.7rem;letter-spacing:.02em;padding:6px 10px;
+  border-radius:999px;border:1px solid var(--hairline);background:transparent;
+  color:var(--ink-soft);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.og-q[aria-pressed="true"]{font-weight:600}
+.og-q.awin[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#f5f1e6}
+.og-q.draw[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:#1b1812}
+.og-q.bwin[aria-pressed="true"]{background:var(--verm);border-color:var(--verm);color:#f5f1e6}
+.og-q.over[aria-pressed="true"],.og-q.btts[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.og-readout{font-family:var(--mono);font-size:.82rem;min-height:1.6em;margin-bottom:10px;color:var(--ink-soft)}
+.og-readout b{color:var(--ink)}
+.og-big{font-size:1.25rem;font-weight:700;color:var(--ink)}
+.og-matrix{display:grid;grid-template-columns:auto repeat(6,1fr);gap:3px;max-width:360px}
+.og-corner,.og-ax-top,.og-ax-side{font-family:var(--mono);font-size:.55rem;color:var(--ink-soft);
+  display:flex;align-items:center;justify-content:center}
+.og-corner{align-items:flex-end;padding-bottom:2px}
+.og-cell{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.62rem;font-weight:500;color:var(--ink);
+  background:var(--paper-2);transition:opacity .15s,box-shadow .15s;position:relative}
+.og-cell.og-dim{opacity:.12}
+.og-cell.og-hot{box-shadow:inset 0 0 0 2px var(--ink)}
+.og-outer{display:flex;align-items:center;gap:5px}
+.og-inner{flex:1;min-width:0}
+.og-team-side{writing-mode:vertical-lr;transform:rotate(180deg);font-family:var(--mono);
+  font-size:.55rem;color:var(--ink-soft);white-space:nowrap;align-self:stretch;
+  display:flex;align-items:center;justify-content:center}
+.og-team-top{font-family:var(--mono);font-size:.55rem;color:var(--ink-soft);
+  text-align:center;margin-bottom:3px;max-width:360px}
+@media(prefers-reduced-motion:reduce){.og-cell{transition:none}}
+
+/* ---- knockout stage ---- */
+.ko-banner{margin:0 0 22px}
+.ko-banner a{display:block;text-decoration:none;border:1px solid var(--green);background:var(--green-soft);padding:13px 18px;color:var(--ink);transition:background .15s,color .15s}
+.ko-banner a:hover,.ko-banner a:focus-visible{background:var(--green);color:var(--paper)}
+.ko-banner-k{display:block;font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--green)}
+.ko-banner a:hover .ko-banner-k,.ko-banner a:focus-visible .ko-banner-k{color:var(--paper)}
+.ko-banner b{font-family:var(--serif);font-size:1.2rem;font-weight:700;display:inline-block;margin-top:2px}
+.ko-banner-sub{display:block;font-size:.8rem;color:var(--ink-soft);margin-top:3px}
+.ko-banner a:hover .ko-banner-sub,.ko-banner a:focus-visible .ko-banner-sub{color:var(--paper)}
+.slate .ko-card .team.tbd{font-style:italic;color:var(--ink-soft);font-weight:500}
+.slate .ko-card .ko-decided{font-family:var(--mono);font-size:.58rem;color:var(--ink-soft);margin-left:4px;text-transform:uppercase;letter-spacing:.04em}
+.call-lead{font-family:var(--serif);font-size:1.15rem;margin:0 0 10px}
+.adv-bar{display:flex;height:30px;border:1px solid var(--hairline);overflow:hidden;font-family:var(--mono);font-size:.72rem;font-weight:700}
+.adv-seg{display:grid;place-items:center;color:var(--paper);overflow:hidden;white-space:nowrap;min-width:0}
+.adv-a{background:var(--verm)}
+.adv-b{background:var(--ink-soft)}
+.call-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.7rem;color:var(--ink-soft);margin:6px 0 0}
+.call-facts{font-size:.86rem;margin:10px 0 0}
+.call-src{font-size:.72rem;color:var(--ink-soft);font-style:italic;margin:6px 0 0}
+.ko-result p{font-family:var(--serif);font-size:1.1rem;margin:0}
+.ko-path p{margin:0 0 6px;font-size:.9rem}
+.ko-path a{color:var(--verm)}
+.ko-aet{font-family:var(--mono);font-size:.62rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;vertical-align:middle}
+.page-mast h1 .tbd{font-style:italic;color:var(--ink-soft)}
+.ko-record{margin-top:22px;border-top:1px solid var(--hairline);padding-top:14px}
+.ko-record h3{font-family:var(--serif);font-size:1.05rem;margin:0 0 8px}
+
+</style>
+</head>
+<body>
+<a class="skip" href="#groups">Skip to the group tables</a>
+<div class="sheet">
+
+<header class="page-mast">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="index.html">The 26 Standings</a> · <span aria-current="page">Group stage</span>
+  </nav>
+  <p class="eyebrow">WC26 Daily Hub · Group stage</p>
+  <h1>The Twelve Groups</h1>
+  <div class="metaline">
+    <span>72 of 72 group matches played</span>
+    <span>Top two per group + the eight best thirds reached the Round of 32</span>
+  </div>
+</header>
+
+<main>
+<section id="groups" aria-labelledby="groups-h">
+  <div class="sec-head">
+    <span class="kicker">The Tables</span>
+    <h2 id="groups-h">Twelve Groups</h2>
+  </div>
+  <p class="standfirst">Top two in each group advance. Shaded zones read the table as it stands — nothing is decided until the math says so.</p>
+  <div class="grid">
+<article class="card" id="group-a" style="--i:0" aria-labelledby="gh-a">
+  <h3 id="gh-a"><span class="stamp" aria-hidden="true">A</span>Group A<span class="played-tag">6/6 played</span></h3>
+  <table>
+    <caption class="sr-only">Group A standings after 6 of 6 matches</caption>
+    <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
+    <tbody>
+      <tr class="zone-top fate-through">
+        <td class="pos">1</td>
+        <th class="team" scope="row" title="Mexico"><a href="teams/mexico.html">Mexico</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">won, won, won</span></td>
+        <td>6</td>
+        <td>+6</td>
+        <td class="pts">9</td>
+      </tr>
+      <tr class="zone-top fate-through">
+        <td class="pos">2</td>
+        <th class="team" scope="row" title="South Africa"><a href="teams/south-africa.html">South Africa</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">lost, drew, won</span></td>
+        <td>2</td>
+        <td>-1</td>
+        <td class="pts">4</td>
+      </tr>
+      <tr class="zone-third">
+        <td class="pos">3</td>
+        <th class="team" scope="row" title="South Korea"><a href="teams/south-korea.html">South Korea</a></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">won, lost, lost</span></td>
+        <td>2</td>
+        <td>-1</td>
+        <td class="pts">3</td>
+      </tr>
+      <tr class="zone-out fate-out">
+        <td class="pos">4</td>
+        <th class="team" scope="row" title="Czechia"><a href="teams/czechia.html">Czechia</a><span class="sr-only"> — eliminated</span></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">lost, drew, lost</span></td>
+        <td>2</td>
+        <td>-4</td>
+        <td class="pts">1</td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+<article class="card" id="group-b" style="--i:1" aria-labelledby="gh-b">
+  <h3 id="gh-b"><span class="stamp" aria-hidden="true">B</span>Group B<span class="played-tag">6/6 played</span></h3>
+  <table>
+    <caption class="sr-only">Group B standings after 6 of 6 matches</caption>
+    <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
+    <tbody>
+      <tr class="zone-top fate-through">
+        <td class="pos">1</td>
+        <th class="team" scope="row" title="Switzerland"><a href="teams/switzerland.html">Switzerland</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">drew, won, won</span></td>
+        <td>7</td>
+        <td>+4</td>
+        <td class="pts">7</td>
+      </tr>
+      <tr class="zone-top fate-through">
+        <td class="pos">2</td>
+        <th class="team" scope="row" title="Canada"><a href="teams/canada.html">Canada</a><span class="sr-only"> — qualified for the Round of 32</span><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">drew, won, lost</span></td>
+        <td>8</td>
+        <td>+5</td>
+        <td class="pts">4</td>
+      </tr>
+      <tr class="zone-third">
+        <td class="pos">3</td>
+        <th class="team" scope="row" title="Bosnia and Herzegovina"><a href="teams/bosnia-and-herzegovina.html">Bosnia and Herzegovina</a><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">drew, lost, won</span></td>
+        <td>5</td>
+        <td>-1</td>
+        <td class="pts">4</td>
+      </tr>
+      <tr class="zone-out fate-out">
+        <td class="pos">4</td>
+        <th class="team" scope="row" title="Qatar"><a href="teams/qatar.html">Qatar</a><span class="sr-only"> — eliminated</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">drew, lost, lost</span></td>
+        <td>2</td>
+        <td>-8</td>
+        <td class="pts">1</td>
+      </tr>
+    </tbody>
+  </table>
+  <ul class="notes">
+    <li><span class="dag">†</span> overall goal difference/goals separate Bosnia and Herzegovina / Canada (level on points and head-to-head).</li>
+  </ul>
+</article>
+<article class="card" id="group-c" style="--i:2" aria-labelledby="gh-c">
+  <h3 id="gh-c"><span class="stamp" aria-hidden="true">C</span>Group C<span class="played-tag">6/6 played</span></h3>
+  <table>
+    <caption class="sr-only">Group C standings after 6 of 6 matches</caption>
+    <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
+    <tbody>
+      <tr class="zone-top fate-through">
+        <td class="pos">1</td>
+        <th class="team" scope="row" title="Brazil"><a href="teams/brazil.html">Brazil</a><span class="sr-only"> — qualified for the Round of 32</span><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">drew, won, won</span></td>
+        <td>7</td>
+        <td>+6</td>
+        <td class="pts">7</td>
+      </tr>
+      <tr class="zone-top fate-through">
+        <td class="pos">2</td>
+        <th class="team" scope="row" title="Morocco"><a href="teams/morocco.html">Morocco</a><span class="sr-only"> — qualified for the Round of 32</span><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">drew, won, won</span></td>
+        <td>6</td>
+        <td>+3</td>
+        <td class="pts">7</td>
+      </tr>
+      <tr class="zone-third">
+        <td class="pos">3</td>
+        <th class="team" scope="row" title="Scotland"><a href="teams/scotland.html">Scotland</a></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">won, lost, lost</span></td>
+        <td>1</td>
+        <td>-3</td>
+        <td class="pts">3</td>
+      </tr>
+      <tr class="zone-out fate-out">
+        <td class="pos">4</td>
+        <th class="team" scope="row" title="Haiti"><a href="teams/haiti.html">Haiti</a><span class="sr-only"> — eliminated</span></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">lost, lost, lost</span></td>
+        <td>2</td>
+        <td>-6</td>
+        <td class="pts">0</td>
+      </tr>
+    </tbody>
+  </table>
+  <ul class="notes">
+    <li><span class="dag">†</span> overall goal difference/goals separate Brazil / Morocco (level on points and head-to-head).</li>
+  </ul>
+</article>
+<article class="card" id="group-d" style="--i:3" aria-labelledby="gh-d">
+  <h3 id="gh-d"><span class="stamp" aria-hidden="true">D</span>Group D<span class="played-tag">6/6 played</span></h3>
+  <table>
+    <caption class="sr-only">Group D standings after 6 of 6 matches</caption>
+    <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
+    <tbody>
+      <tr class="zone-top fate-through">
+        <td class="pos">1</td>
+        <th class="team" scope="row" title="United States"><a href="teams/united-states.html">United States</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">won, won, lost</span></td>
+        <td>8</td>
+        <td>+4</td>
+        <td class="pts">6</td>
+      </tr>
+      <tr class="zone-top fate-through">
+        <td class="pos">2</td>
+        <th class="team" scope="row" title="Australia"><a href="teams/australia.html">Australia</a><span class="sr-only"> — qualified for the Round of 32</span><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-d" aria-hidden="true">D</span><span class="sr-only">won, lost, drew</span></td>
+        <td>2</td>
+        <td>0</td>
+        <td class="pts">4</td>
+      </tr>
+      <tr class="zone-third">
+        <td class="pos">3</td>
+        <th class="team" scope="row" title="Paraguay"><a href="teams/paraguay.html">Paraguay</a><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-d" aria-hidden="true">D</span><span class="sr-only">lost, won, drew</span></td>
+        <td>2</td>
+        <td>-2</td>
+        <td class="pts">4</td>
+      </tr>
+      <tr class="zone-out fate-out">
+        <td class="pos">4</td>
+        <th class="team" scope="row" title="Türkiye"><a href="teams/turkiye.html">Türkiye</a><span class="sr-only"> — eliminated</span></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">lost, lost, won</span></td>
+        <td>3</td>
+        <td>-2</td>
+        <td class="pts">3</td>
+      </tr>
+    </tbody>
+  </table>
+  <ul class="notes">
+    <li><span class="dag">†</span> overall goal difference/goals separate Australia / Paraguay (level on points and head-to-head).</li>
+  </ul>
+</article>
+<article class="card" id="group-e" style="--i:4" aria-labelledby="gh-e">
+  <h3 id="gh-e"><span class="stamp" aria-hidden="true">E</span>Group E<span class="played-tag">6/6 played</span></h3>
+  <table>
+    <caption class="sr-only">Group E standings after 6 of 6 matches</caption>
+    <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
+    <tbody>
+      <tr class="zone-top fate-through">
+        <td class="pos">1</td>
+        <th class="team" scope="row" title="Germany"><a href="teams/germany.html">Germany</a><span class="sr-only"> — qualified for the Round of 32</span><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">won, won, lost</span></td>
+        <td>10</td>
+        <td>+6</td>
+        <td class="pts">6</td>
+      </tr>
+      <tr class="zone-top fate-through">
+        <td class="pos">2</td>
+        <th class="team" scope="row" title="Côte d&#x27;Ivoire"><a href="teams/cote-divoire.html">Côte d&#x27;Ivoire</a><span class="sr-only"> — qualified for the Round of 32</span><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">won, lost, won</span></td>
+        <td>4</td>
+        <td>+2</td>
+        <td class="pts">6</td>
+      </tr>
+      <tr class="zone-third">
+        <td class="pos">3</td>
+        <th class="team" scope="row" title="Ecuador"><a href="teams/ecuador.html">Ecuador</a></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">lost, drew, won</span></td>
+        <td>2</td>
+        <td>0</td>
+        <td class="pts">4</td>
+      </tr>
+      <tr class="zone-out fate-out">
+        <td class="pos">4</td>
+        <th class="team" scope="row" title="Curaçao"><a href="teams/curacao.html">Curaçao</a><span class="sr-only"> — eliminated</span></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">lost, drew, lost</span></td>
+        <td>1</td>
+        <td>-8</td>
+        <td class="pts">1</td>
+      </tr>
+    </tbody>
+  </table>
+  <ul class="notes">
+    <li><span class="dag">†</span> head-to-head (its points, then goal difference, then goals) separates Côte d&#x27;Ivoire / Germany (level on points).</li>
+  </ul>
+</article>
+<article class="card" id="group-f" style="--i:5" aria-labelledby="gh-f">
+  <h3 id="gh-f"><span class="stamp" aria-hidden="true">F</span>Group F<span class="played-tag">6/6 played</span></h3>
+  <table>
+    <caption class="sr-only">Group F standings after 6 of 6 matches</caption>
+    <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
+    <tbody>
+      <tr class="zone-top fate-through">
+        <td class="pos">1</td>
+        <th class="team" scope="row" title="Netherlands"><a href="teams/netherlands.html">Netherlands</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">drew, won, won</span></td>
+        <td>10</td>
+        <td>+6</td>
+        <td class="pts">7</td>
+      </tr>
+      <tr class="zone-top fate-through">
+        <td class="pos">2</td>
+        <th class="team" scope="row" title="Japan"><a href="teams/japan.html">Japan</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-d" aria-hidden="true">D</span><span class="sr-only">drew, won, drew</span></td>
+        <td>7</td>
+        <td>+4</td>
+        <td class="pts">5</td>
+      </tr>
+      <tr class="zone-third">
+        <td class="pos">3</td>
+        <th class="team" scope="row" title="Sweden"><a href="teams/sweden.html">Sweden</a></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-d" aria-hidden="true">D</span><span class="sr-only">won, lost, drew</span></td>
+        <td>7</td>
+        <td>0</td>
+        <td class="pts">4</td>
+      </tr>
+      <tr class="zone-out fate-out">
+        <td class="pos">4</td>
+        <th class="team" scope="row" title="Tunisia"><a href="teams/tunisia.html">Tunisia</a><span class="sr-only"> — eliminated</span></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">lost, lost, lost</span></td>
+        <td>2</td>
+        <td>-10</td>
+        <td class="pts">0</td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+<article class="card" id="group-g" style="--i:6" aria-labelledby="gh-g">
+  <h3 id="gh-g"><span class="stamp" aria-hidden="true">G</span>Group G<span class="played-tag">6/6 played</span></h3>
+  <table>
+    <caption class="sr-only">Group G standings after 6 of 6 matches</caption>
+    <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
+    <tbody>
+      <tr class="zone-top fate-through">
+        <td class="pos">1</td>
+        <th class="team" scope="row" title="Belgium"><a href="teams/belgium.html">Belgium</a><span class="sr-only"> — qualified for the Round of 32</span><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">drew, drew, won</span></td>
+        <td>6</td>
+        <td>+4</td>
+        <td class="pts">5</td>
+      </tr>
+      <tr class="zone-top fate-through">
+        <td class="pos">2</td>
+        <th class="team" scope="row" title="Egypt"><a href="teams/egypt.html">Egypt</a><span class="sr-only"> — qualified for the Round of 32</span><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-d" aria-hidden="true">D</span><span class="sr-only">drew, won, drew</span></td>
+        <td>5</td>
+        <td>+2</td>
+        <td class="pts">5</td>
+      </tr>
+      <tr class="zone-third">
+        <td class="pos">3</td>
+        <th class="team" scope="row" title="Iran"><a href="teams/iran.html">Iran</a></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-d" aria-hidden="true">D</span><span class="sr-only">drew, drew, drew</span></td>
+        <td>3</td>
+        <td>0</td>
+        <td class="pts">3</td>
+      </tr>
+      <tr class="zone-out fate-out">
+        <td class="pos">4</td>
+        <th class="team" scope="row" title="New Zealand"><a href="teams/new-zealand.html">New Zealand</a><span class="sr-only"> — eliminated</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">drew, lost, lost</span></td>
+        <td>4</td>
+        <td>-6</td>
+        <td class="pts">1</td>
+      </tr>
+    </tbody>
+  </table>
+  <ul class="notes">
+    <li><span class="dag">†</span> overall goal difference/goals separate Belgium / Egypt (level on points and head-to-head).</li>
+  </ul>
+</article>
+<article class="card" id="group-h" style="--i:7" aria-labelledby="gh-h">
+  <h3 id="gh-h"><span class="stamp" aria-hidden="true">H</span>Group H<span class="played-tag">6/6 played</span></h3>
+  <table>
+    <caption class="sr-only">Group H standings after 6 of 6 matches</caption>
+    <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
+    <tbody>
+      <tr class="zone-top fate-through">
+        <td class="pos">1</td>
+        <th class="team" scope="row" title="Spain"><a href="teams/spain.html">Spain</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">drew, won, won</span></td>
+        <td>5</td>
+        <td>+5</td>
+        <td class="pts">7</td>
+      </tr>
+      <tr class="zone-top fate-through">
+        <td class="pos">2</td>
+        <th class="team" scope="row" title="Cape Verde"><a href="teams/cape-verde.html">Cape Verde</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-d" aria-hidden="true">D</span><span class="sr-only">drew, drew, drew</span></td>
+        <td>2</td>
+        <td>0</td>
+        <td class="pts">3</td>
+      </tr>
+      <tr class="zone-third">
+        <td class="pos">3</td>
+        <th class="team" scope="row" title="Uruguay"><a href="teams/uruguay.html">Uruguay</a><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">drew, drew, lost</span></td>
+        <td>3</td>
+        <td>-1</td>
+        <td class="pts">2</td>
+      </tr>
+      <tr class="zone-out fate-out">
+        <td class="pos">4</td>
+        <th class="team" scope="row" title="Saudi Arabia"><a href="teams/saudi-arabia.html">Saudi Arabia</a><span class="sr-only"> — eliminated</span><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-d" aria-hidden="true">D</span><span class="sr-only">drew, lost, drew</span></td>
+        <td>1</td>
+        <td>-4</td>
+        <td class="pts">2</td>
+      </tr>
+    </tbody>
+  </table>
+  <ul class="notes">
+    <li><span class="dag">†</span> overall goal difference/goals separate Saudi Arabia / Uruguay (level on points and head-to-head).</li>
+  </ul>
+</article>
+<article class="card" id="group-i" style="--i:8" aria-labelledby="gh-i">
+  <h3 id="gh-i"><span class="stamp" aria-hidden="true">I</span>Group I<span class="played-tag">6/6 played</span></h3>
+  <table>
+    <caption class="sr-only">Group I standings after 6 of 6 matches</caption>
+    <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
+    <tbody>
+      <tr class="zone-top fate-through">
+        <td class="pos">1</td>
+        <th class="team" scope="row" title="France"><a href="teams/france.html">France</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">won, won, won</span></td>
+        <td>10</td>
+        <td>+8</td>
+        <td class="pts">9</td>
+      </tr>
+      <tr class="zone-top fate-through">
+        <td class="pos">2</td>
+        <th class="team" scope="row" title="Norway"><a href="teams/norway.html">Norway</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">won, won, lost</span></td>
+        <td>8</td>
+        <td>+1</td>
+        <td class="pts">6</td>
+      </tr>
+      <tr class="zone-third">
+        <td class="pos">3</td>
+        <th class="team" scope="row" title="Senegal"><a href="teams/senegal.html">Senegal</a></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">lost, lost, won</span></td>
+        <td>8</td>
+        <td>+2</td>
+        <td class="pts">3</td>
+      </tr>
+      <tr class="zone-out fate-out">
+        <td class="pos">4</td>
+        <th class="team" scope="row" title="Iraq"><a href="teams/iraq.html">Iraq</a><span class="sr-only"> — eliminated</span></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">lost, lost, lost</span></td>
+        <td>1</td>
+        <td>-11</td>
+        <td class="pts">0</td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+<article class="card" id="group-j" style="--i:9" aria-labelledby="gh-j">
+  <h3 id="gh-j"><span class="stamp" aria-hidden="true">J</span>Group J<span class="played-tag">6/6 played</span></h3>
+  <table>
+    <caption class="sr-only">Group J standings after 6 of 6 matches</caption>
+    <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
+    <tbody>
+      <tr class="zone-top fate-through">
+        <td class="pos">1</td>
+        <th class="team" scope="row" title="Argentina"><a href="teams/argentina.html">Argentina</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">won, won, won</span></td>
+        <td>8</td>
+        <td>+7</td>
+        <td class="pts">9</td>
+      </tr>
+      <tr class="zone-top fate-through">
+        <td class="pos">2</td>
+        <th class="team" scope="row" title="Austria"><a href="teams/austria.html">Austria</a><span class="sr-only"> — qualified for the Round of 32</span><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-d" aria-hidden="true">D</span><span class="sr-only">won, lost, drew</span></td>
+        <td>6</td>
+        <td>0</td>
+        <td class="pts">4</td>
+      </tr>
+      <tr class="zone-third">
+        <td class="pos">3</td>
+        <th class="team" scope="row" title="Algeria"><a href="teams/algeria.html">Algeria</a><span class="dag">†</span></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-d" aria-hidden="true">D</span><span class="sr-only">lost, won, drew</span></td>
+        <td>5</td>
+        <td>-2</td>
+        <td class="pts">4</td>
+      </tr>
+      <tr class="zone-out fate-out">
+        <td class="pos">4</td>
+        <th class="team" scope="row" title="Jordan"><a href="teams/jordan.html">Jordan</a><span class="sr-only"> — eliminated</span></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">lost, lost, lost</span></td>
+        <td>3</td>
+        <td>-5</td>
+        <td class="pts">0</td>
+      </tr>
+    </tbody>
+  </table>
+  <ul class="notes">
+    <li><span class="dag">†</span> overall goal difference/goals separate Algeria / Austria (level on points and head-to-head).</li>
+  </ul>
+</article>
+<article class="card" id="group-k" style="--i:10" aria-labelledby="gh-k">
+  <h3 id="gh-k"><span class="stamp" aria-hidden="true">K</span>Group K<span class="played-tag">6/6 played</span></h3>
+  <table>
+    <caption class="sr-only">Group K standings after 6 of 6 matches</caption>
+    <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
+    <tbody>
+      <tr class="zone-top fate-through">
+        <td class="pos">1</td>
+        <th class="team" scope="row" title="Colombia"><a href="teams/colombia.html">Colombia</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-d" aria-hidden="true">D</span><span class="sr-only">won, won, drew</span></td>
+        <td>4</td>
+        <td>+3</td>
+        <td class="pts">7</td>
+      </tr>
+      <tr class="zone-top fate-through">
+        <td class="pos">2</td>
+        <th class="team" scope="row" title="Portugal"><a href="teams/portugal.html">Portugal</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-d" aria-hidden="true">D</span><span class="sr-only">drew, won, drew</span></td>
+        <td>6</td>
+        <td>+5</td>
+        <td class="pts">5</td>
+      </tr>
+      <tr class="zone-third">
+        <td class="pos">3</td>
+        <th class="team" scope="row" title="DR Congo"><a href="teams/dr-congo.html">DR Congo</a></th>
+        <td class="form"><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">drew, lost, won</span></td>
+        <td>4</td>
+        <td>+1</td>
+        <td class="pts">4</td>
+      </tr>
+      <tr class="zone-out fate-out">
+        <td class="pos">4</td>
+        <th class="team" scope="row" title="Uzbekistan"><a href="teams/uzbekistan.html">Uzbekistan</a><span class="sr-only"> — eliminated</span></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">lost, lost, lost</span></td>
+        <td>2</td>
+        <td>-9</td>
+        <td class="pts">0</td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+<article class="card" id="group-l" style="--i:11" aria-labelledby="gh-l">
+  <h3 id="gh-l"><span class="stamp" aria-hidden="true">L</span>Group L<span class="played-tag">6/6 played</span></h3>
+  <table>
+    <caption class="sr-only">Group L standings after 6 of 6 matches</caption>
+    <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Position</span></th><th class="team" scope="col">Team</th><th class="form" scope="col">Form</th><th class="num" scope="col">GF</th><th class="num" scope="col">GD</th><th class="num" scope="col">Pts</th></tr></thead>
+    <tbody>
+      <tr class="zone-top fate-through">
+        <td class="pos">1</td>
+        <th class="team" scope="row" title="England"><a href="teams/england.html">England</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">won, drew, won</span></td>
+        <td>6</td>
+        <td>+4</td>
+        <td class="pts">7</td>
+      </tr>
+      <tr class="zone-top fate-through">
+        <td class="pos">2</td>
+        <th class="team" scope="row" title="Croatia"><a href="teams/croatia.html">Croatia</a><span class="sr-only"> — qualified for the Round of 32</span></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-w" aria-hidden="true">W</span><span class="sr-only">lost, won, won</span></td>
+        <td>5</td>
+        <td>0</td>
+        <td class="pts">6</td>
+      </tr>
+      <tr class="zone-third">
+        <td class="pos">3</td>
+        <th class="team" scope="row" title="Ghana"><a href="teams/ghana.html">Ghana</a></th>
+        <td class="form"><span class="pip pip-w" aria-hidden="true">W</span><span class="pip pip-d" aria-hidden="true">D</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">won, drew, lost</span></td>
+        <td>2</td>
+        <td>0</td>
+        <td class="pts">4</td>
+      </tr>
+      <tr class="zone-out fate-out">
+        <td class="pos">4</td>
+        <th class="team" scope="row" title="Panama"><a href="teams/panama.html">Panama</a><span class="sr-only"> — eliminated</span></th>
+        <td class="form"><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="pip pip-l" aria-hidden="true">L</span><span class="sr-only">lost, lost, lost</span></td>
+        <td>0</td>
+        <td>-4</td>
+        <td class="pts">0</td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+  </div>
+</section>
+
+<section id="thirds" aria-labelledby="thirds-h">
+  <div class="sec-head">
+    <span class="kicker">The Cutline</span>
+    <h2 id="thirds-h">Third-Place Race</h2>
+  </div>
+  <p class="standfirst">The best eight third-placed teams also advance to the Round of 32. The dashed line is the cut.</p>
+  <div class="thirds-wrap" tabindex="0" role="region" aria-label="Third-place ranking table, scrollable">
+<table>
+    <caption class="sr-only">Third-place ranking across all groups; the best 8 advance</caption>
+    <thead><tr><th class="pos" scope="col"><span aria-hidden="true">#</span><span class="sr-only">Rank</span></th><th class="team" scope="col">Team</th><th scope="col">Grp</th><th scope="col">W-D-L</th><th scope="col">GF</th><th scope="col">GD</th><th scope="col">Pts</th><th scope="col"><span aria-hidden="true">In</span><span class="sr-only">Qualifying</span></th></tr></thead>
+    <tbody>
+      <tr class="q">
+        <td class="pos">1</td>
+        <th class="team" scope="row" title="DR Congo"><a href="teams/dr-congo.html">DR Congo</a></th>
+        <td class="grp">K</td>
+        <td>1-1-1</td>
+        <td>4</td>
+        <td>+1</td>
+        <td class="pts">4</td>
+        <td class="in">✓<span class="sr-only"> qualifying as it stands</span></td>
+      </tr>
+      <tr class="q">
+        <td class="pos">2</td>
+        <th class="team" scope="row" title="Sweden"><a href="teams/sweden.html">Sweden</a></th>
+        <td class="grp">F</td>
+        <td>1-1-1</td>
+        <td>7</td>
+        <td>0</td>
+        <td class="pts">4</td>
+        <td class="in">✓<span class="sr-only"> qualifying as it stands</span></td>
+      </tr>
+      <tr class="q">
+        <td class="pos">3</td>
+        <th class="team" scope="row" title="Ecuador"><a href="teams/ecuador.html">Ecuador</a><span class="dag">†</span></th>
+        <td class="grp">E</td>
+        <td>1-1-1</td>
+        <td>2</td>
+        <td>0</td>
+        <td class="pts">4</td>
+        <td class="in">✓<span class="sr-only"> qualifying as it stands</span></td>
+      </tr>
+      <tr class="q">
+        <td class="pos">4</td>
+        <th class="team" scope="row" title="Ghana"><a href="teams/ghana.html">Ghana</a><span class="dag">†</span></th>
+        <td class="grp">L</td>
+        <td>1-1-1</td>
+        <td>2</td>
+        <td>0</td>
+        <td class="pts">4</td>
+        <td class="in">✓<span class="sr-only"> qualifying as it stands</span></td>
+      </tr>
+      <tr class="q">
+        <td class="pos">5</td>
+        <th class="team" scope="row" title="Bosnia and Herzegovina"><a href="teams/bosnia-and-herzegovina.html">Bosnia and Herzegovina</a></th>
+        <td class="grp">B</td>
+        <td>1-1-1</td>
+        <td>5</td>
+        <td>-1</td>
+        <td class="pts">4</td>
+        <td class="in">✓<span class="sr-only"> qualifying as it stands</span></td>
+      </tr>
+      <tr class="q">
+        <td class="pos">6</td>
+        <th class="team" scope="row" title="Algeria"><a href="teams/algeria.html">Algeria</a></th>
+        <td class="grp">J</td>
+        <td>1-1-1</td>
+        <td>5</td>
+        <td>-2</td>
+        <td class="pts">4</td>
+        <td class="in">✓<span class="sr-only"> qualifying as it stands</span></td>
+      </tr>
+      <tr class="q">
+        <td class="pos">7</td>
+        <th class="team" scope="row" title="Paraguay"><a href="teams/paraguay.html">Paraguay</a></th>
+        <td class="grp">D</td>
+        <td>1-1-1</td>
+        <td>2</td>
+        <td>-2</td>
+        <td class="pts">4</td>
+        <td class="in">✓<span class="sr-only"> qualifying as it stands</span></td>
+      </tr>
+      <tr class="q">
+        <td class="pos">8</td>
+        <th class="team" scope="row" title="Senegal"><a href="teams/senegal.html">Senegal</a></th>
+        <td class="grp">I</td>
+        <td>1-0-2</td>
+        <td>8</td>
+        <td>+2</td>
+        <td class="pts">3</td>
+        <td class="in">✓<span class="sr-only"> qualifying as it stands</span></td>
+      </tr>
+      <tr class="cut"><td colspan="8"><span class="scissors" aria-hidden="true">✂</span>&nbsp; the cutline — top 8 advance</td></tr>
+      <tr class="below">
+        <td class="pos">9</td>
+        <th class="team" scope="row" title="Iran"><a href="teams/iran.html">Iran</a></th>
+        <td class="grp">G</td>
+        <td>0-3-0</td>
+        <td>3</td>
+        <td>0</td>
+        <td class="pts">3</td>
+        <td class="in"><span class="sr-only">out as it stands</span></td>
+      </tr>
+      <tr class="below">
+        <td class="pos">10</td>
+        <th class="team" scope="row" title="South Korea"><a href="teams/south-korea.html">South Korea</a></th>
+        <td class="grp">A</td>
+        <td>1-0-2</td>
+        <td>2</td>
+        <td>-1</td>
+        <td class="pts">3</td>
+        <td class="in"><span class="sr-only">out as it stands</span></td>
+      </tr>
+      <tr class="below">
+        <td class="pos">11</td>
+        <th class="team" scope="row" title="Scotland"><a href="teams/scotland.html">Scotland</a></th>
+        <td class="grp">C</td>
+        <td>1-0-2</td>
+        <td>1</td>
+        <td>-3</td>
+        <td class="pts">3</td>
+        <td class="in"><span class="sr-only">out as it stands</span></td>
+      </tr>
+      <tr class="below">
+        <td class="pos">12</td>
+        <th class="team" scope="row" title="Uruguay"><a href="teams/uruguay.html">Uruguay</a></th>
+        <td class="grp">H</td>
+        <td>0-2-1</td>
+        <td>3</td>
+        <td>-1</td>
+        <td class="pts">2</td>
+        <td class="in"><span class="sr-only">out as it stands</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <ul class="notes">
+    <li class="warn"><span class="dag">†</span> Ecuador / Ghana level on all modelled criteria — FIFA World Ranking decides (not modelled here); order provisional, shown alphabetically.</li>
+  </ul>
+
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="legend" aria-label="Legend">
+    <span><span class="pip pip-w">W</span><span class="pip pip-d">D</span><span class="pip pip-l">L</span> form, matchdays 1–3</span>
+    <span><span class="swatch g"></span> top-two zone (as it stands)</span>
+    <span><span class="swatch a"></span> third place — cutline race</span>
+    <span>✓ qualified for the R32 (in every remaining outcome)</span>
+    <span><s>struck out</s> — mathematically eliminated</span>
+    <span><span class="dag">†</span> see table note</span>
+    <span><span class="moon">☾</span> midnight-ET kickoff, previous day's slate</span>
+  </div>
+  <p class="colophon">
+    Generated 2026-06-28 05:03 · standings computed from data/fixtures.csv by scripts/standings.py ·
+    tiebreakers (2026): points, head-to-head, goal difference, goals scored, fair play, FIFA ranking ·
+    <a href="index.html">the bracket</a> · <a href="record.html">the record</a> ·
+    <a href="https://github.com/alxgriff/wc26-hub">source &amp; data</a>
+  </p>
+</footer>
+
+</div>
+</body>
+</html>
