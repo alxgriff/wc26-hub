@@ -34,6 +34,21 @@ def _full_groups() -> list:
     return matches
 
 
+def _partial_groups() -> list:
+    """All 12 groups MID-stage: matchdays 1-2 played, matchday 3 still scheduled — so every
+    team has played 2 of 3 and NO group position is sealed. Hermetic stand-in for 'the live
+    fixtures, mid-group-stage' (which stops being true once the real groups finish), so the
+    provisional-flag assertion is date-independent."""
+    out = []
+    for m in _full_groups():
+        if m.matchday == 3:
+            out.append(st.Match(m.match_id, m.group, m.matchday, m.team_a, m.team_b,
+                                None, None, "scheduled"))
+        else:
+            out.append(m)
+    return out
+
+
 class TemplateTests(unittest.TestCase):
     def test_r32_template_is_16_matches_73_to_88(self):
         self.assertEqual(set(bk.R32_TEMPLATE), set(range(73, 89)))
@@ -176,12 +191,14 @@ class ProjectedFinishTests(unittest.TestCase):
         self.assertTrue(bk.project(s, resolve_provisional=True)["thirds_resolved"])
 
     def test_per_side_provisional_flags(self):
-        matches = st.load_fixtures(LIVE)
+        # hermetic: a synthetic MID-group-stage set (MD1-2 played, MD3 open) — not the live
+        # fixtures, which stop being mid-stage once the real groups finish.
+        matches = _partial_groups()
         now = bk.project(st.compute_standings(matches), resolve_provisional=True)
         for e in now["r32"].values():
             self.assertIn("home_provisional", e)
             self.assertIn("away_provisional", e)
-        # mid-group-stage no position is sealed, so concrete slots are flagged provisional
+        # no position is sealed (each team has a game left), so concrete slots are provisional
         self.assertTrue(any(e["home_provisional"] or e["away_provisional"]
                             for e in now["r32"].values()))
         # projected-final standings (every team played 3) => nothing provisional
