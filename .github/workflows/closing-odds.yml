@@ -59,6 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # same existing secret as daily-build (KO cards)
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -98,6 +99,19 @@ jobs:
         run: |
           python scripts/knockout.py --resolve | tee -a "$GITHUB_STEP_SUMMARY"
           python scripts/fetch_ko_results.py | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Generate Sonnet cards for any newly-resolved tie that doesn't have one yet (skips
+      # already-generated, so it's ~free after the first hit). The 7am daily-build is the
+      # primary generator; running it here too means a tie that resolves AND kicks off the
+      # same day gets up to four more chances to fill its card before kickoff, instead of
+      # relying on that single morning run. Uses the same ANTHROPIC_API_KEY secret.
+      - name: Generate knockout cards (Sonnet, grounded)
+        id: ko_cards
+        if: ${{ steps.ed.outputs.ko == 'true' }}
+        continue-on-error: true
+        run: |
+          pip install anthropic >/dev/null 2>&1 || true
+          python scripts/knockout_cards.py "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
 
       # Roll Elo forward through the results just entered, so this run's re-recorded edges
       # and rebuilt previews use current Elo. Fail-soft (model falls back to VERIFIED).
@@ -157,8 +171,8 @@ jobs:
         run: |
           git config user.name "wc26-daily-bot"
           git config user.email "actions@users.noreply.github.com"
-          # explicit allowlist: only the artifacts this job owns
-          git add data docs editions
+          # explicit allowlist: only the artifacts this job owns (cards/ holds generated KO cards)
+          git add data docs editions cards
           if git diff --cached --quiet; then
             echo "No changes." >> "$GITHUB_STEP_SUMMARY"
           else
@@ -178,6 +192,7 @@ jobs:
           [ "${{ steps.snapshot.outcome }}" = "failure" ] && failed="$failed snapshot"
           [ "${{ steps.results.outcome }}"  = "failure" ] && failed="$failed results"
           [ "${{ steps.ko.outcome }}"       = "failure" ] && failed="$failed ko"
+          [ "${{ steps.ko_cards.outcome }}" = "failure" ] && failed="$failed ko_cards"
           [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"
           [ "${{ steps.evaluate.outcome }}" = "failure" ] && failed="$failed evaluate"
           [ "${{ steps.ko_evaluate.outcome }}" = "failure" ] && failed="$failed ko_evaluate"
