@@ -369,6 +369,54 @@ tr.subtotal td.lbl,tr.subtotal td:last-child{text-align:right}
 .status-lost{color:var(--verm);font-weight:700}
 .status-open{color:var(--ink-soft)}
 
+/* ---------- record page: scoreboard + day-by-day ledger ---------- */
+.lede{font-style:normal;color:var(--ink);font-size:1.02rem;line-height:1.55;margin:0 0 22px;max-width:780px}
+/* the box-score scoreboard — cumulative record at a glance */
+.scoreboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:14px;margin:0 0 30px}
+.scorecard{border:1px solid var(--ink);border-top:4px solid var(--ink-soft);background:var(--paper-2);box-shadow:4px 4px 0 var(--hairline);padding:15px 18px 16px;display:flex;flex-direction:column}
+.scorecard.tone-good{border-top-color:var(--green)}
+.scorecard.tone-bad{border-top-color:var(--verm)}
+.sc-kicker{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:9px}
+.sc-figure{display:flex;align-items:baseline;gap:7px;line-height:1}
+.sc-big{font-family:var(--serif);font-size:clamp(2.1rem,7vw,2.7rem);font-weight:900;letter-spacing:-.02em;font-variation-settings:"opsz" 144;color:var(--ink)}
+.tone-good .sc-big{color:var(--green)}
+.tone-bad .sc-big{color:var(--verm)}
+.sc-unit{font-family:var(--mono);font-size:.66rem;color:var(--ink-soft);letter-spacing:.02em}
+.sc-sub{margin:9px 0 0;font-size:.84rem;color:var(--ink)}
+.sc-good{color:var(--green);font-weight:700}
+.sc-bad{color:var(--verm);font-weight:700}
+.sc-meaning{margin:10px 0 0;padding-top:9px;border-top:1px solid var(--hairline);font-size:.78rem;line-height:1.5;color:var(--ink-soft)}
+/* collapsible day blocks */
+summary{list-style:none}
+summary::-webkit-details-marker{display:none}
+details.day{border:1px solid var(--hairline);background:var(--paper-2);margin-bottom:7px}
+details.day[open]{border-color:var(--ink);box-shadow:3px 3px 0 var(--hairline)}
+.day>summary{cursor:pointer;display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:11px 15px;outline-offset:-2px}
+.day>summary:hover{background:var(--paper)}
+.day>summary::before{content:"\25b8";color:var(--verm);font-size:.8rem;line-height:1;transition:transform .15s}
+.day[open]>summary::before{transform:rotate(90deg)}
+.ds-date{font-family:var(--serif);font-weight:700;font-size:.98rem;margin-right:auto}
+.ds-chips{display:flex;flex-wrap:wrap;gap:6px}
+.ds-chip{font-family:var(--mono);font-size:.64rem;color:var(--ink-soft);border:1px solid var(--hairline);background:var(--paper);padding:2px 7px;white-space:nowrap}
+.ds-chip.pos{color:var(--green);border-color:var(--green);background:var(--green-soft)}
+.ds-chip.neg{color:var(--verm);border-color:var(--verm);background:var(--verm-soft)}
+.day-body{padding:0 15px 14px}
+.day-track{margin-top:12px}
+.dt-label{font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--verm);margin:0 0 6px}
+/* day tables: flush inside the day block, no separate card chrome */
+.day-body .record-wrap{box-shadow:none;border:1px solid var(--hairline);max-width:none;margin:0;padding:1px 12px 6px}
+.day-body .record-wrap table{min-width:480px}
+.day-body td.pts{font-size:.86rem}
+.muted{color:var(--ink-soft);font-family:var(--mono);font-size:.85em}
+/* the folded shadow book */
+.fold>summary{cursor:pointer;font-family:var(--mono);font-size:.76rem;color:var(--ink-soft);padding:5px 0;outline-offset:2px}
+.fold>summary::before{content:"\25b8\00a0";color:var(--verm)}
+.fold[open]>summary::before{content:"\25be\00a0"}
+.fold-cue{color:var(--verm);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.66rem;margin-left:6px}
+.fold[open] .fold-cue{display:none}
+.ko-record .overnight{margin-top:8px}
+@media(prefers-reduced-motion:reduce){.day>summary::before{transition:none}}
+
 /* ---------- MD3 scenarios ---------- */
 .scenario{border:1px solid var(--ink);background:var(--paper-2);box-shadow:4px 4px 0 var(--hairline);padding:12px 16px 14px;margin:0 0 18px;max-width:680px}
 .scenario-intro{font-style:italic;color:var(--ink-soft);font-size:.9rem;margin-bottom:4px}
@@ -725,12 +773,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.25</td><td title="1.83 decimal">-120</td><td>52%</td><td>65%</td><td class="edge-pos">+12.3%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="2.20 decimal">+120</td><td>43%</td><td>35%</td><td class="edge-neg">-7.3%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="1.65 decimal">-155</td><td>57%</td><td>65%</td><td class="edge-pos">+7.3%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Norway +1</td><td title="1.93 decimal">-108</td><td>50%</td><td>43%</td><td class="edge-neg">-7.1%</td></tr>
-      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">France -1</td><td title="1.91 decimal">-110</td><td>50%</td><td>57%</td><td class="edge-pos">+7.1%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Norway +1</td><td title="1.93 decimal">-108</td><td>50%</td><td>48%</td><td class="edge-neg">-1.7%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">France -1</td><td title="1.91 decimal">-110</td><td>50%</td><td>52%</td><td class="">+1.7%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Under 3</strong> (Total goals), model edge <strong>+7.9%</strong></p><p><strong>France -1</strong> (Asian handicap), model edge <strong>+7.1%</strong></p><p class="odds-note">the model likes these, but the line is over 12h old (the book hasn't reposted), so they are <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Under 3</strong> (Total goals), model edge <strong>+7.9%</strong></p><p class="odds-note">the model likes this, but the line is over 12h old (the book hasn't reposted), so it is <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
 <p class="odds-note">Logged pick: Under 3.5 @ -164 (betmgm), edge 5.3pp · settled <b>lost</b> for -1.00u · CLV -2.0pp.</p>
 <p class="odds-note">Logged pick: France -1 @ +108 (betonlineag), edge 5.2pp · settled <b>won</b> for +1.08u · CLV +3.6pp.</p>
 <p class="odds-note">Logged pick: France @ -154 (draftkings), edge 4.9pp · settled <b>won</b> for +0.65u · CLV +3.0pp.</p>
@@ -758,7 +806,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.8466,lb=2.1633,N=8,SHOW=6,i,j;
+  var la=0.9402,lb=2.0697,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
