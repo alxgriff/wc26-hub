@@ -212,26 +212,32 @@ class RecordRenderingTests(unittest.TestCase):
                 "kickoff_dt": lg.kickoff_dt, "grade": lg.grade,
                 "cumulative": lg.cumulative_line, "now": NOW}
 
-    def test_calls_table_with_day_subtotal_and_brier(self):
+    def test_day_ledger_grades_call_with_brier_and_hit(self):
+        # the graded call still shows its probabilities, Brier, hit chip, grouped by day
         matches, rows = self.fixtures()
         ledger_rows = [{"match_id": "A1", "source": "consensus", "p_home": "0.6",
                         "p_draw": "0.25", "p_away": "0.15",
                         "predicted_score": "2-0", "timestamp": "t"}]
-        html_out, cumulative = bs.render_record_calls(
-            matches, rows, self.ledger_for(ledger_rows))
+        led = self.ledger_for(ledger_rows)
+        html_out = bs.render_record_by_day(matches, rows, led, picks=[])
         self.assertIn("Mexico v South Africa", html_out)
         self.assertIn("60%/25%/15%", html_out)
-        self.assertIn("subtotal", html_out)
-        self.assertIn("0.245", html_out)   # 0.4^2 + 0.25^2 + 0.15^2
-        self.assertIn("hit-y", html_out)   # 60% favorite landed
-        self.assertIn("cumulative Brier 0.245", cumulative)
+        self.assertIn("June 11", html_out)         # grouped under its editorial day
+        self.assertIn("0.245", html_out)           # 0.4^2 + 0.25^2 + 0.15^2
+        self.assertIn("hit-y", html_out)           # 60% favorite landed
+        # and the scoreboard carries the cumulative Brier + coin-flip baseline
+        grades = led["grade"](matches, led["rows"])
+        sb = bs.render_record_scoreboard(grades, picks=[], shadow_picks=[])
+        self.assertIn("0.245", sb)
+        self.assertIn("coin-flip", sb)
 
     def test_no_grades_renders_honest_empty_state(self):
         matches, rows = self.fixtures()
-        html_out, cumulative = bs.render_record_calls(
-            matches, rows, self.ledger_for([]))
-        self.assertEqual(html_out, "")            # standfirst carries the message
-        self.assertIn("No graded calls yet", cumulative)
+        led = self.ledger_for([])
+        self.assertIn("No results recorded yet",
+                      bs.render_record_by_day(matches, rows, led, picks=[]))
+        self.assertIn("No graded calls yet",
+                      bs.render_record_scoreboard({}, picks=[], shadow_picks=[]))
 
     def test_overnight_grades_and_flags_missing_results(self):
         from datetime import date as _date

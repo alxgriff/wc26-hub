@@ -1212,95 +1212,133 @@ def _hit_chip(correct: bool) -> str:
             '<span class="sr-only">missed</span>')
 
 
-def render_record_calls(matches: "list[st.Match]", rows: list[dict],
-                        ledger: dict | None, root: str = "") -> tuple[str, str]:
-    """(calls_table_html, cumulative_line_text) for the record page."""
-    if ledger is None:
-        return "", "Prediction ledger unavailable."
-    grades = ledger["grade"](matches, ledger["rows"])
-    cumulative = ledger["cumulative"](matches, ledger["rows"]) \
-        or ("No graded calls yet — grades land when a logged match gets its "
-            "result entered.")
-    if not grades:
-        return "", cumulative
-    by_mid = {m.match_id: m for m in matches}
-    editorial = {r["match_id"]: r.get("_editorial") for r in rows}
-    ordered = sorted(grades, key=lambda mid: (editorial.get(mid) or date.min, mid))
-
-    body, day, day_acc = [], None, []
-
-    def flush_day():
-        if day is None or not day_acc:
-            return
-        n = len(day_acc)
-        hits = sum(1 for g in day_acc if g["correct"])
-        mean_b = sum(g["brier"] for g in day_acc) / n
-        body.append(
-            f'      <tr class="subtotal"><td colspan="4">{day:%B} {day.day} — '
-            f'{n} graded</td><td>{hits}/{n}</td><td>{mean_b:.3f}</td></tr>')
-
-    for mid in ordered:
-        g = grades[mid]
-        m = by_mid[mid]
-        ed = editorial.get(mid)
-        if ed != day:
-            flush_day()
-            day, day_acc = ed, []
-        day_acc.append(g)
-        p = g["p"]
-        pred = f' ({_esc(g["predicted_score"])})' if g["predicted_score"] else ""
-        body.append(
-            f'      <tr>\n'
-            f'        <td class="lbl"><a href="{root}matches/{_esc(mid)}.html">'
-            f'{_esc(m.team_a)} v {_esc(m.team_b)}</a></td>\n'
-            f'        <td>{p[0]:.0%}/{p[1]:.0%}/{p[2]:.0%}{pred}</td>\n'
-            f'        <td>{m.score_a}–{m.score_b}</td>\n'
-            f'        <td>{("home", "draw", "away")[g["outcome"]]}</td>\n'
-            f'        <td>{_hit_chip(g["correct"])}</td>\n'
-            f'        <td class="pts">{g["brier"]:.3f}</td>\n'
-            f'      </tr>')
-    flush_day()
-    table = (
-        '<div class="record-wrap">\n  <table>\n'
-        '    <caption class="sr-only">Every logged call graded: probabilities, '
-        'result, hit or miss, Brier score</caption>\n'
-        '    <thead><tr><th class="lbl" scope="col">Match</th>'
-        '<th scope="col">Logged H/D/A</th><th scope="col">Final</th>'
-        '<th scope="col">Outcome</th><th scope="col">Hit</th>'
-        '<th scope="col">Brier</th></tr></thead>\n'
-        '    <tbody>\n' + "\n".join(body) + "\n    </tbody>\n  </table>\n</div>")
-    return table, cumulative
-
-
-def render_record_bets(rows: list[dict], root: str = "",
-                       picks_log: Path | None = None) -> tuple[str, str]:
-    """(bets_table_html, units_line_text) for the record page."""
+def _fnum(x):
     try:
-        import odds as od
-        picks = od.load_picks(picks_log) if picks_log else od.load_picks()
-        units = od.units_summary(picks)
-    except Exception:
-        return ('<p class="standfirst">Picks ledger unavailable.</p>',
-                "Picks ledger unavailable.")
-    if not picks:
-        return ('<p class="standfirst">No picks recorded yet.</p>',
-                "No picks recorded yet — the first qualifying edge gets logged "
-                "on the morning run.")
-    teams = {r["match_id"]: (r["team_a"], r["team_b"]) for r in rows}
-    editorial = {r["match_id"]: r.get("_editorial") for r in rows}
-    open_picks = [p for p in picks if p.get("status") == "open"]
-    units_line = units or "No picks settled yet."
-    if open_picks:
-        units_line += (f" {len(open_picks)} open pick"
-                       f"{'s' if len(open_picks) != 1 else ''}, "
-                       f"{len(open_picks)}u at risk.")
+        return float(x)
+    except (TypeError, ValueError):
+        return None
+
+
+def _call_stats(grades_iter) -> tuple[int, int, float | None]:
+    """(graded count, hits, mean Brier) over a set of graded calls."""
+    gl = list(grades_iter)
+    n = len(gl)
+    hits = sum(1 for g in gl if g["correct"])
+    mb = (sum(g["brier"] for g in gl) / n) if n else None
+    return n, hits, mb
+
+
+def _bet_stats(picks: list[dict]) -> dict:
+    """Settlement stats for a set of picks: net units, W–L, CLV, open count."""
+    settled = [p for p in picks if (p.get("status") or "") in ("won", "lost", "push")]
+    net = sum(v for p in settled if (v := _fnum(p.get("units"))) is not None)
+    clvs = [v for p in picks
+            if (p.get("clv_pp") or "").strip() and (v := _fnum(p["clv_pp"])) is not None]
+    return {
+        "net": net,
+        "wins": sum(1 for p in settled if p.get("status") == "won"),
+        "losses": sum(1 for p in settled if p.get("status") == "lost"),
+        "n_settled": len(settled),
+        "mean_clv": (sum(clvs) / len(clvs)) if clvs else None,
+        "n_clv": len(clvs),
+        "n_open": sum(1 for p in picks if (p.get("status") or "open") == "open"),
+    }
+
+
+def _scorecard(kicker: str, big: str, unit: str, sub: str, meaning: str,
+               tone: str = "flat") -> str:
+    """One box-score stat block: a headline number, its unit, a stat line, a plain meaning."""
+    return (
+        f'<div class="scorecard tone-{tone}">'
+        f'<span class="sc-kicker">{_esc(kicker)}</span>'
+        f'<span class="sc-figure"><b class="sc-big">{_esc(big)}</b>'
+        f'<span class="sc-unit">{_esc(unit)}</span></span>'
+        f'<p class="sc-sub">{sub}</p>'
+        f'<p class="sc-meaning">{_esc(meaning)}</p>'
+        '</div>')
+
+
+def render_record_scoreboard(grades: dict, picks: list[dict],
+                             shadow_picks: list[dict]) -> str:
+    """The cumulative scoreboard — three box-score cards (Calls / Bets / Shadow) giving the
+    running record at a glance, each with a plain-English meaning. The page's hero."""
+    cards = []
+    # The Calls — forecast accuracy (multiclass Brier; 0.667 is the coin-flip baseline)
+    n, hits, mb = _call_stats(grades.values())
+    if n:
+        cards.append(_scorecard(
+            "The Calls", f"{mb:.3f}", "avg Brier",
+            f'<b>{hits} of {n}</b> hit · '
+            + (f'<span class="sc-good">beats the 0.667 coin-flip</span>' if mb < 0.667
+               else '<span class="sc-bad">worse than a coin flip</span>'),
+            "How sharp the pre-kickoff forecast was. Lower is better — 0 is perfect, "
+            "0.667 a coin flip.", tone="good" if mb < 0.667 else "bad"))
+    else:
+        cards.append(_scorecard("The Calls", "—", "avg Brier", "No graded calls yet",
+            "How sharp the pre-kickoff forecast was, graded once results land.", "flat"))
+    # The Bets — paper P/L + closing-line value
+    b = _bet_stats(picks)
+    if b["n_settled"] or b["n_open"]:
+        sub = (f'<b>{b["wins"]}–{b["losses"]}</b> settled'
+               if b["n_settled"] else "none settled yet")
+        if b["mean_clv"] is not None:
+            sub += f' · CLV {b["mean_clv"]:+.1f}pp'
+        if b["n_open"]:
+            sub += f' · {b["n_open"]} open'
+        tone = "good" if b["net"] > 0 else ("bad" if b["net"] < 0 else "flat")
+        big = f'{b["net"]:+.1f}u' if b["n_settled"] else "0u"
+        cards.append(_scorecard(
+            "The Bets", big, "net · flat 1u", sub,
+            "Paper picks, recorded only when our price beats the market. CLV is how far "
+            "the line moved our way by kickoff.", tone))
+    else:
+        cards.append(_scorecard("The Bets", "—", "net · flat 1u", "No picks recorded yet",
+            "Paper picks, recorded only when our price beats the market.", "flat"))
+    # The Shadow Book — risky disagreements, paper-only (never a real-money tone)
+    sb = _bet_stats(shadow_picks)
+    if sb["n_settled"] or sb["n_open"]:
+        sub = (f'<b>{sb["wins"]}–{sb["losses"]}</b> on paper'
+               if sb["n_settled"] else f'{sb["n_open"]} tracked')
+        cards.append(_scorecard(
+            "Shadow Book", f'{sb["net"]:+.1f}u', "paper · not staked", sub,
+            "Bold calls where we disagree hard with the market — too risky to stake, "
+            "tracked to see who's right.", "flat"))
+    else:
+        cards.append(_scorecard("Shadow Book", "—", "paper · not staked", "Nothing tracked yet",
+            "Bold calls where we disagree hard with the market — tracked, never staked.", "flat"))
+    return '<div class="scoreboard">' + "".join(cards) + '</div>'
+
+
+def _day_calls_table(calls: list, by_mid: dict, root: str) -> str:
+    """Compact graded-calls table for ONE day (no day-subtotal row — the day is the group)."""
     body = []
-    for p in sorted(picks, key=lambda p: (editorial.get(p["match_id"]) or date.min,
-                                          p["match_id"])):
+    for mid, g in calls:
+        m = by_mid[mid]
+        p = g["p"]
+        pred = f' <span class="muted">({_esc(g["predicted_score"])})</span>' if g["predicted_score"] else ""
+        body.append(
+            f'<tr><td class="lbl"><a href="{root}matches/{_esc(mid)}.html">'
+            f'{_esc(m.team_a)} v {_esc(m.team_b)}</a></td>'
+            f'<td>{p[0]:.0%}/{p[1]:.0%}/{p[2]:.0%}{pred}</td>'
+            f'<td>{m.score_a}–{m.score_b}</td>'
+            f'<td>{_hit_chip(g["correct"])}</td>'
+            f'<td class="pts">{g["brier"]:.3f}</td></tr>')
+    return (
+        '<div class="day-track"><p class="dt-label">Calls — the forecast, graded</p>'
+        '<div class="record-wrap"><table>'
+        '<caption class="sr-only">Graded calls this day: logged probabilities, result, '
+        'hit or miss, Brier</caption>'
+        '<thead><tr><th class="lbl" scope="col">Match</th><th scope="col">Logged H/D/A</th>'
+        '<th scope="col">Final</th><th scope="col">Hit</th><th scope="col">Brier</th></tr></thead>'
+        '<tbody>' + "".join(body) + '</tbody></table></div></div>')
+
+
+def _day_bets_table(bets: list, teams: dict, root: str) -> str:
+    """Compact recorded-picks table for ONE day."""
+    body = []
+    for p in bets:
         mid = p["match_id"]
         a, b = teams.get(mid, (mid, ""))
-        ed = editorial.get(mid)
-        when = f"{ed:%b} {ed.day}" if ed else ""
         status = p.get("status") or "open"
         units_cell = p.get("units") or ("—" if status == "open" else "")
         clv_cell = f'{p["clv_pp"]}pp' if p.get("clv_pp") else "—"
@@ -1311,31 +1349,76 @@ def render_record_bets(rows: list[dict], root: str = "",
         caut = ' <abbr class="caut" title="moneyline edge inflated by draw under-pricing — see note">‡</abbr>' \
             if _h2h_win_side(p["market"], p["selection"]) else ""
         body.append(
-            f'      <tr>\n'
-            f'        <td class="lbl">{_esc(when)}</td>\n'
-            f'        <td class="lbl"><a href="{root}matches/{_esc(mid)}.html">'
-            f'{_esc(a)} v {_esc(b)}</a></td>\n'
-            f'        <td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}{caut}</td>\n'
-            f'        {odds_cell}\n'
-            f'        <td class="lbl">{_esc(p.get("book") or "")}</td>\n'
-            f'        <td>{_esc(p.get("edge_pp") or "")}pp</td>\n'
-            f'        <td class="lbl status-{_esc(status)}">{_esc(status)}</td>\n'
-            f'        <td class="pts">{_esc(units_cell)}</td>\n'
-            f'        <td>{_esc(clv_cell)}</td>\n'
-            f'      </tr>')
-    table = (
-        '<div class="record-wrap">\n  <table>\n'
-        '    <caption class="sr-only">Every recorded pick: selection, price, '
-        'edge at record, settlement, units, closing line value</caption>\n'
-        '    <thead><tr><th class="lbl" scope="col">Day</th>'
-        '<th class="lbl" scope="col">Match</th><th class="lbl" scope="col">Pick</th>'
-        '<th scope="col">Odds</th><th class="lbl" scope="col">Book</th>'
-        '<th scope="col">Edge</th><th class="lbl" scope="col">Status</th>'
-        '<th scope="col">Units</th><th scope="col">CLV</th></tr></thead>\n'
-        '    <tbody>\n' + "\n".join(body) + "\n    </tbody>\n  </table>\n</div>")
+            f'<tr><td class="lbl"><a href="{root}matches/{_esc(mid)}.html">'
+            f'{_esc(a)} v {_esc(b)}</a></td>'
+            f'<td class="lbl">{_esc(_sel_label(p["market"], p["selection"], p["line"], a, b))}{caut}</td>'
+            f'{odds_cell}'
+            f'<td>{_esc(p.get("edge_pp") or "")}pp</td>'
+            f'<td class="lbl status-{_esc(status)}">{_esc(status)}</td>'
+            f'<td class="pts">{_esc(units_cell)}</td>'
+            f'<td>{_esc(clv_cell)}</td></tr>')
+    return (
+        '<div class="day-track"><p class="dt-label">Bets — paper picks, settled</p>'
+        '<div class="record-wrap"><table>'
+        '<caption class="sr-only">Recorded picks this day: selection, price, edge, '
+        'settlement, units, closing line value</caption>'
+        '<thead><tr><th class="lbl" scope="col">Match</th><th class="lbl" scope="col">Pick</th>'
+        '<th scope="col">Odds</th><th scope="col">Edge</th><th class="lbl" scope="col">Result</th>'
+        '<th scope="col">Units</th><th scope="col">CLV</th></tr></thead>'
+        '<tbody>' + "".join(body) + '</tbody></table></div></div>')
+
+
+def render_record_by_day(matches: "list[st.Match]", rows: list[dict],
+                         ledger: dict | None, picks: list[dict],
+                         root: str = "") -> str:
+    """The day-by-day ledger: one collapsible block per editorial date (newest first, newest
+    open) holding that day's graded calls and settled bets — so the record reads as a run of
+    daily box scores instead of one endless table."""
+    grades = ledger["grade"](matches, ledger["rows"]) if ledger else {}
+    if not grades and not picks:
+        return ('<p class="standfirst">No results recorded yet — each day fills in here once '
+                'its matches are played and graded.</p>')
+    by_mid = {m.match_id: m for m in matches}
+    teams = {r["match_id"]: (r["team_a"], r["team_b"]) for r in rows}
+    editorial = {r["match_id"]: r.get("_editorial") for r in rows}
+
+    days: dict = {}
+    for mid, g in grades.items():
+        days.setdefault(editorial.get(mid) or date.min, {"calls": [], "bets": []})["calls"].append((mid, g))
+    for p in picks:
+        days.setdefault(editorial.get(p["match_id"]) or date.min, {"calls": [], "bets": []})["bets"].append(p)
+
+    out = []
+    for i, d in enumerate(sorted(days, reverse=True)):       # newest day first
+        bucket = days[d]
+        calls = sorted(bucket["calls"], key=lambda cg: cg[0])
+        bets = sorted(bucket["bets"], key=lambda p: p["match_id"])
+        n, hits, mb = _call_stats(g for _, g in calls)
+        chips = []
+        if n:
+            chips.append(f'<span class="ds-chip">{n} call{"" if n == 1 else "s"} · '
+                         f'{hits}/{n} hit · Brier {mb:.2f}</span>')
+        if bets:
+            bsum = _bet_stats(bets)
+            if bsum["n_settled"]:
+                cls = "pos" if bsum["net"] > 0 else ("neg" if bsum["net"] < 0 else "")
+                tail = f'{bsum["net"]:+.1f}u'
+            else:
+                cls, tail = "", "open"
+            chips.append(f'<span class="ds-chip {cls}">{len(bets)} bet'
+                         f'{"" if len(bets) == 1 else "s"} · {tail}</span>')
+        label = f"{d:%a · %B} {d.day}" if d != date.min else "Undated"
+        body = (_day_calls_table(calls, by_mid, root) if calls else "") + \
+               (_day_bets_table(bets, teams, root) if bets else "")
+        out.append(
+            f'<details class="day"{" open" if i == 0 else ""}>'
+            f'<summary><span class="ds-date">{_esc(label)}</span>'
+            f'<span class="ds-chips">{"".join(chips)}</span></summary>'
+            f'<div class="day-body">{body}</div></details>')
+    note = ""
     if any(_h2h_win_side(p["market"], p["selection"]) for p in picks):
-        table += (f'\n<p class="odds-note warn">‡ {_DRAW_AUDIT_CAUTION}.</p>')
-    return table, units_line
+        note = f'<p class="odds-note warn">‡ {_DRAW_AUDIT_CAUTION}.</p>'
+    return "\n".join(out) + note
 
 
 def render_record_shadow(rows: list[dict], root: str = "",
@@ -1643,9 +1726,12 @@ def render_record_ko_calls(knockout: list | None) -> str:
             f'<li><span class="mid">M{no}</span> {_hit_chip(g["correct"])} '
             f'{_esc(g.get("advancer", ""))} advanced · the call had them at '
             f'{adv_p:.0%} · 2-class Brier {g["brier"]:.3f}</li>')
-    head = f'<p class="cumulative">{_esc(cumulative)}</p>' if cumulative else ""
-    return ('<div class="ko-record"><h3>Knockout — advance calls</h3>' + head
-            + '<ul class="overnight">' + "".join(items) + '</ul></div>')
+    head = f'<p class="standfirst">{_esc(cumulative)}</p>' if cumulative else ""
+    return ('<section aria-labelledby="ko-h"><div class="sec-head">'
+            '<span class="kicker">2-class Brier</span>'
+            '<h2 id="ko-h">Knockout — advance calls</h2></div>'
+            + head + '<div class="ko-record"><ul class="overnight">'
+            + "".join(items) + '</ul></div></section>')
 
 
 def render_record_page(matches: "list[st.Match]", rows: list[dict],
@@ -1654,19 +1740,41 @@ def render_record_page(matches: "list[st.Match]", rows: list[dict],
                        picks_log: Path | None = None,
                        shadow_log: Path | None = None,
                        knockout: list | None = None) -> str:
-    calls_html, cumulative = render_record_calls(matches, rows, ledger)
-    calls_html += render_record_ko_calls(knockout)        # appended; empty in group stage
-    bets_html, units_line = render_record_bets(rows, picks_log=picks_log)
-    shadow_html, shadow_line = render_record_shadow(rows, shadow_log=shadow_log)
+    try:
+        import odds as od
+        picks = od.load_picks(picks_log) if picks_log else od.load_picks()
+    except Exception:
+        picks = []
+    try:
+        import odds as od
+        shadow_picks = od.load_shadow_picks(shadow_log) if shadow_log else od.load_shadow_picks()
+    except Exception:
+        shadow_picks = []
+    grades = ledger["grade"](matches, ledger["rows"]) if ledger else {}
+
+    scoreboard_html = render_record_scoreboard(grades, picks, shadow_picks)
+    ledger_html = (
+        '<section id="ledger" aria-labelledby="ledger-h"><div class="sec-head">'
+        '<span class="kicker">Day by day</span><h2 id="ledger-h">The Ledger</h2></div>'
+        '<p class="standfirst">Each day\'s calls and bets, newest first. Open a day to see '
+        'the detail.</p>' + render_record_by_day(matches, rows, ledger, picks) + '</section>')
+    ko_html = render_record_ko_calls(knockout)            # empty until a knockout call grades
+    shadow_table, shadow_line = render_record_shadow(rows, shadow_log=shadow_log)
+    shadow_html = (
+        '<section id="shadow" aria-labelledby="shadow-h"><div class="sec-head">'
+        '<span class="kicker">Risky · model vs market</span>'
+        '<h2 id="shadow-h">The Shadow Book</h2></div>'
+        '<details class="fold"><summary class="fold-sum">' + _esc(shadow_line)
+        + ' <span class="fold-cue">show the risky calls</span></summary>'
+        + shadow_table + '</details></section>')
+
     tpl = Template((template_dir / "record.html").read_text(encoding="utf-8"))
     return tpl.safe_substitute(
         site_css=css,
-        calls_html=calls_html,
-        cumulative_line=_esc(cumulative),
-        bets_html=bets_html,
-        units_line=_esc(units_line),
+        scoreboard_html=scoreboard_html,
+        ledger_html=ledger_html,
+        ko_html=ko_html,
         shadow_html=shadow_html,
-        shadow_line=_esc(shadow_line),
         generated_at=_esc(generated_at),
         repo_url=REPO_URL,
     )

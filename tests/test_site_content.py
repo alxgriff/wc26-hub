@@ -216,8 +216,8 @@ class FullSiteTests(unittest.TestCase):
         # the D1 pick recorded by the morning run shows as an open bet
         self.assertIn("Paraguay", rec)
         self.assertIn("status-open", rec)
-        # the Calls-vs-Bets explainer: a correct call can sit beside a losing bet
-        self.assertIn("underpriced", rec)
+        # the Calls-vs-Bets explainer: the two scorecards can disagree on a match
+        self.assertIn("disagree on the same match", rec)
         self.assertTrue((self.out / "data" / "2026-06-12.json").exists())
 
     def test_bracket_page_gated_and_linked(self):

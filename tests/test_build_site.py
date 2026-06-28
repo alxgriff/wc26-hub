@@ -375,6 +375,49 @@ class KnockoutPageTests(unittest.TestCase):
         self.assertNotIn("$", html)
 
 
+class RecordScoreboardTests(unittest.TestCase):
+    @staticmethod
+    def _pick(mid, status="open", units="", clv="", market="totals", sel="under"):
+        return {"match_id": mid, "market": market, "selection": sel, "line": "2.5",
+                "odds": "2.0", "book": "dk", "edge_pp": "5.0", "our_p": "0.55",
+                "status": status, "units": units, "clv_pp": clv}
+
+    def test_calls_card_tone_beats_coinflip(self):
+        grades = {"A1": {"p": (0.6, 0.25, 0.15), "outcome": 0, "brier": 0.245,
+                         "correct": True, "predicted_score": "2-0"}}
+        sb = bs.render_record_scoreboard(grades, picks=[], shadow_picks=[])
+        self.assertIn("tone-good", sb)             # 0.245 < 0.667
+        self.assertIn("beats the 0.667 coin-flip", sb)
+        self.assertIn("0.245", sb)
+
+    def test_bets_card_tone_follows_net_units(self):
+        won = self._pick("A1", "won", "0.9", "1.0")
+        lost = self._pick("A2", "lost", "-1.0", "-0.5")
+        sb_pos = bs.render_record_scoreboard({}, [won], [])
+        self.assertIn("tone-good", sb_pos)
+        self.assertIn("+0.9u", sb_pos)
+        sb_neg = bs.render_record_scoreboard({}, [self._pick("A3", "lost", "-1.0")], [])
+        self.assertIn("tone-bad", sb_neg)
+
+    def test_by_day_groups_and_chips_sign(self):
+        matches = [st.Match("A1", "A", 1, "Mexico", "South Africa", 2, 0, "played")]
+        rows = [{"match_id": "A1", "team_a": "Mexico", "team_b": "South Africa",
+                 "_editorial": date(2026, 6, 11)},
+                {"match_id": "B1", "team_a": "Canada", "team_b": "Bosnia",
+                 "_editorial": date(2026, 6, 12)}]
+        import ledger as lg
+        led = {"rows": [{"match_id": "A1", "source": "consensus", "p_home": "0.6",
+                         "p_draw": "0.25", "p_away": "0.15", "predicted_score": "",
+                         "timestamp": "t"}],
+               "grade": lg.grade}
+        picks = [self._pick("B1", "lost", "-1.0")]
+        html = bs.render_record_by_day(matches, rows, led, picks)
+        self.assertIn("June 11", html)             # calls day
+        self.assertIn("June 12", html)             # bets day (separate)
+        self.assertIn("ds-chip neg", html)         # the losing bet day chip is red
+        self.assertIn('details class="day" open', html)  # newest day open
+
+
 class KnockoutPhaseTests(unittest.TestCase):
     def test_knockout_phase_masthead_and_slate(self):
         html, _ = bs.build_page(

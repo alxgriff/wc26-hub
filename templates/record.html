@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Record — WC26 Daily Hub</title>
-<meta name="description" content="The running accountability ledger: every logged call graded by Brier score, every paper pick with units and closing-line value.">
+<meta name="description" content="The running accountability ledger: every forecast graded by Brier, every paper pick scored in units and closing-line value, day by day.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,500&family=Spline+Sans+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -13,14 +13,14 @@ $site_css
 </style>
 </head>
 <body>
-<a class="skip" href="#calls">Skip to the graded calls</a>
+<a class="skip" href="#ledger">Skip to the ledger</a>
 <div class="sheet">
 
 <header class="page-mast">
   <nav class="crumbs" aria-label="Breadcrumb">
-    <a href="index.html">The 26 Standings</a> · <span aria-current="page">The Record</span>
+    <a href="index.html">The 26 Standings</a> · <a href="bracket.html">The Bracket</a> · <span aria-current="page">The Record</span>
   </nav>
-  <p class="eyebrow">WC26 Daily Hub · Accountability Ledger</p>
+  <p class="eyebrow">WC26 Daily Hub · Kept Honest</p>
   <h1>The Record</h1>
   <div class="metaline">
     <span>Every call logged before kickoff, graded after</span>
@@ -30,51 +30,15 @@ $site_css
 
 <main>
 
-<section aria-labelledby="how-h" class="how-to-read">
-  <h2 id="how-h" class="sr-only">How to read this page</h2>
-  <p class="standfirst">Two independent scorecards. They measure different things and can disagree on the same match — that is the method working, not a contradiction.</p>
-  <div class="callout-grid">
-    <div class="callout">
-      <span class="tag">The Calls · Brier</span>
-      <p>How good our <strong>forecast</strong> was — the probability we put on each result before kickoff, graded by Brier score once the match is settled. Lower is better: 0 is perfect, 0.667 a coin flip, 2 as wrong as possible. This measures being right, not betting.</p>
-    </div>
-    <div class="callout">
-      <span class="tag">The Bets · Units &amp; CLV</span>
-      <p>Paper picks recorded only when our probability beats the market <strong>price</strong> — scored in units (flat 1u) and closing-line value. A pick can lose while the call was right: we may rate the favorite to win yet bet the other side because the book underpriced it. D1 is the case in point — we called the USA, who won, but Paraguay was the value bet.</p>
-    </div>
-    <div class="callout">
-      <span class="tag">The Shadow Book · risky calls</span>
-      <p>The calls where our model and the market <strong>severely disagree</strong> — the edge is so large it's usually our error (a ratings quirk), occasionally a real overlay. <strong>Too risky to stake</strong>, so we track them on paper to learn who's right. Hypothetical units only, kept out of the units record above.</p>
-    </div>
-  </div>
-</section>
+<p class="standfirst lede">Two scorecards, kept honest. One grades the <strong>forecast</strong> — how good our probabilities were. The other grades the <strong>bets</strong> — paper picks taken only when our price beat the market. They measure different things and can disagree on the same match; that's the method working, not a contradiction.</p>
 
-<section id="calls" aria-labelledby="calls-h">
-  <div class="sec-head">
-    <span class="kicker">Brier</span>
-    <h2 id="calls-h">The Calls</h2>
-  </div>
-  <p class="standfirst">$cumulative_line</p>
-$calls_html
-</section>
+$scoreboard_html
 
-<section id="bets" aria-labelledby="bets-h">
-  <div class="sec-head">
-    <span class="kicker">Units &amp; CLV</span>
-    <h2 id="bets-h">The Bets</h2>
-  </div>
-  <p class="standfirst">$units_line</p>
-$bets_html
-</section>
+$ledger_html
 
-<section id="shadow" aria-labelledby="shadow-h">
-  <div class="sec-head">
-    <span class="kicker">Risky · model vs market</span>
-    <h2 id="shadow-h">The Shadow Book</h2>
-  </div>
-  <p class="standfirst">$shadow_line</p>
+$ko_html
+
 $shadow_html
-</section>
 
 </main>
 
@@ -82,11 +46,11 @@ $shadow_html
   <p class="colophon">
     Generated $generated_at · calls graded from data/predictions_log.csv (logged
     pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
-    at fresh prices, revisions explicit, settled rows immutable) · Brier: 0 best ·
-    0.667 coin-flip · 2 worst · CLV = closing implied minus our implied at record ·
-    shadow book from data/shadow_picks_log.csv (severe model–market disagreements,
-    too risky to bet, paper-only, excluded from the units record) ·
-    <a href="index.html">all standings</a> · <a href="$repo_url">source &amp; data</a>
+    at fresh prices, settled rows immutable) · Brier: 0 best · 0.667 coin-flip ·
+    2 worst · CLV = closing implied minus our implied at record · shadow book from
+    data/shadow_picks_log.csv (severe model–market disagreements, too risky to bet,
+    paper-only, excluded from the units record) ·
+    <a href="index.html">the bracket</a> · <a href="$repo_url">source &amp; data</a>
   </p>
 </footer>
 
