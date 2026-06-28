@@ -1067,6 +1067,30 @@ def _match_event(event: dict, fixture_rows: list) -> dict | None:
     return None
 
 
+def knockout_fixture_rows(fixtures_path: Path) -> list[dict]:
+    """Resolved knockout ties as fixtures-shaped rows {match_id 'M{no}', team_a, team_b,
+    date_et} so the SAME US-region fetch can snapshot a knockout game's 90' h2h (the API
+    carries no 'to qualify' market — see evaluate_ko_match, which derives advance from this
+    h2h). Teams are canon (from standings) so _match_event matches the API event by team-set;
+    the ±1-day guard keeps a knockout rematch off the weeks-earlier group match_id. The KO
+    match_id 'M73' never collides with a group id 'A1'. Missing/blank knockout.csv -> []."""
+    import knockout as ko
+    import bracket as bk
+    ko_path = fixtures_path.parent / "knockout.csv"
+    matches = ko.load_knockout(ko_path)
+    if not matches:
+        return []
+    try:                                  # materialize so a lagging on-disk file still resolves
+        fixtures = st.load_fixtures(fixtures_path)
+        standings = st.compute_standings(fixtures, fair_play=st.load_discipline())
+        matches = ko.materialize_teams(bk.project(standings), matches)
+    except (FileNotFoundError, ValueError):
+        pass                              # fall back to the teams already written on disk
+    return [{"match_id": f"M{km.match_no}", "team_a": km.team_a, "team_b": km.team_b,
+             "date_et": km.date_et}
+            for km in matches if km.participants_known and not km.is_played]
+
+
 def snapshot_from_api(events: list, fixture_rows: list, phase: str,
                       now: datetime, prefer_book: str | None = None) -> tuple:
     """Convert API events to odds_log rows: per-selection median + best price.
@@ -1455,6 +1479,7 @@ def main(argv: list | None = None) -> int:
             print(f"error: {e}", file=sys.stderr)
             return 1
         rows = be.read_rows(args.fixtures)
+        rows += knockout_fixture_rows(args.fixtures)   # snapshot resolved KO ties' 90' h2h too
         now = lg.now_et()
         phases = ["snapshot", "closing"] if args.phase == "both" else [args.phase]
         odds_rows, lines = [], []

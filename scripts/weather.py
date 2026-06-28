@@ -441,6 +441,35 @@ def _load_fixtures(fixtures_path: Path) -> list[dict]:
     return rows
 
 
+def _load_knockout(knockout_path: Path) -> list[dict]:
+    """Knockout matches (data/knockout.csv) as fixtures-shaped rows for the same weather
+    pipeline: match_id 'M{no}', stadium, status, _kickoff_utc. The schedule (venue + time)
+    is static, so every knockout match is weather-fetchable from the day it's calendared —
+    resolution of the teams is irrelevant to the venue forecast. Missing file -> []."""
+    knockout_path = Path(knockout_path)
+    if not knockout_path.exists():
+        return []
+    rows = []
+    with knockout_path.open(encoding="utf-8-sig", newline="") as f:
+        for r in csv.DictReader(f):
+            no = (r.get("match_no") or "").strip()
+            if not no:
+                continue
+            date_et = (r.get("date_et") or "").strip()
+            k24 = (r.get("kickoff_et_24h") or "").strip()
+            try:
+                utc = kickoff_to_utc(date_et, k24) if (date_et and k24) else None
+            except ValueError:
+                utc = None
+            rows.append({
+                "match_id": f"M{no}", "date_et": date_et, "kickoff_et_24h": k24,
+                "stadium": (r.get("stadium") or "").strip(),
+                "status": (r.get("status") or "").strip().lower(),
+                "_kickoff_utc": utc,
+            })
+    return rows
+
+
 # ---------------------------------------------------------------- CLI modes
 
 def _run_date(
@@ -455,6 +484,9 @@ def _run_date(
     import build_edition as be  # noqa
     rows = _load_fixtures(fixtures_path)
     today = be.select_matches(rows, target_date)
+    # knockout matches on this calendar date (no late-cap convention) — same venue forecast
+    today += [r for r in _load_knockout(fixtures_path.parent / "knockout.csv")
+              if r["date_et"] == target_date.isoformat()]
     if not today:
         print(f"No matches on {target_date}.", file=sys.stderr)
         return 0
@@ -503,6 +535,7 @@ def _run_backfill(
     """Write 'actual' rows for played matches using the archive API."""
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
     rows = _load_fixtures(fixtures_path)
+    rows += _load_knockout(fixtures_path.parent / "knockout.csv")
     played = [r for r in rows if (r.get("status") or "").strip().lower() == "played"]
     if not played:
         print("No played matches found.", file=sys.stderr)

@@ -702,10 +702,12 @@ def _sweat_blurb(info: dict, team_a: str, team_b: str) -> str:
 def render_sweat(info: dict | None, team_a: str, team_b: str) -> str:
     """Sweat Factor block. Placeholder when info is None."""
     if info is None:
+        # honest, cause-agnostic: a missing row can mean "beyond the 16-day window" OR
+        # "not fetched yet" — don't assert a reason we can't verify (CLAUDE.md: flag
+        # uncertainty, never invent). It fills once weather.py logs the row.
         return (
-            '<div class="placeholder-slot">Sweat Factor forecast pending — this match is not '
-            'yet within the 16-day Open-Meteo forecast window. The section fills automatically '
-            'once available; no data is invented.</div>'
+            '<div class="placeholder-slot">Sweat Factor forecast not captured yet — it fills '
+            'automatically once the venue forecast is fetched. No data is invented.</div>'
         )
     if info.get("climate_controlled"):
         return '<p class="cond-ac">Indoors — climate-controlled. Heat not a factor.</p>'

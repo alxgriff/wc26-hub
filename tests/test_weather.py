@@ -517,5 +517,31 @@ class TestFetchForecastInjector(unittest.TestCase):
             wx.fetch_forecast(29.685, -95.411, utc, opener=fake_opener)
 
 
+class TestLoadKnockout(unittest.TestCase):
+    """weather._load_knockout: knockout.csv as fixtures-shaped rows for the weather pipeline."""
+
+    def _write(self, body: str) -> Path:
+        import tempfile
+        p = Path(tempfile.mkdtemp()) / "knockout.csv"
+        header = ("match_no,round,date_et,kickoff_et_24h,kickoff_et,stadium,city,country,"
+                  "tv_us,team_a,team_b,score_a,score_b,decided_by,winner,status,notes\n")
+        p.write_text(header + body, encoding="utf-8-sig")
+        return p
+
+    def test_shapes_rows_with_kickoff_utc(self):
+        p = self._write("73,R32,2026-06-28,15:00,3:00 PM,SoFi Stadium,Inglewood,USA,,"
+                        "South Africa,Canada,,,,,scheduled,\n")
+        rows = wx._load_knockout(p)
+        self.assertEqual(len(rows), 1)
+        r = rows[0]
+        self.assertEqual(r["match_id"], "M73")
+        self.assertEqual(r["stadium"], "SoFi Stadium")
+        self.assertEqual(r["status"], "scheduled")
+        self.assertEqual(r["_kickoff_utc"], wx.kickoff_to_utc("2026-06-28", "15:00"))
+
+    def test_missing_file_returns_empty(self):
+        self.assertEqual(wx._load_knockout(Path("does/not/exist/knockout.csv")), [])
+
+
 if __name__ == "__main__":
     unittest.main()

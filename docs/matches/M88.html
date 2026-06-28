@@ -619,7 +619,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Sweat Factor</span>
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
-<div class="placeholder-slot">Sweat Factor forecast pending — this match is not yet within the 16-day Open-Meteo forecast window. The section fills automatically once available; no data is invented.</div>
+<div class="placeholder-slot">Sweat Factor forecast not captured yet — it fills automatically once the venue forecast is fetched. No data is invented.</div>
 </section>
 
 <section aria-labelledby="card-h" class="read-grid">
@@ -637,7 +637,18 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">The Market</span>
     <h2 id="odds-h">Odds &amp; best bet</h2>
   </div>
-<div class="placeholder-slot">No odds snapshot logged yet — this section activates with the odds workflow (CLAUDE.md Phase 3: odds_log.csv, de-vig, edge vs threshold). Odds are never invented.</div>
+<div class="edge-wrap">
+  <table>
+    <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
+    <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl">To qualify</td><td class="lbl">Australia</td><td title="no quoted price — implied from the 90′ line">—</td><td>46%</td><td>56%</td><td class="edge-pos">+9.9%</td></tr>
+      <tr><td class="lbl">To qualify</td><td class="lbl">Egypt</td><td title="no quoted price — implied from the 90′ line">—</td><td>54%</td><td>44%</td><td class="edge-neg">-9.9%</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
+<p class="odds-note">market snapshot Jun 28, 1:27 PM ET · DraftKings where quoted, else best of 3 US books, de-vigged multiplicatively · advance edge derived from the 90&#x27; market (no quoted &#x27;to qualify&#x27; line) — a model-vs-market read, not a recorded bet.</p>
 </section>
 
 <section aria-labelledby="teams-h"><div class="sec-head"><span class="kicker">Go Deeper</span><h2 id="teams-h">Team cards</h2></div><div class="team-pair"><a href="../teams/australia.html">Australia<span class="sub">squad · system · key players</span></a><a href="../teams/egypt.html">Egypt<span class="sub">squad · system · key players</span></a></div></section>

@@ -930,5 +930,38 @@ class KnockoutAdvanceTests(unittest.TestCase):
         self.assertEqual(s["status"], "open")
 
 
+class KnockoutFixtureRowsTests(unittest.TestCase):
+    """odds.knockout_fixture_rows: resolved KO ties as fixtures-shaped rows so the same
+    US-region fetch snapshots their 90' h2h (which evaluate_ko_match derives advance from)."""
+
+    def _write_ko(self, dirpath, body):
+        p = Path(dirpath) / "knockout.csv"
+        header = ("match_no,round,date_et,kickoff_et_24h,kickoff_et,stadium,city,country,"
+                  "tv_us,team_a,team_b,score_a,score_b,decided_by,winner,status,notes\n")
+        p.write_text(header + body, encoding="utf-8-sig")
+        return p
+
+    def test_resolved_ties_become_rows_played_excluded(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            self._write_ko(d,
+                "73,R32,2026-06-28,15:00,3:00 PM,SoFi Stadium,Inglewood,USA,,"
+                "South Africa,Canada,,,,,scheduled,\n"
+                "74,R32,2026-06-29,16:30,4:30 PM,Gillette Stadium,Foxborough,USA,,"
+                ",,,,,,scheduled,\n"                              # unresolved -> excluded
+                "75,R32,2026-06-29,21:00,9:00 PM,Estadio BBVA,Monterrey,Mexico,,"
+                "Spain,Italy,2,1,regulation,A,played,\n")         # played -> excluded
+            # nonexistent fixtures => materialize fails => falls back to on-disk teams
+            rows = od.knockout_fixture_rows(Path(d) / "fixtures.csv")
+        self.assertEqual([r["match_id"] for r in rows], ["M73"])
+        self.assertEqual((rows[0]["team_a"], rows[0]["team_b"], rows[0]["date_et"]),
+                         ("South Africa", "Canada", "2026-06-28"))
+
+    def test_missing_knockout_returns_empty(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(od.knockout_fixture_rows(Path(d) / "fixtures.csv"), [])
+
+
 if __name__ == "__main__":
     unittest.main()
