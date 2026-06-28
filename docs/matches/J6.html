@@ -672,7 +672,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Sweat Factor</span>
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
-<div class="placeholder-slot">Sweat Factor forecast not captured yet — it fills automatically once the venue forecast is fetched. No data is invented.</div>
+<div class="conditions">
+  <span class="cond-stamp">Actual · as of 2026-06-28 17:55 ET</span>
+  <p class="cond-stats">~79°F · humid (82% RH) · WBGT 85.5°F</p>
+  <div class="cond-track" aria-label="Match heat index: Severe (84/100)"><div class="cond-fill" style="width:84%"></div></div>
+  <p class="cond-sev cond-sev-severe">Severe</p>
+  <p class="cond-blurb">Severe heat, and Austria carry the bigger burden: +13°F above their home baseline vs +5°F for Algeria.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">Algeria</span><div class="cond-dis-track" aria-label="Heat disadvantage 30/100"><div class="cond-dis-fill" style="width:30%"></div></div><span class="cond-delta">+5.4°F vs home</span></div><div class="cond-team"><span class="cond-tname">Austria</span><div class="cond-dis-track" aria-label="Heat disadvantage 72/100"><div class="cond-dis-fill cond-dis-hot" style="width:72%"></div></div><span class="cond-delta">+13.0°F vs home</span></div></div>
+</div>
 </section>
 
 <section aria-labelledby="card-h" class="read-grid">
@@ -741,7 +748,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.1973,lb=1.5124,N=8,SHOW=6,i,j;
+  var la=1.2131,lb=1.4966,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
