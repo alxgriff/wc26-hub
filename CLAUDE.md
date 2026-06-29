@@ -150,7 +150,12 @@ tv_us, team_a, team_b, score_a, score_b, decided_by, winner, status, notes
   recorded**: the ET layer is the model's on both sides, so the edge is just the 90'
   disagreement on the advance axis, and with no real line there's no CLV. (A genuinely
   quoted 2-way advance line, via manual `odds.py enter M.. advance H,A`, WOULD be recorded —
-  model-priced, 8pp ceiling, settled from `knockout.csv`'s `winner`, penalty-aware.)
+  model-priced, 8pp ceiling, settled from `knockout.csv`'s `winner`, penalty-aware.) The fetched
+  **90-minute** totals / Asian-handicap / BTTS lines ARE shown on the card too (model-priced from
+  the 90' score model), but **display-only** (`evaluate_ko_match` flags them in
+  `display_only_markets`; `best_bets` skips them): a 90' market settles on regulation, while
+  `knockout.csv` stores only the post-ET full-time score, so recording them would bias the units
+  record on ties that reach extra time. Advance stays the only recordable knockout market.
   Accountability is separate: pre-kickoff advance calls are logged to
   `data/ko_predictions_log.csv` and graded with a **2-class Brier** (0 best · 0.5 coin-flip
   · 2 worst) against the advancing side.
