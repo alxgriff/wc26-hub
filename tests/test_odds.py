@@ -875,22 +875,22 @@ class KnockoutAdvanceTests(unittest.TestCase):
         self.assertTrue(any("derived" in m for m in ev["missing"]))
         self.assertEqual(od.best_bets(ev)[0], [])             # display-only — never a recorded pick
 
-    def test_ko_90min_goal_markets_shown_but_not_recorded(self):
-        # the fetched 90' totals/spreads ARE priced (from kp.reg) and shown on the card,
-        # but they're display-only — a knockout tie can go to ET, which 90' markets don't
-        # settle on, so best_bets must never turn them into a recorded pick.
+    def test_ko_90min_goal_markets_priced_and_recordable(self):
+        # the fetched 90' totals/spreads are priced from kp.reg and ARE recordable (they settle
+        # on the regulation score) — a qualifying edge becomes a real pick, like a group game.
         rows = [odds_row("M73", "totals", "over", 2.50, line="2.5"),   # big edge vs the model
                 odds_row("M73", "totals", "under", 1.55, line="2.5"),
                 odds_row("M73", "spreads", "home", 2.50, line="0.5"),
                 odds_row("M73", "spreads", "away", 1.55, line="-0.5")]
         with mock.patch.object(od.pr, "resolve_knockout", return_value=fake_kp()):
             ev = od.evaluate_ko_match(73, "France", "Brazil", rows, object())
-        self.assertTrue(ev["totals"])                          # priced + shown
+        self.assertTrue(ev["totals"])
         self.assertTrue(ev["spreads"])
-        self.assertIn("totals", ev["display_only_markets"])
-        self.assertIn("spreads", ev["display_only_markets"])
-        self.assertTrue(any("90-minute markets" in m for m in ev["missing"]))
-        self.assertEqual(od.best_bets(ev)[0], [])              # never recorded, even at a big edge
+        self.assertNotIn("totals", ev["display_only_markets"])   # recordable now
+        self.assertNotIn("spreads", ev["display_only_markets"])
+        self.assertTrue(any("90 minutes (regulation)" in m for m in ev["missing"]))
+        markets = {p["market"] for p in od.best_bets(ev)[0]}
+        self.assertTrue({"totals", "spreads"} & markets)         # at least one recorded
 
     def test_advance_is_model_priced_8pp_ceiling(self):
         rows = [odds_row("M73", "advance", "home", 2.0),
@@ -944,6 +944,30 @@ class KnockoutAdvanceTests(unittest.TestCase):
         # a group h2h pick must not be settled by the knockout path (no group match given)
         s = self._settle_one(_km(status="scheduled"),
                              pick_row("A1", "h2h", "home", 1.9, 0.6, 0.55))
+        self.assertEqual(s["status"], "open")
+
+    def test_settle_ko_totals_regulation_uses_final(self):
+        # regulation game: 90' score == final (3-1, total 4) -> Over 2.5 wins
+        km = _km(score_a=3, score_b=1, decided_by="regulation", winner="A", status="played")
+        s = self._settle_one(km, pick_row("M73", "totals", "over", 1.90, 0.55, 0.50, line="2.5"))
+        self.assertEqual(s["status"], "won")
+
+    def test_settle_ko_totals_extra_time_uses_regulation_score(self):
+        # final 3-3 after extra time, but the 90' score was 1-1 (total 2) -> Over 2.5 LOSES
+        # (extra-time goals don't count); the reg columns carry the 90' score.
+        km = _km(score_a=3, score_b=3, decided_by="penalties", winner="A", status="played",
+                 score_a_reg=1, score_b_reg=1)
+        s = self._settle_one(km, pick_row("M73", "totals", "over", 1.90, 0.55, 0.50, line="2.5"))
+        self.assertEqual(s["status"], "lost")
+        # and the UNDER 2.5 (on the 90' total of 2) wins
+        s2 = self._settle_one(km, pick_row("M73", "totals", "under", 2.00, 0.50, 0.45, line="2.5"))
+        self.assertEqual(s2["status"], "won")
+
+    def test_settle_ko_90min_pick_stays_open_without_reg_score(self):
+        # extra-time game whose 90' score hasn't been fetched yet -> the pick can't settle
+        km = _km(score_a=2, score_b=2, decided_by="penalties", winner="A", status="played")
+        self.assertIsNone(km.reg_score)
+        s = self._settle_one(km, pick_row("M73", "totals", "over", 1.90, 0.55, 0.50, line="2.5"))
         self.assertEqual(s["status"], "open")
 
 

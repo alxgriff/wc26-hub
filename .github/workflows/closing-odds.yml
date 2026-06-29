@@ -99,6 +99,7 @@ jobs:
         run: |
           python scripts/knockout.py --resolve | tee -a "$GITHUB_STEP_SUMMARY"
           python scripts/fetch_ko_results.py | tee -a "$GITHUB_STEP_SUMMARY"
+          python scripts/fetch_ko_reg_scores.py | tee -a "$GITHUB_STEP_SUMMARY"  # 90' score for ET ties
 
       # Generate Sonnet cards for any newly-resolved tie that doesn't have one yet (skips
       # already-generated, so it's ~free after the first hit). The 7am daily-build is the

@@ -45,7 +45,12 @@ specifies weights. Probabilities must sum to 1.0 ± 0.001 per match.
 
 ### data/knockout.csv — knockout stage (matches 73–104); fixtures.csv stays the GROUP SSOT
 Columns: match_no, round, date_et, kickoff_et_24h, kickoff_et, stadium, city, country,
-tv_us, team_a, team_b, score_a, score_b, decided_by, winner, status, notes
+tv_us, team_a, team_b, score_a, score_b, score_a_reg, score_b_reg, decided_by, winner, status, notes
+- score_a/score_b are the 90'+ET **aggregate** (authoritative for advancement via `winner`);
+  score_a_reg/score_b_reg are the **90-minute (regulation)** score on which the 90' bet markets
+  (totals / handicap / BTTS) settle. A regulation-decided game's reg == final (may be left blank
+  and is derived); a tie that reaches extra time needs reg filled — `fetch_ko_reg_scores.py` pulls
+  it from ESPN's keyless `fifa.world` feed (90' = sum of the first two half line-scores).
 - match_no: the FIFA/bracket number 73–104 (R32 73–88, R16 89–96, QF 97–100, SF
   101–102, third-place 103, Final 104) — the SAME numbering `scripts/bracket.py` uses.
   Knockout fixtures CANNOT live in fixtures.csv (its match_id is locked to A1–L6).
@@ -151,11 +156,12 @@ tv_us, team_a, team_b, score_a, score_b, decided_by, winner, status, notes
   disagreement on the advance axis, and with no real line there's no CLV. (A genuinely
   quoted 2-way advance line, via manual `odds.py enter M.. advance H,A`, WOULD be recorded —
   model-priced, 8pp ceiling, settled from `knockout.csv`'s `winner`, penalty-aware.) The fetched
-  **90-minute** totals / Asian-handicap / BTTS lines ARE shown on the card too (model-priced from
-  the 90' score model), but **display-only** (`evaluate_ko_match` flags them in
-  `display_only_markets`; `best_bets` skips them): a 90' market settles on regulation, while
-  `knockout.csv` stores only the post-ET full-time score, so recording them would bias the units
-  record on ties that reach extra time. Advance stays the only recordable knockout market.
+  **90-minute** totals / Asian-handicap / BTTS lines ARE recorded too (model-priced from the 90'
+  score model, same 4pp bar / 8pp ceiling as group games): they **settle on the regulation (90')
+  score** — a regulation game's is its final, an extra-time game's is fetched from ESPN into
+  `knockout.csv`'s reg columns; `settle_picks` reads `KnockoutMatch.reg_score` and leaves a pick
+  open until the 90' score is known (extra-time goals never count toward these markets). Only a
+  *derived* advance read (no quoted price) stays display-only.
   Accountability is separate: pre-kickoff advance calls are logged to
   `data/ko_predictions_log.csv` and graded with a **2-class Brier** (0 best · 0.5 coin-flip
   · 2 worst) against the advancing side.

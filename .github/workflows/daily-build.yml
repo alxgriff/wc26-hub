@@ -135,6 +135,16 @@ jobs:
         continue-on-error: true
         run: python scripts/fetch_ko_results.py | tee -a "$GITHUB_STEP_SUMMARY"
 
+      # The 90-minute (regulation) score from ESPN's free feed, for ties that reached extra
+      # time — it's what the knockout totals/handicap/BTTS bets settle on (a regulation game's
+      # 90' score is its final, so most need nothing). Must run before settle. No-op when no
+      # extra-time tie is awaiting its reg score.
+      - name: Fetch knockout regulation (90') scores (ESPN)
+        id: ko_reg
+        if: ${{ steps.ed.outputs.ko == 'true' }}
+        continue-on-error: true
+        run: python scripts/fetch_ko_reg_scores.py | tee -a "$GITHUB_STEP_SUMMARY"
+
       # Generate Sonnet-grounded cards for newly-resolved ties (skips already-generated;
       # needs ANTHROPIC_API_KEY — fail-soft, the card slot placeholders without one).
       - name: Generate knockout cards (Sonnet, grounded)
@@ -231,6 +241,7 @@ jobs:
           [ "${{ steps.results.outcome }}"  = "failure" ] && failed="$failed results"
           [ "${{ steps.ko_resolve.outcome }}" = "failure" ] && failed="$failed ko_resolve"
           [ "${{ steps.ko_results.outcome }}" = "failure" ] && failed="$failed ko_results"
+          [ "${{ steps.ko_reg.outcome }}"     = "failure" ] && failed="$failed ko_reg"
           [ "${{ steps.ko_ledger.outcome }}" = "failure" ] && failed="$failed ko_ledger"
           [ "${{ steps.ko_cards.outcome }}" = "failure" ] && failed="$failed ko_cards"
           [ "${{ steps.ko_evaluate.outcome }}" = "failure" ] && failed="$failed ko_evaluate"

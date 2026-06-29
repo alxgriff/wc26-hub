@@ -68,6 +68,19 @@ you make a non-obvious call, add it here.*
   alternatives for a *real* to-qualify line: API-Football (no-license terms, sparse coverage) and
   Betfair (£299+ live key, US-geo-blocked). Accountability stays a **2-class advance Brier** (0 best
   / 0.5 coin-flip / 2 worst). *`scripts/odds.py` (`evaluate_ko_match`, `best_bets`), `scripts/ledger.py`.*
+- **Knockout 90-minute markets ARE recorded; settled on the regulation score (2026-06-29).** The
+  fetched totals / Asian-handicap / BTTS lines were first shown display-only because soccer 90'
+  markets settle on regulation while `knockout.csv` stored only the post-ET aggregate. Solved per
+  the user ("that data problem has to be solvable") by adding a **regulation (90') score** to the
+  contract (`score_a_reg`/`score_b_reg`) and pulling it from **ESPN's keyless `fifa.world` feed**
+  (`fetch_ko_reg_scores.py`; 90' = sum of the first two half line-scores — verified against five
+  real ET/penalty games). Research ranked sources: ESPN (keyless, free, live 2026 coverage) over
+  football-data.org (named `regularTime` but token-gated, scores-delayed) and API-Football (free
+  tier non-commercial). The 90' markets now record like group games (4pp bar / 8pp ceiling) and
+  `settle_picks` reads `KnockoutMatch.reg_score` — a regulation game derives it from the final, an
+  extra-time game uses the reg columns, and a pick stays open until the 90' score is known (ET goals
+  never count). Confirmed convention (cited): totals/AH/BTTS settle on 90 min, advance on the full
+  result incl. ET+pens. *`scripts/knockout.py`, `scripts/fetch_ko_reg_scores.py`, `scripts/odds.py`.*
 - **The site/edition flip to the knockout phase by data, not date.** When the group stage
   completes (or the slate date passes the last group date), the masthead/progress/slate switch to
   knockout and a banner elevates the bracket — so the most-trafficked moment (the R32) never lands

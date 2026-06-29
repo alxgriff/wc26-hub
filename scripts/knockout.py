@@ -30,7 +30,7 @@ from __future__ import annotations
 
 import csv
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -46,9 +46,14 @@ WINNER_SIDES = ("A", "B")
 ROUND_ORDER = ("R32", "R16", "QF", "SF", "3RD", "Final")
 
 # CSV column contract (header order). score_* blank until played; team_* blank until resolved.
+# score_a/score_b are the 90'+ET AGGREGATE (authoritative for advancement via `winner`);
+# score_a_reg/score_b_reg are the 90-MINUTE (regulation) score on which totals/handicap/BTTS
+# settle. For a game decided in regulation the two are equal (reg may be left blank and is
+# derived); a game that reaches extra time needs reg filled (from the ESPN fifa.world feed).
 COLUMNS = ("match_no", "round", "date_et", "kickoff_et_24h", "kickoff_et",
            "stadium", "city", "country", "tv_us", "team_a", "team_b",
-           "score_a", "score_b", "decided_by", "winner", "status", "notes")
+           "score_a", "score_b", "score_a_reg", "score_b_reg",
+           "decided_by", "winner", "status", "notes")
 _REQUIRED_COLUMNS = ("match_no", "round", "status")
 
 
@@ -120,10 +125,28 @@ class KnockoutMatch:
     winner: str            # "" | "A" | "B" — authoritative for advancement
     status: str            # scheduled | played
     notes: str
+    # the 90-minute (regulation) score — what totals/handicap/BTTS settle on. Keyword-only with
+    # a None default so existing construction is unaffected; equals the final for a regulation
+    # game (then it may stay None and is derived), filled from ESPN when a tie reaches extra time.
+    score_a_reg: "int | None" = field(default=None, kw_only=True)
+    score_b_reg: "int | None" = field(default=None, kw_only=True)
 
     @property
     def is_played(self) -> bool:
         return self.status == "played"
+
+    @property
+    def reg_score(self) -> tuple[int, int] | None:
+        """The 90-minute (regulation) score, on which totals / handicap / BTTS settle, or None
+        if it isn't known yet. Explicit reg columns win; otherwise a regulation-decided game's
+        90' score IS its final score. A game that reached extra time with no reg logged returns
+        None — its 90' bets can't be settled until the regulation score is fetched."""
+        if self.score_a_reg is not None and self.score_b_reg is not None:
+            return (self.score_a_reg, self.score_b_reg)
+        if self.is_played and self.decided_by == "regulation" \
+                and self.score_a is not None and self.score_b is not None:
+            return (self.score_a, self.score_b)
+        return None
 
     @property
     def participants_known(self) -> bool:
@@ -196,13 +219,18 @@ def _validate_match(km: KnockoutMatch, venues: set | None = None,
         raise ValueError(
             f"M{no}: stadium {km.stadium!r} is not in data/venues.csv canon "
             "(Sweat Factor joins on the exact stadium string — normalise or add the venue)")
-    for col, val in (("score_a", km.score_a), ("score_b", km.score_b)):
+    for col, val in (("score_a", km.score_a), ("score_b", km.score_b),
+                     ("score_a_reg", km.score_a_reg), ("score_b_reg", km.score_b_reg)):
         if val is not None and val < 0:
             raise ValueError(f"M{no}: {col} is negative: {val}")
+    if (km.score_a_reg is None) != (km.score_b_reg is None):
+        raise ValueError(f"M{no}: regulation score must give both sides or neither")
 
     if km.status == "scheduled":
         if km.score_a is not None or km.score_b is not None:
             raise ValueError(f"M{no}: status is 'scheduled' but a score is present")
+        if km.score_a_reg is not None or km.score_b_reg is not None:
+            raise ValueError(f"M{no}: status is 'scheduled' but a regulation score is present")
         if km.winner:
             raise ValueError(f"M{no}: status is 'scheduled' but a winner is set")
         if km.decided_by:
@@ -232,6 +260,16 @@ def _validate_match(km: KnockoutMatch, venues: set | None = None,
             if km.winner != higher:
                 raise ValueError(f"M{no}: winner {km.winner!r} contradicts the score "
                                  f"{km.score_a}–{km.score_b} (the {higher} side won)")
+        if km.score_a_reg is not None:
+            # extra time only ADDS goals, so the 90' score can't exceed the aggregate;
+            # a regulation-decided game's 90' score IS its final score.
+            if km.score_a_reg > km.score_a or km.score_b_reg > km.score_b:
+                raise ValueError(f"M{no}: regulation score {km.score_a_reg}–{km.score_b_reg} "
+                                 f"exceeds the aggregate {km.score_a}–{km.score_b}")
+            if km.decided_by == "regulation" and \
+                    (km.score_a_reg, km.score_b_reg) != (km.score_a, km.score_b):
+                raise ValueError(f"M{no}: decided in regulation, so the 90' score must equal "
+                                 f"the final ({km.score_a}–{km.score_b})")
 
     if warn is not None and (not km.date_et or not km.stadium):
         warn.append(f"M{no}: schedule incomplete (date_et/stadium missing)")
@@ -266,7 +304,9 @@ def parse_knockout(rows, warnings: list | None = None) -> list[KnockoutMatch]:
             str(raw.get("decided_by") or "").strip().lower(),
             str(raw.get("winner") or "").strip().upper(),
             str(raw.get("status") or "").strip().lower(),
-            str(raw.get("notes") or "").strip())
+            str(raw.get("notes") or "").strip(),
+            score_a_reg=_parse_score(raw.get("score_a_reg"), no, "score_a_reg"),
+            score_b_reg=_parse_score(raw.get("score_b_reg"), no, "score_b_reg"))
         _validate_match(km, venues=venues, seen=seen, warn=warn)
         out.append(km)
     out.sort(key=lambda k: k.match_no)
@@ -352,6 +392,8 @@ def _row_dict(k: KnockoutMatch) -> dict:
         "team_a": k.team_a, "team_b": k.team_b,
         "score_a": "" if k.score_a is None else k.score_a,
         "score_b": "" if k.score_b is None else k.score_b,
+        "score_a_reg": "" if k.score_a_reg is None else k.score_a_reg,
+        "score_b_reg": "" if k.score_b_reg is None else k.score_b_reg,
         "decided_by": k.decided_by, "winner": k.winner, "status": k.status, "notes": k.notes,
     }
 
@@ -368,8 +410,8 @@ def write_knockout(path: str | Path, matches: list[KnockoutMatch]) -> None:
 
 
 def enter_ko_result(matches: list[KnockoutMatch], match_no: int, score_a: int, score_b: int,
-                    decided_by: str = "", winner: str = "",
-                    force: bool = False) -> tuple[list[KnockoutMatch], str]:
+                    decided_by: str = "", winner: str = "", force: bool = False,
+                    reg_score: "tuple[int, int] | None" = None) -> tuple[list[KnockoutMatch], str]:
     """Set a played result on a knockout match, contract-safe. Defaults: a decisive
     scoreline infers winner (higher side) and decided_by='regulation' if unset; a level
     scoreline REQUIRES decided_by='penalties' and an explicit winner (the shootout can't
@@ -392,12 +434,44 @@ def enter_ko_result(matches: list[KnockoutMatch], match_no: int, score_a: int, s
     if score_a != score_b:                       # decisive: infer the unset fields
         decided_by = decided_by or "regulation"
         winner = winner or ("A" if score_a > score_b else "B")
+    # regulation game => the 90' score IS the final; an extra-time/penalty game takes the
+    # regulation score from the caller (the ESPN feed) when supplied, else leaves it blank.
+    reg_a, reg_b = (None, None)
+    if reg_score is not None:
+        reg_a, reg_b = int(reg_score[0]), int(reg_score[1])
+    elif decided_by == "regulation":
+        reg_a, reg_b = int(score_a), int(score_b)
     cand = dataclasses.replace(km, score_a=int(score_a), score_b=int(score_b),
+                               score_a_reg=reg_a, score_b_reg=reg_b,
                                decided_by=decided_by, winner=winner, status="played")
     _validate_match(cand, venues=_venue_canon())    # raises on any contract violation
     updated = [cand if m.match_no == match_no else m for m in matches]
     return updated, (f"M{match_no}: entered {score_a}–{score_b} "
                      f"({cand.decided_by}), {cand.winner_team} advance")
+
+
+def set_reg_score(matches: list[KnockoutMatch], match_no: int, reg_a: int, reg_b: int,
+                  force: bool = False) -> tuple[list[KnockoutMatch], str]:
+    """Record the 90-minute (regulation) score on an already-PLAYED knockout match — the basis
+    for settling its 90' bets when the tie went to extra time. The ESPN feed supplies it.
+    Contract-safe (re-validated); refuses to overwrite an existing, differing reg score unless
+    ``force``. Returns (updated_matches, message); raises ValueError on a violation."""
+    import dataclasses
+    by = by_no(matches)
+    if match_no not in by:
+        raise ValueError(f"M{match_no} is not in the knockout schedule")
+    km = by[match_no]
+    if not km.is_played:
+        raise ValueError(f"M{match_no} is not played — no regulation score to record yet")
+    reg_a, reg_b = int(reg_a), int(reg_b)
+    if km.score_a_reg is not None and (km.score_a_reg, km.score_b_reg) != (reg_a, reg_b) \
+            and not force:
+        raise ValueError(f"M{match_no} already has a regulation score "
+                         f"{km.score_a_reg}–{km.score_b_reg}; pass force=True to overwrite")
+    cand = dataclasses.replace(km, score_a_reg=reg_a, score_b_reg=reg_b)
+    _validate_match(cand, venues=_venue_canon())
+    updated = [cand if m.match_no == match_no else m for m in matches]
+    return updated, f"M{match_no}: regulation (90') score {reg_a}–{reg_b}"
 
 
 def main(argv: list | None = None) -> int:
@@ -414,6 +488,9 @@ def main(argv: list | None = None) -> int:
                     help="how it ended (default: regulation if decisive; penalties required if level)")
     ap.add_argument("--winner", choices=("A", "B"), default="",
                     help="advancing side for --enter (required for a level/penalty result)")
+    ap.add_argument("--reg-score", metavar="A-B",
+                    help="90-minute (regulation) score for an extra-time tie, e.g. 1-1 "
+                         "(auto = final for a regulation game; ESPN fills it otherwise)")
     ap.add_argument("--force", action="store_true", help="overwrite an already-played result")
     args = ap.parse_args(argv)
     for stream in (sys.stdout, sys.stderr):
@@ -444,10 +521,20 @@ def main(argv: list | None = None) -> int:
         except ValueError:
             print(f"error: bad --score {args.score!r} (expected A-B integers)", file=sys.stderr)
             return 2
+        reg = None
+        if args.reg_score:
+            if "-" not in args.reg_score:
+                print("error: --reg-score must be A-B (e.g. 1-1)", file=sys.stderr)
+                return 2
+            try:
+                reg = tuple(int(x) for x in args.reg_score.split("-", 1))
+            except ValueError:
+                print(f"error: bad --reg-score {args.reg_score!r}", file=sys.stderr)
+                return 2
         try:
             matches, msg = enter_ko_result(matches, args.enter, sa, sb,
                                            decided_by=args.decided, winner=args.winner,
-                                           force=args.force)
+                                           force=args.force, reg_score=reg)
         except ValueError as e:
             print(f"error: {e}", file=sys.stderr)
             return 1

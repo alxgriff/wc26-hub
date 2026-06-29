@@ -102,9 +102,10 @@ MODEL_PRICED_MARKETS = ("totals", "spreads", "btts", "advance")
 MODEL_PRICED_SANITY = 0.08
 H2H_SELECTIONS = ("home", "draw", "away")
 KO_ADVANCE_MARKET = "advance"   # knockout 2-way: home = team_a advances, away = team_b
-                                # advances. Model-priced (predict.resolve_knockout); the
-                                # ONLY knockout market we record, because it settles
-                                # cleanly + penalty-aware from knockout.csv's winner side.
+                                # advances. Model-priced (predict.resolve_knockout); settles
+                                # penalty-aware from knockout.csv's `winner`. The 90' goals
+                                # markets (totals/spreads/BTTS) are also recorded and settle
+                                # from the regulation score (knockout.csv reg columns).
 
 # Prefer-book sourcing (June 14 single-book → June 16 prefer-else-fallback): fetch the
 # whole US region and PREFER this book per selection (the one the user bets) so the
@@ -531,10 +532,10 @@ def evaluate_ko_match(match_no: int, team_a: str, team_b: str,
     shown as a model-vs-market read, never recorded (no quoted price, no CLV).
 
     90-MINUTE GOALS (totals / Asian handicap / BTTS): model-priced from the same 90' score model
-    (kp.reg) and SHOWN so the card carries all the lines — but DISPLAY-ONLY. They settle on 90
-    minutes, while knockout.csv stores only the full-time (post-ET) score, so a tie that goes to
-    extra time can't be settled cleanly; recording them would bias the units record. ``out
-    ["display_only_markets"]`` lists every market best_bets must NOT record."""
+    (kp.reg), RECORDABLE like a group game. They settle on the regulation (90') score from
+    knockout.csv's reg columns (a regulation game's 90' score IS its final; an extra-time game's
+    is fetched from ESPN by fetch_ko_reg_scores) — see settle_picks. ``out["display_only_markets"]``
+    lists the markets best_bets must NOT record (only a DERIVED advance read, which has no price)."""
     out = {"h2h": [], "totals": [], "spreads": [], "btts": [], "advance": [], "missing": []}
     if not (team_a and team_b):
         out["missing"].append("matchup not resolved yet — no advance call")
@@ -543,15 +544,17 @@ def evaluate_ko_match(match_no: int, team_a: str, team_b: str,
     kp = pr.resolve_knockout(model, team_a, team_b,
                              hfa_team=pr.host_hfa(country, team_a, team_b))  # host at home in KO
 
-    # 90-minute goals markets, priced from the 90' prediction (kp.reg) — display-only (see above).
+    # 90-minute goals markets, priced from the 90' prediction (kp.reg). RECORDABLE, same as a
+    # group game — they settle on the regulation (90') score, fetched into knockout.csv's reg
+    # columns (a regulation game's 90' score is its final; an extra-time game's comes from ESPN).
     goal = _price_goal_markets(mid, odds_rows, kp.reg)
     out["totals"], out["spreads"], out["btts"] = goal["totals"], goal["spreads"], goal["btts"]
     out["missing"].extend(goal["missing"])
-    display_only = {"totals", "spreads", "btts"}
+    display_only: set = set()
     if out["totals"] or out["spreads"] or out["btts"]:
         out["missing"].append(
-            "totals / handicap / BTTS are 90-minute markets shown as model-vs-market reads — "
-            "not recorded (a knockout tie can go to extra time, which they don't settle on)")
+            "totals / handicap / BTTS settle on 90 minutes (regulation) — extra-time goals "
+            "don't count toward them")
 
     adv = latest_market(odds_rows, mid, KO_ADVANCE_MARKET)
     if adv and ("home", "") in adv and ("away", "") in adv:
@@ -789,6 +792,31 @@ def _settle_clv_line(p: dict, odds_rows: list, kickoff_by_mid: dict) -> str:
             + (f", CLV {p['clv_pp']}pp" if p["clv_pp"] else ", CLV n/a"))
 
 
+def _settle_goal_pick(p: dict, score_a: int, score_b: int) -> None:
+    """Settle a totals / Asian-handicap / BTTS pick from a (home, away) score, in place (sets
+    p['status'] and p['units']). Shared by group games (the final score) and knockout ties (the
+    90-minute regulation score) — the goals markets settle the same way off whichever score."""
+    if p["market"] == "totals":
+        total = score_a + score_b
+        line = float(p["line"])
+        if abs(total - line) < 1e-9:            # integer line landed exactly -> push
+            p["status"], p["units"] = "push", "+0.00"
+        else:
+            won = (total > line) == (p["selection"] == "over")
+            p["status"] = "won" if won else "lost"
+            p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
+    elif p["market"] == "spreads":
+        margin = score_a - score_b
+        margin_sel = margin if p["selection"] == "home" else -margin
+        units, status = ah_settle_units(margin_sel, float(p["line"]), float(p["odds"]))
+        p["status"], p["units"] = status, f"{units:+.2f}"
+    else:  # btts
+        both = score_a >= 1 and score_b >= 1
+        won = both == (p["selection"] == "yes")
+        p["status"] = "won" if won else "lost"
+        p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
+
+
 def settle_picks(matches: list, odds_rows: list,
                  picks_path: Path = PICKS_LOG,
                  fixtures_rows: list | None = None,
@@ -828,6 +856,16 @@ def settle_picks(matches: list, odds_rows: list,
             p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
             lines.append(_settle_clv_line(p, odds_rows, kickoff_by_mid))
             continue
+        km = ko_by_mid.get(p["match_id"])
+        if km is not None:                        # a knockout 90' goals pick (totals/spreads/BTTS)
+            if p["market"] not in ("totals", "spreads", "btts"):
+                continue                          # only the goals markets settle from the 90' score
+            reg = km.reg_score
+            if reg is None:
+                continue                          # 90' score not known yet (ET tie awaiting ESPN)
+            _settle_goal_pick(p, reg[0], reg[1])
+            lines.append(_settle_clv_line(p, odds_rows, kickoff_by_mid))
+            continue
         if p["match_id"] not in by_mid:
             continue
         m = by_mid[p["match_id"]]
@@ -836,28 +874,8 @@ def settle_picks(matches: list, odds_rows: list,
             won = p["selection"] == outcome
             p["status"] = "won" if won else "lost"
             p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
-        elif p["market"] == "totals":
-            total = m.score_a + m.score_b
-            line = float(p["line"])
-            if abs(total - line) < 1e-9:        # integer line landed exactly
-                p["status"] = "push"
-                p["units"] = "+0.00"
-            else:
-                won = (total > line) == (p["selection"] == "over")
-                p["status"] = "won" if won else "lost"
-                p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
-        elif p["market"] == "spreads":
-            margin = m.score_a - m.score_b
-            margin_sel = margin if p["selection"] == "home" else -margin
-            units, status = ah_settle_units(margin_sel, float(p["line"]),
-                                            float(p["odds"]))
-            p["status"] = status
-            p["units"] = f"{units:+.2f}"
-        else:  # btts
-            both = m.score_a >= 1 and m.score_b >= 1
-            won = both == (p["selection"] == "yes")
-            p["status"] = "won" if won else "lost"
-            p["units"] = f"{float(p['odds']) - 1:+.2f}" if won else "-1.00"
+        else:
+            _settle_goal_pick(p, m.score_a, m.score_b)   # totals / spreads / BTTS
 
         lines.append(_settle_clv_line(p, odds_rows, kickoff_by_mid))
     _save(picks, picks_path, PICK_COLUMNS)
