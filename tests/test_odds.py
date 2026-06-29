@@ -875,6 +875,23 @@ class KnockoutAdvanceTests(unittest.TestCase):
         self.assertTrue(any("derived" in m for m in ev["missing"]))
         self.assertEqual(od.best_bets(ev)[0], [])             # display-only — never a recorded pick
 
+    def test_ko_90min_goal_markets_shown_but_not_recorded(self):
+        # the fetched 90' totals/spreads ARE priced (from kp.reg) and shown on the card,
+        # but they're display-only — a knockout tie can go to ET, which 90' markets don't
+        # settle on, so best_bets must never turn them into a recorded pick.
+        rows = [odds_row("M73", "totals", "over", 2.50, line="2.5"),   # big edge vs the model
+                odds_row("M73", "totals", "under", 1.55, line="2.5"),
+                odds_row("M73", "spreads", "home", 2.50, line="0.5"),
+                odds_row("M73", "spreads", "away", 1.55, line="-0.5")]
+        with mock.patch.object(od.pr, "resolve_knockout", return_value=fake_kp()):
+            ev = od.evaluate_ko_match(73, "France", "Brazil", rows, object())
+        self.assertTrue(ev["totals"])                          # priced + shown
+        self.assertTrue(ev["spreads"])
+        self.assertIn("totals", ev["display_only_markets"])
+        self.assertIn("spreads", ev["display_only_markets"])
+        self.assertTrue(any("90-minute markets" in m for m in ev["missing"]))
+        self.assertEqual(od.best_bets(ev)[0], [])              # never recorded, even at a big edge
+
     def test_advance_is_model_priced_8pp_ceiling(self):
         rows = [odds_row("M73", "advance", "home", 2.0),
                 odds_row("M73", "advance", "away", 2.0)]

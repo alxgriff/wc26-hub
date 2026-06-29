@@ -450,6 +450,18 @@ def evaluate_match(match_id: str, odds_rows: list, ledger_rows: list,
     else:
         out["missing"].append("no 1X2 snapshot")
 
+    goal = _price_goal_markets(match_id, odds_rows, pred)
+    out["totals"], out["spreads"], out["btts"] = goal["totals"], goal["spreads"], goal["btts"]
+    out["missing"].extend(goal["missing"])
+    return out
+
+
+def _price_goal_markets(match_id: str, odds_rows: list, pred) -> dict:
+    """Model-priced totals (O/U), Asian-handicap and BTTS edges from the score model in
+    ``pred`` (lambda_a/lambda_b/btts). Shared by the group evaluator and the knockout one —
+    the goals markets price the same way; for a knockout tie ``pred`` is the 90-minute
+    prediction (kp.reg). Returns {"totals":[...],"spreads":[...],"btts":[...],"missing":[...]}."""
+    out = {"totals": [], "spreads": [], "btts": [], "missing": []}
     totals = latest_market(odds_rows, match_id, "totals")
     pairs = all_paired_lines(totals, "over", "under") if totals else []
     if pairs and pred is not None:
@@ -511,17 +523,18 @@ def evaluate_match(match_id: str, odds_rows: list, ledger_rows: list,
 
 def evaluate_ko_match(match_no: int, team_a: str, team_b: str,
                       odds_rows: list, model, country: str = "") -> dict:
-    """Edge table for a resolved knockout tie. The bettable market is ADVANCE (to
-    qualify): model-priced from predict.resolve_knockout (the 90' consensus routed
-    through extra time + a coin-flip shootout), de-vigged against a 2-way 'advance'
-    market when one is quoted. Returns the evaluate_match shape (all market keys present
-    so render_market stays safe), with edges only in 'advance'.
+    """Edge table for a resolved knockout tie. Two layers:
 
-    Advance-only by design: the standard odds-API soccer market is the 90-MINUTE 3-way
-    result, which (a) has no consensus ledger for knockouts and (b) cannot be settled
-    from the post-extra-time score in knockout.csv. Advance settles cleanly + penalty-
-    aware from the winner side, so it is the only knockout market we record (a 90' market,
-    if present, is the caller's to display — never recorded here)."""
+    ADVANCE (to qualify): model-priced from predict.resolve_knockout (the 90' consensus routed
+    through extra time + a coin-flip shootout). Recordable ONLY against a genuinely-quoted 2-way
+    'advance' line (rare — via manual `enter advance`); otherwise DERIVED from the 90' h2h and
+    shown as a model-vs-market read, never recorded (no quoted price, no CLV).
+
+    90-MINUTE GOALS (totals / Asian handicap / BTTS): model-priced from the same 90' score model
+    (kp.reg) and SHOWN so the card carries all the lines — but DISPLAY-ONLY. They settle on 90
+    minutes, while knockout.csv stores only the full-time (post-ET) score, so a tie that goes to
+    extra time can't be settled cleanly; recording them would bias the units record. ``out
+    ["display_only_markets"]`` lists every market best_bets must NOT record."""
     out = {"h2h": [], "totals": [], "spreads": [], "btts": [], "advance": [], "missing": []}
     if not (team_a and team_b):
         out["missing"].append("matchup not resolved yet — no advance call")
@@ -529,6 +542,17 @@ def evaluate_ko_match(match_no: int, team_a: str, team_b: str,
     mid = f"M{match_no}"
     kp = pr.resolve_knockout(model, team_a, team_b,
                              hfa_team=pr.host_hfa(country, team_a, team_b))  # host at home in KO
+
+    # 90-minute goals markets, priced from the 90' prediction (kp.reg) — display-only (see above).
+    goal = _price_goal_markets(mid, odds_rows, kp.reg)
+    out["totals"], out["spreads"], out["btts"] = goal["totals"], goal["spreads"], goal["btts"]
+    out["missing"].extend(goal["missing"])
+    display_only = {"totals", "spreads", "btts"}
+    if out["totals"] or out["spreads"] or out["btts"]:
+        out["missing"].append(
+            "totals / handicap / BTTS are 90-minute markets shown as model-vs-market reads — "
+            "not recorded (a knockout tie can go to extra time, which they don't settle on)")
+
     adv = latest_market(odds_rows, mid, KO_ADVANCE_MARKET)
     if adv and ("home", "") in adv and ("away", "") in adv:
         # a REAL, quoted 2-way to-qualify line (rare — via manual `enter advance`): recordable
@@ -536,30 +560,28 @@ def evaluate_ko_match(match_no: int, team_a: str, team_b: str,
         implied = devig(o)                       # 2-way multiplicative de-vig (Σ implied = 1)
         for i, (sel, p) in enumerate((("home", kp.p_advance_a), ("away", kp.p_advance_b))):
             out["advance"].append((sel, "", o[i], implied[i], p, p - implied[i]))
-        return out
-    if adv:
+    elif adv:
         out["missing"].append("incomplete advance market (need both sides)")
-        return out
-    # No quoted to-qualify market (the norm — The Odds API carries none). DERIVE the market's
-    # advance probability from the fetched 90' 3-way h2h, routing its draw mass through the SAME
-    # extra-time + coin-flip-shootout layer the model uses. This is a model-vs-market READ
-    # (vig-free fair probability, not a price you can take) — shown, but NEVER recorded: the ET
-    # layer is ours on both sides, so the edge is just the 90' h2h disagreement on the advance
-    # axis (a self-priced quantity, hence the model-priced 8pp framing — and no real line/CLV).
-    h = latest_market(odds_rows, mid, "h2h")
-    if h and all((sel, "") in h for sel in ("home", "draw", "away")):
-        q = devig([h[("home", "")][0], h[("draw", "")][0], h[("away", "")][0]])  # 90' h/d/a
-        et_a, et_d, _et_b = kp.et_wdl                       # model's ET conditional W/D/L
-        madv_a = q[0] + q[1] * (et_a + et_d * 0.5)          # route draw mass; 0.5 = flat shootout
-        madv = (madv_a, 1.0 - madv_a)
-        for i, (sel, p) in enumerate((("home", kp.p_advance_a), ("away", kp.p_advance_b))):
-            out["advance"].append((sel, "", None, madv[i], p, p - madv[i]))  # None odds = no quoted price
-        out["advance_derived"] = True
-        out["missing"].append(
-            "advance edge derived from the 90' market (no quoted 'to qualify' line) — a "
-            "model-vs-market read, not a recorded bet")
     else:
-        out["missing"].append("no market snapshot for this tie yet — advance call shown, nothing priced")
+        # No quoted to-qualify market (the norm). DERIVE the market's advance probability from
+        # the fetched 90' 3-way h2h, routing its draw mass through the SAME ET + coin-flip-
+        # shootout layer the model uses. A model-vs-market READ — shown, never recorded.
+        h = latest_market(odds_rows, mid, "h2h")
+        if h and all((sel, "") in h for sel in ("home", "draw", "away")):
+            q = devig([h[("home", "")][0], h[("draw", "")][0], h[("away", "")][0]])  # 90' h/d/a
+            et_a, et_d, _et_b = kp.et_wdl                   # model's ET conditional W/D/L
+            madv_a = q[0] + q[1] * (et_a + et_d * 0.5)      # route draw mass; 0.5 = flat shootout
+            madv = (madv_a, 1.0 - madv_a)
+            for i, (sel, p) in enumerate((("home", kp.p_advance_a), ("away", kp.p_advance_b))):
+                out["advance"].append((sel, "", None, madv[i], p, p - madv[i]))  # None odds = no price
+            out["advance_derived"] = True
+            display_only.add("advance")
+            out["missing"].append(
+                "advance edge derived from the 90' market (no quoted 'to qualify' line) — a "
+                "model-vs-market read, not a recorded bet")
+        elif not (out["totals"] or out["spreads"] or out["btts"]):
+            out["missing"].append("no market snapshot for this tie yet — nothing priced")
+    out["display_only_markets"] = display_only
     return out
 
 
@@ -591,10 +613,13 @@ def best_bets(evaluation: dict, threshold: float = RECORD_THRESHOLD,
     self-priced market is far more likely our miscalibration than market error."""
     flags = []
     per_market: dict = {}
+    # markets shown but NOT recorded: the knockout 90' goals markets (totals/spreads/BTTS, which
+    # can't settle from a post-ET score) and a DERIVED advance read (no quoted price, no CLV).
+    display_only = set(evaluation.get("display_only_markets") or ())
+    if evaluation.get("advance_derived"):
+        display_only.add("advance")
     for market in ("h2h", "totals", "spreads", "btts", "advance"):
-        # a knockout advance edge DERIVED from the 90' line is a display-only model-vs-market
-        # read (no quoted to-qualify price, no CLV) — shown, never recorded.
-        if market == "advance" and evaluation.get("advance_derived"):
+        if market in display_only:
             continue
         ceiling = _market_sanity(market, sanity, model_sanity)
         for sel, line, odds, implied, our_p, edge in evaluation.get(market, []):
