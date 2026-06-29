@@ -761,7 +761,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">The Market</span>
     <h2 id="odds-h">Odds &amp; best bet</h2>
   </div>
-<p class="odds-note">model projection: <b>2.93</b> total goals · over 1.5 <b>79%</b> · over 2.5 <b>56%</b> · over 3.5 <b>34%</b></p>
+<p class="odds-note">model projection: <b>3.03</b> total goals · over 1.5 <b>80%</b> · over 2.5 <b>58%</b> · over 3.5 <b>36%</b></p>
 <div class="edge-wrap">
   <table>
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
@@ -770,17 +770,16 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">1X2</td><td class="lbl">Tunisia</td><td title="19.00 decimal">+1800</td><td>5%</td><td>5%</td><td class="">+0.1%</td></tr>
       <tr><td class="lbl">1X2</td><td class="lbl">Draw</td><td title="8.50 decimal">+750</td><td>11%</td><td>13%</td><td class="">+2.2%</td></tr>
       <tr><td class="lbl">1X2</td><td class="lbl">Netherlands</td><td title="1.14 decimal">-714</td><td>84%</td><td>81%</td><td class="edge-neg">-2.3%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="2.05 decimal">+105</td><td>47%</td><td>34%</td><td class="edge-neg">-13.0%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="1.79 decimal">-127</td><td>53%</td><td>66%</td><td class="edge-pos">+13.0%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Tunisia +2.5</td><td title="1.73 decimal">-137</td><td>56%</td><td>64%</td><td class="edge-pos">+8.4%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Netherlands -2.5</td><td title="2.18 decimal">+118</td><td>44%</td><td>36%</td><td class="edge-neg">-8.4%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="2.05 decimal">+105</td><td>47%</td><td>36%</td><td class="edge-neg">-10.7%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="1.79 decimal">-127</td><td>53%</td><td>64%</td><td class="edge-pos">+10.7%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Tunisia +2.5</td><td title="1.73 decimal">-137</td><td>56%</td><td>62%</td><td class="edge-pos">+6.2%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Netherlands -2.5</td><td title="2.18 decimal">+118</td><td>44%</td><td>38%</td><td class="edge-neg">-6.2%</td></tr>
     </tbody>
   </table>
 </div>
-<p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Tunisia +2.5</strong> (Asian handicap), model edge <strong>+6.2%</strong></p><p class="odds-note">the model likes this, but the line is over 12h old (the book hasn't reposted), so it is <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
 <p class="odds-note">Logged pick: Draw @ +1000 (draftkings), edge 4.7pp · settled <b>lost</b> for -1.00u · CLV +2.6pp.</p>
-<p class="verify-flag">totals under 3.5: model-priced edge +13.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads home 2.5: model-priced edge +8.4% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">totals under 3.5: model-priced edge +10.7% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 25, 6:59 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
 <details class="outcome-grid-wrap">
 <summary class="outcome-grid-toggle">Show score grid</summary>
@@ -804,7 +803,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.4591,lb=2.4673,N=8,SHOW=6,i,j;
+  var la=0.4633,lb=2.5646,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}
