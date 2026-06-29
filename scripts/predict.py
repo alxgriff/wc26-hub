@@ -113,16 +113,17 @@ ELO_FILE = "Elo_Ratings_World_Cup_2026_VERIFIED.csv"   # NOT the corrupted origi
 # are graded from the immutable ledger, never recomputed. Pass elo_current=False to pin to
 # the VERIFIED anchor (used by the exact-value regression baseline so it can't drift nightly).
 ELO_CURRENT = "Elo_Ratings_World_Cup_2026_CURRENT.csv"
-FUTI_FILE = "World_Cup_2026_Futi_6_24.csv"   # match-driven futi.live EPV ratings,
-# refreshed 2026-06-24 (post-MD2). Ingested for GOING-FORWARD predictions only (MD3);
-# already-played MD1/MD2 games are graded from their immutable pre-kickoff logged calls
-# (ledger.grade / build_site.render_call), never recomputed — so the small post-MD2 drift
-# (mean |ΔRat| 0.52, max 2 pts on the 0-99 scale) can't leak into earlier scoring. The 6/24
-# vintage was transcribed from the futi.live app "Teams rankings" view (Att/Def/Rat per team,
-# data/Ratings/futi_6_24/IMG_0012-0017); display-only Formation/Top_Player/Coach are carried
-# forward from the 6/18 detail-card vintage (the list view omits them). Prior vintages: 6/18
-# (post-MD1) World_Cup_2026_Futi_6_18.csv; 6/12 (pre-tournament)
-# World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv.
+FUTI_FILE = "World_Cup_2026_Futi_6_28.csv"   # match-driven futi.live EPV ratings,
+# refreshed 2026-06-28 (group stage complete, R32 under way). Ingested for GOING-FORWARD
+# predictions only (the knockout rounds); already-played games are graded from their immutable
+# pre-kickoff logged calls (ledger.grade / build_site.render_call), never recomputed — so the
+# rating drift can't leak into earlier scoring. The 6/28 vintage was transcribed from the
+# futi.live app "Teams rankings" view (Att/Def/Rat per team, data/Ratings/futi_6_28/
+# IMG_0038-0042, ranks 1-45); display-only Formation/Top_Player/Coach are carried forward from
+# 6/24 (the list view omits them). Three eliminated teams not in the 6/28 shots (Qatar, Haiti,
+# Curaçao — out of the tournament, no remaining matches) are carried forward unchanged from 6/24.
+# Prior vintages: 6/24 (post-MD2) World_Cup_2026_Futi_6_24.csv; 6/18 (post-MD1)
+# World_Cup_2026_Futi_6_18.csv; 6/12 (pre-tournament) ..._Detailed_Profiles_Final.csv.
 OPTA_FILE = "Opta_Predictions_World_Cup_2026.csv"
 MARKET_FILE = "Market_Outrights_VERIFIED.csv"          # real de-vigged outright market
 OPTA_MATCH_FILE = "Opta_Match_Predictions.csv"         # per-match W/D/L overlay

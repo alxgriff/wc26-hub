@@ -9,7 +9,7 @@ before use in the predictor (`scripts/predict.py`).
 | Source | Status | Use it for |
 |---|---|---|
 | **Elo** | ⚠️ original corrupted — **VERIFIED is the anchor; `..._CURRENT.csv` (rolled, gitignored) is preferred live** | match-strength backbone |
-| **Futi** (`World_Cup_2026_Futi_6_18.csv`, active) | ✅ reliable, post-MD1 refresh | match-strength (1.5× weight) + Attack/Defense goals model |
+| **Futi** (`World_Cup_2026_Futi_6_28.csv`, active) | ✅ reliable, refreshed at the group→knockout boundary | match-strength (1.5× weight) + Attack/Defense goals model |
 | **Opta** (`Opta_Predictions...`) | ✅ reputable, but tournament-level | context overlay only (advance %, win %) |
 | **Market** (`Market_Outrights_VERIFIED.csv`) | ✅ real market, de-vigged | public-sentiment context + divergence flags |
 | **Zeileis** (`Zeileis_Hybrid_Model...`) | ❌ both key columns broken | **not used at all** |
@@ -33,14 +33,17 @@ before use in the predictor (`scripts/predict.py`).
   catching the Elo error.
 - **Futi = futi.live** (Imburgio/Muller, ex-American Soccer Analysis): an Expected
   Possession Value / "goals added" model — chance-quality, *orthogonal* to results-based
-  Elo. Its tournament ratings are match-driven (dynamic). **`World_Cup_2026_Futi_6_18.csv`**
-  is the post-MD1 refresh, OCR'd from 48 app screenshots (`Futi_6_18/`, gitignored, kept
-  local). It barely moved from the 6/12 pre-tournament file (mean 0.44 pts; corr +0.36 with
-  MD1 points), so it's ingested for going-forward predictions only — played games stay
-  graded from immutable logged calls (no leakage). Pre-tournament vintage kept for
-  provenance: `World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv`. The 1.5×
-  Futi blend weight and this whole call are documented in DECISIONS.md (2026-06-18) and
-  reproducible via `scripts/eval_blend.py`.
+  Elo. Its tournament ratings are match-driven (dynamic). **`World_Cup_2026_Futi_6_28.csv`**
+  is the latest, transcribed at the group→knockout boundary from the futi.live "Teams
+  rankings" list view (Att/Def/Rat per team, `futi_6_28/IMG_0038-0042`, gitignored, ranks
+  1-45). Display-only Formation/Top_Player/Coach are carried forward from 6/24 (the list view
+  omits them); three eliminated teams not in the 6/28 screenshots (Qatar, Haiti, Curaçao — out
+  of the tournament, no remaining matches) are carried forward unchanged from 6/24. Ingested
+  for going-forward (knockout) predictions only — played games stay graded from immutable
+  logged calls (no leakage). Prior vintages: `World_Cup_2026_Futi_6_24.csv` (post-MD2),
+  `World_Cup_2026_Futi_6_18.csv` (post-MD1), `World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv`
+  (pre-tournament). The 1.5× Futi blend weight and this whole call are documented in
+  DECISIONS.md (2026-06-18) and reproducible via `scripts/eval_blend.py`.
 - **Opta** is from Stats Perform and its ordering is sound, but its numbers are
   tournament-path probabilities (bracket-confounded), so they are context, not
   match strength.

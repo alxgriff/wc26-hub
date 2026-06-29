@@ -66,13 +66,15 @@ class DixonColesTests(unittest.TestCase):
         55/26/19 -> 53/28/19 when the Tier 3.1 Maher-form total params were activated
         (2026-06-14); -> 51/29/20 at the 2026-06-18 update (Futi tilt w_futi 1.0->1.5 AND
         the post-MD1 6/18 futi.live ratings: Futi rates Morocco far higher than Elo, rank 8
-        vs 22). Now 50/30/20 after the 2026-06-24 post-MD2 futi.live refresh
-        (World_Cup_2026_Futi_6_24.csv): Morocco's Futi defense rose 95->97, lifting the draw
-        ~1pp and trimming Brazil ~1pp. Pinned to the VERIFIED Elo anchor (elo_current=False),
-        so only the Futi refresh moves it; rho is still 0."""
+        vs 22). 50/30/20 after the 2026-06-24 post-MD2 futi.live refresh: Morocco's Futi defense
+        rose 95->97, lifting the draw ~1pp and trimming Brazil ~1pp. Now 53/28/19 after the
+        2026-06-28 refresh (World_Cup_2026_Futi_6_28.csv, groups complete): Brazil's Futi rose
+        88->90 and Morocco's Futi defense eased 97->94, so Brazil's win edges up and the draw
+        falls. Pinned to the VERIFIED Elo anchor (elo_current=False), so only the Futi refresh
+        moves it; rho is still 0."""
         pr = P.predict_match(MODEL, "Brazil", "Morocco")
         got = (round(pr.p_a * 100), round(pr.p_draw * 100), round(pr.p_b * 100))
-        self.assertEqual(got, (50, 30, 20), got)
+        self.assertEqual(got, (53, 28, 19), got)
 
     def test_dc_tau_per_cell_lambda_mapping(self):
         """Pin the EXACT per-cell Dixon-Coles form, incl. the deliberate cross-mapping

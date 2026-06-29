@@ -49,9 +49,9 @@ FIXTURES = REPO / "data" / "fixtures.csv"
 DRD_LOG = REPO / "data" / "edge_drd_log.csv"
 TAG = "deserved-result-divergence"
 FUTI_PRE = "World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv"   # 6/12, pre-tournament
-FUTI_NOW = P.FUTI_FILE   # the production vintage (6/18 today) — follows predict.py so the live
-#                          board/log never go stale when the Futi file is bumped. FUTI_PRE stays
-#                          fixed: it's the pre-tournament file used for leak-free MD1 validation.
+FUTI_NOW = P.FUTI_FILE   # the production vintage — follows predict.py (whatever FUTI_FILE points
+#                          at) so the live board/log never go stale when the Futi file is bumped.
+#                          FUTI_PRE stays fixed: the pre-tournament file for leak-free MD1 validation.
 
 LOG_COLS = ["match_id", "side", "team", "as_of", "model_p", "market_p", "drd_edge",
             "process_lean", "market_capture", "price_decimal", "price_american", "book",
