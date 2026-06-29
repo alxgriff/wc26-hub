@@ -938,7 +938,7 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-29 16:42",
+ "generated_at": "2026-06-29 22:48",
  "slate_date": "2026-06-29",
  "bracket": {
   "schema": 1,
@@ -1225,6 +1225,12 @@
     "loser": "South Africa",
     "p": null,
     "source": "result"
+   },
+   "76": {
+    "team": "Brazil",
+    "loser": "Japan",
+    "p": null,
+    "source": "result"
    }
   },
   "participants": {
@@ -1294,6 +1300,10 @@
    ],
    "90": [
     "Canada",
+    null
+   ],
+   "91": [
+    "Brazil",
     null
    ]
   },
@@ -1600,8 +1610,8 @@
    "76": {
     "team": "Brazil",
     "loser": "Japan",
-    "p": 0.7353730407211378,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "77": {
     "team": "France",
