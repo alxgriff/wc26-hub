@@ -336,9 +336,14 @@ def feed(projection: dict, resolver, results: "dict | None" = None) -> dict:
     participants: dict[int, list] = {}
 
     def decide(m: int, a, b) -> None:
+        if not a and not b:
+            return
+        # record participants even when only ONE side is known, so a team that has won its
+        # tie advances onto the next round's line immediately (the other slot reads TBD) —
+        # like a real bracket. A winner is only resolved once BOTH sides are known.
+        participants[m] = [a, b]
         if not a or not b:
             return
-        participants[m] = [a, b]
         if m in results:
             w = results[m]
             winners[m] = {"team": w, "loser": b if w == a else a,

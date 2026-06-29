@@ -335,7 +335,10 @@ def materialize_teams(proj: dict, matches: list[KnockoutMatch]) -> list[Knockout
             tb = e["away"] if (e.get("away") and not e.get("away_provisional")) else ""
         else:
             pair = participants.get(k.match_no)
-            ta, tb = (pair[0], pair[1]) if pair else ("", "")
+            # only materialize a later-round tie when BOTH feeders are decided; bracket.feed
+            # now records a partial pair (one winner known) for the live-bracket VIEW, but the
+            # data file stays clean — a half-set tie has no recordable matchup for odds/cards.
+            ta, tb = (pair[0], pair[1]) if (pair and pair[0] and pair[1]) else ("", "")
         out.append(dataclasses.replace(k, team_a=ta or "", team_b=tb or ""))
     return out
 

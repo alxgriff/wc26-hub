@@ -1630,6 +1630,42 @@ def _bracket_view(proj: dict, view_cls: str, champ_label: str, sub: str) -> str:
             f'</div></div>')
 
 
+def render_bracket_block(proj: dict, projected: "dict | None" = None,
+                         real_results: bool = True) -> str:
+    """The bracket itself: the as-it-stands view, plus the model's projected-finish view behind
+    a CSS-only radio toggle when ``projected`` is given. No page chrome — used both on the
+    standalone bracket page (group stage) and inline as the main-page centerpiece (knockout)."""
+    if real_results:               # knockout phase: as-it-stands advances only actual results
+        now_view = _bracket_view(
+            proj, "view-now", "Champions",
+            "Real results only. Every group winner, runner-up and the eight best thirds (slotted by "
+            "the FIFA Annex C logic) drop into their fixed slots; then a winner is highlighted and "
+            "advances the moment its tie is played, with the loser struck out. The rounds beyond "
+            "fill in as games finish — nothing here is projected.")
+    else:                          # group phase: clinch-aware model projection
+        now_view = _bracket_view(
+            proj, "view-now", "Projected to lift the trophy",
+            "Drawn from the standings as they stand — every group winner, runner-up and the eight "
+            "best thirds (slotted by the FIFA Annex C logic). A green ✓ marks a seed already "
+            "mathematically secured; a dashed underline marks a provisional position; the run "
+            "beyond the R32 is the model's projected advancer, with its chance to advance.")
+    if projected is None:
+        return now_view
+    proj_view = _bracket_view(
+        projected, "view-proj", "Projected champion",
+        "Every remaining game simulated from the model's goal rates and run through the whole "
+        "bracket — a full scenario, not a forecast of who qualifies.")
+    # CSS-only radio toggle (no JS): the radios precede the views so the `#id:checked ~ .view`
+    # sibling rules show/hide. 'As it stands' is the default.
+    return (
+        '<input type="radio" name="bview" id="bv-now" class="bview-radio" checked>'
+        '<input type="radio" name="bview" id="bv-proj" class="bview-radio">'
+        '<div class="bview-tabs" role="tablist" aria-label="Bracket view">'
+        '<label for="bv-now">As it stands</label>'
+        '<label for="bv-proj">Projected finish</label></div>'
+        + now_view + proj_view)
+
+
 def render_bracket_page(proj: dict, css: str, generated_at: str,
                         template_dir: Path = TEMPLATE_DIR,
                         projected: "dict | None" = None, real_results: bool = True) -> str:
@@ -1641,41 +1677,7 @@ def render_bracket_page(proj: dict, css: str, generated_at: str,
                 "third-place cutline is settled.")
     notes_html = "".join(f'<li>{_esc(w)}</li>' for w in proj["warnings"])
     notes_html = f'<ul class="bnotes">{notes_html}</ul>' if notes_html else ""
-
-    if real_results:               # knockout phase: as-it-stands advances only actual results
-        now_view = _bracket_view(
-            proj, "view-now", "Champions",
-            "Real results only. Every group winner, runner-up and the eight best thirds (slotted by "
-            "the FIFA Annex C logic) drop into their fixed slots; then a winner is highlighted and "
-            "advances the moment its tie is actually played, with the loser struck out. Unplayed ties "
-            "show both sides, and the rounds beyond fill in as games finish — nothing here is "
-            "projected. For the model's run of the whole bracket, switch to the projected finish.")
-    else:                          # group phase: keep the current clinch-aware model projection
-        now_view = _bracket_view(
-            proj, "view-now", "Projected to lift the trophy",
-            "Drawn from the standings as they stand — every group winner, runner-up and the eight "
-            "best thirds (slotted by the FIFA Annex C logic). A green ✓ marks a seed already "
-            "mathematically secured; a dashed underline marks a provisional position (it shifts "
-            "with each result); the run beyond the R32 is the model's projected advancer, in green "
-            "with its chance to advance. Switch to the projected finish to play every group out.")
-    if projected is not None:
-        proj_view = _bracket_view(
-            projected, "view-proj", "Projected champion",
-            "Every remaining group game simulated from the model's goal rates and each group "
-            "settled on its most likely final table (draws included — a leader who only needs a "
-            "point keeps top spot), then the whole bracket run through. A full scenario, not a "
-            "forecast of who qualifies.")
-        # CSS-only radio toggle (no JS in the output): the radios precede the views so the
-        # `#id:checked ~ .view` sibling rules can show/hide. 'As it stands' is the default.
-        bracket_html = (
-            '<input type="radio" name="bview" id="bv-now" class="bview-radio" checked>'
-            '<input type="radio" name="bview" id="bv-proj" class="bview-radio">'
-            '<div class="bview-tabs" role="tablist" aria-label="Bracket view">'
-            '<label for="bv-now">As it stands</label>'
-            '<label for="bv-proj">Projected finish</label></div>'
-            + now_view + proj_view)
-    else:
-        bracket_html = now_view
+    bracket_html = render_bracket_block(proj, projected, real_results)
 
     tpl = Template((template_dir / "bracket.html").read_text(encoding="utf-8"))
     return tpl.safe_substitute(
@@ -2280,7 +2282,8 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
                knockout: list | None = None,
                ko_calls: dict[str, str] | None = None,
                last_group_date: date | None = None,
-               bracket_proj: dict | None = None) -> tuple[str, dict]:
+               bracket_proj: dict | None = None,
+               bracket_full: dict | None = None) -> tuple[str, dict]:
     """Render the index page. Returns (html, data_dict)."""
     s = st.compute_standings(matches, fair_play=fair_play)
     forms = form_by_team(matches)
@@ -2340,17 +2343,20 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
     # tables + third-place race move to group-stage.html behind a 'Group stage' link. Group
     # phase: the group tables stay the front page (the bracket is still one click away).
     if in_ko:
-        bracket_inner = (render_bracket_html(bracket_proj) if bracket_proj is not None
-                         else '<p class="standfirst">The bracket fills in once the groups '
-                              'finish.</p>')
+        if bracket_proj is not None:
+            bracket_block = render_bracket_block(bracket_proj, bracket_full, real_results=True)
+            intro = ('A winner is highlighted and advances the moment its tie is played.'
+                     + (' Switch to the model’s projected finish for the run of the whole bracket.'
+                        if bracket_full is not None else ''))
+        else:
+            bracket_block = ('<p class="standfirst">The bracket fills in once the groups finish.</p>')
+            intro = ""
         body_sections_html = (
             '<section id="bracket" aria-labelledby="bracket-h">\n'
             '  <div class="sec-head"><span class="kicker">R32 → Final</span>'
             '<h2 id="bracket-h">The Bracket</h2></div>\n'
-            '  <p class="standfirst">As it stands — a winner is highlighted and advances the '
-            'moment its tie is played. <a href="bracket.html">See the model’s projected finish →</a></p>\n'
-            '  <div class="bracket-wrap" tabindex="0" role="region" '
-            f'aria-label="Knockout bracket, scrollable">{bracket_inner}</div>\n</section>')
+            + (f'  <p class="standfirst">{intro}</p>\n' if intro else "")
+            + bracket_block + '\n</section>')
         nav_html = ('    <a class="wide" href="#bracket">the bracket</a>\n'
                     '    <a class="wide" href="group-stage.html">group stage</a>\n'
                     '    <a class="wide" href="record.html">the record</a>')
@@ -2613,7 +2619,8 @@ def build_site(out_dir: Path, target: date, generated_at: str,
                              overnight_html=render_overnight(rows, target,
                                                              matches, ledger),
                              fates=fates, knockout=knockout, ko_calls=ko_slate_calls,
-                             last_group_date=last_group_date, bracket_proj=bracket_proj)
+                             last_group_date=last_group_date, bracket_proj=bracket_proj,
+                             bracket_full=bracket_full)
     if bracket_proj is not None:
         data["bracket"] = bk.to_dict(bracket_proj)
     if bracket_full is not None:
@@ -2637,11 +2644,23 @@ def build_site(out_dir: Path, target: date, generated_at: str,
         (out_dir / "group-stage.html").write_text(
             render_group_stage_page(s, forms, fates, css, generated_at, template_dir),
             encoding="utf-8")
-    if bracket_proj is not None:
+    if bracket_proj is not None and not in_ko:
+        # group phase: the bracket is a standalone page (the index is the group tables)
         (out_dir / "bracket.html").write_text(
             render_bracket_page(bracket_proj, css, generated_at, template_dir,
                                 projected=bracket_full, real_results=in_ko),
             encoding="utf-8")
+    elif in_ko:
+        # knockout phase: the bracket (with the as-it-stands / projected-finish toggle) is the
+        # main-page centerpiece, so the standalone page is redundant — leave a redirect so any
+        # existing link (an older bookmark, a match-page footer) lands on the on-page bracket.
+        (out_dir / "bracket.html").write_text(
+            '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">'
+            '<meta http-equiv="refresh" content="0; url=index.html#bracket">'
+            '<link rel="canonical" href="index.html#bracket">'
+            '<title>The Bracket — WC26 Daily Hub</title></head><body>'
+            '<p>The bracket is now on <a href="index.html#bracket">the main page</a>.</p>'
+            '</body></html>', encoding="utf-8")
 
     fixture_teams = sorted({m.team_a for m in matches} | {m.team_b for m in matches})
     for team in fixture_teams:

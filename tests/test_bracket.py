@@ -165,15 +165,25 @@ class FeedTests(unittest.TestCase):
 
     def test_gating_halts_propagation(self):
         # only group A has played -> no full R32 tie has both sides known except via
-        # started groups; nothing should propagate past the gating frontier.
+        # started groups; no WINNER should be resolved past the gating frontier.
         s = st.compute_standings(st.load_fixtures(SNAP))
         proj = bk.project(s)
         fed = bk.feed(proj, _alpha_resolver)
         self.assertIsNone(fed["champion"])             # cannot reach the Final
         self.assertEqual(fed["winners"], {})           # no R32 tie has both sides known
-        # any resolved tie would have two concrete (non-None) participants
-        for m, pr in fed["participants"].items():
-            self.assertTrue(all(pr))
+        # a winner is only ever resolved when BOTH sides are known (partial slots may exist
+        # for the live view, but they never carry a fabricated winner)
+        for m in fed["winners"]:
+            self.assertTrue(all(fed["participants"][m]))
+
+    def test_winner_advances_onto_next_line_before_sibling_decided(self):
+        # a team that has WON its tie shows on the next round's line immediately, with the
+        # other slot still blank — like a real bracket (the M73 winner -> the M90 line).
+        s = st.compute_standings(_full_groups())
+        proj = bk.project(s, resolve_provisional=True)
+        fed = bk.feed(proj, lambda a, b: None, results={73: proj["r32"][73]["home"]})
+        self.assertEqual(fed["participants"][90], [proj["r32"][73]["home"], None])
+        self.assertNotIn(90, fed["winners"])           # M90 itself isn't decided yet
 
 
 LIVE = REPO / "data" / "fixtures.csv"
