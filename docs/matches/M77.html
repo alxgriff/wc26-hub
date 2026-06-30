@@ -667,7 +667,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">Sweat Factor</span>
     <h2 id="weather-h">How the heat stacks up</h2>
   </div>
-<div class="placeholder-slot">Sweat Factor forecast not captured yet — it fills automatically once the venue forecast is fetched. No data is invented.</div>
+<div class="conditions">
+  <span class="cond-stamp">Forecast · as of 2026-06-30 07:54 ET</span>
+  <p class="cond-stats">~93°F · dry (36% RH) · WBGT 86.9°F</p>
+  <div class="cond-track" aria-label="Match heat index: Severe (89/100)"><div class="cond-fill" style="width:89%"></div></div>
+  <p class="cond-sev cond-sev-severe">Severe</p>
+  <p class="cond-blurb">Severe conditions (87°F WBGT) — this is a demanding physical environment for both teams.</p>
+  <div class="cond-teams"><div class="cond-team"><span class="cond-tname">France</span><div class="cond-dis-track" aria-label="Heat disadvantage 97/100"><div class="cond-dis-fill cond-dis-hot" style="width:97%"></div></div><span class="cond-delta">+17.5°F vs home</span></div><div class="cond-team"><span class="cond-tname">Sweden</span><div class="cond-dis-track" aria-label="Heat disadvantage 100/100"><div class="cond-dis-fill cond-dis-hot" style="width:100%"></div></div><span class="cond-delta">+20.9°F vs home</span></div></div>
+</div>
 </section>
 
 <section aria-labelledby="card-h" class="read-grid">
@@ -702,20 +709,20 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
     <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
     <tbody>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td title="1.69 decimal">-145</td><td>57%</td><td>55%</td><td class="edge-neg">-2.1%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td title="2.27 decimal">+127</td><td>43%</td><td>45%</td><td class="">+2.1%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="2.15 decimal">+115</td><td>45%</td><td>43%</td><td class="edge-neg">-1.7%</td></tr>
-      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="1.74 decimal">-135</td><td>55%</td><td>57%</td><td class="">+1.7%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">France -1.5</td><td title="1.81 decimal">-123</td><td>53%</td><td>64%</td><td class="edge-pos">+10.6%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Sweden +1.5</td><td title="2.05 decimal">+105</td><td>47%</td><td>36%</td><td class="edge-neg">-10.6%</td></tr>
-      <tr><td class="lbl">To qualify</td><td class="lbl">France</td><td title="no quoted price — implied from the 90′ line">—</td><td>84%</td><td>90%</td><td class="edge-pos">+6.2%</td></tr>
-      <tr><td class="lbl">To qualify</td><td class="lbl">Sweden</td><td title="no quoted price — implied from the 90′ line">—</td><td>16%</td><td>10%</td><td class="edge-neg">-6.2%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3</td><td title="1.71 decimal">-141</td><td>56%</td><td>55%</td><td class="edge-neg">-1.1%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3</td><td title="2.20 decimal">+120</td><td>44%</td><td>45%</td><td class="">+1.1%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="2.12 decimal">+112</td><td>44%</td><td>43%</td><td class="edge-neg">-1.3%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="1.69 decimal">-145</td><td>56%</td><td>57%</td><td class="">+1.3%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">France -1.5</td><td title="1.81 decimal">-123</td><td>53%</td><td>64%</td><td class="edge-pos">+10.8%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Sweden +1.5</td><td title="2.04 decimal">+104</td><td>47%</td><td>36%</td><td class="edge-neg">-10.8%</td></tr>
+      <tr><td class="lbl">To qualify</td><td class="lbl">France</td><td title="no quoted price — implied from the 90′ line">—</td><td>84%</td><td>90%</td><td class="edge-pos">+5.9%</td></tr>
+      <tr><td class="lbl">To qualify</td><td class="lbl">Sweden</td><td title="no quoted price — implied from the 90′ line">—</td><td>16%</td><td>10%</td><td class="edge-neg">-5.9%</td></tr>
     </tbody>
   </table>
 </div>
 <p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
-<p class="verify-flag">spreads home -1.5: model-priced edge +10.6% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="odds-note">market snapshot Jun 30, 12:54 AM ET · DraftKings where quoted, else best of 5 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake · totals / handicap / BTTS settle on 90 minutes (regulation) — extra-time goals don&#x27;t count toward them · advance edge derived from the 90&#x27; market (no quoted &#x27;to qualify&#x27; line) — a model-vs-market read, not a recorded bet.</p>
+<p class="verify-flag">spreads home -1.5: model-priced edge +10.8% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="odds-note">market snapshot Jun 30, 7:54 AM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 3 can push (P 22%) — probabilities and edge are per unit at risk; a push refunds the stake · totals / handicap / BTTS settle on 90 minutes (regulation) — extra-time goals don&#x27;t count toward them · advance edge derived from the 90&#x27; market (no quoted &#x27;to qualify&#x27; line) — a model-vs-market read, not a recorded bet.</p>
 </section>
 
 <section aria-labelledby="teams-h"><div class="sec-head"><span class="kicker">Go Deeper</span><h2 id="teams-h">Team cards</h2></div><div class="team-pair"><a href="../teams/france.html">France<span class="sub">squad · system · key players</span></a><a href="../teams/sweden.html">Sweden<span class="sub">squad · system · key players</span></a></div></section>
