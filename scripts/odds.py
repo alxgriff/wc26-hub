@@ -1537,6 +1537,14 @@ def main(argv: list | None = None) -> int:
                     if prefer else "US region (best of all books)")
         print(f"logged {len(odds_rows)} odds rows ({args.phase}, {src_desc}); "
               f"API requests remaining this month: {remaining}")
+        # low-credit alarm: surface a GitHub warning BEFORE the monthly quota zeroes and starts
+        # 401-ing the fetch/scores steps (each run spends ~5 credits; the free tier is ~500/mo).
+        try:
+            if int(remaining) < 60:
+                print(f"::warning::Odds API credits low: {remaining} left this month "
+                      "— fetch/scores steps will start failing when it hits 0")
+        except (TypeError, ValueError):
+            pass
         return 0
 
     if args.command == "enter":
