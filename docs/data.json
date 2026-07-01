@@ -938,7 +938,7 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-06-30 22:56",
+ "generated_at": "2026-07-01 01:29",
  "slate_date": "2026-06-30",
  "bracket": {
   "schema": 1,
@@ -1231,6 +1231,18 @@
     "loser": "Japan",
     "p": null,
     "source": "result"
+   },
+   "77": {
+    "team": "France",
+    "loser": "Sweden",
+    "p": null,
+    "source": "result"
+   },
+   "78": {
+    "team": "Norway",
+    "loser": "Côte d'Ivoire",
+    "p": null,
+    "source": "result"
    }
   },
   "participants": {
@@ -1298,13 +1310,17 @@
     "Australia",
     "Egypt"
    ],
+   "89": [
+    null,
+    "France"
+   ],
    "90": [
     "Canada",
     null
    ],
    "91": [
     "Brazil",
-    null
+    "Norway"
    ]
   },
   "champion": null
@@ -1616,14 +1632,14 @@
    "77": {
     "team": "France",
     "loser": "Sweden",
-    "p": 0.903082359680468,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "78": {
     "team": "Norway",
     "loser": "Côte d'Ivoire",
-    "p": 0.699872286669351,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "79": {
     "team": "Mexico",
