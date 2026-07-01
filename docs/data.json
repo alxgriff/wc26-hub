@@ -938,7 +938,7 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-07-01 16:20",
+ "generated_at": "2026-07-01 22:53",
  "slate_date": "2026-07-01",
  "bracket": {
   "schema": 1,
@@ -1249,6 +1249,18 @@
     "loser": "Ecuador",
     "p": null,
     "source": "result"
+   },
+   "80": {
+    "team": "England",
+    "loser": "DR Congo",
+    "p": null,
+    "source": "result"
+   },
+   "82": {
+    "team": "Belgium",
+    "loser": "Senegal",
+    "p": null,
+    "source": "result"
    }
   },
   "participants": {
@@ -1330,7 +1342,11 @@
    ],
    "92": [
     "Mexico",
-    null
+    "England"
+   ],
+   "94": [
+    null,
+    "Belgium"
    ]
   },
   "champion": null
@@ -1660,8 +1676,8 @@
    "80": {
     "team": "England",
     "loser": "DR Congo",
-    "p": 0.8728893451412001,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "81": {
     "team": "United States",
@@ -1672,8 +1688,8 @@
    "82": {
     "team": "Belgium",
     "loser": "Senegal",
-    "p": 0.679107137209728,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "83": {
     "team": "Portugal",
@@ -1732,7 +1748,7 @@
    "92": {
     "team": "England",
     "loser": "Mexico",
-    "p": 0.7642106247196986,
+    "p": 0.695695298856251,
     "source": "model"
    },
    "93": {
