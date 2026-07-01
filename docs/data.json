@@ -938,8 +938,8 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-07-01 01:50",
- "slate_date": "2026-06-30",
+ "generated_at": "2026-07-01 05:03",
+ "slate_date": "2026-07-01",
  "bracket": {
   "schema": 1,
   "as_of_matches_played": 72,
@@ -1243,6 +1243,12 @@
     "loser": "Côte d'Ivoire",
     "p": null,
     "source": "result"
+   },
+   "79": {
+    "team": "Mexico",
+    "loser": "Ecuador",
+    "p": null,
+    "source": "result"
    }
   },
   "participants": {
@@ -1321,6 +1327,10 @@
    "91": [
     "Brazil",
     "Norway"
+   ],
+   "92": [
+    "Mexico",
+    null
    ]
   },
   "champion": null
@@ -1644,8 +1654,8 @@
    "79": {
     "team": "Mexico",
     "loser": "Ecuador",
-    "p": 0.5238611286443109,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "80": {
     "team": "England",
