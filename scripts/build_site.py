@@ -1368,9 +1368,26 @@ def _day_bets_table(bets: list, teams: dict, root: str) -> str:
         '<tbody>' + "".join(body) + '</tbody></table></div></div>')
 
 
+def _pick_context(rows: list[dict], knockout: list | None) -> tuple[dict, dict]:
+    """(editorial_date, teams) lookups keyed by match_id, covering BOTH group fixtures and
+    knockout ties — so a knockout pick (match_id 'M80') gets its date and team names instead
+    of bucketing under 'Undated' with the raw id, which made the record look frozen."""
+    editorial = {r["match_id"]: r.get("_editorial") for r in rows}
+    teams = {r["match_id"]: (r["team_a"], r["team_b"]) for r in rows}
+    for km in (knockout or []):
+        mid = f"M{km.match_no}"
+        try:
+            editorial[mid] = date.fromisoformat(km.date_et) if km.date_et else None
+        except ValueError:
+            editorial[mid] = None
+        if km.team_a and km.team_b:
+            teams[mid] = (km.team_a, km.team_b)
+    return editorial, teams
+
+
 def render_record_by_day(matches: "list[st.Match]", rows: list[dict],
                          ledger: dict | None, picks: list[dict],
-                         root: str = "") -> str:
+                         root: str = "", knockout: list | None = None) -> str:
     """The day-by-day ledger: one collapsible block per editorial date (newest first, newest
     open) holding that day's graded calls and settled bets — so the record reads as a run of
     daily box scores instead of one endless table."""
@@ -1379,8 +1396,7 @@ def render_record_by_day(matches: "list[st.Match]", rows: list[dict],
         return ('<p class="standfirst">No results recorded yet — each day fills in here once '
                 'its matches are played and graded.</p>')
     by_mid = {m.match_id: m for m in matches}
-    teams = {r["match_id"]: (r["team_a"], r["team_b"]) for r in rows}
-    editorial = {r["match_id"]: r.get("_editorial") for r in rows}
+    editorial, teams = _pick_context(rows, knockout)
 
     days: dict = {}
     for mid, g in grades.items():
@@ -1422,7 +1438,8 @@ def render_record_by_day(matches: "list[st.Match]", rows: list[dict],
 
 
 def render_record_shadow(rows: list[dict], root: str = "",
-                         shadow_log: Path | None = None) -> tuple[str, str]:
+                         shadow_log: Path | None = None,
+                         knockout: list | None = None) -> tuple[str, str]:
     """(shadow_table_html, summary_line) for the record page's Shadow Book — the RISKY
     calls where the model and market severely disagree (edges above the sanity ceiling).
     Tracked but too risky to stake; walled off from the units/CLV record; the units
@@ -1438,8 +1455,7 @@ def render_record_shadow(rows: list[dict], root: str = "",
                 'model flags edges above the sanity ceiling (the risky calls where model '
                 'and market severely disagree).</p>',
                 "Nothing tracked yet — the first risky call lands here.")
-    teams = {r["match_id"]: (r["team_a"], r["team_b"]) for r in rows}
-    editorial = {r["match_id"]: r.get("_editorial") for r in rows}
+    editorial, teams = _pick_context(rows, knockout)
     open_n = sum(1 for p in picks if p.get("status") == "open")
     summary_line = (summary or "Nothing settled yet.") + (
         f" {open_n} awaiting result." if open_n else "")
@@ -1759,9 +1775,10 @@ def render_record_page(matches: "list[st.Match]", rows: list[dict],
         '<section id="ledger" aria-labelledby="ledger-h"><div class="sec-head">'
         '<span class="kicker">Day by day</span><h2 id="ledger-h">The Ledger</h2></div>'
         '<p class="standfirst">Each day\'s calls and bets, newest first. Open a day to see '
-        'the detail.</p>' + render_record_by_day(matches, rows, ledger, picks) + '</section>')
+        'the detail.</p>'
+        + render_record_by_day(matches, rows, ledger, picks, knockout=knockout) + '</section>')
     ko_html = render_record_ko_calls(knockout)            # empty until a knockout call grades
-    shadow_table, shadow_line = render_record_shadow(rows, shadow_log=shadow_log)
+    shadow_table, shadow_line = render_record_shadow(rows, shadow_log=shadow_log, knockout=knockout)
     shadow_html = (
         '<section id="shadow" aria-labelledby="shadow-h"><div class="sec-head">'
         '<span class="kicker">Risky · model vs market</span>'

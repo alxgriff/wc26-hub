@@ -399,6 +399,18 @@ class RecordScoreboardTests(unittest.TestCase):
         sb_neg = bs.render_record_scoreboard({}, [self._pick("A3", "lost", "-1.0")], [])
         self.assertIn("tone-bad", sb_neg)
 
+    def test_knockout_pick_shows_under_its_date_with_team_names(self):
+        # a knockout pick (match_id 'M80') must land under its real date with team names —
+        # not bucket under 'Undated' with the raw id (which made the record look frozen).
+        km = _km(80, team_a="England", team_b="DR Congo", date_et="2026-06-30")
+        html = bs.render_record_by_day(
+            [], [], None,
+            [self._pick("M80", "lost", "-1.0", market="totals", sel="under")],
+            knockout=[km])
+        self.assertIn("June 30", html)                    # placed under its date
+        self.assertIn("England v DR Congo", html)         # real team names, not 'M80'
+        self.assertNotIn("Undated", html)
+
     def test_by_day_groups_and_chips_sign(self):
         matches = [st.Match("A1", "A", 1, "Mexico", "South Africa", 2, 0, "played")]
         rows = [{"match_id": "A1", "team_a": "Mexico", "team_b": "South Africa",
