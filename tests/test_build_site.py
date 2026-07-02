@@ -411,6 +411,29 @@ class RecordScoreboardTests(unittest.TestCase):
         self.assertIn("England v DR Congo", html)         # real team names, not 'M80'
         self.assertNotIn("Undated", html)
 
+    _KO_GRADE = {73: {"p": (0.27, 0.73), "outcome": 1, "brier": 0.073,
+                      "correct": True, "advancer": "Canada"}}
+
+    def test_scoreboard_shows_advance_calls_card(self):
+        # knockout advance calls must surface in the top scoreboard so the aggregate keeps
+        # moving through the knockout stage (2-class Brier, 0.5 coin-flip — its own scale).
+        sb = bs.render_record_scoreboard({}, [], [], ko_grades=self._KO_GRADE)
+        self.assertIn("Advance Calls", sb)
+        self.assertIn("2-class Brier", sb)
+        self.assertIn("1 of 1", sb)                       # right
+        self.assertIn("beats the 0.5 coin-flip", sb)
+
+    def test_by_day_shows_advance_call_chip_and_table(self):
+        # a knockout day must carry its own "N advance calls · X/N hit · Brier" chip + table,
+        # so the per-day context tier doesn't vanish once the group stage ends.
+        km = _km(73, team_a="South Africa", team_b="Canada", date_et="2026-06-28")
+        html = bs.render_record_by_day([], [], None, [], knockout=[km],
+                                       ko_grades=self._KO_GRADE)
+        self.assertIn("June 28", html)
+        self.assertIn("1 advance call ", html)            # the per-day chip
+        self.assertIn("who goes through", html)           # the advance-calls table
+        self.assertIn("Canada", html)                     # our call / who advanced
+
     def test_by_day_groups_and_chips_sign(self):
         matches = [st.Match("A1", "A", 1, "Mexico", "South Africa", 2, 0, "played")]
         rows = [{"match_id": "A1", "team_a": "Mexico", "team_b": "South Africa",

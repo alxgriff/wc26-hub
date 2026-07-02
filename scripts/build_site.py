@@ -1259,11 +1259,13 @@ def _scorecard(kicker: str, big: str, unit: str, sub: str, meaning: str,
 
 
 def render_record_scoreboard(grades: dict, picks: list[dict],
-                             shadow_picks: list[dict]) -> str:
-    """The cumulative scoreboard — three box-score cards (Calls / Bets / Shadow) giving the
-    running record at a glance, each with a plain-English meaning. The page's hero."""
+                             shadow_picks: list[dict], ko_grades: dict | None = None) -> str:
+    """The cumulative scoreboard — box-score cards (group Calls / Advance Calls / Bets / Shadow)
+    giving the running record at a glance, each with a plain-English meaning. The page's hero.
+    The knockout advance card appears once an advance call is graded, so the top-of-page numbers
+    keep moving through the knockout stage (its 2-class Brier is a different scale from group)."""
     cards = []
-    # The Calls — forecast accuracy (multiclass Brier; 0.667 is the coin-flip baseline)
+    # The Calls — group forecast accuracy (multiclass Brier; 0.667 is the coin-flip baseline)
     n, hits, mb = _call_stats(grades.values())
     if n:
         cards.append(_scorecard(
@@ -1271,11 +1273,21 @@ def render_record_scoreboard(grades: dict, picks: list[dict],
             f'<b>{hits} of {n}</b> hit · '
             + (f'<span class="sc-good">beats the 0.667 coin-flip</span>' if mb < 0.667
                else '<span class="sc-bad">worse than a coin flip</span>'),
-            "How sharp the pre-kickoff forecast was. Lower is better — 0 is perfect, "
+            "How sharp the group-stage forecast was. Lower is better — 0 is perfect, "
             "0.667 a coin flip.", tone="good" if mb < 0.667 else "bad"))
     else:
         cards.append(_scorecard("The Calls", "—", "avg Brier", "No graded calls yet",
             "How sharp the pre-kickoff forecast was, graded once results land.", "flat"))
+    # Advance Calls — knockout who-advances forecast (2-class Brier; 0.5 is the coin-flip)
+    kn, khits, kmb = _call_stats((ko_grades or {}).values())
+    if kn:
+        cards.append(_scorecard(
+            "Advance Calls", f"{kmb:.3f}", "2-class Brier",
+            f'<b>{khits} of {kn}</b> right · '
+            + (f'<span class="sc-good">beats the 0.5 coin-flip</span>' if kmb < 0.5
+               else '<span class="sc-bad">worse than a coin flip</span>'),
+            "Who we called to advance in the knockout, graded on the tie's result (extra "
+            "time + penalties). Lower is better — 0.5 a coin flip.", tone="good" if kmb < 0.5 else "bad"))
     # The Bets — paper P/L + closing-line value
     b = _bet_stats(picks)
     if b["n_settled"] or b["n_open"]:
@@ -1333,6 +1345,30 @@ def _day_calls_table(calls: list, by_mid: dict, root: str) -> str:
         '<tbody>' + "".join(body) + '</tbody></table></div></div>')
 
 
+def _day_ko_calls_table(ko_calls: list, ko_by_no: dict, root: str) -> str:
+    """Compact graded ADVANCE-calls table for ONE knockout day (2-class Brier)."""
+    body = []
+    for no, g in ko_calls:
+        km = ko_by_no.get(no)
+        ta, tb = (km.team_a, km.team_b) if km else ("", "")
+        called = ta if g["p"][0] >= g["p"][1] else tb    # who we called to go through
+        body.append(
+            f'<tr><td class="lbl"><a href="{root}matches/M{no}.html">'
+            f'{_esc(ta)} v {_esc(tb)}</a></td>'
+            f'<td>{_esc(called)} <span class="muted">{max(g["p"]):.0%}</span></td>'
+            f'<td>{_esc(g.get("advancer", ""))}</td>'
+            f'<td>{_hit_chip(g["correct"])}</td>'
+            f'<td class="pts">{g["brier"]:.3f}</td></tr>')
+    return (
+        '<div class="day-track"><p class="dt-label">Advance calls — who goes through, graded</p>'
+        '<div class="record-wrap"><table>'
+        '<caption class="sr-only">Graded advance calls this day: our pick to advance, who '
+        'advanced, hit or miss, 2-class Brier</caption>'
+        '<thead><tr><th class="lbl" scope="col">Tie</th><th scope="col">Our call</th>'
+        '<th scope="col">Advanced</th><th scope="col">Hit</th><th scope="col">Brier</th></tr></thead>'
+        '<tbody>' + "".join(body) + '</tbody></table></div></div>')
+
+
 def _day_bets_table(bets: list, teams: dict, root: str) -> str:
     """Compact recorded-picks table for ONE day."""
     body = []
@@ -1387,33 +1423,53 @@ def _pick_context(rows: list[dict], knockout: list | None) -> tuple[dict, dict]:
 
 def render_record_by_day(matches: "list[st.Match]", rows: list[dict],
                          ledger: dict | None, picks: list[dict],
-                         root: str = "", knockout: list | None = None) -> str:
+                         root: str = "", knockout: list | None = None,
+                         ko_grades: dict | None = None) -> str:
     """The day-by-day ledger: one collapsible block per editorial date (newest first, newest
-    open) holding that day's graded calls and settled bets — so the record reads as a run of
-    daily box scores instead of one endless table."""
+    open) holding that day's graded calls (group W/D/L and knockout advance) and settled bets —
+    so the record reads as a run of daily box scores instead of one endless table."""
     grades = ledger["grade"](matches, ledger["rows"]) if ledger else {}
-    if not grades and not picks:
+    ko_grades = ko_grades or {}
+    if not grades and not picks and not ko_grades:
         return ('<p class="standfirst">No results recorded yet — each day fills in here once '
                 'its matches are played and graded.</p>')
     by_mid = {m.match_id: m for m in matches}
+    ko_by_no = {km.match_no: km for km in (knockout or [])}
     editorial, teams = _pick_context(rows, knockout)
 
+    def ko_day(no):
+        km = ko_by_no.get(no)
+        try:
+            return date.fromisoformat(km.date_et) if (km and km.date_et) else date.min
+        except ValueError:
+            return date.min
+
     days: dict = {}
+
+    def bucket(d):
+        return days.setdefault(d, {"calls": [], "ko_calls": [], "bets": []})
     for mid, g in grades.items():
-        days.setdefault(editorial.get(mid) or date.min, {"calls": [], "bets": []})["calls"].append((mid, g))
+        bucket(editorial.get(mid) or date.min)["calls"].append((mid, g))
+    for no, g in ko_grades.items():
+        bucket(ko_day(no))["ko_calls"].append((no, g))
     for p in picks:
-        days.setdefault(editorial.get(p["match_id"]) or date.min, {"calls": [], "bets": []})["bets"].append(p)
+        bucket(editorial.get(p["match_id"]) or date.min)["bets"].append(p)
 
     out = []
     for i, d in enumerate(sorted(days, reverse=True)):       # newest day first
-        bucket = days[d]
-        calls = sorted(bucket["calls"], key=lambda cg: cg[0])
-        bets = sorted(bucket["bets"], key=lambda p: p["match_id"])
-        n, hits, mb = _call_stats(g for _, g in calls)
+        b = days[d]
+        calls = sorted(b["calls"], key=lambda cg: cg[0])
+        ko_calls = sorted(b["ko_calls"], key=lambda cg: cg[0])
+        bets = sorted(b["bets"], key=lambda p: p["match_id"])
         chips = []
+        n, hits, mb = _call_stats(g for _, g in calls)
         if n:
             chips.append(f'<span class="ds-chip">{n} call{"" if n == 1 else "s"} · '
                          f'{hits}/{n} hit · Brier {mb:.2f}</span>')
+        kn, khits, kmb = _call_stats(g for _, g in ko_calls)
+        if kn:
+            chips.append(f'<span class="ds-chip">{kn} advance call{"" if kn == 1 else "s"} · '
+                         f'{khits}/{kn} hit · Brier {kmb:.2f}</span>')
         if bets:
             bsum = _bet_stats(bets)
             if bsum["n_settled"]:
@@ -1425,6 +1481,7 @@ def render_record_by_day(matches: "list[st.Match]", rows: list[dict],
                          f'{"" if len(bets) == 1 else "s"} · {tail}</span>')
         label = f"{d:%a · %B} {d.day}" if d != date.min else "Undated"
         body = (_day_calls_table(calls, by_mid, root) if calls else "") + \
+               (_day_ko_calls_table(ko_calls, ko_by_no, root) if ko_calls else "") + \
                (_day_bets_table(bets, teams, root) if bets else "")
         out.append(
             f'<details class="day"{" open" if i == 0 else ""}>'
@@ -1721,6 +1778,19 @@ def render_group_stage_page(s: "st.Standings", forms: dict, fates: dict, css: st
         played=s.played, total=s.total, generated_at=_esc(generated_at), repo_url=REPO_URL)
 
 
+def _ko_advance_grades(knockout: list | None) -> dict:
+    """{match_no: grade} for every graded knockout advance call (2-class Brier), or {} — loaded
+    once and shared by the scoreboard card and the day-by-day ledger. Fail-soft."""
+    if not knockout:
+        return {}
+    try:
+        import ledger as lg
+        ko_rows = lg.load_ko_ledger()
+        return lg.grade_ko(knockout, ko_rows) if ko_rows else {}
+    except Exception:
+        return {}
+
+
 def render_record_ko_calls(knockout: list | None) -> str:
     """Knockout advance-call accountability: each graded advance call + the cumulative
     2-class Brier (0 best · 0.5 coin-flip · 2 worst). Empty until a knockout call is
@@ -1769,15 +1839,17 @@ def render_record_page(matches: "list[st.Match]", rows: list[dict],
     except Exception:
         shadow_picks = []
     grades = ledger["grade"](matches, ledger["rows"]) if ledger else {}
+    ko_grades = _ko_advance_grades(knockout)              # graded knockout advance calls (or {})
 
-    scoreboard_html = render_record_scoreboard(grades, picks, shadow_picks)
+    scoreboard_html = render_record_scoreboard(grades, picks, shadow_picks, ko_grades=ko_grades)
     ledger_html = (
         '<section id="ledger" aria-labelledby="ledger-h"><div class="sec-head">'
         '<span class="kicker">Day by day</span><h2 id="ledger-h">The Ledger</h2></div>'
         '<p class="standfirst">Each day\'s calls and bets, newest first. Open a day to see '
         'the detail.</p>'
-        + render_record_by_day(matches, rows, ledger, picks, knockout=knockout) + '</section>')
-    ko_html = render_record_ko_calls(knockout)            # empty until a knockout call grades
+        + render_record_by_day(matches, rows, ledger, picks, knockout=knockout,
+                               ko_grades=ko_grades) + '</section>')
+    ko_html = ""    # knockout advance calls now live in the scoreboard card + day-by-day ledger
     shadow_table, shadow_line = render_record_shadow(rows, shadow_log=shadow_log, knockout=knockout)
     shadow_html = (
         '<section id="shadow" aria-labelledby="shadow-h"><div class="sec-head">'
