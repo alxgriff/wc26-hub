@@ -938,7 +938,7 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-07-02 16:14",
+ "generated_at": "2026-07-02 22:50",
  "slate_date": "2026-07-02",
  "bracket": {
   "schema": 1,
@@ -1267,6 +1267,12 @@
     "loser": "Senegal",
     "p": null,
     "source": "result"
+   },
+   "84": {
+    "team": "Spain",
+    "loser": "Austria",
+    "p": null,
+    "source": "result"
    }
   },
   "participants": {
@@ -1349,6 +1355,10 @@
    "92": [
     "Mexico",
     "England"
+   ],
+   "93": [
+    null,
+    "Spain"
    ],
    "94": [
     "United States",
@@ -1706,8 +1716,8 @@
    "84": {
     "team": "Spain",
     "loser": "Austria",
-    "p": 0.8636781043367555,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "85": {
     "team": "Switzerland",
