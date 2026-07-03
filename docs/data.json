@@ -938,8 +938,8 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-07-03 01:06",
- "slate_date": "2026-07-02",
+ "generated_at": "2026-07-03 06:46",
+ "slate_date": "2026-07-03",
  "bracket": {
   "schema": 1,
   "as_of_matches_played": 72,
@@ -1268,9 +1268,21 @@
     "p": null,
     "source": "result"
    },
+   "83": {
+    "team": "Portugal",
+    "loser": "Croatia",
+    "p": null,
+    "source": "result"
+   },
    "84": {
     "team": "Spain",
     "loser": "Austria",
+    "p": null,
+    "source": "result"
+   },
+   "85": {
+    "team": "Switzerland",
+    "loser": "Algeria",
     "p": null,
     "source": "result"
    }
@@ -1357,12 +1369,16 @@
     "England"
    ],
    "93": [
-    null,
+    "Portugal",
     "Spain"
    ],
    "94": [
     "United States",
     "Belgium"
+   ],
+   "96": [
+    "Switzerland",
+    null
    ]
   },
   "champion": null
@@ -1710,8 +1726,8 @@
    "83": {
     "team": "Portugal",
     "loser": "Croatia",
-    "p": 0.7120063830111328,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "84": {
     "team": "Spain",
@@ -1722,8 +1738,8 @@
    "85": {
     "team": "Switzerland",
     "loser": "Algeria",
-    "p": 0.6641182298817052,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "86": {
     "team": "Argentina",
