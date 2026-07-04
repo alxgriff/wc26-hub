@@ -138,6 +138,25 @@ edition before trusting it. The checklist below remains the manual fallback.
 6. Commit with explicit paths (not `git add -A`, which can sweep stray files): `git add data docs editions; git commit -m "Edition YYYY-MM-DD"`.
 7. June 20 only: re-verify the F4 Tunisia–Japan kickoff first.
 
+### Knockout stage (June 28 → July 19; manual fallback for the same automation)
+
+0. `git pull --ff-only` first — the bot commits several times a day; a stale checkout
+   reads as "the pipeline is broken" (2026-07-04 lesson). Then the data invariants in
+   the `hub-health` skill (.claude/skills/) — green CI does NOT mean results landed.
+1. Results: `python scripts/fetch_ko_results.py` (keyless ESPN pass auto-enters
+   shootout winners; only a tie ESPN shows no tally for needs
+   `knockout.py --enter N --score A-B --decided penalties --winner A|B`).
+2. `python scripts/knockout.py --resolve` (fills next-round matchups), then
+   `python scripts/fetch_ko_reg_scores.py` (90' score for ET/pens ties — bets settle on it).
+3. **Before the first kickoff:** `python scripts/ledger.py log-ko YYYY-MM-DD`
+   (a missed pre-kickoff advance call is permanent — no backfill).
+4. Cards for resolved ties: `python scripts/knockout_cards.py YYYY-MM-DD --window 3`
+   (needs ANTHROPIC_API_KEY; keyless fallback = the `ko-cards` skill).
+5. Odds: `odds.py fetch`, `odds.py evaluate-ko YYYY-MM-DD --record`, `odds.py settle`.
+6. Build + read + commit as in the group checklist (`git add data docs editions cards`).
+7. July 20: the closeout run (settle the Final, grade the last advance calls) — the
+   cron covers it; if running manually, don't skip it because "the tournament is over".
+
 ## Phase 7 — Sweat Factor (weather-driven heat index) ✅ Shipped June 2026
 
 **Goal:** Per-match heat conditions + per-team climate disadvantage index, surfaced on

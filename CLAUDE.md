@@ -206,3 +206,9 @@ Columns: `match_id, source, temp_c, rh_pct, wind_ms, solar_wm2, wbgt_est, climat
 - Editions are markdown, prose-forward; match cards keep their 9-section
   format from cards/template.md. Don't editorialize injuries beyond sourced
   facts. Flag uncertainty rather than smoothing it over.
+- **Site CSS class names must never contain ad-ish tokens** (`ad-`, `adv-`,
+  `banner`, `sponsor`, `promo`): ad-blockers apply EasyList's generic cosmetic
+  rules (e.g. `##.adv-bar`, which hid the advance bar for blocker users until
+  2026-07-04) and the element vanishes right after first paint for those
+  users only. If an element disappears "on some browsers", grep EasyList
+  before debugging CSS.
