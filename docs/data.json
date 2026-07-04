@@ -938,8 +938,8 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-07-03 23:33",
- "slate_date": "2026-07-03",
+ "generated_at": "2026-07-04 04:10",
+ "slate_date": "2026-07-04",
  "bracket": {
   "schema": 1,
   "as_of_matches_played": 72,
@@ -1285,6 +1285,18 @@
     "loser": "Algeria",
     "p": null,
     "source": "result"
+   },
+   "86": {
+    "team": "Argentina",
+    "loser": "Cape Verde",
+    "p": null,
+    "source": "result"
+   },
+   "87": {
+    "team": "Colombia",
+    "loser": "Ghana",
+    "p": null,
+    "source": "result"
    }
   },
   "participants": {
@@ -1376,9 +1388,13 @@
     "United States",
     "Belgium"
    ],
+   "95": [
+    "Argentina",
+    null
+   ],
    "96": [
     "Switzerland",
-    null
+    "Colombia"
    ]
   },
   "champion": null
@@ -1744,14 +1760,14 @@
    "86": {
     "team": "Argentina",
     "loser": "Cape Verde",
-    "p": 0.9534839346262324,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "87": {
     "team": "Colombia",
     "loser": "Ghana",
-    "p": 0.9192475021603722,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "88": {
     "team": "Australia",
