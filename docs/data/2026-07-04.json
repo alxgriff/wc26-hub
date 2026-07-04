@@ -938,7 +938,7 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-07-04 16:33",
+ "generated_at": "2026-07-04 23:30",
  "slate_date": "2026-07-04",
  "bracket": {
   "schema": 1,
@@ -1315,6 +1315,18 @@
     "loser": "Australia",
     "p": null,
     "source": "result"
+   },
+   "89": {
+    "team": "France",
+    "loser": "Paraguay",
+    "p": null,
+    "source": "result"
+   },
+   "90": {
+    "team": "Morocco",
+    "loser": "Canada",
+    "p": null,
+    "source": "result"
    }
   },
   "participants": {
@@ -1413,6 +1425,10 @@
    "96": [
     "Switzerland",
     "Colombia"
+   ],
+   "97": [
+    "France",
+    "Morocco"
    ]
   },
   "champion": null
@@ -1796,14 +1812,14 @@
    "89": {
     "team": "France",
     "loser": "Paraguay",
-    "p": 0.8590354413410712,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "90": {
     "team": "Morocco",
     "loser": "Canada",
-    "p": 0.7304352416608746,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "91": {
     "team": "Brazil",
