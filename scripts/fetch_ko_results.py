@@ -82,7 +82,8 @@ def apply_ko_completed(events: list, knockout_path: Path, fixtures_path: Path,
         if sa == sb:
             status.append(
                 f"M{km.match_no}: {km.team_a} {sa}–{sb} {km.team_b} level after play — "
-                "settled on penalties; the shootout winner can't be read from the score. "
+                "settled on penalties; the Odds API can't say who won the shootout and "
+                "the ESPN pass (which runs first) didn't confirm it either. "
                 f"Enter manually: knockout.py --enter {km.match_no} --score {sa}-{sb} "
                 "--decided penalties --winner A|B")
             continue
@@ -163,7 +164,23 @@ def apply_espn_results(matches: list, opener=None,
                 continue
             lines.append(f"{msg} — shootout {so[0]}–{so[1]} (ESPN)")
         else:
-            decided = "extra_time" if "AET" in sname.upper() else ""
+            # decided_by drives whether the 90' score is derived (= final) or fetched
+            # later — so only trust a RECOGNISED status. AET-ish => extra_time (reg comes
+            # from the ESPN summary later); a known full-time status => regulation; an
+            # unrecognised status is reported, never guessed (mislabelling an extra-time
+            # win as regulation would silently corrupt the 90' score its bets settle on).
+            up = sname.upper()
+            if any(t in up for t in ("AET", "EXTRA", "OVERTIME")):
+                decided = "extra_time"
+            elif up in ("STATUS_FULL_TIME", "STATUS_FINAL"):
+                decided = ""                     # enter_ko_result defaults to regulation
+            else:
+                lines.append(
+                    f"M{km.match_no}: {km.team_a} {sa}–{sb} {km.team_b} completed but "
+                    f"ESPN status {sname!r} is not a recognised full-time/AET status — "
+                    f"enter manually so the 90' score isn't mis-set: knockout.py "
+                    f"--enter {km.match_no} --score {sa}-{sb} [--decided extra_time]")
+                continue
             try:
                 matches, msg = ko.enter_ko_result(matches, km.match_no, sa, sb,
                                                   decided_by=decided)
@@ -197,16 +214,22 @@ def main(argv: list[str] | None = None) -> int:
 
     # ESPN pass FIRST (keyless): shootout winners + Odds-API-window-expired ties. Running
     # it before the Odds API pass means a dead/keyless Odds API still lands results.
-    matches = ko.load_knockout(args.knockout)
-    if matches:
-        fixtures = st.load_fixtures(args.fixtures)
-        standings = st.compute_standings(fixtures, fair_play=st.load_discipline())
-        materialized = ko.materialize_teams(bk.project(standings), matches)
-        updated, lines = apply_espn_results(materialized)
-        for line in lines:
-            print(line)
-        if not args.dry_run and any(u is not o for u, o in zip(updated, materialized)):
-            ko.write_knockout(args.knockout, updated)
+    # Fail-soft as a WHOLE too: an unexpected error here degrades to Odds-only rather
+    # than sinking the whole results step.
+    try:
+        matches = ko.load_knockout(args.knockout)
+        if matches:
+            fixtures = st.load_fixtures(args.fixtures)
+            standings = st.compute_standings(fixtures, fair_play=st.load_discipline())
+            materialized = ko.materialize_teams(bk.project(standings), matches)
+            updated, lines = apply_espn_results(materialized)
+            for line in lines:
+                print(line)
+            if not args.dry_run and any(u is not o for u, o in zip(updated, materialized)):
+                ko.write_knockout(args.knockout, updated)
+    except Exception as e:
+        print(f"warning: ESPN pass failed ({e.__class__.__name__}: {e}) — "
+              "continuing with the Odds API pass only", file=sys.stderr)
 
     key = od._read_key()
     if not key:

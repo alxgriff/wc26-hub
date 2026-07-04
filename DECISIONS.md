@@ -1,6 +1,6 @@
 # WC26 Hub — Decisions (what we decided and why)
 
-*Last updated 2026-06-13. An ADR-lite log of the load-bearing choices, each with its
+*Last updated 2026-07-04. An ADR-lite log of the load-bearing choices, each with its
 rationale and source (commit / file). Newest themes first within each section. When
 you make a non-obvious call, add it here.*
 
@@ -46,9 +46,13 @@ you make a non-obvious call, add it here.*
 - **A shootout winner is NEVER inferred from the score.** A level knockout result is recorded
   with `decided_by=penalties` and an explicit `winner` side (A|B), which is authoritative for
   advancement (`bracket.feed` + the ledger read `winner`, not the score). `fetch_ko_results.py`
-  auto-enters only DECISIVE results and reports level ones for manual `--enter` — the API can't
-  say who won a shootout, so we don't guess. (The API also doesn't flag extra time, so a decisive
-  auto-entry records `regulation`; revise to `extra_time` by hand if needed.) *`scripts/knockout.py`, `scripts/fetch_ko_results.py`.*
+  runs a keyless ESPN pass first (added 2026-07-04, after three R32 shootouts sat unentered for
+  days): penalty ties are auto-entered with the shootout winner from ESPN's explicit
+  `shootoutScore` — an explicit shootout result, not an inference — and `extra_time` is read
+  from ESPN's AET status; a level tie ESPN shows no tally for is still reported for manual
+  `--enter`, never guessed. The Odds API pass then enters remaining DECISIVE results (that API
+  can't name a shootout winner or flag extra time; a decisive Odds-API entry records
+  `regulation`, revisable). *`scripts/knockout.py`, `scripts/fetch_ko_results.py`.*
 - **Knockout cards are auto-generated AND auto-published (user-chosen).** Sonnet writes the
   tactical sections grounded STRICTLY in the two teams' KB profiles + computed facts + the Wire,
   injuries tagged "(verify before use)", fail-soft to a placeholder (never fabricates) — the same

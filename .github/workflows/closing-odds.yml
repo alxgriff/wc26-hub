@@ -95,7 +95,9 @@ jobs:
 
       # Knockout stage (no-op until ties resolve): refresh matchups from the standings
       # just updated, then enter any completed knockout scores so the bracket + record
-      # update same-day. Level/penalty results are reported for manual entry.
+      # update same-day. Penalty ties are auto-entered with the shootout winner from
+      # ESPN's explicit shootoutScore (keyless pass inside fetch_ko_results.py); only a
+      # level tie ESPN shows no tally for is reported for manual entry, never guessed.
       - name: Resolve + enter knockout results
         id: ko
         if: ${{ steps.ed.outputs.ko == 'true' }}
@@ -104,6 +106,16 @@ jobs:
           python scripts/knockout.py --resolve | tee -a "$GITHUB_STEP_SUMMARY"
           python scripts/fetch_ko_results.py | tee -a "$GITHUB_STEP_SUMMARY"
           python scripts/fetch_ko_reg_scores.py | tee -a "$GITHUB_STEP_SUMMARY"  # 90' score for ET ties
+
+      # Log advance calls for any tie that RESOLVED after the 7 AM build but kicks off
+      # today (e.g. an overnight shootout entered above resolves today's matchup mid-day).
+      # ledger.log_ko only logs pre-kickoff and skips already-logged ties, so this is a
+      # harmless no-op on every run where the morning build already caught them.
+      - name: Log knockout advance calls (intra-day catch-up, pre-kickoff)
+        id: ko_ledger
+        if: ${{ steps.ed.outputs.ko == 'true' }}
+        continue-on-error: true
+        run: python scripts/ledger.py log-ko "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
 
       # Generate Sonnet cards for any newly-resolved tie that doesn't have one yet (skips
       # already-generated, so it's ~free after the first hit). The 7am daily-build is the
@@ -116,7 +128,7 @@ jobs:
         continue-on-error: true
         run: |
           pip install anthropic >/dev/null 2>&1 || true
-          python scripts/knockout_cards.py "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
+          python scripts/knockout_cards.py "${{ steps.ed.outputs.date }}" --window 3 | tee -a "$GITHUB_STEP_SUMMARY"
 
       # Roll Elo forward through the results just entered, so this run's re-recorded edges
       # and rebuilt previews use current Elo. Fail-soft (model falls back to VERIFIED).
@@ -197,6 +209,7 @@ jobs:
           [ "${{ steps.snapshot.outcome }}" = "failure" ] && failed="$failed snapshot"
           [ "${{ steps.results.outcome }}"  = "failure" ] && failed="$failed results"
           [ "${{ steps.ko.outcome }}"       = "failure" ] && failed="$failed ko"
+          [ "${{ steps.ko_ledger.outcome }}" = "failure" ] && failed="$failed ko_ledger"
           [ "${{ steps.ko_cards.outcome }}" = "failure" ] && failed="$failed ko_cards"
           [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"
           [ "${{ steps.evaluate.outcome }}" = "failure" ] && failed="$failed evaluate"

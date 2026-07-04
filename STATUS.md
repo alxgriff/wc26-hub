@@ -1,6 +1,6 @@
 # WC26 Hub — Status (what's done, what's left)
 
-*Last updated 2026-06-13. The running picture of where the project stands. For the
+*Last updated 2026-07-04. The running picture of where the project stands. For the
 map read [ARCHITECTURE.md](ARCHITECTURE.md); for rationale read [DECISIONS.md](DECISIONS.md).*
 
 ## Shipped
@@ -61,8 +61,11 @@ The full Round-of-32 → Final stage now runs end-to-end (group→knockout bound
 - **Data:** `data/knockout.csv` + `scripts/knockout.py` — fixed schedule (matches 73–104),
   contract-safe loader/validator, R32+feeder team resolver (`--resolve`), penalty-aware
   result entry (`--enter`). `fixtures.csv` stays the group SSOT.
-- **Results feed:** `fetch_ko_results.py` auto-enters decisive scores; level/penalty results
-  reported for manual entry. `bracket.feed(results=…)` propagates winners down the tree.
+- **Results feed:** `fetch_ko_results.py` runs a keyless ESPN pass first — penalty ties
+  auto-entered with the shootout winner from ESPN's explicit `shootoutScore`, AET read from
+  ESPN's status, Odds-API-window-expired decisive ties swept up — then the Odds API pass for
+  remaining decisive scores; only a level tie ESPN shows no tally for is reported for manual
+  entry (added 2026-07-04). `bracket.feed(results=…)` propagates winners down the tree.
 - **Site:** phase-aware masthead/slate + bracket-elevating banner (no more June-28 dead-end);
   per-tie knockout match pages with the advance Call (`predict.resolve_knockout`), the road
   here, result, the Sonnet card, and the advance-odds section.
@@ -70,15 +73,19 @@ The full Round-of-32 → Final stage now runs end-to-end (group→knockout bound
 - **Cards:** `knockout_cards.py` — overnight Sonnet-grounded, auto-published to `cards/ko/`.
 - **Accountability:** 2-class advance Brier (`ledger.py log-ko/report-ko`, `ko_predictions_log.csv`).
 - **Betting:** 2-way **advance** market (`odds.py`), model-priced (8pp ceiling), penalty-aware settle.
-- **Automation:** daily-build + closing-odds crons extended through the July 19 final; new
-  knockout steps fail-soft + health-gated.
+- **Automation:** daily-build + closing-odds crons run through the July 19 final plus a
+  July 20 closeout (settles the Final's picks, grades the last advance calls); intra-day
+  log-ko catch-up in closing-odds; new knockout steps fail-soft + health-gated.
 
 Open follow-ups: host HFA now applies in KO ties at a host's own venue (knockout.csv carries
 the venue country; `predict.host_hfa`). The advance market price is **auto-derived from the
 fetched 90' h2h** (route its draw mass through the model's ET+shootout) and shown as a
 model-vs-market read — NEVER recorded (no quoted to-qualify line ⇒ no CLV); a real 2-way
-line (manual `odds.py enter … advance`) would be recordable. ET-vs-regulation isn't distinguished by the API (decisive
-auto-entries record `regulation`; revise to `extra_time` by hand if needed).
+line (manual `odds.py enter … advance`) would be recordable. ET-vs-regulation is read from
+ESPN's AET status by the ESPN pass (unrecognised statuses are reported for manual entry, so a
+mislabel can't silently corrupt the 90' score); a decisive entry from the Odds API pass still
+records `regulation` (that API doesn't flag extra time) — revise by hand if it ever lands one
+the ESPN pass missed.
 
 ### Odds (`odds.py`)
 - **Draw-no-bet** is computed (`predict.py` `dnb_a`) but not snapshotted/recorded.

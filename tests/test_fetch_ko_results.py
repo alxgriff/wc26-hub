@@ -134,6 +134,31 @@ class ApplyEspnResultsTests(unittest.TestCase):
         self.assertFalse(ko.by_no(updated)[74].is_played)
         self.assertEqual(lines, ["0 knockout result(s) entered from ESPN"])
 
+    def test_unrecognised_final_status_reports_manual_entry(self):
+        # decisive but the status is neither a known full-time token nor AET-ish: entering
+        # it as regulation would derive a possibly-wrong 90' score, so it must be reported
+        opener = _opener(_sb_event("Germany", "Paraguay", 2, 1, status="STATUS_ABANDONED"))
+        updated, lines = fr.apply_espn_results([_tie()], opener=opener, today=TODAY)
+        self.assertFalse(ko.by_no(updated)[74].is_played)
+        self.assertTrue(any("not a recognised full-time/AET status" in ln for ln in lines))
+
+    def test_level_shootout_tally_reports_manual_entry(self):
+        # a level shootout tally can't name a winner — never guessed
+        opener = _opener(_sb_event("Germany", "Paraguay", 1, 1, shootout=(3, 3)))
+        updated, lines = fr.apply_espn_results([_tie()], opener=opener, today=TODAY)
+        self.assertFalse(ko.by_no(updated)[74].is_played)
+        self.assertTrue(any("enter manually" in ln for ln in lines))
+
+    def test_fetch_failure_is_fail_soft(self):
+        import urllib.error
+
+        def opener(url):
+            raise urllib.error.URLError("down")
+        updated, lines = fr.apply_espn_results([_tie()], opener=opener, today=TODAY)
+        self.assertFalse(ko.by_no(updated)[74].is_played)
+        self.assertTrue(any("fetch failed" in ln for ln in lines))
+        self.assertIn("0 knockout result(s) entered from ESPN", lines)
+
 
 if __name__ == "__main__":
     unittest.main()

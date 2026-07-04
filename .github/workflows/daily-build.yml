@@ -14,10 +14,13 @@ name: daily-build
 on:
   schedule:
     # 07:00 ET (EDT). The whole tournament: group stage + knockout, June 12
-    # through the July 19 final. Two ranges because a cron day-of-month field
-    # can't span across the June/July boundary. Re-derive if DST assumptions change.
+    # through the July 19 final — PLUS July 20, the post-final closeout run
+    # (settle the Final's picks, fetch its 90'/shootout result, grade the last
+    # advance calls, final record rebuild; without it none of that ever runs).
+    # Two ranges because a cron day-of-month field can't span across the
+    # June/July boundary. Re-derive if DST assumptions change.
     - cron: "0 11 12-30 6 *"   # June 12-30 (group stage + R32 start June 28)
-    - cron: "0 11 1-19 7 *"    # July 1-19 (R16 -> Final July 19)
+    - cron: "0 11 1-20 7 *"    # July 1-19 (R16 -> Final) + July 20 closeout
   workflow_dispatch:
     inputs:
       date:
@@ -157,7 +160,7 @@ jobs:
         id: ko_cards
         if: ${{ steps.ed.outputs.ko == 'true' }}
         continue-on-error: true
-        run: python scripts/knockout_cards.py "${{ steps.ed.outputs.date }}" | tee -a "$GITHUB_STEP_SUMMARY"
+        run: python scripts/knockout_cards.py "${{ steps.ed.outputs.date }}" --window 3 | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Settle yesterday's picks (units + CLV)
         id: settle

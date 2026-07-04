@@ -370,7 +370,10 @@ def feed(projection: dict, resolver, results: "dict | None" = None) -> dict:
     return out
 
 
-def render_markdown(projection: dict) -> str:
+def render_markdown(projection: dict, ko_by_no: "dict | None" = None) -> str:
+    """``ko_by_no`` ({match_no: KnockoutMatch}, e.g. knockout.by_no) annotates a PLAYED
+    R32 tie with its result and who advanced — without it every slot renders as an open
+    matchup even after the round is history."""
     out = ["# Knockout bracket — as it stands", ""]
     n = projection["as_of_matches_played"]
     out.append(f"*Projection from the current group standings as if they were final "
@@ -383,6 +386,11 @@ def render_markdown(projection: dict) -> str:
         out.append("")
 
     def line(m):
+        km = (ko_by_no or {}).get(m)
+        if km is not None and km.is_played and km.winner_team:
+            tag = {"extra_time": " AET", "penalties": " pens"}.get(km.decided_by, "")
+            return (f"- **M{m}:** {km.team_a} {km.score_a}–{km.score_b} "
+                    f"{km.team_b}{tag} — **{km.winner_team} advance**")
         e = projection["r32"][m]
         h = e["home"] or f"*{e['home_label']}*"
         a = e["away"] or f"*{e['away_label']}*"

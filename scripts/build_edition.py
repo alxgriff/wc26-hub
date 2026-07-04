@@ -432,13 +432,21 @@ def _slate_line(r: dict) -> str:
 
 def _overnight_section(rows: list[dict], yesterday: date,
                        graded: dict | None = None,
-                       cumulative: str | None = None) -> list[str]:
+                       cumulative: str | None = None,
+                       ko_prior: "list | None" = None,
+                       ko_graded: dict | None = None,
+                       ko_cumulative: str | None = None) -> list[str]:
     """Yesterday's results, with per-match prediction grades (✓/✗ + Brier) when
-    the ledger has a published call for a match."""
+    the ledger has a published call for a match. ``ko_prior`` (KnockoutMatch list for
+    the previous editorial date) adds knockout results with their graded advance calls
+    (``ko_graded`` from ledger.grade_ko) — without it a knockout-stage edition's
+    Overnight is permanently, wrongly empty."""
     graded = graded or {}
+    ko_prior = ko_prior or []
+    ko_graded = ko_graded or {}
     prior = select_matches(rows, yesterday)
     out = ["## Overnight", ""]
-    if not prior:
+    if not prior and not ko_prior:
         out.append("_No matches on the previous editorial date._")
         out.append("")
         return out
@@ -467,10 +475,30 @@ def _overnight_section(rows: list[dict], yesterday: date,
         else:
             out.append(f"- ⚠️ **{r['match_id']}**{moon} {r['team_a']} vs "
                        f"{r['team_b']} — **result not yet entered**")
+    for km in sorted(ko_prior, key=lambda k: (k.kickoff_et_24h, k.match_no)):
+        rname = _KO_ROUND_NAME.get(km.round, km.round)
+        if km.is_played and km.winner_team:
+            tag = {"extra_time": " (AET)", "penalties": " (pens)"}.get(km.decided_by, "")
+            out.append(f"- **M{km.match_no}** ({rname}) {km.team_a} "
+                       f"{km.score_a}–{km.score_b} {km.team_b}{tag} — "
+                       f"**{km.winner_team} advance**")
+            g = ko_graded.get(km.match_no)
+            if g:
+                fav_p = max(g["p"])
+                fav = km.team_a if g["p"][0] >= g["p"][1] else km.team_b
+                out.append(f"  - Our call: {fav} to advance ({fav_p:.0%}) → "
+                           f"{'✓ correct' if g['correct'] else '✗ wrong'} · "
+                           f"Brier {g['brier']:.3f}")
+        elif km.participants_known:
+            out.append(f"- ⚠️ **M{km.match_no}** ({rname}) {km.team_a} vs "
+                       f"{km.team_b} — **result not yet entered**")
     out.append("")
     out.append(cumulative if cumulative else
                "_No graded predictions yet — the Brier ledger starts once a "
                "logged call's match is played._")
+    if ko_cumulative:
+        out.append("")
+        out.append(ko_cumulative)
     out.append("")
     return out
 
@@ -534,7 +562,9 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
                   odds_bodies: "dict[str, str] | None" = None,
                   conditions: "dict[str, str] | None" = None,
                   knockout: "list | None" = None,
-                  bracket_md: str | None = None) -> tuple[str, list[str]]:
+                  bracket_md: str | None = None,
+                  ko_graded: dict | None = None,
+                  ko_cumulative: str | None = None) -> tuple[str, list[str]]:
     """Render the full edition markdown for ``target``. Returns
     ``(markdown, warnings)``; warnings are data-integrity notes for stderr.
 
@@ -542,8 +572,10 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
     Stakes slots; when omitted, MD3 cards fall back to the factual block.
     ``calls`` ({match_id: The-Call body}) fills the cards' The Call slots;
     ``graded``/``cumulative`` (from ledger.grade / ledger.cumulative_line) add
-    prediction grading to Overnight. All optional: when absent, those slots stay
-    in placeholder state (never invented)."""
+    prediction grading to Overnight; ``ko_graded``/``ko_cumulative`` (from
+    ledger.grade_ko / ledger.ko_cumulative_line) do the same for knockout advance
+    calls. All optional: when absent, those slots stay in placeholder state
+    (never invented)."""
     warnings: list[str] = []
     calls = calls or {}
     odds_bodies = odds_bodies or {}
@@ -605,9 +637,13 @@ def build_edition(target: date, rows: list[dict], standings: "st.Standings",
         parts.append(callout)
         parts.append("")
 
-    # Overnight
-    parts.extend(_overnight_section(rows, target - timedelta(days=1),
-                                    graded=graded, cumulative=cumulative))
+    # Overnight — includes yesterday's knockout ties (with graded advance calls)
+    yesterday = target - timedelta(days=1)
+    ko_prior = [km for km in knockout if km.date_et == yesterday.isoformat()]
+    parts.extend(_overnight_section(rows, yesterday,
+                                    graded=graded, cumulative=cumulative,
+                                    ko_prior=ko_prior, ko_graded=ko_graded,
+                                    ko_cumulative=ko_cumulative))
 
     # Today's slate
     parts.append("## Today's slate")
@@ -895,6 +931,8 @@ def main(argv: list[str] | None = None) -> int:
     # frozen-fixture build stays group-shaped. Fail-soft — any error yields a group edition.
     knockout: list = []
     bracket_md = None
+    ko_graded = None
+    ko_cumulative = None
     try:
         import knockout as ko
         import bracket as bk
@@ -905,7 +943,15 @@ def main(argv: list[str] | None = None) -> int:
             resolver = _ko_resolver()
             if resolver is not None:
                 bproj = bk.feed(bproj, resolver, results=ko.results_dict(knockout))
-            bracket_md = bk.render_markdown(bproj)
+            bracket_md = bk.render_markdown(bproj, ko_by_no=ko.by_no(knockout))
+            try:
+                import ledger as lg_ko
+                ko_rows = lg_ko.load_ko_ledger()
+                ko_graded = lg_ko.grade_ko(knockout, ko_rows)
+                ko_cumulative = lg_ko.ko_cumulative_line(knockout, ko_rows)
+            except Exception as e:
+                print(f"warning: knockout advance-call grading unavailable ({e})",
+                      file=sys.stderr)
     except Exception as e:
         print(f"warning: knockout stage unavailable ({e}) — group-shaped edition",
               file=sys.stderr)
@@ -915,7 +961,8 @@ def main(argv: list[str] | None = None) -> int:
                                       graded=graded, cumulative=cumulative,
                                       odds_bodies=odds_bodies,
                                       conditions=conditions,
-                                      knockout=knockout, bracket_md=bracket_md)
+                                      knockout=knockout, bracket_md=bracket_md,
+                                      ko_graded=ko_graded, ko_cumulative=ko_cumulative)
     for w in warnings:
         print(f"warning: {w}", file=sys.stderr)
 
