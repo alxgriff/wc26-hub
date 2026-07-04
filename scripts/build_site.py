@@ -2250,10 +2250,14 @@ def render_ko_call(info: dict | None, km, result: tuple | None = None) -> str:
     return (
         '<div class="call">'
         f'<p class="call-lead"><b>{_esc(fav)}</b> to advance · <b>{fav_p}%</b></p>'
-        f'<div class="adv-bar" role="img" aria-label="{_esc(ta)} {pa}% to advance, '
+        # class names deliberately avoid ad-ish tokens: EasyList ships a generic
+        # cosmetic rule `##.adv-bar` (plus 600+ other `.adv*` selectors), so any
+        # `adv-` prefixed class gets display:none'd by ad-blockers a beat after
+        # first paint — the bar "flashes then disappears" (user-reported 2026-07-04)
+        f'<div class="call-bar" role="img" aria-label="{_esc(ta)} {pa}% to advance, '
         f'{_esc(tb)} {pb}%">'
-        f'<span class="adv-seg adv-a" style="width:{pa}%">{la_lbl}</span>'
-        f'<span class="adv-seg adv-b" style="width:{pb}%">{lb_lbl}</span></div>'
+        f'<span class="call-seg seg-a" style="width:{pa}%">{la_lbl}</span>'
+        f'<span class="call-seg seg-b" style="width:{pb}%">{lb_lbl}</span></div>'
         f'<p class="call-scale"><span>{_esc(ta)} {pa}%</span>'
         f'<span>{_esc(tb)} {pb}%</span></p>'
         f'<p class="call-facts">most likely 90′ score <b>{ms[0]}–{ms[1]}</b> · '

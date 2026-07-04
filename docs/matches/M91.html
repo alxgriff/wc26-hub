@@ -607,10 +607,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 .slate .ko-card .team.tbd{font-style:italic;color:var(--ink-soft);font-weight:500}
 .slate .ko-card .ko-decided{font-family:var(--mono);font-size:.58rem;color:var(--ink-soft);margin-left:4px;text-transform:uppercase;letter-spacing:.04em}
 .call-lead{font-family:var(--serif);font-size:1.15rem;margin:0 0 10px}
-.adv-bar{display:flex;height:30px;border:1px solid var(--hairline);overflow:hidden;font-family:var(--mono);font-size:.72rem;font-weight:700}
-.adv-seg{display:grid;place-items:center;color:var(--paper);overflow:hidden;white-space:nowrap;min-width:0}
-.adv-a{background:var(--verm)}
-.adv-b{background:var(--ink-soft)}
+/* "call-bar" not "adv-bar": EasyList's generic `##.adv-bar` (and 600+ `.adv*` rules)
+   makes ad-blockers hide any adv- prefixed element right after first paint */
+.call-bar{display:flex;height:30px;border:1px solid var(--hairline);overflow:hidden;font-family:var(--mono);font-size:.72rem;font-weight:700}
+.call-seg{display:grid;place-items:center;color:var(--paper);overflow:hidden;white-space:nowrap;min-width:0}
+.seg-a{background:var(--verm)}
+.seg-b{background:var(--ink-soft)}
 .call-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.7rem;color:var(--ink-soft);margin:6px 0 0}
 .call-facts{font-size:.86rem;margin:10px 0 0}
 .call-src{font-size:.72rem;color:var(--ink-soft);font-style:italic;margin:6px 0 0}
@@ -651,7 +653,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">The Call</span>
     <h2 id="call-h">Who goes through</h2>
   </div>
-<div class="call"><p class="call-lead"><b>Brazil</b> to advance · <b>75%</b></p><div class="adv-bar" role="img" aria-label="Brazil 75% to advance, Norway 25%"><span class="adv-seg adv-a" style="width:75%">75%</span><span class="adv-seg adv-b" style="width:25%">25%</span></div><p class="call-scale"><span>Brazil 75%</span><span>Norway 25%</span></p><p class="call-facts">most likely 90′ score <b>2–0</b> · ~<b>25%</b> reach extra time · ~<b>17%</b> reach a shootout</p><p class="call-src">advance model: 90′ consensus (Elo+Futi) routed through extra time + a coin-flip shootout · neutral venue</p></div>
+<div class="call"><p class="call-lead"><b>Brazil</b> to advance · <b>75%</b></p><div class="call-bar" role="img" aria-label="Brazil 75% to advance, Norway 25%"><span class="call-seg seg-a" style="width:75%">75%</span><span class="call-seg seg-b" style="width:25%">25%</span></div><p class="call-scale"><span>Brazil 75%</span><span>Norway 25%</span></p><p class="call-facts">most likely 90′ score <b>2–0</b> · ~<b>25%</b> reach extra time · ~<b>17%</b> reach a shootout</p><p class="call-src">advance model: 90′ consensus (Elo+Futi) routed through extra time + a coin-flip shootout · neutral venue</p></div>
 </section>
 
 <section aria-labelledby="path-h">
