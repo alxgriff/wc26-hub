@@ -126,14 +126,16 @@ jobs:
 
       # Knockout stage (no-op while data/knockout.csv has no resolved ties): materialize
       # R32/feeder matchups from the freshly-updated standings, then pull any completed
-      # knockout scores. Level/penalty results are reported for manual entry, never guessed.
+      # knockout scores. Penalty ties are auto-entered with the shootout winner from
+      # ESPN's explicit shootoutScore (keyless pass inside fetch_ko_results.py); a level
+      # tie ESPN shows no tally for is reported for manual entry, never guessed.
       - name: Resolve knockout matchups (standings -> knockout.csv)
         id: ko_resolve
         if: ${{ steps.ed.outputs.ko == 'true' }}
         continue-on-error: true
         run: python scripts/knockout.py --resolve | tee -a "$GITHUB_STEP_SUMMARY"
 
-      - name: Enter knockout results (The Odds API)
+      - name: Enter knockout results (ESPN shootouts + The Odds API)
         id: ko_results
         if: ${{ steps.ed.outputs.ko == 'true' }}
         continue-on-error: true

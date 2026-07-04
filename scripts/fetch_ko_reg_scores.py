@@ -87,6 +87,46 @@ def _scoreboard_event_id(events: list, team_a: str, team_b: str) -> str | None:
     return None
 
 
+def scoreboard_competition(events: list, team_a: str, team_b: str) -> dict | None:
+    """The ESPN scoreboard competition dict whose two competitors canon-match the tie,
+    else None. Unlike the summary endpoint, the scoreboard already carries each
+    competitor's aggregate score and (for a penalty tie) `shootoutScore`."""
+    want = {team_a, team_b}
+    for ev in events:
+        comp = (ev.get("competitions") or [{}])[0]
+        names = {pr._canon(((c.get("team") or {}).get("displayName") or "").strip())
+                 for c in comp.get("competitors", [])}
+        if names == want:
+            return comp
+    return None
+
+
+def extract_scoreboard_result(competition: dict, team_a: str, team_b: str) -> dict | None:
+    """The completed final result of the tie ``team_a`` vs ``team_b`` from an ESPN
+    *scoreboard* competition dict, as ``{"score": (a, b), "shootout": (a, b) | None,
+    "status_name": str}`` — or None if it isn't this tie, isn't completed, or the scores
+    can't be read. ``score`` is the 90'+ET aggregate (ESPN's displayed score excludes
+    shootout kicks); ``shootout`` is the shootout tally when the tie went to penalties
+    (ESPN status STATUS_FINAL_PEN), which is the ONLY feed we have that can name a
+    shootout winner. Teams are canon-normalised exactly like extract_reg_score."""
+    status = ((competition.get("status") or {}).get("type") or {})
+    if not status.get("completed"):
+        return None
+    score: dict[str, int | None] = {}
+    shootout: dict[str, int | None] = {}
+    for c in competition.get("competitors", []):
+        name = pr._canon(((c.get("team") or {}).get("displayName") or "").strip())
+        score[name] = _ls_int(c.get("score"))
+        shootout[name] = _ls_int(c.get("shootoutScore"))
+    if score.get(team_a) is None or score.get(team_b) is None:
+        return None
+    so = None
+    if shootout.get(team_a) is not None and shootout.get(team_b) is not None:
+        so = (shootout[team_a], shootout[team_b])
+    return {"score": (score[team_a], score[team_b]), "shootout": so,
+            "status_name": str(status.get("name") or "")}
+
+
 def apply_reg_scores(matches: list, opener=_default_opener) -> tuple[list, list[str]]:
     """Fetch + set the regulation score for every played tie that NEEDS one (reached extra
     time / penalties, no reg score yet). Two-step per tie: the scoreboard (by date) gives the

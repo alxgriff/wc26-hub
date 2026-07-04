@@ -63,8 +63,13 @@ tv_us, team_a, team_b, score_a, score_b, score_a_reg, score_b_reg, decided_by, w
   on the higher side; equal score ⇒ `decided_by` penalties with `winner` (A|B) the
   shootout winner — a shootout winner is NEVER inferred from the score. `winner` is
   authoritative for advancement (`bracket.feed` and the ledger read it, not the score).
-- Results: `fetch_ko_results.py` auto-enters DECISIVE results; level/penalty results are
-  reported for manual `knockout.py --enter`. Same exact-canon join + never-invent rules.
+- Results: `fetch_ko_results.py` runs two passes. A keyless ESPN pass reads completed
+  ties from the `fifa.world` scoreboard: penalty ties are auto-entered with the shootout
+  winner from ESPN's explicit `shootoutScore` (still never inferred from the 90'+ET
+  score; a level tie ESPN shows no tally for falls back to a manual `knockout.py
+  --enter` report), decisive ties the Odds API window expired past are swept up, and AET
+  is read from ESPN's status. Then the Odds API pass enters remaining DECISIVE results.
+  Same exact-canon join + never-invent rules.
 
 ## Tournament rules (encoded in standings/scenario scripts)
 - 12 groups of 4, single round-robin. Top 2 per group + 8 best third-placed

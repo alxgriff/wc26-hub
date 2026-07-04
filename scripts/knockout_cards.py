@@ -84,8 +84,11 @@ def _path_text(km, ko_by_no: dict) -> str:
         for fno in bk.BRACKET_TREE[km.match_no]:
             fm = ko_by_no.get(fno)
             if fm and fm.is_played and fm.winner_team:
+                # a level aggregate reads as a draw without the decider — tag it
+                tag = {"extra_time": " AET",
+                       "penalties": " — won on penalties"}.get(fm.decided_by, "")
                 bits.append(f"{fm.winner_team} advanced from M{fno} "
-                            f"({fm.team_a} {fm.score_a}–{fm.score_b} {fm.team_b})")
+                            f"({fm.team_a} {fm.score_a}–{fm.score_b} {fm.team_b}{tag})")
         if bits:
             return "; ".join(bits) + "."
     if km.round == "R32" and km.participants_known:

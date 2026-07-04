@@ -68,7 +68,7 @@ it, so there is no second implementation to drift.
 | Module | Role | CLI |
 |---|---|---|
 | `fetch_results.py` | Pull completed scores from The Odds API → `fixtures.csv` | `fetch_results.py [--dry-run]` |
-| `fetch_ko_results.py` | Knockout scores → `knockout.csv` (decisive auto-entered; level/penalty reported for manual entry) | `fetch_ko_results.py [--dry-run]` |
+| `fetch_ko_results.py` | Knockout scores → `knockout.csv` (ESPN pass: shootout winners from `shootoutScore` + expired-window sweeps; Odds API pass: decisive results; unreadable ties reported for manual entry) | `fetch_ko_results.py [--dry-run]` |
 | `fetch_ko_reg_scores.py` | Knockout 90-minute (regulation) score from ESPN's `fifa.world` feed → `knockout.csv` reg cols (basis for 90' bet settlement on extra-time ties) | `fetch_ko_reg_scores.py [--dry-run]` |
 | `weather.py` | Open-Meteo forecast/actual → WBGT heat + per-team climate (Sweat Factor) | `weather.py --date\|--baselines\|--backfill` |
 | `stakes_blurb.py` | Sonnet-written morning standfirst, grounded only in computed facts | `stakes_blurb.py [DATE]` |
