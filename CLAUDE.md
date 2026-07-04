@@ -135,7 +135,10 @@ tv_us, team_a, team_b, score_a, score_b, score_a_reg, score_b_reg, decided_by, w
   market, each clearing a **4-point recording bar** (user-set June 12 at 5pp,
   lowered to 4pp June 14 to gather more model-performance data once the Maher
   totals fix left the model well-calibrated — a measured experiment, revert if
-  the [4,5)pp band shows negative CLV) and a sanity
+  the [4,5)pp band shows negative CLV. **Graded 2026-07-04** at n=34 settled:
+  +0.31u, mean CLV **+0.31pp** (n=29; the ≥5pp band ran +0.17pp) — trigger NOT
+  met, 4pp stays; re-grade when the band reaches ~50 CLV observations, and make
+  it permanent if CLV is still ≥ 0) and a sanity
   ceiling. The sanity ceiling is **market-aware** (user-set June 14): 1X2 is
   checked against the published consensus, so it keeps the 15-point ceiling;
   totals/spreads/BTTS are model-priced from the same score matrix that makes the
