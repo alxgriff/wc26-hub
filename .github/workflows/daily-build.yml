@@ -162,6 +162,17 @@ jobs:
         continue-on-error: true
         run: python scripts/knockout_cards.py "${{ steps.ed.outputs.date }}" --window 3 | tee -a "$GITHUB_STEP_SUMMARY"
 
+      # Silent-stall detector: the data steps above are fail-soft, so a stalled FEED
+      # (results not landing, reg scores missing, cards not generating) never reds a
+      # step on its own — "0 entered" looks healthy. This checks the DATA instead and
+      # feeds the health gate: the build still publishes, then the run goes red.
+      # (Three shootout results once sat unentered for five days of green runs.)
+      - name: Data-freshness invariants (silent-stall detector)
+        id: health
+        if: ${{ steps.ed.outputs.ko == 'true' }}
+        continue-on-error: true
+        run: python scripts/health.py | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Settle yesterday's picks (units + CLV)
         id: settle
         continue-on-error: true
@@ -253,6 +264,7 @@ jobs:
           [ "${{ steps.ko_reg.outcome }}"     = "failure" ] && failed="$failed ko_reg"
           [ "${{ steps.ko_ledger.outcome }}" = "failure" ] && failed="$failed ko_ledger"
           [ "${{ steps.ko_cards.outcome }}" = "failure" ] && failed="$failed ko_cards"
+          [ "${{ steps.health.outcome }}"   = "failure" ] && failed="$failed health(SILENT-STALL)"
           [ "${{ steps.ko_evaluate.outcome }}" = "failure" ] && failed="$failed ko_evaluate"
           [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"
           [ "${{ steps.ledger.outcome }}"   = "failure" ] && failed="$failed ledger"

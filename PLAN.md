@@ -141,8 +141,9 @@ edition before trusting it. The checklist below remains the manual fallback.
 ### Knockout stage (June 28 → July 19; manual fallback for the same automation)
 
 0. `git pull --ff-only` first — the bot commits several times a day; a stale checkout
-   reads as "the pipeline is broken" (2026-07-04 lesson). Then the data invariants in
-   the `hub-health` skill (.claude/skills/) — green CI does NOT mean results landed.
+   reads as "the pipeline is broken" (2026-07-04 lesson). Then `python scripts/health.py`
+   (the silent-stall detector; also in both CI health gates) — green CI alone does NOT
+   mean results landed.
 1. Results: `python scripts/fetch_ko_results.py` (keyless ESPN pass auto-enters
    shootout winners; only a tie ESPN shows no tally for needs
    `knockout.py --enter N --score A-B --decided penalties --winner A|B`).

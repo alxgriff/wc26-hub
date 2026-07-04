@@ -16,30 +16,11 @@ at risk of being missed. Nothing in the logs is red; you have to check the DATA.
    commits — diagnosing a stale checkout wastes the whole session (it looked like 3 days
    of failed builds; it was an un-pulled repo).
 
-2. Data invariants (the actual stall detectors) — run:
-
-```bash
-python - <<'EOF'
-import sys, csv
-from datetime import date, datetime, timezone
-from pathlib import Path
-sys.path.insert(0, "scripts")
-import knockout as ko
-today = datetime.now(timezone.utc).date()
-matches = ko.load_knockout(Path("data/knockout.csv"))
-bad = 0
-for km in matches:
-    d = date.fromisoformat(km.date_et)
-    if d < today and not km.is_played and km.participants_known:
-        print(f"STALL M{km.match_no}: {km.team_a} vs {km.team_b} played {km.date_et}, no result"); bad += 1
-    if km.is_played and km.decided_by in ("extra_time", "penalties") and km.reg_score is None:
-        print(f"STALL M{km.match_no}: ET/pens tie missing 90' reg score (bets can't settle)"); bad += 1
-    if km.participants_known and not km.is_played and abs((d - today).days) <= 3 \
-            and not Path(f"cards/ko/M{km.match_no}.md").exists():
-        print(f"GAP  M{km.match_no}: resolved, kicks {km.date_et}, NO card"); bad += 1
-print("data invariants OK" if not bad else f"{bad} issue(s)")
-EOF
-```
+2. Data invariants (the actual stall detectors): `python scripts/health.py`
+   (exit 1 + STALL/GAP lines = silently stalled; each line names the fix command).
+   CI runs the same script in both workflows' health gates since 2026-07-04, so a
+   stall also shows as a red run tagged `health(SILENT-STALL)` — but run it locally
+   anyway, it's instant. `--today YYYY-MM-DD` simulates a future date.
 
 3. Today's accountability, BEFORE first kickoff: `python scripts/ledger.py log-ko <today>`
    (idempotent; a missed pre-kickoff advance call is unrecoverable — no backfill, ever).
@@ -55,6 +36,6 @@ EOF
    `build_edition.py <date>` → full test suite → commit (`git add data docs editions cards`,
    never `-A` for pipeline artifacts) → push (push = deploy).
 
-If step 2 keeps finding the same class of stall, promote that check into a
-`scripts/health.py` + a hard CI step — a skill catches it when someone runs it; CI
-catches it every morning.
+New stall classes go into `scripts/health.py` (+ hermetic tests in
+`tests/test_health.py` — synthetic matches only, never live-data assertions), not into
+this skill: CI checks every run; a skill only checks when someone runs it.

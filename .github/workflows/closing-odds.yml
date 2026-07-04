@@ -130,6 +130,14 @@ jobs:
           pip install anthropic >/dev/null 2>&1 || true
           python scripts/knockout_cards.py "${{ steps.ed.outputs.date }}" --window 3 | tee -a "$GITHUB_STEP_SUMMARY"
 
+      # Silent-stall detector (same as daily-build): fail-soft feeds never red a step,
+      # so check the DATA — a stall publishes, then reds the run via the health gate.
+      - name: Data-freshness invariants (silent-stall detector)
+        id: health
+        if: ${{ steps.ed.outputs.ko == 'true' }}
+        continue-on-error: true
+        run: python scripts/health.py | tee -a "$GITHUB_STEP_SUMMARY"
+
       # Roll Elo forward through the results just entered, so this run's re-recorded edges
       # and rebuilt previews use current Elo. Fail-soft (model falls back to VERIFIED).
       - name: Update Elo (roll verified baseline through WC results)
@@ -211,6 +219,7 @@ jobs:
           [ "${{ steps.ko.outcome }}"       = "failure" ] && failed="$failed ko"
           [ "${{ steps.ko_ledger.outcome }}" = "failure" ] && failed="$failed ko_ledger"
           [ "${{ steps.ko_cards.outcome }}" = "failure" ] && failed="$failed ko_cards"
+          [ "${{ steps.health.outcome }}"   = "failure" ] && failed="$failed health(SILENT-STALL)"
           [ "${{ steps.settle.outcome }}"   = "failure" ] && failed="$failed settle"
           [ "${{ steps.evaluate.outcome }}" = "failure" ] && failed="$failed evaluate"
           [ "${{ steps.ko_evaluate.outcome }}" = "failure" ] && failed="$failed ko_evaluate"
