@@ -298,7 +298,7 @@ The Roma defender had been used in an advanced position on the right, allowing B
 - Goalkeepers: Yassine Bounou, Munir Mohamedi, Ahmed Reda Tagnaouti
 - Central defenders: Chadi Riad, Issa Diop, Redouane Halhal, Marwane Saâdane
 - Wide defenders: Achraf Hakimi, Zakaria El Ouahdi, Noussair Mazraoui, Anass Salah-Eddine, Youssef Belammari
-- Defensive midfield: Sofyan Ambrabat
+- Defensive midfield: Sofyan Amrabat
 - Central midfield: Neil El Aynaoui, Samir El Mourabet, Ayyoub Bouaddi
 - Attacking midfield: Ismael Saibari, Azzedine Ounahi, Bilal El Khannouss
 - Wide forwards: Brahim Díaz, Chemsdine Talbi, Gessime Yassine, Soufiane Rahimi, Ayoube Amaimouni, Amine Sbaï
