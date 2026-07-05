@@ -607,6 +607,15 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 .slate .ko-card .team.tbd{font-style:italic;color:var(--ink-soft);font-weight:500}
 .slate .ko-card .ko-decided{font-family:var(--mono);font-size:.58rem;color:var(--ink-soft);margin-left:4px;text-transform:uppercase;letter-spacing:.04em}
 .call-lead{font-family:var(--serif);font-size:1.15rem;margin:0 0 10px}
+/* Title race — exact bracket propagation table (index, knockout phase) */
+.race-wrap{max-width:620px}
+.race-wrap td:first-child,.race-wrap th:first-child{text-align:left;font-family:var(--serif);font-weight:700;font-size:.92rem}
+.race-wrap thead th:first-child{font-family:var(--mono);font-weight:500;font-size:.66rem}
+.race-lead td{background:color-mix(in srgb, var(--verm) 7%, transparent)}
+.race-lead td:last-child b{color:var(--verm)}
+.race-dim{color:var(--ink-soft)}
+.race-note{font-size:.72rem;color:var(--ink-soft);font-style:italic;margin:6px 0 0}
+
 /* "call-bar" not "adv-bar": EasyList's generic `##.adv-bar` (and 600+ `.adv*` rules)
    makes ad-blockers hide any adv- prefixed element right after first paint */
 .call-bar{display:flex;height:30px;border:1px solid var(--hairline);overflow:hidden;font-family:var(--mono);font-size:.72rem;font-weight:700}
@@ -1509,7 +1518,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 
 <footer>
   <p class="colophon">
-    Generated 2026-07-05 12:10 · calls graded from data/predictions_log.csv (logged
+    Generated 2026-07-05 11:23 · calls graded from data/predictions_log.csv (logged
     pre-kickoff, immutable after) · picks from data/picks_log.csv (recorded day-of
     at fresh prices, settled rows immutable) · Brier: 0 best · 0.667 coin-flip ·
     2 worst · CLV = closing implied minus our implied at record · shadow book from

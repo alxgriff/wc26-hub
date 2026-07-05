@@ -382,6 +382,62 @@ def load_knockout_resolver(knockout: list | None = None):
     return resolve
 
 
+def compute_title_race(knockout: list) -> dict | None:
+    """Exact title-race odds from the current knockout state (bracket.championship_odds
+    over predict.advance_p_fn), or None when they can't be computed — no knockout data,
+    predict unavailable, or any model error. Fail-soft: the section simply doesn't render."""
+    if not knockout:
+        return None
+    try:
+        import predict as pr
+        model = pr.load_ratings()
+        p_fn = pr.advance_p_fn(model, {km.match_no: km.country for km in knockout})
+        odds = bk.championship_odds(ko.by_no(knockout), p_fn)
+        return odds if odds.get("champion") else None
+    except Exception:
+        return None
+
+
+def render_title_race(odds: dict) -> str:
+    """The title-race table: every surviving team, P(appear) per remaining round and
+    P(champion), sorted by title chance. Probabilities are the EXACT propagation of the
+    advance model through the bracket — deterministic, so rebuilds diff cleanly."""
+    champ = odds.get("champion", {})
+    reach = odds.get("reach", {})
+    if not champ:
+        return ""
+    rows = sorted(champ.items(), key=lambda kv: (-kv[1], kv[0]))
+
+    def cell(p: float) -> str:
+        if p >= 0.9995:
+            return "<td>✓</td>"
+        return f"<td>{p:.0%}</td>" if p >= 0.005 else '<td class="race-dim">&lt;1%</td>'
+
+    body = []
+    for i, (team, pc) in enumerate(rows):
+        r = reach.get(team, {})
+        lead = ' class="race-lead"' if i == 0 else ""
+        body.append(
+            f"<tr{lead}><td>{_esc(team)}</td>"
+            + cell(r.get("QF", 0.0)) + cell(r.get("SF", 0.0)) + cell(r.get("Final", 0.0))
+            + f"<td><b>{pc:.1%}</b></td></tr>")
+    return (
+        '<section id="title-race" aria-labelledby="title-race-h">\n'
+        '  <div class="sec-head"><span class="kicker">Every path, priced</span>'
+        '<h2 id="title-race-h">The Title Race</h2></div>\n'
+        '  <p class="standfirst">Chance of reaching each round, propagated exactly '
+        'through the bracket from the advance model (extra time, shootouts and the '
+        'host-venue bonus included) — no simulation noise, updated as results land.</p>\n'
+        '  <div class="race-wrap"><table>\n'
+        '    <thead><tr><th>Team</th><th>QF</th><th>SF</th><th>Final</th>'
+        '<th>Champion</th></tr></thead>\n'
+        '    <tbody>' + "".join(body) + '</tbody>\n'
+        '  </table></div>\n'
+        '  <p class="race-note">✓ = already there. Model probabilities, not odds — '
+        'see each match page for the market view.</p>\n'
+        '</section>')
+
+
 def load_group_rates():
     """Adapter for the 'projected finish' bracket: rates(match) -> (lambda_a, lambda_b) = the
     model's expected goals per side for a group game, or None if predict.py is unavailable.
@@ -2444,14 +2500,18 @@ def build_page(matches: "list[st.Match]", rows: list[dict], target: date,
         else:
             bracket_block = ('<p class="standfirst">The bracket fills in once the groups finish.</p>')
             intro = ""
+        title_race = compute_title_race(knockout)
+        title_race_html = ("\n" + render_title_race(title_race)) if title_race else ""
         body_sections_html = (
             '<section id="bracket" aria-labelledby="bracket-h">\n'
             '  <div class="sec-head"><span class="kicker">R32 → Final</span>'
             '<h2 id="bracket-h">The Bracket</h2></div>\n'
             + (f'  <p class="standfirst">{intro}</p>\n' if intro else "")
-            + bracket_block + '\n</section>')
+            + bracket_block + '\n</section>' + title_race_html)
         nav_html = ('    <a class="wide" href="#bracket">the bracket</a>\n'
-                    '    <a class="wide" href="group-stage.html">group stage</a>\n'
+                    + ('    <a class="wide" href="#title-race">the title race</a>\n'
+                       if title_race_html else '')
+                    + '    <a class="wide" href="group-stage.html">group stage</a>\n'
                     '    <a class="wide" href="record.html">the record</a>')
         page_title = "WC26 Daily Hub — The Knockout Bracket"
         page_desc = ("The 2026 World Cup knockout bracket, Round of 32 to the Final — winners "

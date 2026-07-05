@@ -607,6 +607,15 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 .slate .ko-card .team.tbd{font-style:italic;color:var(--ink-soft);font-weight:500}
 .slate .ko-card .ko-decided{font-family:var(--mono);font-size:.58rem;color:var(--ink-soft);margin-left:4px;text-transform:uppercase;letter-spacing:.04em}
 .call-lead{font-family:var(--serif);font-size:1.15rem;margin:0 0 10px}
+/* Title race — exact bracket propagation table (index, knockout phase) */
+.race-wrap{max-width:620px}
+.race-wrap td:first-child,.race-wrap th:first-child{text-align:left;font-family:var(--serif);font-weight:700;font-size:.92rem}
+.race-wrap thead th:first-child{font-family:var(--mono);font-weight:500;font-size:.66rem}
+.race-lead td{background:color-mix(in srgb, var(--verm) 7%, transparent)}
+.race-lead td:last-child b{color:var(--verm)}
+.race-dim{color:var(--ink-soft)}
+.race-note{font-size:.72rem;color:var(--ink-soft);font-style:italic;margin:6px 0 0}
+
 /* "call-bar" not "adv-bar": EasyList's generic `##.adv-bar` (and 600+ `.adv*` rules)
    makes ad-blockers hide any adv- prefixed element right after first paint */
 .call-bar{display:flex;height:30px;border:1px solid var(--hairline);overflow:hidden;font-family:var(--mono);font-size:.72rem;font-weight:700}
@@ -778,12 +787,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">1X2</td><td class="lbl">Iraq</td><td title="26.00 decimal">+2500</td><td>4%</td><td>2%</td><td class="edge-neg">-1.9%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 3.5</td><td title="1.82 decimal">-122</td><td>52%</td><td>38%</td><td class="edge-neg">-14.5%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 3.5</td><td title="2.01 decimal">+101</td><td>48%</td><td>62%</td><td class="edge-pos">+14.5%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">France -2.5</td><td title="1.75 decimal">-133</td><td>55%</td><td>52%</td><td class="edge-neg">-3.7%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Iraq +2.5</td><td title="2.16 decimal">+116</td><td>45%</td><td>48%</td><td class="edge-pos">+3.7%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">France -2.5</td><td title="1.75 decimal">-133</td><td>55%</td><td>50%</td><td class="edge-neg">-5.0%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Iraq +2.5</td><td title="2.16 decimal">+116</td><td>45%</td><td>50%</td><td class="edge-pos">+5.0%</td></tr>
     </tbody>
   </table>
 </div>
-<p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Iraq +2.5</strong> (Asian handicap), model edge <strong>+5.0%</strong></p><p class="odds-note">the model likes this, but the line is over 12h old (the book hasn't reposted), so it is <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
 <p class="odds-note">Logged pick: Iraq +2.5 @ +121 (betonlineag), edge 6.8pp · settled <b>lost</b> for -1.00u · CLV +0.5pp.</p>
 <p class="verify-flag">totals under 3.5: model-priced edge +14.5% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 22, 1:12 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
@@ -810,7 +819,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=2.9216,lb=0.1988,N=8,SHOW=6,i,j;
+  var la=2.8909,lb=0.2295,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

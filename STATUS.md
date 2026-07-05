@@ -70,6 +70,10 @@ The full Round-of-32 → Final stage now runs end-to-end (group→knockout bound
   per-tie knockout match pages with the advance Call (`predict.resolve_knockout`), the road
   here, result, the Sonnet card, and the advance-odds section.
 - **Edition:** `build_edition` embeds the bracket + a cross-group "who qualified" recap.
+- **Title race (2026-07-05):** exact P(QF/SF/Final/Champion) per surviving team —
+  `bracket.championship_odds` propagates `predict.advance_p_fn` (venue-aware host HFA
+  by match number) through the bracket tree; a DP, not Monte-Carlo, so builds stay
+  deterministic. On the index (#title-race) + in the edition; fail-soft.
 - **Cards:** `knockout_cards.py` — overnight Sonnet-grounded, auto-published to `cards/ko/`.
 - **Accountability:** 2-class advance Brier (`ledger.py log-ko/report-ko`, `ko_predictions_log.csv`).
 - **Betting:** 2-way **advance** market (`odds.py`), model-priced (8pp ceiling), penalty-aware settle.

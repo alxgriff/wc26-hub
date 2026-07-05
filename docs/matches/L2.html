@@ -607,6 +607,15 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 .slate .ko-card .team.tbd{font-style:italic;color:var(--ink-soft);font-weight:500}
 .slate .ko-card .ko-decided{font-family:var(--mono);font-size:.58rem;color:var(--ink-soft);margin-left:4px;text-transform:uppercase;letter-spacing:.04em}
 .call-lead{font-family:var(--serif);font-size:1.15rem;margin:0 0 10px}
+/* Title race — exact bracket propagation table (index, knockout phase) */
+.race-wrap{max-width:620px}
+.race-wrap td:first-child,.race-wrap th:first-child{text-align:left;font-family:var(--serif);font-weight:700;font-size:.92rem}
+.race-wrap thead th:first-child{font-family:var(--mono);font-weight:500;font-size:.66rem}
+.race-lead td{background:color-mix(in srgb, var(--verm) 7%, transparent)}
+.race-lead td:last-child b{color:var(--verm)}
+.race-dim{color:var(--ink-soft)}
+.race-note{font-size:.72rem;color:var(--ink-soft);font-style:italic;margin:6px 0 0}
+
 /* "call-bar" not "adv-bar": EasyList's generic `##.adv-bar` (and 600+ `.adv*` rules)
    makes ad-blockers hide any adv- prefixed element right after first paint */
 .call-bar{display:flex;height:30px;border:1px solid var(--hairline);overflow:hidden;font-family:var(--mono);font-size:.72rem;font-weight:700}
@@ -781,12 +790,12 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.25</td><td title="1.78 decimal">-128</td><td>54%</td><td>55%</td><td class="">+0.6%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.33 decimal">+133</td><td>41%</td><td>45%</td><td class="edge-pos">+4.6%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.61 decimal">-164</td><td>59%</td><td>55%</td><td class="edge-neg">-4.6%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Ghana -0.5</td><td title="2.36 decimal">+136</td><td>41%</td><td>35%</td><td class="edge-neg">-6.1%</td></tr>
-      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Panama +0.5</td><td title="1.65 decimal">-154</td><td>59%</td><td>65%</td><td class="edge-pos">+6.1%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Ghana -0.5</td><td title="2.36 decimal">+136</td><td>41%</td><td>35%</td><td class="edge-neg">-6.2%</td></tr>
+      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Panama +0.5</td><td title="1.65 decimal">-154</td><td>59%</td><td>65%</td><td class="edge-pos">+6.2%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Over 2</strong> (Total goals), model edge <strong>+7.6%</strong></p><p><strong>Panama +0.5</strong> (Asian handicap), model edge <strong>+6.1%</strong></p><p class="odds-note">the model likes these, but the line is over 12h old (the book hasn't reposted), so they are <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
+<div class="bet-callout stale"><span class="tag">Model lean · stale line</span><p><strong>Over 2</strong> (Total goals), model edge <strong>+7.6%</strong></p><p><strong>Panama +0.5</strong> (Asian handicap), model edge <strong>+6.2%</strong></p><p class="odds-note">the model likes these, but the line is over 12h old (the book hasn't reposted), so they are <strong>not recorded</strong> until the price refreshes — an intra-day run logs it once it does.</p></div>
 <p class="odds-note">Logged pick: Over 2.5 @ +140 (betmgm), edge 7.9pp · settled <b>lost</b> for -1.00u.</p>
 <p class="verify-flag">h2h away: edge +23.3% implausibly large — verify odds freshness and team news before trusting</p>
 <p class="odds-note">market snapshot Jun 17, 12:43 PM ET · DraftKings where quoted, else best of 4 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 2 can push (P 26%) — probabilities and edge are per unit at risk; a push refunds the stake.</p>
@@ -813,7 +822,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=1.2175,lb=1.2771,N=8,SHOW=6,i,j;
+  var la=1.2146,lb=1.2799,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

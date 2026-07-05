@@ -413,6 +413,97 @@ def to_dict(projection: dict) -> dict:
     return projection   # already a pure, JSON-safe dict
 
 
+# ---------------------------------------------------------------- title race (exact)
+
+_ROUND_OF_MATCH = {**{m: "R16" for m in range(89, 97)}, **{m: "QF" for m in range(97, 101)},
+                   101: "SF", 102: "SF", 104: "Final"}
+TITLE_ROUNDS = ("R16", "QF", "SF", "Final")
+
+
+def _pair_dist(in_a: dict, in_b: dict, m: int, p_fn) -> dict:
+    """P(team wins match ``m``) given the two independent inbound distributions —
+    exact convolution over every possible pairing. p_fn(a, b, m) = P(a beats b in
+    that match, incl. ET + shootout + the match venue's host HFA)."""
+    out: dict[str, float] = {}
+    for a, pa in in_a.items():
+        for b, pb in in_b.items():
+            w = pa * pb
+            if w <= 0.0:
+                continue
+            p = float(p_fn(a, b, m))
+            out[a] = out.get(a, 0.0) + w * p
+            out[b] = out.get(b, 0.0) + w * (1.0 - p)
+    return out
+
+
+def championship_odds(ko_by_no: dict, p_fn) -> dict:
+    """EXACT title-race probabilities from the CURRENT knockout state — a dynamic
+    program over BRACKET_TREE, not a Monte-Carlo (deterministic builds: same data +
+    model => byte-identical output). A played match is a point mass on its real
+    winner; a resolved unplayed tie prices its actual pairing; an unresolved tie
+    convolves its feeders' win distributions. Third place (M103) is outside the
+    tree and excluded. Returns {"reach": {team: {round: P(team APPEARS in round)}},
+    "champion": {team: P(wins the Final)}} — reach of a played round is 1/0 history.
+    ``p_fn(a, b, match_no) -> P(a beats b)`` must cover any hypothetical pairing;
+    exceptions propagate (callers fail soft)."""
+    dist: dict[int, dict] = {}
+    reach: dict[str, dict] = {}
+
+    def _appear(m: int, in_a: dict, in_b: dict) -> None:
+        rnd = _ROUND_OF_MATCH.get(m)
+        if rnd is None:
+            return
+        for team_p in (in_a, in_b):
+            for t, p in team_p.items():
+                if p > 0.0:
+                    reach.setdefault(t, {r: 0.0 for r in TITLE_ROUNDS})[rnd] += p
+
+    for m in range(73, 89):                       # R32 — history by now, but stay general
+        km = ko_by_no.get(m)
+        if km is None or not km.participants_known:
+            dist[m] = {}
+        elif km.is_played and km.winner_team:
+            dist[m] = {km.winner_team: 1.0}
+        else:
+            dist[m] = _pair_dist({km.team_a: 1.0}, {km.team_b: 1.0}, m, p_fn)
+
+    for m in sorted(BRACKET_TREE):                # feeders are lower-numbered
+        f1, f2 = BRACKET_TREE[m]
+        km = ko_by_no.get(m)
+        if km is not None and km.is_played and km.winner_team:
+            in_a, in_b = {km.team_a: 1.0}, {km.team_b: 1.0}
+            dist[m] = {km.winner_team: 1.0}
+        elif km is not None and km.participants_known:
+            in_a, in_b = {km.team_a: 1.0}, {km.team_b: 1.0}
+            dist[m] = _pair_dist(in_a, in_b, m, p_fn)
+        else:
+            in_a, in_b = dist.get(f1, {}), dist.get(f2, {})
+            dist[m] = _pair_dist(in_a, in_b, m, p_fn)
+        _appear(m, in_a, in_b)
+
+    return {"reach": reach, "champion": dist.get(104, {})}
+
+
+def render_title_race_md(odds: dict, limit: int = 8) -> str:
+    """The title race as a compact markdown table (edition embed): top ``limit``
+    surviving teams by P(champion), with P(appear) per remaining round."""
+    champ = odds.get("champion", {})
+    reach = odds.get("reach", {})
+    if not champ:
+        return ""
+    rows = sorted(champ.items(), key=lambda kv: (-kv[1], kv[0]))[:limit]
+    out = ["## The title race", "",
+           "*Exact propagation of the advance model through the bracket "
+           "(extra time + shootouts + host-venue bonus included). "
+           "Probabilities update as results land.*", "",
+           "| Team | QF | SF | Final | Champion |", "|:---|---:|---:|---:|---:|"]
+    for team, pc in rows:
+        r = reach.get(team, {})
+        out.append(f"| {team} | {r.get('QF', 0):.0%} | {r.get('SF', 0):.0%} "
+                   f"| {r.get('Final', 0):.0%} | **{pc:.1%}** |")
+    return "\n".join(out) + "\n"
+
+
 def main(argv: list | None = None) -> int:
     import argparse
     ap = argparse.ArgumentParser(description="Project the as-it-stands WC26 knockout bracket.")

@@ -607,6 +607,15 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 .slate .ko-card .team.tbd{font-style:italic;color:var(--ink-soft);font-weight:500}
 .slate .ko-card .ko-decided{font-family:var(--mono);font-size:.58rem;color:var(--ink-soft);margin-left:4px;text-transform:uppercase;letter-spacing:.04em}
 .call-lead{font-family:var(--serif);font-size:1.15rem;margin:0 0 10px}
+/* Title race — exact bracket propagation table (index, knockout phase) */
+.race-wrap{max-width:620px}
+.race-wrap td:first-child,.race-wrap th:first-child{text-align:left;font-family:var(--serif);font-weight:700;font-size:.92rem}
+.race-wrap thead th:first-child{font-family:var(--mono);font-weight:500;font-size:.66rem}
+.race-lead td{background:color-mix(in srgb, var(--verm) 7%, transparent)}
+.race-lead td:last-child b{color:var(--verm)}
+.race-dim{color:var(--ink-soft)}
+.race-note{font-size:.72rem;color:var(--ink-soft);font-style:italic;margin:6px 0 0}
+
 /* "call-bar" not "adv-bar": EasyList's generic `##.adv-bar` (and 600+ `.adv*` rules)
    makes ad-blockers hide any adv- prefixed element right after first paint */
 .call-bar{display:flex;height:30px;border:1px solid var(--hairline);overflow:hidden;font-family:var(--mono);font-size:.72rem;font-weight:700}
@@ -653,7 +662,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">The Call</span>
     <h2 id="call-h">Who goes through</h2>
   </div>
-<div class="call"><p class="call-lead"><b>Spain</b> to advance · <b>68%</b></p><div class="call-bar" role="img" aria-label="Portugal 32% to advance, Spain 68%"><span class="call-seg seg-a" style="width:32%">32%</span><span class="call-seg seg-b" style="width:68%">68%</span></div><p class="call-scale"><span>Portugal 32%</span><span>Spain 68%</span></p><p class="call-facts">most likely 90′ score <b>0–1</b> · ~<b>30%</b> reach extra time · ~<b>21%</b> reach a shootout</p><p class="call-src">advance model: 90′ consensus (Elo+Futi) routed through extra time + a coin-flip shootout · neutral venue</p></div>
+<div class="call"><p class="call-lead"><b>Spain</b> to advance · <b>67%</b></p><div class="call-bar" role="img" aria-label="Portugal 33% to advance, Spain 67%"><span class="call-seg seg-a" style="width:33%">33%</span><span class="call-seg seg-b" style="width:67%">67%</span></div><p class="call-scale"><span>Portugal 33%</span><span>Spain 67%</span></p><p class="call-facts">most likely 90′ score <b>0–1</b> · ~<b>30%</b> reach extra time · ~<b>21%</b> reach a shootout</p><p class="call-src">advance model: 90′ consensus (Elo+Futi) routed through extra time + a coin-flip shootout · neutral venue</p></div>
 </section>
 
 <section aria-labelledby="path-h">
@@ -706,14 +715,14 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <tbody>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.75 decimal">-132</td><td>54%</td><td>49%</td><td class="edge-neg">-4.8%</td></tr>
       <tr class="pick-row"><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="2.08 decimal">+108</td><td>46%</td><td>51%</td><td class="edge-pos">+4.8%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Portugal +0.5</td><td title="1.93 decimal">-108</td><td>50%</td><td>45%</td><td class="edge-neg">-4.5%</td></tr>
-      <tr class="pick-row"><td class="lbl">Asian handicap</td><td class="lbl">Spain -0.5</td><td title="1.89 decimal">-112</td><td>50%</td><td>55%</td><td class="edge-pos">+4.5%</td></tr>
-      <tr><td class="lbl">To qualify</td><td class="lbl">Portugal</td><td title="no quoted price — implied from the 90′ line">—</td><td>36%</td><td>32%</td><td class="edge-neg">-3.6%</td></tr>
-      <tr><td class="lbl">To qualify</td><td class="lbl">Spain</td><td title="no quoted price — implied from the 90′ line">—</td><td>64%</td><td>68%</td><td class="edge-pos">+3.6%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Portugal +0.5</td><td title="1.93 decimal">-108</td><td>50%</td><td>46%</td><td class="edge-neg">-3.8%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Spain -0.5</td><td title="1.89 decimal">-112</td><td>50%</td><td>54%</td><td class="edge-pos">+3.8%</td></tr>
+      <tr><td class="lbl">To qualify</td><td class="lbl">Portugal</td><td title="no quoted price — implied from the 90′ line">—</td><td>36%</td><td>33%</td><td class="edge-neg">-3.0%</td></tr>
+      <tr><td class="lbl">To qualify</td><td class="lbl">Spain</td><td title="no quoted price — implied from the 90′ line">—</td><td>64%</td><td>67%</td><td class="edge-pos">+3.0%</td></tr>
     </tbody>
   </table>
 </div>
-<div class="bet-callout"><span class="tag">Best bets — top 2, ≥4% edge</span><p>1. <strong>Under 2.5</strong> (Total goals) @ +108, edge <strong>+4.8%</strong> — best price +117 (betus). Flat 1u, paper record.</p><p>2. <strong>Spain -0.5</strong> (Asian handicap) @ -112, edge <strong>+4.5%</strong> — best price -110 (betus). Flat 1u, paper record.</p><p class="odds-note">same-match picks are correlated — they tend to win and lose together; the units record swings accordingly.</p></div>
+<div class="bet-callout"><span class="tag">Best bet</span><p><strong>Under 2.5</strong> (Total goals) @ +108, edge <strong>+4.8%</strong> — best price +117 (betus). Flat 1u, paper record.</p></div>
 <p class="odds-note">market snapshot Jul 5, 8:07 AM ET · DraftKings where quoted, else best of 6 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · totals / handicap / BTTS settle on 90 minutes (regulation) — extra-time goals don&#x27;t count toward them · advance edge derived from the 90&#x27; market (no quoted &#x27;to qualify&#x27; line) — a model-vs-market read, not a recorded bet.</p>
 </section>
 

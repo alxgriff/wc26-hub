@@ -518,6 +518,27 @@ def resolve_knockout(model: RatingModel, team_a: str, team_b: str,
         (et_a, et_d, et_b), p_d, p_d * et_d)
 
 
+def advance_p_fn(model: RatingModel, country_by_no: dict):
+    """The pairwise kernel for ``bracket.championship_odds``: a memoized
+    ``p_fn(a, b, match_no) -> P(a beats b in that bracket match)`` — resolve_knockout
+    (90' + extra time + coin-flip shootout) with host HFA keyed to the MATCH's venue
+    country (knockout.csv fixes each match number's venue, so a hypothetical future
+    pairing still prices the right ground). Memoized per (pair, country): the exact
+    bracket propagation asks for the same pairing many times."""
+    cache: dict = {}
+
+    def p_fn(a: str, b: str, match_no: int) -> float:
+        country = (country_by_no.get(match_no) or "").strip()
+        key = (a, b, country)
+        if key not in cache:
+            kp = resolve_knockout(model, a, b, hfa_team=host_hfa(country, a, b))
+            cache[key] = kp.p_advance_a
+            cache[(b, a, country)] = kp.p_advance_b
+        return cache[key]
+
+    return p_fn
+
+
 # ---------------------------------------------------------------- match-level overlay
 
 def load_match_overlay(path: str | Path = RATINGS_DIR / OPTA_MATCH_FILE,

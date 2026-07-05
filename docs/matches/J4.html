@@ -607,6 +607,15 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 .slate .ko-card .team.tbd{font-style:italic;color:var(--ink-soft);font-weight:500}
 .slate .ko-card .ko-decided{font-family:var(--mono);font-size:.58rem;color:var(--ink-soft);margin-left:4px;text-transform:uppercase;letter-spacing:.04em}
 .call-lead{font-family:var(--serif);font-size:1.15rem;margin:0 0 10px}
+/* Title race — exact bracket propagation table (index, knockout phase) */
+.race-wrap{max-width:620px}
+.race-wrap td:first-child,.race-wrap th:first-child{text-align:left;font-family:var(--serif);font-weight:700;font-size:.92rem}
+.race-wrap thead th:first-child{font-family:var(--mono);font-weight:500;font-size:.66rem}
+.race-lead td{background:color-mix(in srgb, var(--verm) 7%, transparent)}
+.race-lead td:last-child b{color:var(--verm)}
+.race-dim{color:var(--ink-soft)}
+.race-note{font-size:.72rem;color:var(--ink-soft);font-style:italic;margin:6px 0 0}
+
 /* "call-bar" not "adv-bar": EasyList's generic `##.adv-bar` (and 600+ `.adv*` rules)
    makes ad-blockers hide any adv- prefixed element right after first paint */
 .call-bar{display:flex;height:30px;border:1px solid var(--hairline);overflow:hidden;font-family:var(--mono);font-size:.72rem;font-weight:700}
@@ -780,8 +789,8 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
       <tr class="pick-row"><td class="lbl">1X2</td><td class="lbl">Algeria</td><td title="1.51 decimal">-196</td><td>63%</td><td>69%</td><td class="edge-pos">+5.2%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="1.93 decimal">-108</td><td>49%</td><td>62%</td><td class="edge-pos">+12.0%</td></tr>
       <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.89 decimal">-112</td><td>51%</td><td>38%</td><td class="edge-neg">-12.0%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Jordan +1</td><td title="2.00 decimal">+100</td><td>48%</td><td>36%</td><td class="edge-neg">-11.5%</td></tr>
-      <tr><td class="lbl">Asian handicap</td><td class="lbl">Algeria -1</td><td title="1.84 decimal">-119</td><td>52%</td><td>64%</td><td class="edge-pos">+11.5%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Jordan +1</td><td title="2.00 decimal">+100</td><td>48%</td><td>38%</td><td class="edge-neg">-10.3%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Algeria -1</td><td title="1.84 decimal">-119</td><td>52%</td><td>62%</td><td class="edge-pos">+10.3%</td></tr>
     </tbody>
   </table>
 </div>
@@ -789,7 +798,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 <p class="odds-note">Logged pick: Algeria @ -189 (draftkings), edge 5.8pp · settled <b>won</b> for +0.53u · CLV +0.6pp.</p>
 <p class="odds-note">Logged pick: Algeria -1 @ -118 (betonlineag), edge 7.3pp · settled <b>push</b> for +0.00u · CLV +0.0pp.</p>
 <p class="verify-flag">totals over 2.5: model-priced edge +12.0% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
-<p class="verify-flag">spreads away -1: model-priced edge +11.5% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
+<p class="verify-flag">spreads away -1: model-priced edge +10.3% exceeds the 8% cap for uncorroborated markets (priced from our own score matrix, no consensus cross-check) — not recorded</p>
 <p class="odds-note">market snapshot Jun 22, 9:21 PM ET · DraftKings where quoted, else best of 7 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2.</p>
 <div class="prose"><blockquote><p><strong>Markets to watch (pre-baked):</strong> under 2.5; Al-Taamari shots-on-target type props later.</p></blockquote></div>
 <details class="outcome-grid-wrap">
@@ -814,7 +823,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
 </details>
 <script>
 (function(){
-  var la=0.8132,lb=2.3634,N=8,SHOW=6,i,j;
+  var la=0.8352,lb=2.3414,N=8,SHOW=6,i,j;
   function pois(k,l){var f=1;for(var ii=2;ii<=k;ii++)f*=ii;return Math.exp(-l)*Math.pow(l,k)/f;}
   var pa=[],pb=[];
   for(i=0;i<=N;i++){pa.push(pois(i,la));pb.push(pois(i,lb));}

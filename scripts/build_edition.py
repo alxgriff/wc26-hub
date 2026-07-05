@@ -945,6 +945,17 @@ def main(argv: list[str] | None = None) -> int:
                 bproj = bk.feed(bproj, resolver, results=ko.results_dict(knockout))
             bracket_md = bk.render_markdown(bproj, ko_by_no=ko.by_no(knockout))
             try:
+                import predict as pr_tr
+                model_tr = pr_tr.load_ratings()
+                p_fn = pr_tr.advance_p_fn(
+                    model_tr, {km.match_no: km.country for km in knockout})
+                tr_md = bk.render_title_race_md(
+                    bk.championship_odds(ko.by_no(knockout), p_fn))
+                if tr_md:
+                    bracket_md = bracket_md.rstrip() + "\n\n" + tr_md
+            except Exception as e:
+                print(f"warning: title race unavailable ({e})", file=sys.stderr)
+            try:
                 import ledger as lg_ko
                 ko_rows = lg_ko.load_ko_ledger()
                 ko_graded = lg_ko.grade_ko(knockout, ko_rows)
