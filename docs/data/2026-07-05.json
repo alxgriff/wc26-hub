@@ -938,7 +938,7 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-07-05 16:35",
+ "generated_at": "2026-07-05 23:34",
  "slate_date": "2026-07-05",
  "bracket": {
   "schema": 1,
@@ -1327,6 +1327,12 @@
     "loser": "Canada",
     "p": null,
     "source": "result"
+   },
+   "91": {
+    "team": "Norway",
+    "loser": "Brazil",
+    "p": null,
+    "source": "result"
    }
   },
   "participants": {
@@ -1429,6 +1435,10 @@
    "97": [
     "France",
     "Morocco"
+   ],
+   "99": [
+    "Norway",
+    null
    ]
   },
   "champion": null
@@ -1822,10 +1832,10 @@
     "source": "result"
    },
    "91": {
-    "team": "Brazil",
-    "loser": "Norway",
-    "p": 0.765993425191722,
-    "source": "model"
+    "team": "Norway",
+    "loser": "Brazil",
+    "p": null,
+    "source": "result"
    },
    "92": {
     "team": "England",
@@ -1870,9 +1880,9 @@
     "source": "model"
    },
    "99": {
-    "team": "Brazil",
-    "loser": "England",
-    "p": 0.5089122396508565,
+    "team": "England",
+    "loser": "Norway",
+    "p": 0.7403935203343841,
     "source": "model"
    },
    "100": {
@@ -1889,8 +1899,8 @@
    },
    "102": {
     "team": "Argentina",
-    "loser": "Brazil",
-    "p": 0.6091454607950095,
+    "loser": "England",
+    "p": 0.6081023026046483,
     "source": "model"
    },
    "104": {
@@ -1901,8 +1911,8 @@
    },
    "103": {
     "team": "France",
-    "loser": "Brazil",
-    "p": 0.5230331620035491,
+    "loser": "England",
+    "p": 0.5301152375757491,
     "source": "model"
    }
   },
@@ -2012,7 +2022,7 @@
     "Belgium"
    ],
    "99": [
-    "Brazil",
+    "Norway",
     "England"
    ],
    "100": [
@@ -2024,7 +2034,7 @@
     "Spain"
    ],
    "102": [
-    "Brazil",
+    "England",
     "Argentina"
    ],
    "104": [
@@ -2033,7 +2043,7 @@
    ],
    "103": [
     "France",
-    "Brazil"
+    "England"
    ]
   },
   "champion": "Argentina"
