@@ -938,7 +938,7 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-07-06 17:57",
+ "generated_at": "2026-07-06 23:36",
  "slate_date": "2026-07-06",
  "bracket": {
   "schema": 1,
@@ -1339,6 +1339,12 @@
     "loser": "Mexico",
     "p": null,
     "source": "result"
+   },
+   "93": {
+    "team": "Spain",
+    "loser": "Portugal",
+    "p": null,
+    "source": "result"
    }
   },
   "participants": {
@@ -1441,6 +1447,10 @@
    "97": [
     "France",
     "Morocco"
+   ],
+   "98": [
+    "Spain",
+    null
    ],
    "99": [
     "Norway",
@@ -1852,8 +1862,8 @@
    "93": {
     "team": "Spain",
     "loser": "Portugal",
-    "p": 0.6776739639944613,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "94": {
     "team": "Belgium",
