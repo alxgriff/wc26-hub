@@ -938,8 +938,8 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-07-06 02:37",
- "slate_date": "2026-07-05",
+ "generated_at": "2026-07-06 04:50",
+ "slate_date": "2026-07-06",
  "bracket": {
   "schema": 1,
   "as_of_matches_played": 72,
@@ -1333,6 +1333,12 @@
     "loser": "Brazil",
     "p": null,
     "source": "result"
+   },
+   "92": {
+    "team": "England",
+    "loser": "Mexico",
+    "p": null,
+    "source": "result"
    }
   },
   "participants": {
@@ -1438,7 +1444,7 @@
    ],
    "99": [
     "Norway",
-    null
+    "England"
    ]
   },
   "champion": null
@@ -1840,8 +1846,8 @@
    "92": {
     "team": "England",
     "loser": "Mexico",
-    "p": 0.695695298856251,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "93": {
     "team": "Spain",
