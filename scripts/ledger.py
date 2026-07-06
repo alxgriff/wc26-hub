@@ -317,21 +317,27 @@ def save_ko_ledger(rows: list[dict], path: str | Path = KO_LEDGER_PATH) -> None:
 def upsert_ko_prediction(rows: list[dict], row: dict, played_nos: set,
                          kickoff_passed: bool) -> tuple[list[dict], bool]:
     """Insert/update the advance call for a knockout match (keyed on match_no). Same
-    integrity as upsert_prediction: refuse to create OR revise a row once the tie is
-    played; refuse a new row after kickoff; identical re-logs are idempotent no-ops."""
+    integrity as upsert_prediction: a logged call is immutable once kickoff passes or
+    the tie is played (a re-log is then a harmless NO-OP — the call on record stands,
+    even where a recompute with rolled-forward ratings would differ); creating a NEW
+    row post-kickoff/post-play is refused (a genuinely missed call is permanent). The
+    existing-row check comes FIRST: the evening log-ko catch-up runs after the same
+    job enters finished results, so the day's ties are already played by then — that
+    must read as "already logged", never as a MISSED alarm (closing-odds went red on
+    exactly this, 2026-07-04/05)."""
     no = str(row["match_no"])
     existing = next((r for r in rows if str(r.get("match_no")) == no), None)
-    if no in played_nos:
-        raise LedgerError(f"M{no}: tie already played — advance calls are immutable")
-    if existing is None and kickoff_passed:
-        raise LedgerError(f"M{no}: kickoff has passed — refusing a post-hoc advance call")
     if existing is not None:
+        if no in played_nos or kickoff_passed:
+            return rows, False                   # immutable: the pre-kickoff call stands
         if all(existing.get(k) == row.get(k) for k in ("p_advance_a", "p_advance_b")):
             return rows, False
-        if kickoff_passed:
-            raise LedgerError(f"M{no}: kickoff has passed — refusing to revise the advance call")
         existing.update(row)
         return rows, True
+    if no in played_nos:
+        raise LedgerError(f"M{no}: tie already played — advance calls are immutable")
+    if kickoff_passed:
+        raise LedgerError(f"M{no}: kickoff has passed — refusing a post-hoc advance call")
     return rows + [row], True
 
 
@@ -386,8 +392,11 @@ def log_ko_slate(editorial_date: date,
                "timestamp": stamp}
         try:
             rows, changed = upsert_ko_prediction(rows, row, played_nos, passed)
+            standing = passed or str(km.match_no) in played_nos
             lines.append(f"M{km.match_no} {km.team_a} vs {km.team_b}: "
-                         + ("logged advance call" if changed else "already logged (unchanged)"))
+                         + ("logged advance call" if changed else
+                            "already logged (immutable — the pre-kickoff call stands)"
+                            if standing else "already logged (unchanged)"))
         except LedgerError as e:
             lines.append(f"M{km.match_no}: MISSED — advance call not logged before kickoff ({e})")
 

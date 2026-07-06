@@ -208,10 +208,25 @@ class KoUpsertTests(unittest.TestCase):
         with self.assertRaises(lg.LedgerError):
             lg.upsert_ko_prediction([], ko_pred(73), set(), True)
 
-    def test_played_tie_immutable(self):
-        rows, _ = lg.upsert_ko_prediction([], ko_pred(73), set(), False)
+    def test_played_tie_with_logged_call_is_a_noop_not_missed(self):
+        # the evening log-ko catch-up runs AFTER results are entered: a played tie whose
+        # call WAS logged pre-kickoff must be a silent no-op (the row stands untouched),
+        # never a MISSED alarm — closing-odds went red on exactly this (2026-07-04/05)
+        rows, _ = lg.upsert_ko_prediction([], ko_pred(73, 0.6, 0.4), set(), False)
+        rows, changed = lg.upsert_ko_prediction(rows, ko_pred(73, 0.9, 0.1), {"73"}, False)
+        self.assertFalse(changed)
+        self.assertEqual(rows[0]["p_advance_a"], "0.6000")   # immutable: original stands
+
+    def test_post_kickoff_relog_of_logged_call_is_a_noop(self):
+        rows, _ = lg.upsert_ko_prediction([], ko_pred(73, 0.6, 0.4), set(), False)
+        rows, changed = lg.upsert_ko_prediction(rows, ko_pred(73, 0.7, 0.3), set(), True)
+        self.assertFalse(changed)
+        self.assertEqual(rows[0]["p_advance_a"], "0.6000")
+
+    def test_played_tie_without_logged_call_is_still_missed(self):
+        # the REAL miss must stay loud: no pre-kickoff row exists, the call is gone forever
         with self.assertRaises(lg.LedgerError):
-            lg.upsert_ko_prediction(rows, ko_pred(73, 0.9, 0.1), {"73"}, False)
+            lg.upsert_ko_prediction([], ko_pred(73), {"73"}, True)
 
 
 class KoGradeTests(unittest.TestCase):
