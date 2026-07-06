@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import argparse
 import sys
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -35,6 +35,18 @@ import knockout as ko          # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_WINDOW = 3             # matches knockout_cards --window in the workflows
+
+# date_et is an ET calendar date, so "today" MUST be the ET date too (same fixed-EDT
+# convention as ledger.py — the tournament sits entirely inside daylight time). Using
+# UTC false-flagged evening games: past 8 PM ET the UTC day rolls over, so a game still
+# being played (or minutes final) read as "played yesterday, no result", and the card
+# window disagreed with knockout_cards' ET editorial date (both bit the 02:33 UTC
+# verification run on 2026-07-06).
+ET = timezone(timedelta(hours=-4))
+
+
+def today_et() -> date:
+    return datetime.now(tz=timezone.utc).astimezone(ET).date()
 
 
 def check_knockout(matches: list, today: date, cards_dir: Path,
@@ -76,7 +88,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--cards-dir", type=Path, default=REPO_ROOT / "cards" / "ko")
     ap.add_argument("--window", type=int, default=DEFAULT_WINDOW,
                     help="days ahead a resolved tie must already have a card (default 3)")
-    ap.add_argument("--today", help="override the UTC date, for testing (YYYY-MM-DD)")
+    ap.add_argument("--today", help="override the ET date, for testing (YYYY-MM-DD)")
     args = ap.parse_args(argv)
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
@@ -85,8 +97,7 @@ def main(argv: list[str] | None = None) -> int:
     if not args.knockout.exists():
         print("no knockout schedule — nothing to check.")
         return 0
-    today = date.fromisoformat(args.today) if args.today \
-        else datetime.now(timezone.utc).date()
+    today = date.fromisoformat(args.today) if args.today else today_et()
     matches = ko.load_knockout(args.knockout)
     issues = check_knockout(matches, today, args.cards_dir, window=args.window)
     for line in issues:
