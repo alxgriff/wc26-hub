@@ -938,7 +938,7 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-07-07 17:33",
+ "generated_at": "2026-07-07 23:28",
  "slate_date": "2026-07-07",
  "bracket": {
   "schema": 1,
@@ -1351,6 +1351,18 @@
     "loser": "United States",
     "p": null,
     "source": "result"
+   },
+   "95": {
+    "team": "Argentina",
+    "loser": "Egypt",
+    "p": null,
+    "source": "result"
+   },
+   "96": {
+    "team": "Switzerland",
+    "loser": "Colombia",
+    "p": null,
+    "source": "result"
    }
   },
   "participants": {
@@ -1461,6 +1473,10 @@
    "99": [
     "Norway",
     "England"
+   ],
+   "100": [
+    "Argentina",
+    "Switzerland"
    ]
   },
   "champion": null
@@ -1880,14 +1896,14 @@
    "95": {
     "team": "Argentina",
     "loser": "Egypt",
-    "p": 0.8823453800907977,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "96": {
-    "team": "Colombia",
-    "loser": "Switzerland",
-    "p": 0.6517751429726459,
-    "source": "model"
+    "team": "Switzerland",
+    "loser": "Colombia",
+    "p": null,
+    "source": "result"
    },
    "97": {
     "team": "France",
@@ -1909,8 +1925,8 @@
    },
    "100": {
     "team": "Argentina",
-    "loser": "Colombia",
-    "p": 0.7002992326305867,
+    "loser": "Switzerland",
+    "p": 0.8111671193934498,
     "source": "model"
    },
    "101": {
@@ -2049,7 +2065,7 @@
    ],
    "100": [
     "Argentina",
-    "Colombia"
+    "Switzerland"
    ],
    "101": [
     "France",
