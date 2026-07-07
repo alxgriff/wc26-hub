@@ -938,8 +938,8 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-07-06 23:36",
- "slate_date": "2026-07-06",
+ "generated_at": "2026-07-07 04:31",
+ "slate_date": "2026-07-07",
  "bracket": {
   "schema": 1,
   "as_of_matches_played": 72,
@@ -1345,6 +1345,12 @@
     "loser": "Portugal",
     "p": null,
     "source": "result"
+   },
+   "94": {
+    "team": "Belgium",
+    "loser": "United States",
+    "p": null,
+    "source": "result"
    }
   },
   "participants": {
@@ -1450,7 +1456,7 @@
    ],
    "98": [
     "Spain",
-    null
+    "Belgium"
    ],
    "99": [
     "Norway",
@@ -1868,8 +1874,8 @@
    "94": {
     "team": "Belgium",
     "loser": "United States",
-    "p": 0.715016633332089,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "95": {
     "team": "Argentina",
