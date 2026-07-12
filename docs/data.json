@@ -938,8 +938,8 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-07-11 23:25",
- "slate_date": "2026-07-11",
+ "generated_at": "2026-07-12 04:06",
+ "slate_date": "2026-07-12",
  "bracket": {
   "schema": 1,
   "as_of_matches_played": 72,
@@ -1375,6 +1375,18 @@
     "loser": "Belgium",
     "p": null,
     "source": "result"
+   },
+   "99": {
+    "team": "England",
+    "loser": "Norway",
+    "p": null,
+    "source": "result"
+   },
+   "100": {
+    "team": "Argentina",
+    "loser": "Switzerland",
+    "p": null,
+    "source": "result"
    }
   },
   "participants": {
@@ -1493,6 +1505,10 @@
    "101": [
     "France",
     "Spain"
+   ],
+   "102": [
+    "England",
+    "Argentina"
    ]
   },
   "champion": null
@@ -1936,14 +1952,14 @@
    "99": {
     "team": "England",
     "loser": "Norway",
-    "p": 0.7403935203343841,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "100": {
     "team": "Argentina",
     "loser": "Switzerland",
-    "p": 0.8111671193934498,
-    "source": "model"
+    "p": null,
+    "source": "result"
    },
    "101": {
     "team": "Spain",
