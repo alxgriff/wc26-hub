@@ -662,7 +662,7 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">The Call</span>
     <h2 id="call-h">Who goes through</h2>
   </div>
-<div class="call"><p class="call-lead"><b>Spain</b> to advance · <b>50%</b></p><div class="call-bar" role="img" aria-label="Spain 50% to advance, Argentina 50%"><span class="call-seg seg-a" style="width:50%">50%</span><span class="call-seg seg-b" style="width:50%">50%</span></div><p class="call-scale"><span>Spain 50%</span><span>Argentina 50%</span></p><p class="call-facts">most likely 90′ score <b>1–1</b> · ~<b>36%</b> reach extra time · ~<b>26%</b> reach a shootout</p><p class="call-src">advance model: 90′ consensus (Elo+Futi) routed through extra time + a coin-flip shootout · neutral venue</p></div>
+<div class="call"><p class="call-lead"><b>Spain</b> to advance · <b>56%</b></p><div class="call-bar" role="img" aria-label="Spain 56% to advance, Argentina 44%"><span class="call-seg seg-a" style="width:56%">56%</span><span class="call-seg seg-b" style="width:44%">44%</span></div><p class="call-scale"><span>Spain 56%</span><span>Argentina 44%</span></p><p class="call-facts">most likely 90′ score <b>1–1</b> · ~<b>34%</b> reach extra time · ~<b>25%</b> reach a shootout</p><p class="call-src">advance model: 90′ consensus (Elo+Futi) routed through extra time + a coin-flip shootout · neutral venue</p></div>
 </section>
 
 <section aria-labelledby="path-h">
@@ -696,7 +696,24 @@ details[open] .outcome-grid-toggle::before{content:"▾ "}
     <span class="kicker">The Market</span>
     <h2 id="odds-h">Odds &amp; best bet</h2>
   </div>
-<div class="placeholder-slot">No odds snapshot logged yet — this section activates with the odds workflow (CLAUDE.md Phase 3: odds_log.csv, de-vig, edge vs threshold). Odds are never invented.</div>
+<div class="edge-wrap">
+  <table>
+    <caption class="sr-only">Market odds versus the model: implied probability, our probability, and the edge per selection</caption>
+    <thead><tr><th class="lbl" scope="col">Market</th><th class="lbl" scope="col">Selection</th><th scope="col">Odds</th><th scope="col">Implied</th><th scope="col">Ours</th><th scope="col">Edge</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2</td><td title="1.77 decimal">-130</td><td>54%</td><td>57%</td><td class="">+2.5%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2</td><td title="2.10 decimal">+110</td><td>46%</td><td>43%</td><td class="edge-neg">-2.5%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Over 2.5</td><td title="2.33 decimal">+133</td><td>41%</td><td>42%</td><td class="">+1.3%</td></tr>
+      <tr><td class="lbl">Total goals</td><td class="lbl">Under 2.5</td><td title="1.58 decimal">-171</td><td>59%</td><td>58%</td><td class="edge-neg">-1.3%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Spain -0.5</td><td title="2.20 decimal">+120</td><td>44%</td><td>42%</td><td class="edge-neg">-1.8%</td></tr>
+      <tr><td class="lbl">Asian handicap</td><td class="lbl">Argentina +0.5</td><td title="1.71 decimal">-141</td><td>56%</td><td>58%</td><td class="">+1.8%</td></tr>
+      <tr><td class="lbl">To qualify</td><td class="lbl">Spain</td><td title="no quoted price — implied from the 90′ line">—</td><td>58%</td><td>56%</td><td class="edge-neg">-1.7%</td></tr>
+      <tr><td class="lbl">To qualify</td><td class="lbl">Argentina</td><td title="no quoted price — implied from the 90′ line">—</td><td>42%</td><td>44%</td><td class="">+1.7%</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="no-bet"><b>NO BET</b> — no edge clears the 4% recording bar (a normal, expected result).</p>
+<p class="odds-note">market snapshot Jul 15, 11:46 PM ET · DraftKings where quoted, else best of 3 US books, de-vigged multiplicatively · totals / handicap / BTTS are model-priced from the score matrix — the Opta overlay covers W/D/L only, and with no independent consensus check they clear a stricter 8% edge ceiling vs 15% for 1X2 · O/U 2 can push (P 26%) — probabilities and edge are per unit at risk; a push refunds the stake · totals / handicap / BTTS settle on 90 minutes (regulation) — extra-time goals don&#x27;t count toward them · advance edge derived from the 90&#x27; market (no quoted &#x27;to qualify&#x27; line) — a model-vs-market read, not a recorded bet.</p>
 </section>
 
 <section aria-labelledby="teams-h"><div class="sec-head"><span class="kicker">Go Deeper</span><h2 id="teams-h">Team cards</h2></div><div class="team-pair"><a href="../teams/spain.html">Spain<span class="sub">squad · system · key players</span></a><a href="../teams/argentina.html">Argentina<span class="sub">squad · system · key players</span></a></div></section>

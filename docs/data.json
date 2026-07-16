@@ -938,7 +938,7 @@
   ]
  },
  "warnings": [],
- "generated_at": "2026-07-15 23:27",
+ "generated_at": "2026-07-16 03:46",
  "slate_date": "2026-07-15",
  "bracket": {
   "schema": 1,
@@ -1994,15 +1994,15 @@
     "source": "result"
    },
    "104": {
-    "team": "Argentina",
-    "loser": "Spain",
-    "p": 0.5030901886268311,
+    "team": "Spain",
+    "loser": "Argentina",
+    "p": 0.5610280484710946,
     "source": "model"
    },
    "103": {
     "team": "France",
     "loser": "England",
-    "p": 0.5301152375757491,
+    "p": 0.5829802724735933,
     "source": "model"
    }
   },
@@ -2136,6 +2136,6 @@
     "England"
    ]
   },
-  "champion": "Argentina"
+  "champion": "Spain"
  }
 }
