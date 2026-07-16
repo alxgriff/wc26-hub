@@ -188,7 +188,7 @@ def cmd_board(args) -> None:
         d["match_id"], d["matchup"] = r["match_id"], f"{a} v {b}"
         rows.append(d)
     rows.sort(key=lambda d: -d["drd_edge"])
-    print(f"\nDeserved-Result Divergence board  (process=1:1.5 Futi tilt / 6-18 ; reputation=Elo-only)")
+    print(f"\nDeserved-Result Divergence board  (process=1:1.5 Futi tilt / {FUTI_NOW} ; reputation=Elo-only)")
     print(f"{'match':>5} {'side':>4} {'team':<16} {'model':>6} {'mkt':>6} {'drd_edge':>9} "
           f"{'proc_lean':>9} {'mkt_cap':>8}  flag")
     for d in rows:

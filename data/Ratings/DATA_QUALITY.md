@@ -9,7 +9,7 @@ before use in the predictor (`scripts/predict.py`).
 | Source | Status | Use it for |
 |---|---|---|
 | **Elo** | ⚠️ original corrupted — **VERIFIED is the anchor; `..._CURRENT.csv` (rolled, gitignored) is preferred live** | match-strength backbone |
-| **Futi** (`World_Cup_2026_Futi_6_28.csv`, active) | ✅ reliable, refreshed at the group→knockout boundary | match-strength (1.5× weight) + Attack/Defense goals model |
+| **Futi** (`World_Cup_2026_Futi_7_15.csv`, active) | ✅ reliable, refreshed 7/15 post-semifinals (live teams only) | match-strength (1.5× weight) + Attack/Defense goals model |
 | **Opta** (`Opta_Predictions...`) | ✅ reputable, but tournament-level | context overlay only (advance %, win %) |
 | **Market** (`Market_Outrights_VERIFIED.csv`) | ✅ real market, de-vigged | public-sentiment context + divergence flags |
 | **Zeileis** (`Zeileis_Hybrid_Model...`) | ❌ both key columns broken | **not used at all** |
@@ -33,15 +33,17 @@ before use in the predictor (`scripts/predict.py`).
   catching the Elo error.
 - **Futi = futi.live** (Imburgio/Muller, ex-American Soccer Analysis): an Expected
   Possession Value / "goals added" model — chance-quality, *orthogonal* to results-based
-  Elo. Its tournament ratings are match-driven (dynamic). **`World_Cup_2026_Futi_6_28.csv`**
-  is the latest, transcribed at the group→knockout boundary from the futi.live "Teams
-  rankings" list view (Att/Def/Rat per team, `futi_6_28/IMG_0038-0042`, gitignored, ranks
-  1-45). Display-only Formation/Top_Player/Coach are carried forward from 6/24 (the list view
-  omits them); three eliminated teams not in the 6/28 screenshots (Qatar, Haiti, Curaçao — out
-  of the tournament, no remaining matches) are carried forward unchanged from 6/24. Ingested
-  for going-forward (knockout) predictions only — played games stay graded from immutable
-  logged calls (no leakage). Prior vintages: `World_Cup_2026_Futi_6_24.csv` (post-MD2),
-  `World_Cup_2026_Futi_6_18.csv` (post-MD1), `World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv`
+  Elo. Its tournament ratings are match-driven (dynamic). **`World_Cup_2026_Futi_7_15.csv`**
+  is the latest, transcribed post-semifinals from the futi.live "Teams rankings" list view
+  (Att/Def/Rat per team, `futi_7_15/futi_7_15.jpg`, gitignored, ranks 1-6: Spain, Argentina,
+  France, Brazil, England, Portugal — covering all four teams still alive: Final
+  Spain–Argentina, third place France–England; transcription double-verified 2026-07-15).
+  The other 42 teams (all eliminated, no remaining matches) are carried forward unchanged
+  from 6/28, as are display-only Formation/Top_Player/Coach (the list view omits them).
+  Ingested for going-forward predictions only — played games stay graded from immutable
+  logged calls (no leakage). Prior vintages: `World_Cup_2026_Futi_6_28.csv` (groups
+  complete), `World_Cup_2026_Futi_6_24.csv` (post-MD2), `World_Cup_2026_Futi_6_18.csv`
+  (post-MD1), `World_Cup_2026_Futi_Final_Fixed_Futi_Detailed_Profiles_Final.csv`
   (pre-tournament). The 1.5× Futi blend weight and this whole call are documented in
   DECISIONS.md (2026-06-18) and reproducible via `scripts/eval_blend.py`.
 - **Opta** is from Stats Perform and its ordering is sound, but its numbers are

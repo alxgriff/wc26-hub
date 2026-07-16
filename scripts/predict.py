@@ -113,17 +113,19 @@ ELO_FILE = "Elo_Ratings_World_Cup_2026_VERIFIED.csv"   # NOT the corrupted origi
 # are graded from the immutable ledger, never recomputed. Pass elo_current=False to pin to
 # the VERIFIED anchor (used by the exact-value regression baseline so it can't drift nightly).
 ELO_CURRENT = "Elo_Ratings_World_Cup_2026_CURRENT.csv"
-FUTI_FILE = "World_Cup_2026_Futi_6_28.csv"   # match-driven futi.live EPV ratings,
-# refreshed 2026-06-28 (group stage complete, R32 under way). Ingested for GOING-FORWARD
-# predictions only (the knockout rounds); already-played games are graded from their immutable
-# pre-kickoff logged calls (ledger.grade / build_site.render_call), never recomputed — so the
-# rating drift can't leak into earlier scoring. The 6/28 vintage was transcribed from the
-# futi.live app "Teams rankings" view (Att/Def/Rat per team, data/Ratings/futi_6_28/
-# IMG_0038-0042, ranks 1-45); display-only Formation/Top_Player/Coach are carried forward from
-# 6/24 (the list view omits them). Three eliminated teams not in the 6/28 shots (Qatar, Haiti,
-# Curaçao — out of the tournament, no remaining matches) are carried forward unchanged from 6/24.
-# Prior vintages: 6/24 (post-MD2) World_Cup_2026_Futi_6_24.csv; 6/18 (post-MD1)
-# World_Cup_2026_Futi_6_18.csv; 6/12 (pre-tournament) ..._Detailed_Profiles_Final.csv.
+FUTI_FILE = "World_Cup_2026_Futi_7_15.csv"   # match-driven futi.live EPV ratings,
+# refreshed 2026-07-15 (semifinals complete; only the Final and third-place game remain).
+# Ingested for GOING-FORWARD predictions only; already-played games are graded from their
+# immutable pre-kickoff logged calls (ledger.grade / build_site.render_call), never recomputed
+# — so the rating drift can't leak into earlier scoring. The 7/15 vintage was transcribed from
+# the futi.live app "Teams rankings" view (Att/Def/Rat per team, data/Ratings/futi_7_15/
+# futi_7_15.jpg, ranks 1-6): Spain, Argentina, France, Brazil, England, Portugal — which
+# covers ALL FOUR teams still alive (Final: Spain-Argentina; 3rd place: France-England). The
+# other 42 teams (all eliminated, no remaining matches) are carried forward unchanged from
+# 6/28, as are display-only Formation/Top_Player/Coach (the list view omits them).
+# Prior vintages: 6/28 (groups complete) World_Cup_2026_Futi_6_28.csv; 6/24 (post-MD2)
+# World_Cup_2026_Futi_6_24.csv; 6/18 (post-MD1) World_Cup_2026_Futi_6_18.csv; 6/12
+# (pre-tournament) ..._Detailed_Profiles_Final.csv.
 OPTA_FILE = "Opta_Predictions_World_Cup_2026.csv"
 MARKET_FILE = "Market_Outrights_VERIFIED.csv"          # real de-vigged outright market
 OPTA_MATCH_FILE = "Opta_Match_Predictions.csv"         # per-match W/D/L overlay
