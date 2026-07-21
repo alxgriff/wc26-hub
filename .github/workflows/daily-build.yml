@@ -12,15 +12,13 @@ name: daily-build
 # are HARD gates: a red test suite publishes nothing.
 
 on:
-  schedule:
-    # 07:00 ET (EDT). The whole tournament: group stage + knockout, June 12
-    # through the July 19 final — PLUS July 20, the post-final closeout run
-    # (settle the Final's picks, fetch its 90'/shootout result, grade the last
-    # advance calls, final record rebuild; without it none of that ever runs).
-    # Two ranges because a cron day-of-month field can't span across the
-    # June/July boundary. Re-derive if DST assumptions change.
-    - cron: "0 11 12-30 6 *"   # June 12-30 (group stage + R32 start June 28)
-    - cron: "0 11 1-20 7 *"    # July 1-19 (R16 -> Final) + July 20 closeout
+  # Tournament complete (Final played 2026-07-19; the July 20 closeout run
+  # executed). Schedule REMOVED 2026-07-20: cron has no year field, so the
+  # old "12-30 6 *" / "1-20 7 *" ranges would silently refire every June/July
+  # forever against a finished tournament. The retired triggers, for the next
+  # cycle (re-derive dates + DST before reuse):
+  #   - cron: "0 11 12-30 6 *"   # 07:00 ET June 12-30 (group stage + R32)
+  #   - cron: "0 11 1-20 7 *"    # 07:00 ET July 1-19 (R16 -> Final) + July 20 closeout
   workflow_dispatch:
     inputs:
       date:

@@ -221,3 +221,10 @@ you make a non-obvious call, add it here.*
   news in a distinct box, never house voice. *CLAUDE.md; `scripts/build_site.py`; commits `d137b2a`, `9e352a5`.*
 - **Commit + push proactively once confident** (rollback is cheap; user override is rare).
   Use explicit `git add <paths>`, not `git add -A`. *Session memory `commit-when-confident`.*
+- **Mothballed at tournament end, not archived (2026-07-20).** The Final played July 19,
+  the July 20 cron closeout ran, and both workflow `schedule:` triggers were then REMOVED —
+  GitHub cron has no year field, so the tournament date ranges would refire every June/July
+  forever against finished data. `workflow_dispatch` stays for manual runs; retired triggers
+  are preserved as comments in both files for the next cycle; the site remains a static
+  archive on Cloudflare Pages. Final numbers + lessons live in `RETROSPECTIVE.md` and the
+  STATUS.md closeout block. *`.github/workflows/daily-build.yml`, `closing-odds.yml`.*

@@ -25,20 +25,20 @@ name: closing-odds
 # pre-its-own-mutation). A successful build is the gate.
 
 on:
-  schedule:
-    # Whole tournament (group + knockout), June 12 through the July 19 final. The
-    # same-ET-day captures (11:30 AM / 6:30 PM ET) run on the calendar date; the late
-    # captures (8:30 / 11:30 PM ET) fall on the NEXT UTC day, so their ranges start and
-    # end one day later (through July 20 for the July 19 final's evening). Two ranges
-    # each because a cron day-of-month field can't cross the June/July boundary.
-    - cron: "30 15 12-30 6 *"   # 11:30 AM ET, June
-    - cron: "30 15 1-19 7 *"    # 11:30 AM ET, July
-    - cron: "30 22 12-30 6 *"   #  6:30 PM ET, June
-    - cron: "30 22 1-19 7 *"    #  6:30 PM ET, July
-    - cron: "30 0 13-30 6 *"    #  8:30 PM ET (prev ET day), June
-    - cron: "30 0 1-20 7 *"     #  8:30 PM ET (prev ET day), July
-    - cron: "30 3 13-30 6 *"    # 11:30 PM ET (prev ET day), June
-    - cron: "30 3 1-20 7 *"     # 11:30 PM ET (prev ET day), July
+  # Tournament complete (Final played 2026-07-19; its evening captures ran
+  # July 19-20). Schedule REMOVED 2026-07-20: cron has no year field, so the
+  # ranges would refire every June/July forever. The retired triggers, for
+  # the next cycle (same-ET-day captures run on the calendar date; the late
+  # captures fall on the NEXT UTC day, so their ranges start/end one day
+  # later; two ranges each because day-of-month can't cross June/July):
+  #   - cron: "30 15 12-30 6 *"   # 11:30 AM ET, June
+  #   - cron: "30 15 1-19 7 *"    # 11:30 AM ET, July
+  #   - cron: "30 22 12-30 6 *"   #  6:30 PM ET, June
+  #   - cron: "30 22 1-19 7 *"    #  6:30 PM ET, July
+  #   - cron: "30 0 13-30 6 *"    #  8:30 PM ET (prev ET day), June
+  #   - cron: "30 0 1-20 7 *"     #  8:30 PM ET (prev ET day), July
+  #   - cron: "30 3 13-30 6 *"    # 11:30 PM ET (prev ET day), June
+  #   - cron: "30 3 1-20 7 *"     # 11:30 PM ET (prev ET day), July
   workflow_dispatch:
 
 permissions:

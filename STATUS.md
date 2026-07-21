@@ -1,7 +1,30 @@
 # WC26 Hub — Status (what's done, what's left)
 
-*Last updated 2026-07-04. The running picture of where the project stands. For the
+*Last updated 2026-07-20. The running picture of where the project stands. For the
 map read [ARCHITECTURE.md](ARCHITECTURE.md); for rationale read [DECISIONS.md](DECISIONS.md).*
+
+## 🏆 Tournament complete (2026-07-20)
+
+**Spain are world champions** — 1–0 AET over Argentina in the Final (July 19,
+MetLife). All 104 matches are entered, every ledger is settled, and the July 20
+cron closeout run executed as designed. Final accountability numbers:
+
+- **W/D/L predictions:** 69 graded, 43 correct, cumulative Brier **0.509**
+  (0.667 = coin-flip), RPS 0.152.
+- **Knockout advance calls:** 32/32 logged pre-kickoff, 26 correct, 2-class
+  Brier **0.278** (0.5 = coin-flip).
+- **Betting record:** 133 settled picks, 70W–55L–8P, **+9.62u** flat-stake,
+  mean CLV **+0.2pp** (n=117 closing lines).
+- **4pp recording-bar experiment:** final grade PASSED — [4,5)pp band n=32 CLV
+  observations, mean CLV +0.25pp, +2.36u (see CLAUDE.md Phase 3).
+- **Shadow book (ceiling-suppressed picks):** 82 settled paper picks, −2.88u —
+  the sanity ceiling was net-positive.
+
+**The repo is now mothballed:** both cron schedules were removed 2026-07-20
+(cron has no year field — they would have refired every June/July forever);
+`workflow_dispatch` remains for manual runs. The site stays up as a static
+archive (Cloudflare Pages still deploys on push). The full post-mortem is in
+[RETROSPECTIVE.md](RETROSPECTIVE.md).
 
 ## Shipped
 
@@ -19,8 +42,8 @@ Plus this session's additions: **2026 tiebreaker fix**, the **knockout bracket**
 "as it stands" projector + cascade layout + winner projection through the tree), the
 **responsive Today slate**, and the **Dixon-Coles + knockout** model scaffolding (inert).
 
-Tests: **544 green** (was 372; +172 for the knockout stage). Daily automation live (3 GitHub Actions workflows). Deploys via
-Cloudflare Pages on push.
+Tests: **603 green** (2026-07-20). Daily automation RETIRED with the tournament
+(schedules removed; `workflow_dispatch` remains). Deploys via Cloudflare Pages on push.
 
 ## Open items
 
@@ -107,11 +130,9 @@ the ESPN pass missed.
   WBGT **solar term deferred to v2**. (Baselines already replaced with Open-Meteo archive
   values.) *PLAN.md Phase 7.*
 
-### Verification (recurring)
-- **June 20 F4 (Tunisia–Japan) kickoff** — listed 12:00 AM ET June 21 / 10 PM June 20
-  Monterrey; **re-verify before that edition publishes**. *CLAUDE.md "Verification rules".*
-- **MD2/MD3 card injury/selection notes** were baked June 11 — refresh from current news
-  before each edition; anything tagged "(verify before use)" must be web-verified or cut.
+### Verification (recurring) — EXPIRED with the tournament
+Both standing items (F4 kickoff re-verify, card injury-note refresh) applied to
+publication days only; nothing publishes anymore. Kept for the next cycle's checklist.
 
 ### Placeholders by contract (not bugs)
 - "The Call" / "Odds & Best Bet" stay in `*[…]*` placeholder for any match with no logged
@@ -119,5 +140,8 @@ the ESPN pass missed.
 
 ## How to pick up next session
 1. Read CLAUDE.md (contracts) → this file (where things stand) → ARCHITECTURE.md if you need the map.
-2. Run `python -m unittest discover -s tests` (expect 544 green).
-3. Check the recurring verification items above against today's date before publishing.
+2. Run `python -m unittest discover -s tests` (expect 603 green).
+3. The tournament is over: there is no daily publishing loop. For a future cycle,
+   start from [RETROSPECTIVE.md](RETROSPECTIVE.md) "What carries forward", re-add the
+   cron schedules (retired triggers are commented in both workflow files), and rebake
+   fixtures/cards/ratings for the new tournament.
